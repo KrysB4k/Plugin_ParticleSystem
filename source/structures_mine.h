@@ -1,8 +1,6 @@
 // let below pragma directive at top of this source
 #pragma pack(1)
 
-#include "vector3f.h"
-
 // TYPE_HERE: here you can type your structure definitions like it has been done
 // in the "structures.h" file for trng dll
 
@@ -122,32 +120,22 @@ typedef struct
 } SPARKS;	//34
 
 
+struct phd_vector
+{
+	int x, y, z;
 
-typedef struct phd_3dpos
+	phd_vector(int a, int b, int c) : x(a), y(b), z(c) {}
+};
+
+
+struct phd_3dpos
 {
 	int xPos, yPos, zPos;
 	short xRot, yRot, zRot;
-}phd_3dpos;
+};
 
 
-typedef struct Tr4FxInfo
-{
-	phd_3dpos pos;
-	short room_number;
-	short object_number;
-	short next_fx;
-	short next_active;
-	short speed;
-	short fallspeed;
-	short frame_number;
-	short counter;
-	short shade;
-	short flag1;
-	short flag2;
-}Tr4FxInfo;
-
-
-typedef struct Tr4ItemInfo
+struct Tr4ItemInfo
 {
 	int floor;
 	DWORD touch_bits;
@@ -191,10 +179,10 @@ typedef struct Tr4ItemInfo
 	short draw_room;
 	short TOSSPAD;
 
-}Tr4ItemInfo; // 15F6
+}; // 15F6
 
 
-typedef struct Tr4ObjectInfo
+struct Tr4ObjectInfo
 {
 	short nmeshes;
 	short mesh_index;
@@ -229,10 +217,10 @@ typedef struct Tr4ObjectInfo
 	void (*draw_routine_extra)(Tr4ItemInfo* item);
 	DWORD explodable_meshbits;
 	DWORD padfuck;
-}Tr4ObjectInfo;
+};
 
 
-typedef struct Tr4CollInfo
+struct Tr4CollInfo
 {
 	int mid_floor, mid_ceiling, mid_type;
 	int front_floor, front_ceiling, front_type;
@@ -269,10 +257,10 @@ typedef struct Tr4CollInfo
 	WORD enable_spaz : 1;
 	WORD hit_ceiling : 1;
 
-}Tr4CollInfo; //86
+}; //86
 
 
-typedef struct Tr4FloorInfo // 08
+struct Tr4FloorInfo // 08
 {
 	short index;     // 00
 	short box_flags; // 02
@@ -280,21 +268,10 @@ typedef struct Tr4FloorInfo // 08
 	signed char floor;     // 05
 	unsigned char sky_room;  // 06
 	signed char ceiling;   // 07
-}Tr4FloorInfo;
+};
 
 
-typedef struct Tr4LaraArm
-{
-	short *frameBase;		//00
-	short frameNum;			//04
-	short animNum;			//06
-	short lock;				//08
-	short yRot, xRot, zRot;	//0A
-	short flashGun;			//10
-}Tr4LaraArm; //12
-
-
-typedef struct Tr4AnimStruct
+struct Tr4AnimStruct
 {
 	short* frame_ptr;
 	BYTE frame_rate;
@@ -316,10 +293,10 @@ typedef struct Tr4AnimStruct
 	short number_commands;
 	short command_index;
 
-}Tr4AnimStruct; // 28
+}; // 28
 
 
-typedef struct D3DTLVERTEX
+struct D3DTLVERTEX
 {
 	float sx;
 	float sy;
@@ -331,10 +308,10 @@ typedef struct D3DTLVERTEX
 
 	float tu;
 	float tv;
-} D3DTLVERTEX;
+};
 
 
-typedef struct TextureStruct
+struct TextureStruct
 {
 	WORD drawtype;
 	WORD tpage;
@@ -347,10 +324,10 @@ typedef struct TextureStruct
 	float v3;
 	float u4;
 	float v4;
-} TextureStruct;
+};
 
 
-typedef struct SpriteStruct
+struct SpriteStruct
 {
 	WORD tpage;
 	WORD offset;
@@ -360,16 +337,14 @@ typedef struct SpriteStruct
 	float y1;	//top
 	float x2;	//right
 	float y2;	//bottom
-} SpriteStruct;
+};
 
 
-typedef struct MeshSphere
+struct MeshSphere
 {
-	int x;
-	int y;
-	int z;
+	int x, y, z;
 	int r;
-} MeshSphere;
+};
 
 
 enum MatrixIndex
@@ -390,73 +365,6 @@ enum BlendMode
 	LINE_SOLID,
 	LINE_COLORADD,
 	POLY_SEMITRANS_ZBUFFER,
-};
-
-
-typedef struct NodeOffset
-{
-	short x;
-	short y;
-	short z;
-}NodeOffset;
-
-
-struct ParticleType
-{
-	short SpriteSlot; // DEFAULT_SPRITES, MISC_SPRITES or CUSTOM_SPRITES
-
-	short MaxSpeed; // maximum speed value reached by particle type
-
-	// fields for managing attachment of particles to item nodes
-	NodeOffset AttachOffset;
-	short AttachCutoff;
-	short AttachCutoffRandom;
-
-	BYTE UpdateIndex;
-	BYTE BlendingMode;
-
-	// various flags for the particle properties?
-	bool Saved;
-	bool NoPerspective;
-	bool LineIgnoreVel;
-	bool WindAffected;
-};
-
-
-struct Particle
-{
-	Vector3f Pos;
-	Vector3f Vel;
-	Vector3f Acc;
-
-	short RoomIndex;
-	short LifeSpan;
-	short Life;
-	short ColorFadeTime;
-
-	short Rot;
-	short AngVel;
-
-	WORD startSize;
-	WORD destSize;
-
-	short EmitterIndex;
-	signed char EmitterNode;
-
-	BYTE TypeIndex;
-	BYTE SpriteIndex;
-
-	/* these have been removed for now */
-	//BYTE SpriteSeq;
-	//signed char FrameRate;
-	
-	BYTE FadeIn;
-	BYTE FadeOut;
-
-	BYTE R1, G1, B1;
-	BYTE R2, G2, B2;
-
-	BYTE Rc, Gc, Bc; // reserved - idea to allow dynamic color modifying in particle-specific update function
 };
 
 

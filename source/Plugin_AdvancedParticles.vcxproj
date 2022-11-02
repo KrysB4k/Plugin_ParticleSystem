@@ -77,17 +77,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DefTomb4Funct.cpp" />
+    <ClCompile Include="utilities.cpp" />
+    <ClCompile Include="particle.cpp" />
     <ClCompile Include="PlugIn_AdvancedParticles.cpp" />
     <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="Tomb4Discoveries_mine.cpp" />
     <ClCompile Include="trng.cpp" />
+    <ClCompile Include="vector3f.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bass.h" />
     <ClInclude Include="constants_mine.h" />
     <ClInclude Include="DefTomb4Funct.h" />
-    <ClInclude Include="functions.h" />
+    <ClInclude Include="utilities.h" />
+    <ClInclude Include="includes.h" />
     <ClInclude Include="macros.h" />
     <ClInclude Include="macros_mine.h" />
+    <ClInclude Include="particle.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="structures.h" />

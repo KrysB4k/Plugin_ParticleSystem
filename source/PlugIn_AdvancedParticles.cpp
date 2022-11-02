@@ -1,117 +1,49 @@
-// FOR_YOU:
-// This is the main source of your plugin.
-// It's in this source you'll type all your assembly or c++ code and all 
-// the variables and memory zones you need.
-
 // ************  Top/Header section ************
 #include "stdafx.h"
 #include <string.h>
 #include <stdio.h>
-#include "bass.h"		// prototypes for extra sound library: bass.dll
-	// Following header files will be updated for every new version of 
-	// the tomb_NextGeneration.dll, so it's better you don't change them
-	//  because they will be replaced for any new update.
 
-#include "Tomb_NextGeneration.h" // mnemonic constants defined in tomb_NextGeneration.dll
-#include "structures.h" // structure of tomb4 program and trng dll
-#include "DefTomb4Funct.h" // defines of tomb4 procedure prototypes
-#include "functions.h"  // assigments of real tomb4 address to each tomb4 procedures
-#include "macros.h"  // definition of macros
 
-	// FOR_YOU:
-	// While the followings are the headers you can use 
-	// to type your structures, constants and new tomb4 procedures you 
-	// discovered. 
-	// Following files are only yours and trng will not ever change them:
-#include "macros_mine.h"  // here you define your own macros
-#include "constants_mine.h" // here you define your mnemonic constants
-#include "structures_mine.h" // here you type your structure definitions
-#include "Tomb4Discoveries_mine.h" // here type tomb4 procedures you discovered
+#include "includes.h"
 
-#include "trng.h" // list of trng functions imported from trng.cpp source. 
 
 #pragma warning( error : 4706 )
-#pragma warning(disable: 4996)
+#pragma warning( disable : 4996)
 
 // ************  Early function declarations ************
-// these declarations are here due to the funcs being used inside ASM code
+
 void DrawParts();
 void UpdateParts();
-int GetFreeParticle();
 
 // ************  Global Variables Section *************
-
-// FOR_YOU:
-// here you type the variables or memory zones you wish use in different
-// C++ procedures.
-// If you use the assembly you'll have to type ALL your variables in this
-// section.
-// for example if you wish have a 32 bits signed variable to store big
-// numbers you can type:
-// TYPE_HERE:
-// int MyNumber;
-// and then you can use it in asm in this way:
-//		mov  eax, [MyNumber]
-// or
-//      mov eax, dword ptr [MyNumber]
-// same speech for wide memory zones.
-// If you wish having a memory zone of 13000 bytes you can type:
-//  BYTE MyZone[13000];
-// and then you can use it in this way:
-//     mov  al, MyNumber[ecx]  ; read the ECXth byte and copy it in AL
-// or also:
-//     mov al, [MyNumber+ecx] ; same result of above instruction
-
-// Variables and memory zone to TYPE_HERE:
 
 HINSTANCE MyDllInstance=NULL;  // the instance handle of your dll
 
 extern char BufferLog[4096]; // temporary global buffer to host error and warning messages
 
-// FOR_YOU: If you mean create code patch (changes in tomb4 code to call your code in the plugin dll,
-// you MUST change the MyTomb4PatcherAddress value (here below) 
-// You can discover a free tomb4 zone using TrngPatcher program, with the 
-// menu command "Tools->Get Assignment of Free Memory range"
-// Note: choose an address, in the given range, terminating with hex 
-// digits: 0,4,8, or C
-// because it's usefull that the address was a multiple by 4
-// If you chose an address used from other plugins you'll get an error and
-// the game will be aborted
-// note: if you don't mean use code patches you can let 0x0 in following line
-DWORD MyTomb4PatcherAddress = 0x6708E0; // <- TYPE_HERE: the new address you chose
+DWORD MyTomb4PatcherAddress = 0x6708E0;
 								
-// this text will contain your plugin name (omitting .dll extension).
-// it will be used to give a title to messagebox for error messages or warnings
 char TexMyPluginName[80];  
-// in this MyData structure you can store all global variables for your plugin
-// you have to define them in structures_mine.h source inside structure "StrMyData" or for variable
-// to save and restore in savegames, in "StrSavegameGlobalData" or "StrSavegameLocalData" structures
-StrMyData MyData;
 
+StrMyData MyData;
 
 int next_part;
 Particle parts[MAX_PARTS];
 
-ParticleType partdata[MAX_PARTDATA];
-/* ParticleType elements should be initializable from Lua
-(e.g. at level start) as currently in cbInitLevel()
- but not modifiable during level runtime */
+ParticleGroup partgroups[MAX_PARTGROUPS];
+/* ParticleGroup elements should be initializable from Lua
+(e.g. at level start) but not modifiable during level runtime */
+
+
+unsigned long effect_timer;
 
 
 // ************  Utilities section  ****************
 
-#define RAD(a) ((a) * float(M_PI) / HALF_ANGLE)
-#define ANG(a) round((a) * HALF_ANGLE / float(M_PI))
-#define RGBA(r, g, b, a) (b | (g << 8) | (r << 16) | (a << 24))
-
 #define phd_PopMatrix() (phd_mxptr -= 12)
 
+
 // ************  Patcher Functions section  ***************
-// Note: please, don't change or remove the C++ procedure you find here,
-// because they are necessary to do work the plugin with the trng dll
-// Anyway in many of these functions you can add your code
-
-
 
 int Patch_UpdateParts(void)
 {
@@ -129,18 +61,8 @@ int Patch_DrawParts(void)
 }
 
 
-// FOR_YOU: In this function you insert the callings of functions used to change tomb4 code
-// You can get these functions, in the correct format, using Trng Core -> Asm Souce Editor -> Debugging menu
-// program
-// note: if there is a conflict the function will return "false"
-// and the tomb4 program will abort with an error message
 bool CreateMyCodePatches(void)
 {
-	// the call of the code patch to TYPE_HERE:
-	// example: 
-	// SET_PATCH(Path_RedirCollision)
-	// to call the function Patch_RedirCollision() created with TrngPatcher program (command Assmembly->Create Dynamic Patch Generator)
-
 	if (SetReservedDataZone(0x6708E0, 128) != APPC_OK) return false;
 
 	SET_PATCH(Patch_UpdateParts);
@@ -168,11 +90,6 @@ BEGIN_ASM_PROC(Patch_01)
 END_ASM_PROC
 
 
-// FOR_YOU: In the SubPatchArray you'll type all procedure names of your code in the dll you
-// wish were called from tomb4 code.
-// type them in the order of ax value. So first asm proc in the list, will be called
-// with ax=0, while the second in the list will be called with ax=1 ect.
-
 void *SubPatchArray[] = {
 // TYPE_HERE your asm procedure names to call from tomb4 code
 	&Patch_00,
@@ -181,68 +98,12 @@ void *SubPatchArray[] = {
 };
 
 
-// ************  MainPatcher() asm procedure  *****************
-
-// FOR_YOU: This is your main patcher procedure.
-// All your patch in tomb4 code will call this procedure passing to it, in ax register,
-// the number of subpatch to call
 
 BEGIN_ASM_PROC(MainPatcher)
 	and eax, 0ffffh
 	mov eax, dword ptr [SubPatchArray+eax*4];
 	jmp eax
 END_ASM_PROC
-
-
-
-// ************  Utility Functions - can be made accessible in Lua ************
-
-
-int Round(float x)
-{
-	return (x > 0.0f) ? int(x+0.5f) : int(x-0.5f);
-}
-
-
-float Lerp(float a, float b, float t)
-{
-	if (t > 1.0f)
-		t = 1.0f;
-	else if (t < 0.0f)
-		t = 0.0f;
-
-	return a + t*(b-a);
-}
-
-
-float InverseLerp(float val1, float val2, float x)
-{
-	float t = (x - val1) / (val2 - val1);
-
-		if (t < 0.0f)
-			t = 0.0f;
-		else if (t > 1.0f)
-			t = 1.0f;
-
-	return t;
-}
-
-
-float SimpleDist(const Vector3f &c1, const Vector3f &c2)
-{
-	Vector3f d = (c1 - c2);
-	d.x = abs(d.x);
-	d.y = abs(d.y);
-	d.z = abs(d.z);
-
-	float maxdist = d.x;
-	if (d.y > maxdist)
-		maxdist = d.y;
-	if (d.z > maxdist)
-		maxdist = d.z;
-
-	return maxdist;
-}
 
 
 
@@ -255,13 +116,13 @@ int GetFreeParticle()
 	
 	for (part = &parts[next_part], free = next_part, i = 0; i < MAX_PARTS; ++i)
 	{
-		if (!part->Life)
+		if (!part->lifeCounter)
 		{
 			next_part = (free + 1) % MAX_PARTS;
 
 			ClearMemory(&parts[free], sizeof(Particle));
-			parts[free].EmitterIndex = -1;
-			parts[free].EmitterNode = -1;
+			parts[free].emitterIndex = -1;
+			parts[free].emitterNode = -1;
 			return free;
 		}
 
@@ -283,229 +144,19 @@ int GetFreeParticle()
 
 	for (i = 0; i < MAX_PARTS; ++i, ++part)
 	{
-		if (part->Life < eldest)
+		if (part->lifeCounter < eldest)
 		{
 			free = i;
-			eldest = part->Life;
+			eldest = part->lifeCounter;
 		}
 	}
 
 	next_part = (free + 1) % MAX_PARTS;
 
 	ClearMemory(&parts[free], sizeof(Particle));
-	parts[free].EmitterIndex = -1;
-	parts[free].EmitterNode = -1;
+	parts[free].emitterIndex = -1;
+	parts[free].emitterNode = -1;
 	return free;
-}
-
-
-bool TestCollisionSpheres(Particle* part, Tr4ItemInfo* item, unsigned long bitMask)
-{
-	int flags = 0;
-	int num = 0;
-
-	if (part && item)
-	{
-		MeshSphere SphereList[34];
-		num = GetSpheres(item, SphereList, 1);
-
-		for (int i = 0; i < num; ++i)
-		{
-			auto sph = &SphereList[i];
-			int r = sph->r;
-			if (r > 0)
-			{
-				int x = Round(part->Pos.x) - sph->x;
-				int y = Round(part->Pos.y) - sph->y;
-				int z = Round(part->Pos.z) - sph->z;
-
-				if ((x*x + y*y + z*z) < r*r)
-					flags |= (1 << i);
-			}
-		}
-	}
-
-	return (flags & bitMask);
-}
-
-
-// could be improved to check a list of slotNums
-Tr4ItemInfo* FindNearestTarget(Particle* part, float range, short slotNum)
-{
-	int nearest = 0x7FFFFFFF;
-	Tr4ItemInfo* ret = nullptr;
-
-	if (part)
-	{
-		for (int i = 0; i < Trng.pGlobTomb4->pAdr->TotItemsMax; ++i)
-		{
-			auto item = &items[i];
-			if ((item->object_number == slotNum) && item->active)
-			{
-				auto v = Vector3f(item->pos.xPos, item->pos.yPos, item->pos.zPos);
-				if (SimpleDist(v, part->Pos) < range)
-				{
-					int dist = int(v.distance(part->Pos));
-					if (dist < nearest)
-					{
-						ret = item;
-						nearest = dist;
-					}
-				}
-			}
-		}
-	}
-
-	return ret;
-}
-
-
-void ParticleHoming(Particle* part, Tr4ItemInfo *item, int targetNode, float range, float homingFactor, float homingAccel)
-{
-	if (!part || !item)
-		return;
-
-	float s = sin(RAD(item->pos.yRot));
-	float c = cos(RAD(item->pos.yRot));
-
-	Vector3f predict(item->speed * s, 0/*item->fallspeed*/,  item->speed * c);
-
-	short meshnum = objects[item->object_number].nmeshes;
-	if (targetNode < 0)
-		targetNode = GetRandomControl() % meshnum; // target random node on object
-	else
-		targetNode = (targetNode >= meshnum) ? (meshnum-1) : targetNode;
-
-	StrMovePosition pos = {0, 0, 0};
-	GetJointAbsPosition((StrItemTr4*)item, &pos, targetNode);
-
-	Vector3f itemPos(pos.RelX, pos.RelY, pos.RelZ);
-	itemPos += predict;
-
-	if (SimpleDist(itemPos, part->Pos) > range)
-		return;
-
-	float dist = itemPos.distance(part->Pos);
-	if (dist > range)
-		return;
-
-	auto dir = (itemPos - part->Pos).normalized();
-
-	if (homingFactor < 0.0f)
-	{
-		dir = -dir;
-		homingFactor = -homingFactor;
-	}
-		
-	auto slerpedVel = part->Vel.normalized().slerp(dir, homingFactor);
-	part->Vel = slerpedVel * (part->Vel.magnitude() + homingAccel);
-}
-
-
-// should not be available in Lua
-int TestForWall(int x, int y, int z, short* room)
-{
-	void *floor = GetFloor(x, y, z, room);
-
-	int fh = GetHeight(floor, x, y, z);
-	int ch = GetCeiling(floor, x, y, z);
-
-	if (fh != (-0x7F00))
-	{
-		if ((fh-y) > 0 && (ch-y) < 0)
-			return 0; // No wall
-
-		return 2; // Block (floor or ceiling)
-	}
-
-	return 1; // Wall
-}
-
-
-bool ParticleCollideWalls(Particle* part, float rebound)
-{
-	if (!part || part->Life == part->LifeSpan)
-		return false;
-
-	if (rebound < 0)
-		rebound = 1.0f;
-
-	auto p = (part->Pos + part->Vel).to_phdvect();
-
-	short tRoom = part->RoomIndex;
-	int wallStatus = TestForWall(p.x, p.y, p.z, &tRoom);
-	if (part->RoomIndex != tRoom)
-		part->RoomIndex = tRoom;
-
-	if (wallStatus)
-	{
-		if (TestForWall(part->Pos.x, p.y, p.z, &tRoom))
-			part->Vel.z = -(part->Vel.z * rebound);
-		if (TestForWall(p.x, p.y, part->Pos.z, &tRoom))
-			part->Vel.x = -(part->Vel.x * rebound);
-
-		return true;
-	}
-
-	return false;
-}
-
-
-// should not be available in Lua
-Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
-{
-	Vector3f dummy(0, -1, 0);
-	if (!floor)
-		return dummy;
-
-	WORD tilts = GetTiltType(floor, x, y, z);
-	signed char tilt_x = tilts & 0xFF;
-	signed char tilt_z = tilts >> 8;
-
-	return Vector3f(float(-tilt_x), -4.0f, float(-tilt_z)).normalized();
-}
-
-
-bool ParticleCollideFloors(Particle* part, float friction, float rebound, bool accurate)
-{
-	if (!part)
-		return false;
-
-	auto p = (part->Pos + part->Vel).to_phdvect();
-	short tRoom = part->RoomIndex;
-
-	Tr4FloorInfo* floor = (Tr4FloorInfo*) GetFloor(p.x, p.y, p.z, &tRoom);
-	int fh = GetHeight(floor, p.x, p.y, p.z);
-	int ch = GetCeiling(floor, p.x, p.y, p.z);
-	if (part->RoomIndex != tRoom)
-		part->RoomIndex = tRoom;
-
-	if (rebound < 0)
-		rebound = 1.0f;
-
-	if (fh != (-0x7F00) && (p.y > fh || p.y < ch))
-	{
-		if (p.y > fh && accurate)
-		{
-			auto n = GetSlopeNormal(floor, p.x, p.y, p.z);
-
-			// get reflection vector off floor surface
-			auto refl = part->Vel - (n * part->Vel.dot(n) * 2);
-			part->Vel = refl * rebound;
-		}
-		else
-			part->Vel.y = -(part->Vel.y * rebound);
-
-		if (friction > 0)
-		{
-			part->Vel.x *= friction;
-			part->Vel.z *= friction;
-		}
-
-		return true;
-	}
-
-	return false;
 }
 
 
@@ -515,21 +166,29 @@ void MyParticleUpdate(Particle *part)
 {
 	//e.g some parametric curve
 
-	float t = (part->LifeSpan - part->Life) / float(part->LifeSpan);
+	float t = part->Parameter();
 
-	part->Vel.x = sin(9 * t * M_PI) * 64;
-	part->Vel.y = cos(12 * t * M_PI) * 64;
-	part->Vel.z = -20 + sin(18 * t * M_PI) * 48;
+	part->vel.x = sin(9 * t * float(M_PI)) * 64;
+	part->vel.y = cos(12 * t * float(M_PI)) * 64;
+	part->vel.z = -20 + sin(18 * t * float(M_PI)) * 48;
+
+	part->colCust = HSLtoRGB(2 * t * 360, 1.0f, 0.5f);
 }
 
 
 void PhysicsParticles(Particle* part)
 {
-	ParticleCollideFloors(part, 0.75f, 0.75f, false);
+	part->ParticleCollideFloors(0.75f, 0.75f, false);
 }
 
 
-// there will need to be some Lua interface to assign update functions to ParticleTypes
+void SensorParticleUpdate(Particle* part)
+{
+	part->ParticleAnimate(35, 49, 1);
+}
+
+
+// there will need to be some Lua interface to assign update functions to ParticleGroups
 void UpdateParticle(Particle* part, int index)
 {
 	if (!part)
@@ -541,9 +200,12 @@ void UpdateParticle(Particle* part, int index)
 	case 1:
 		MyParticleUpdate(part);
 		break;
-
+	
 	case 2:
 		PhysicsParticles(part);
+		break;
+
+	case 3:
 		break;
 
 	default:
@@ -560,259 +222,46 @@ void UpdateParts()
 
 	for (int i = 0; i < MAX_PARTS; ++i, ++part)
 	{
-		if (part->Life <= 0)
+		if (part->lifeCounter <= 0)
 			continue;
 
-		part->Vel += part->Acc;
-		auto pdata = &partdata[part->TypeIndex];
+		auto pdata = &partgroups[part->groupIndex];
+
+		int fadetime = part->lifeSpan;
+		int lifefactor = (part->lifeSpan - part->lifeCounter);
+
+		if (part->colorFadeTime)
+		{
+			if (part->colorFadeTime < 0 && part->lifeSpan > (-part->colorFadeTime))
+			{
+				fadetime = -part->colorFadeTime;
+				lifefactor = -(part->lifeCounter + part->colorFadeTime);
+			}
+			else if (part->lifeSpan > part->colorFadeTime)
+				fadetime = part->colorFadeTime;
+		}
+
+		float t = lifefactor/float(fadetime);
+		if (t < 0.0f)
+			t = 0.0f;
+		if (t > 1.0f)
+			t = 1.0f;
+
+		part->colCust.R = Round(Lerp(float(part->colStart.R), float(part->colEnd.R), t));
+		part->colCust.G = Round(Lerp(float(part->colStart.G), float(part->colEnd.G), t));
+		part->colCust.B = Round(Lerp(float(part->colStart.B), float(part->colEnd.B), t));
 
 		if (pdata)
-		{
-			// call particle-specific update function, assigned with Lua
-			UpdateParticle(part, pdata->UpdateIndex);
-
-			if (pdata && pdata->MaxSpeed > 0)
-			{
-				float speed = part->Vel.magnitude();
-				if (speed > pdata->MaxSpeed)
-					part->Vel *= pdata->MaxSpeed / speed;
-			}
-		}
+			UpdateParticle(part, pdata->updateIndex);
 		
-		part->Rot += part->AngVel;
-		part->Pos += part->Vel;
+		part->vel += part->accel;
+		part->pos += part->vel;
+		part->rot += part->angVel;
 
-		--part->Life;
-	}
-}
-
-
-void DrawParticle(Particle* const part, ParticleType* const pdata, long* const view, int smallest_size)
-{
-	if (!part)
-		return;
-
-	long z1 = view[2];
-	
-	if (z1 <= 0)
-		return;
-	if (z1 >= 0x5000)
-		return;
-
-	int fadetime = part->LifeSpan;
-	int lifefactor = (part->LifeSpan - part->Life);
-		
-	if (part->ColorFadeTime)
-	{
-		if (part->ColorFadeTime < 0 && part->LifeSpan > (-part->ColorFadeTime))
-		{
-			fadetime = -part->ColorFadeTime;
-			lifefactor = -(part->Life + part->ColorFadeTime);
-		}
-		else if (part->LifeSpan > part->ColorFadeTime)
-			fadetime = part->ColorFadeTime;
+		--part->lifeCounter;
 	}
 
-	float t = lifefactor/float(fadetime);
-	if (t < 0.0f)
-		t = 0.0f;
-	if (t > 1.0f)
-		t = 1.0f;
-	
-
-	BYTE cR = Round(Lerp(float(part->R1), float(part->R2), t));
-	BYTE cG = Round(Lerp(float(part->G1), float(part->G2), t));
-	BYTE cB = Round(Lerp(float(part->B1), float(part->B2), t));
-			
-
-	if (part->FadeIn)
-	{
-		int lifedif = part->LifeSpan - part->Life;
-		if (lifedif < part->FadeIn)
-		{
-			float s = lifedif/float(part->FadeIn);
-			cR = Round(Lerp(0, cR, s));
-			cG = Round(Lerp(0, cG, s));
-			cB = Round(Lerp(0, cB, s));
-		}
-	}
-
-	if (part->FadeOut)
-	{
-		if (part->Life < part->FadeOut)
-		{
-			float s = part->Life/float(part->FadeOut);
-			cR = Round(Lerp(0, cR, s));
-			cG = Round(Lerp(0, cG, s));
-			cB = Round(Lerp(0, cB, s));
-		}
-	}
-
-
-	short SpriteSlot = -1;
-
-	if (pdata)
-		SpriteSlot = pdata->SpriteSlot;
-
-	if (SpriteSlot > 0)
-	{
-		int s1, s2;
-		float size = Lerp(part->destSize, part->startSize, t);
-		int sizeint = Round(size);
-
-		if (pdata->NoPerspective)
-			s1 = s2 = sizeint;
-		else
-		{
-			s1 = Round(phd_persp * size / z1);
-
-			if (s1 < smallest_size)
-				s1 = smallest_size;
-
-			s2 = s1;
-		}
-		
-
-		int s1h = s1 >> 1;
-		int s2h = s2 >> 1;
-		
-		long x1, y1, x2, y2, x3, y3, x4, y4;
-		x1 = view[0];
-		y1 = view[1];
-
-		if (x1 + s1h >= phd_winxmin && x1 - s1h < phd_winxmax && y1 + s2h >= phd_winymin && y1 - s2h < phd_winymax)
-		{
-
-			D3DTLVERTEX v[4];
-
-			if (part->Rot)
-			{
-				float sin1 = sin(RAD(part->Rot));
-				float cos1 = cos(RAD(part->Rot));
-
-				int sx1 = Round(-s1h * sin1);
-				int sx2 = Round(s1h * sin1);
-
-				int sy1 = Round(-s2h * sin1);
-				int sy2 = Round(s2h * sin1);
-
-				int cx1 = Round(-s1h * cos1);
-				int cx2 = Round(s1h * cos1);
-
-				int cy1 = Round(-s2h * cos1);
-				int cy2 = Round(s2h * cos1);
-
-				x1 = sx1 - cy1 + view[0];
-				x2 = sx2 - cy1 + view[0];
-				x3 = sx2 - cy2 + view[0];
-				x4 = sx1 - cy2 + view[0];
-
-				y1 = cx1 + sy1 + view[1];
-				y2 = cx2 + sy1 + view[1];
-				y3 = cx2 + sy2 + view[1];
-				y4 = cx1 + sy2 + view[1];
-
-				setXY4(v, x1, y1, x2, y2, x3, y3, x4, y4, z1, clipflags);
-			}
-			else
-			{
-				x1 = view[0] - s1h;
-				x2 = view[0] + s1h;
-
-				y1 = view[1] - s2h;
-				y2 = view[1] + s2h;
-
-				setXY4(v, x1, y1, x2, y1, x2, y2, x1, y2, z1, clipflags);
-			}
-
-			long c1 = RGBA(cR, cG, cB, 0xFF);
-
-			v[0].color = c1;
-			v[1].color = c1;
-			v[2].color = c1;
-			v[3].color = c1;
-			v[0].specular = 0xFF000000;
-			v[1].specular = 0xFF000000;
-			v[2].specular = 0xFF000000;
-			v[3].specular = 0xFF000000;
-			
-			int usedsprite = part->SpriteIndex;
-
-#if 0 // particle sprite animation, removed for now
-			if (part->SpriteSeq > 1)
-			{
-				if (part->FrameRate > 0)
-				{
-					int lifedif = part->LifeSpan - part->Life;
-					usedsprite += ((lifedif/part->FrameRate) % part->SpriteSeq);
-				}
-				else
-				{
-					float s = part->Life/float(part->LifeSpan);
-					usedsprite = Round(Lerp(part->SpriteIndex + (part->SpriteSeq-1), part->SpriteIndex, s)) - 1;
-				}
-			}
-#endif
-
-			int spriteslot = SLOT_DEFAULT_SPRITES;
-
-			if ((pdata->SpriteSlot == SLOT_MISC_SPRITES || pdata->SpriteSlot == SLOT_CUSTOM_SPRITES) &&
-				objects[pdata->SpriteSlot].loaded)
-			{
-				spriteslot = pdata->SpriteSlot;
-			}
-
-			SpriteStruct* sprite = (spriteinfo + objects[spriteslot].mesh_index + usedsprite);
-
-			TextureStruct tex;
-			tex.drawtype = pdata->BlendingMode;
-
-			tex.tpage = sprite->tpage;
-			tex.u1 = sprite->x1;
-			tex.v1 = sprite->y1;
-			tex.u2 = sprite->x2;
-			tex.v2 = sprite->y1;
-			tex.u3 = sprite->x2;
-			tex.v3 = sprite->y2;
-			tex.u4 = sprite->x1;
-			tex.v4 = sprite->y2;
-
-			(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 0);
-		}
-	}
-	else
-	{
-		D3DTLVERTEX v[2];
-
-		long x1 = view[0];
-		long y1 = view[1];
-		long z1 = view[2];
-		long x2 = view[3];
-		long y2 = view[4];
-		long z2 = view[5];
-
-		long c1 = RGBA(cR, cG, cB, 0xFF);
-		long c2 = RGBA(cR >> 2, cG >> 2, cB >> 2, 0xFF);
-		
-		if (ClipLine(x1, y1, z1, x2, y2, z2, phd_winxmin, phd_winymin, phd_winxmax, phd_winymax))
-		{
-			v[0].sx = float(x1);
-			v[0].sy = float(y1);
-			v[0].rhw = f_mpersp / z1 * f_moneopersp;
-			v[0].sz = f_a - v[0].rhw * f_boo;
-			v[0].color = c1;
-			v[0].specular = 0xFF000000;
-
-			v[1].sx = float(x2);
-			v[1].sy = float(y2);
-			v[1].rhw = f_mpersp / z2 * f_moneopersp;
-			v[1].sz = f_a - v[1].rhw * f_boo;
-			v[1].color = c2;
-			v[1].specular = 0xFF000000;
-
-			(*AddLineSorted)(&v[0], &v[1], 6);
-		}
-	}
+	++effect_timer;
 }
 
 
@@ -828,42 +277,42 @@ void DrawParts()
 	int x1 = 0, y1 = 0, z1 = 0;
 	for (int i = 0; i < MAX_PARTS; ++i, ++part)
 	{
-		if (part->Life <= 0)
+		if (part->lifeCounter <= 0)
 			continue;
 
-		x1 = Round(part->Pos.x);
-		y1 = Round(part->Pos.y);
-		z1 = Round(part->Pos.z);
+		x1 = Round(part->pos.x);
+		y1 = Round(part->pos.y);
+		z1 = Round(part->pos.z);
 
-		auto pdata = &partdata[part->TypeIndex];
+		auto pdata = &partgroups[part->groupIndex];
 
 		// item and/or mesh attachment of particle
-		if (part->EmitterIndex >= 0)
+		if (part->emitterIndex >= 0)
 		{
-			int index = part->EmitterIndex;
+			int index = part->emitterIndex;
 			if (index > Trng.pGlobTomb4->pAdr->TotItemsMax)
 				index = *Trng.pGlobTomb4->pAdr->pLaraIndex;
 
 			auto item = &items[index];
 
-			if (part->EmitterNode >= 0) // if attached to specific mesh node of item
+			if (part->emitterNode >= 0) // if attached to specific mesh node of item
 			{
-				phd_vector posNode = {0, 0, 0};
+				phd_vector posNode(0, 0, 0);
 				
 				if (pdata)
 				{
-					posNode.x = pdata->AttachOffset.x;
-					posNode.y = pdata->AttachOffset.y;
-					posNode.z = pdata->AttachOffset.z;
+					posNode.x = pdata->attach.offX;
+					posNode.y = pdata->attach.offY;
+					posNode.z = pdata->attach.offZ;
 				}
 
-				int node = part->EmitterNode & 0x1F;
+				int node = part->emitterNode & 0x1F;
 
-				GetJointAbsPosition((StrItemTr4*)item, (StrMovePosition*)(&posNode), node);
+				auto jointPos = GetJointPos(item, node, posNode.x, posNode.y, posNode.z);
 
-				x1 += posNode.x;
-				y1 += posNode.y;
-				z1 += posNode.z;
+				x1 += Round(jointPos.x);
+				y1 += Round(jointPos.y);
+				z1 += Round(jointPos.z);
 			}
 			else // no mesh node, use item's pos
 			{
@@ -874,32 +323,32 @@ void DrawParts()
 
 			int cutoff = -1;
 			// particle attachment cutoff 
-			if (pdata && pdata->AttachCutoff > 0)
+			if (pdata && pdata->attach.cutoff > 0)
 			{
-				cutoff = pdata->AttachCutoff;
-				if (pdata->AttachCutoffRandom > 1)
-					cutoff += (GetRandomDraw() % pdata->AttachCutoffRandom);
+				cutoff = pdata->attach.cutoff;
+				if (pdata->attach.random> 1)
+					cutoff += (GetRandomDraw() % pdata->attach.random);
 			}
 
-			if ((part->LifeSpan - part->Life) > cutoff)
+			if ((part->lifeSpan - part->lifeCounter) > cutoff)
 			{
-				part->Pos.x = x1;
-				part->Pos.y = y1;
-				part->Pos.z = z1;
-				part->EmitterIndex = -1;
-				part->EmitterNode = -1;
+				part->pos.x = x1;
+				part->pos.y = y1;
+				part->pos.z = z1;
+				part->emitterIndex = -1;
+				part->emitterNode = -1;
 			}
 		}
-		else if (part->EmitterNode >= 0) // if EmitterNode >= 0 when EmitterIndex < 0, use Lara meshes
+		else if (part->emitterNode >= 0) // if EmitterNode >= 0 when EmitterIndex < 0, use Lara meshes
 		{
-			phd_vector posNode = {0, 0, 0};
-			int node = (part->EmitterNode > 14) ? 14 : part->EmitterNode;
+			phd_vector posNode(0, 0, 0);
+			int node = (part->emitterNode > 14) ? 14 : part->emitterNode;
 			
 			if (pdata)
 			{
-				posNode.x = pdata->AttachOffset.x;
-				posNode.y = pdata->AttachOffset.y;
-				posNode.z = pdata->AttachOffset.z;
+				posNode.x = pdata->attach.offX;
+				posNode.y = pdata->attach.offY;
+				posNode.z = pdata->attach.offZ;
 			}
 
 			GetLaraJointPos(&posNode, node);
@@ -910,20 +359,20 @@ void DrawParts()
 
 			int cutoff = -1;
 			// particle attachment cutoff 
-			if (pdata && pdata->AttachCutoff > 0)
+			if (pdata && pdata->attach.cutoff > 0)
 			{
-				cutoff = pdata->AttachCutoff;
-				if (pdata->AttachCutoffRandom > 1)
-					cutoff += (GetRandomDraw() % pdata->AttachCutoffRandom);
+				cutoff = pdata->attach.cutoff;
+				if (pdata->attach.random > 1)
+					cutoff += (GetRandomDraw() % pdata->attach.random);
 			}
 
-			if ((part->LifeSpan - part->Life) > cutoff)
+			if ((part->lifeSpan - part->lifeCounter) > cutoff)
 			{
-				part->Pos.x = x1;
-				part->Pos.y = y1;
-				part->Pos.z = z1;
-				part->EmitterIndex = -1;
-				part->EmitterNode = -1;
+				part->pos.x = x1;
+				part->pos.y = y1;
+				part->pos.z = z1;
+				part->emitterIndex = -1;
+				part->emitterNode = -1;
 			}
 		}
 
@@ -935,7 +384,7 @@ void DrawParts()
 			y1 < -20480 || y1 > 20480 ||
 			z1 < -20480 || z1 > 20480)
 		{
-			part->Life = 0;
+			part->lifeCounter = 0;
 			continue;
 		}
 
@@ -959,10 +408,10 @@ void DrawParts()
 		viewCoords[2] = result[2] >> 14;
 
 		// if particle is a line do world to screen transform for second vertex
-		if (!pdata || pdata->SpriteSlot <= 0)
+		if (!pdata || pdata->spriteSlot <= 0)
 		{
-			float size = Lerp(part->destSize, part->startSize, part->Life/float(part->LifeSpan));
-			auto vel = part->Vel;
+			float size = Lerp(part->destSize, part->startSize, part->lifeCounter/float(part->lifeSpan));
+			auto vel = part->vel;
 
 			if (pdata && pdata->LineIgnoreVel)
 				vel = vel.normalized(); // ignore speed contribution to particle's size
@@ -989,51 +438,48 @@ void DrawParts()
 		long minSize = 4;
 
 		// draw the particle to the given screen coordinates
-		DrawParticle(part, pdata, viewCoords, minSize);
+		part->DrawParticle(pdata, viewCoords, minSize);
 	}
 
 	phd_PopMatrix();
 }
 
 
-
 // it should be possible to write in Lua a particle initialization function, as in examples below
 
+
+// method 1 - passing absolute x, y, z and room coordinates directly
 void LineParticle(int x, int y, int z, short room)
 {
 	int index = GetFreeParticle();
 	Particle *part = &parts[index];
 
+	// we add the absolute coordinates
 	int xrand = x + (GetRandomControl()&127) - 64;
 	int yrand = y + (GetRandomControl()&127) - 64;
 	int zrand = z + (GetRandomControl()&127) - 64;
 
-	part->RoomIndex = room;
+	part->roomIndex = room;
 
-	part->Pos = Vector3f(xrand, yrand, zrand);
+	part->pos = Vector3f(xrand, yrand, zrand);
 
-	part->Life = part->LifeSpan = 240;
+	part->lifeCounter = part->lifeSpan = 240;
 	
-	part->FadeIn = 15;
-	part->FadeOut = 15;
+	part->fadeIn = 15;
+	part->fadeOut = 15;
 	
-	part->Rot = part->AngVel = 0;
+	part->rot = part->angVel = 0;
 
-	part->G1 = part->R2 = 0;
-
-	part->R1 = 255;
-	part->B1 = 32 + (GetRandomControl()&31);
-
-	part->G2 = 64 + (GetRandomControl()&31);
-	part->B2 = 192 + (GetRandomControl()&63);
+	part->colStart = part->colEnd = ColorRGB();
 	
-	part->startSize = part->destSize = 32 + (GetRandomControl()&31);
+	part->startSize = part->destSize = 32 + (GetRandomControl()&15);
 
-	part->TypeIndex = 0;
+	part->groupIndex = 0;
 }
 
 
-void SpriteParticle(int x, int y, int z, short room)
+// method 2 - passing item index and using the de-attachment feature to spawn it at the item's location
+void SpriteParticle(short itemNum)
 {
 	if (GetRandomControl()&3)
 		return;
@@ -1041,88 +487,93 @@ void SpriteParticle(int x, int y, int z, short room)
 	int index = GetFreeParticle();
 	Particle *part = &parts[index];
 
-	int xrand = x + (GetRandomControl()&255) - 128;
-	int yrand = y + (GetRandomControl()&255) - 128;
-	int zrand = z + (GetRandomControl()&255) - 128;
+	// we don't need absolute coordinates here - they will be calculated when de-attaching the particle
+	int xrand = (GetRandomControl()&255) - 128;
+	int yrand = (GetRandomControl()&255) - 128;
+	int zrand = (GetRandomControl()&255) - 128;
 
-	part->RoomIndex = room;
+	part->roomIndex = items[itemNum].room_number; // get the item's room number
 
-	part->Pos = Vector3f(xrand, yrand, zrand);
-	part->Vel.x = (GetRandomControl()&63) - 32;
-	part->Vel.y = (GetRandomControl()&31) - 160;
-	part->Vel.z = (GetRandomControl()&63) - 32;
-	part->Acc = Vector3f(0, 5.0f, 0);
+	part->pos = Vector3f(xrand, yrand, zrand);
 
-	part->Life = part->LifeSpan = 112 + (GetRandomControl()&15);
-	part->ColorFadeTime = part->LifeSpan/2;
+	part->vel.x = (GetRandomControl()&63) - 32;
+	part->vel.y = (GetRandomControl()&31) - 160;
+	part->vel.z = (GetRandomControl()&63) - 32;
+
+	part->accel = Vector3f(0, 5.0f, 0);
+
+	part->lifeCounter = part->lifeSpan = 112 + (GetRandomControl()&15);
+	part->colorFadeTime = part->lifeSpan/2;
 	
-	part->FadeIn = 15;
-	part->FadeOut = 15;
+	part->fadeIn = 15;
+	part->fadeOut = 15;
 	
-	part->SpriteIndex = 14;
-	part->Rot = part->AngVel = 0;
+	part->spriteIndex = 14;
+	part->rot = part->angVel = 0;
 
-	part->B1 = part->B2 = 0;
+	part->colStart = ColorRGB(255, 192 + (GetRandomControl()&63), 0);
+	part->colEnd = ColorRGB(192 + (GetRandomControl()&63), (GetRandomControl()&31), 0);
 
-	part->R1 = 255;
-	part->G1 = 192 + (GetRandomControl()&63);
-
-	part->R2 = 192 + (GetRandomControl()&63);
-	part->G2 = 0 + (GetRandomControl()&31);
-	
 	part->startSize = 32 + (GetRandomControl()&31);
 	part->destSize = 48 + (GetRandomControl()&31);
 
-	part->TypeIndex = 1;
+	// we give the emitter index - the particle then gets de-attached from the emitter in the draw function
+	part->emitterIndex = itemNum;
+	part->groupIndex = 1;
 }
 
 
-void LaraHeadParticle(int x, int y, int z, short room)
+// method 3 - spawn particle at position of Lara's mesh
+// no arguments needed, if the particle won't require any external input (item number, room number, etc)
+void LaraHeadParticle()
 {
 	int index = GetFreeParticle();
 	Particle *part = &parts[index];
 
+	// as in method 2, absolute coordinates are unnecessary
 	int xrand = (GetRandomControl()&127) - 64;
 	int yrand = 0;
 	int zrand = (GetRandomControl()&127) - 64;
 
-	part->RoomIndex = room;
+	part->pos = Vector3f(xrand, yrand, zrand);
 
-	part->Pos = Vector3f(xrand, yrand, zrand);
-	part->Vel.x = (GetRandomControl()&15) - 8;
-	part->Vel.y = (GetRandomControl()&7) - 32;
-	part->Vel.z = (GetRandomControl()&15)- 8;
-	part->Acc.y = 1.5f;
+	part->vel.x = (GetRandomControl()&15) - 8;
+	part->vel.y = (GetRandomControl()&7) - 32;
+	part->vel.z = (GetRandomControl()&15)- 8;
 
-	part->Life = part->LifeSpan = 40 + (GetRandomControl()&15);
+	part->accel.y = 1.5f;
+
+	part->lifeCounter = part->lifeSpan = 40 + (GetRandomControl()&15);
 	
-	part->FadeIn = 10;
-	part->FadeOut = 10;
+	part->fadeIn = 10;
+	part->fadeOut = 10;
 	
-	part->SpriteIndex = 11;
-	part->Rot = part->AngVel = 0;
+	part->spriteIndex = 11;
+	part->rot = part->angVel = 0;
 
-	part->R1 = part->R2 = 0;
+	part->colStart.R = part->colEnd.R = 0;
 
-	part->B1 = 192 + (GetRandomControl()&63);
-	part->G1 = 192 + (GetRandomControl()&63);
+	part->colStart.B = 192 + (GetRandomControl()&63);
+	part->colStart.G = 192 + (GetRandomControl()&63);
 
 	if (GetRandomControl()&1)
 	{
-		part->G2 = 128 + (GetRandomControl()&63);
-		part->B2 = 0;
+		part->colEnd.G = 128 + (GetRandomControl()&63);
+		part->colEnd.B = 0;
 	}
 	else
 	{
-		part->B2 = 128 + (GetRandomControl()&63);
-		part->G2 = 0;
+		part->colEnd.B = 128 + (GetRandomControl()&63);
+		part->colEnd.G = 0;
 	}
 	
 	part->startSize = 16 + (GetRandomControl()&15);
 	part->destSize = part->startSize * 2;
 
-	part->EmitterNode = 8; // attach to Lara's head
-	part->TypeIndex = 2;
+	part->emitterNode = 8; // spawn from Lara's head mesh
+	// if no emitterIndex is set, the plugin will implicitly use Lara's meshes
+
+	part->groupIndex = 2;
 }
 
 
@@ -1133,17 +584,17 @@ void ParticleEmitterControl(short item_number)
 
 	if (TriggerActive((StrItemTr4*)item))
 	{
-		// based on OCB value, as with FLEP smoke emitter OCBs ?
+		// based on OCB value, as with FLEP smoke emitter OCBs ? (to discuss)
 		switch (item->trigger_flags)
 		{
 		case 0:
 			LineParticle(item->pos.xPos, item->pos.yPos, item->pos.zPos, item->room_number);
 			break;
 		case 1:
-			SpriteParticle(item->pos.xPos, item->pos.yPos, item->pos.zPos, item->room_number);
+			SpriteParticle(item_number);
 			break;
 		case 2:
-			LaraHeadParticle(item->pos.xPos, item->pos.yPos, item->pos.zPos, item->room_number);
+			LaraHeadParticle();
 			break;
 		default:
 			break;
@@ -1183,20 +634,26 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// and just a moment before entering in main game cycle.
 	ClearMemory(parts, sizeof(Particle) * MAX_PARTS);
 	next_part = 0;
+	effect_timer = 0;
 
 
-	// initialize some ParticleType
+	// initialize some ParticleGroups
 
-	partdata[0].SpriteSlot = 0;
-	partdata[0].UpdateIndex = 1;
+	partgroups[0].blendingMode = POLY_COLORADD;
+	partgroups[0].updateIndex = 1;
 
-	partdata[1].SpriteSlot = SLOT_DEFAULT_SPRITES;
-	partdata[1].BlendingMode = POLY_COLORADD;
-	partdata[1].UpdateIndex = 2;
+	partgroups[1].spriteSlot = SLOT_DEFAULT_SPRITES;
+	partgroups[1].blendingMode = POLY_COLORADD;
+	partgroups[1].updateIndex = 2;
+	partgroups[1].attach.cutoff = 0; // this will de-attach the particle from the emitter immediately after spawning
 
-	partdata[2].SpriteSlot = SLOT_DEFAULT_SPRITES;
-	partdata[2].BlendingMode = POLY_COLORADD;
-	partdata[2].AttachOffset.y = -80;
+	partgroups[2].spriteSlot = SLOT_DEFAULT_SPRITES;
+	partgroups[2].blendingMode = POLY_COLORADD;
+	partgroups[2].attach.offY = -80;
+
+	partgroups[3].spriteSlot = SLOT_DEFAULT_SPRITES;
+	partgroups[3].blendingMode = POLY_COLORADD;
+	partgroups[3].updateIndex = 3;
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
@@ -1405,7 +862,6 @@ void cbInitLoadNewLevel(void)
 	// here you can initialise other variables of MyData different than Local and progressive actions
 	// free resources allocate in previous level
 	FreeLevelResources();
-
 }
 
 
@@ -1631,6 +1087,8 @@ void cbProgrActionMine(void)
 
 
 }
+
+
 // inside this function you'll type call to functions to intialise your new objects or customize that olds.
 // this callback will be called at start of loading new level and a bit after having started to load level data
 void cbInitObjects(void) 
@@ -1664,7 +1122,7 @@ bool RequireMyCallBacks(void)
 	GET_CALLBACK(CB_ASSIGN_SLOT_MINE, 0,0, cbAssignSlotMine)
 	GET_CALLBACK(CB_INIT_OBJECTS, 0, 0, cbInitObjects)
 	
-	/* unused callbacks which you may uncomment if you wish */
+	/* unused callbacks which you may uncomment for personal use */
 
 	//GET_CALLBACK(CB_CUSTOMIZE_MINE, 0,0, cbCustomizeMine)
 	//GET_CALLBACK(CB_INIT_GAME, 0, 0, cbInitGame)

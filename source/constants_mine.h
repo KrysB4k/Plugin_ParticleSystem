@@ -13,8 +13,10 @@
 // use progressive number to have always different value for each AXN_ constant/action
 
 #define MAX_PARTS 2048
-#define MAX_PARTDATA 256
+#define MAX_PARTGROUPS 256
+#define MAX_PROJECTILES 256
 #define MAX_MESHES 32
+
 #define HALF_ANGLE 32768
 
 #define phd_winxmin *(short*)(0x753C04)
@@ -22,6 +24,8 @@
 #define phd_winymin *(short*)(0x753BBC)
 #define phd_winymax *(short*)(0x753C10)
 #define phd_persp *(long*)(0x753BDC)
+#define phd_zfar *(long*)(0x753BC8)
+#define phd_znear *(long*)(0x753BF0)
 
 #define f_persp *(float*)(0x753C2C)
 #define f_mpersp *(float*)(0x753BA8)
@@ -41,6 +45,9 @@
 #define items (*(Tr4ItemInfo**)(0x7FE16C))
 #define anims (*(Tr4AnimStruct**)0x533938)
 #define effects (*(Tr4FXInfo**)0x8011C0)
+#define meshes (*(short***)(0x533950))
+
+#define ShatterItem (*(Tr4ShatterItem*)(0x7FE840))
 
 
 #define wibble (*(long*)0x4BF238)

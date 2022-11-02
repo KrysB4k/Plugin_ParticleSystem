@@ -1,4 +1,4 @@
-
+#pragma once
 // FOR_YOU: IMPORTANT WARNING: don't change or add text to this source because it will be
 // replaced after new update and in this way you should lose your adding.
 // Use the Tomb4Discoveries_mine.h file to add the tomb4 functions you discovered.
