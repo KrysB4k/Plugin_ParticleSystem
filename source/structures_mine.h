@@ -362,9 +362,16 @@ enum BlendMode
 	POLY_COLORADD,
 	POLY_SEMITRANS,
 	POLY_NOZBUFFER,
-	LINE_SOLID,
+	POLY_COLORSUB,
 	LINE_COLORADD,
 	POLY_SEMITRANS_ZBUFFER,
+};
+
+
+struct EffectBite
+{
+	int x, y, z;
+	int node;
 };
 
 

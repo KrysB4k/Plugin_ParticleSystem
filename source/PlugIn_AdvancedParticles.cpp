@@ -27,10 +27,10 @@ char TexMyPluginName[80];
 
 StrMyData MyData;
 
-int next_part;
-Particle parts[MAX_PARTS];
+int ParticleFactory::nextPart;
+Particle ParticleFactory::parts[MAX_PARTS];
+ParticleGroup ParticleFactory::partGroups[MAX_PARTGROUPS];
 
-ParticleGroup partgroups[MAX_PARTGROUPS];
 /* ParticleGroup elements should be initializable from Lua
 (e.g. at level start) but not modifiable during level runtime */
 
@@ -39,8 +39,6 @@ unsigned long effect_timer;
 
 
 // ************  Utilities section  ****************
-
-#define phd_PopMatrix() (phd_mxptr -= 12)
 
 
 // ************  Patcher Functions section  ***************
@@ -109,123 +107,35 @@ END_ASM_PROC
 
 // ************  Particle associated functions - accessible in Lua, unless stated otherwise ************
 
-int GetFreeParticle()
+
+
+
+// stub for effect spawning function
+void CreateEffect(const EffectBite& bite, int initIndex)
 {
-	int i, free;
-	Particle* part;
-	
-	for (part = &parts[next_part], free = next_part, i = 0; i < MAX_PARTS; ++i)
-	{
-		if (!part->lifeCounter)
-		{
-			next_part = (free + 1) % MAX_PARTS;
 
-			ClearMemory(&parts[free], sizeof(Particle));
-			parts[free].emitterIndex = -1;
-			parts[free].emitterNode = -1;
-			return free;
-		}
-
-		if (free == MAX_PARTS-1)
-		{
-			part = &parts[0];
-			free = 0;
-		}
-		else
-		{
-			part++;
-			free++;
-		}
-	}
-	
-	int eldest = 0x7FFFFFFF;
-	free = 0;
-	part = &parts[0];
-
-	for (i = 0; i < MAX_PARTS; ++i, ++part)
-	{
-		if (part->lifeCounter < eldest)
-		{
-			free = i;
-			eldest = part->lifeCounter;
-		}
-	}
-
-	next_part = (free + 1) % MAX_PARTS;
-
-	ClearMemory(&parts[free], sizeof(Particle));
-	parts[free].emitterIndex = -1;
-	parts[free].emitterNode = -1;
-	return free;
 }
 
 
-// defining custom particle update functions as below should be possible
-
-void MyParticleUpdate(Particle *part)
+// stub for effect updating function
+void UpdateParticle(Particle* part, int updateIndex)
 {
-	//e.g some parametric curve
 
-	float t = part->Parameter();
-
-	part->vel.x = sin(9 * t * float(M_PI)) * 64;
-	part->vel.y = cos(12 * t * float(M_PI)) * 64;
-	part->vel.z = -20 + sin(18 * t * float(M_PI)) * 48;
-
-	part->colCust = HSLtoRGB(2 * t * 360, 1.0f, 0.5f);
 }
 
 
-void PhysicsParticles(Particle* part)
-{
-	part->ParticleCollideFloors(0.75f, 0.75f, false);
-}
-
-
-void SensorParticleUpdate(Particle* part)
-{
-	part->ParticleAnimate(35, 49, 1);
-}
-
-
-// there will need to be some Lua interface to assign update functions to ParticleGroups
-void UpdateParticle(Particle* part, int index)
-{
-	if (!part)
-		return;
-
-	// a switch case for testing purposes, but perhaps passing actual functions as argument will be better
-	switch (index)
-	{
-	case 1:
-		MyParticleUpdate(part);
-		break;
-	
-	case 2:
-		PhysicsParticles(part);
-		break;
-
-	case 3:
-		break;
-
-	default:
-		break;
-	}
-}
-
-
-// Update and Draw procedures - should not be available from Lua, used only by the plugin
+// Generic particle Update and Draw procedures - should not be available from Lua, used only by the plugin
 
 void UpdateParts()
 {
-	Particle* part = &parts[0];
+	Particle* part = &ParticleFactory::parts[0];
 
 	for (int i = 0; i < MAX_PARTS; ++i, ++part)
 	{
 		if (part->lifeCounter <= 0)
 			continue;
 
-		auto pdata = &partgroups[part->groupIndex];
+		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
 
 		int fadetime = part->lifeSpan;
 		int lifefactor = (part->lifeSpan - part->lifeCounter);
@@ -250,13 +160,14 @@ void UpdateParts()
 		part->colCust.R = Round(Lerp(float(part->colStart.R), float(part->colEnd.R), t));
 		part->colCust.G = Round(Lerp(float(part->colStart.G), float(part->colEnd.G), t));
 		part->colCust.B = Round(Lerp(float(part->colStart.B), float(part->colEnd.B), t));
+		 
+		part->sizeCust = Round(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
 
-		if (pdata)
-			UpdateParticle(part, pdata->updateIndex);
+		UpdateParticle(part, pgroup.updateIndex);
 		
 		part->vel += part->accel;
 		part->pos += part->vel;
-		part->rot += part->angVel;
+		part->rot += part->rotVel;
 
 		--part->lifeCounter;
 	}
@@ -272,7 +183,7 @@ void DrawParts()
 
 	long* mptr = phd_mxptr;
 
-	Particle* part = &parts[0];
+	Particle* part = &ParticleFactory::parts[0];
 
 	int x1 = 0, y1 = 0, z1 = 0;
 	for (int i = 0; i < MAX_PARTS; ++i, ++part)
@@ -280,100 +191,27 @@ void DrawParts()
 		if (part->lifeCounter <= 0)
 			continue;
 
-		x1 = Round(part->pos.x);
-		y1 = Round(part->pos.y);
-		z1 = Round(part->pos.z);
+		auto partPos = part->ParticleAbsPos();
 
-		auto pdata = &partgroups[part->groupIndex];
+		x1 = Round(partPos.x);
+		y1 = Round(partPos.y);
+		z1 = Round(partPos.z);
 
-		// item and/or mesh attachment of particle
-		if (part->emitterIndex >= 0)
+		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
+
+		if (part->emitterIndex >= 0 || part->emitterNode >= 0)
 		{
-			int index = part->emitterIndex;
-			if (index > Trng.pGlobTomb4->pAdr->TotItemsMax)
-				index = *Trng.pGlobTomb4->pAdr->pLaraIndex;
-
-			auto item = &items[index];
-
-			if (part->emitterNode >= 0) // if attached to specific mesh node of item
-			{
-				phd_vector posNode(0, 0, 0);
-				
-				if (pdata)
-				{
-					posNode.x = pdata->attach.offX;
-					posNode.y = pdata->attach.offY;
-					posNode.z = pdata->attach.offZ;
-				}
-
-				int node = part->emitterNode & 0x1F;
-
-				auto jointPos = GetJointPos(item, node, posNode.x, posNode.y, posNode.z);
-
-				x1 += Round(jointPos.x);
-				y1 += Round(jointPos.y);
-				z1 += Round(jointPos.z);
-			}
-			else // no mesh node, use item's pos
-			{
-				x1 += item->pos.xPos;
-				y1 += item->pos.yPos;
-				z1 += item->pos.zPos;
-			}
-
 			int cutoff = -1;
 			// particle attachment cutoff 
-			if (pdata && pdata->attach.cutoff > 0)
+			if (pgroup.attach.cutoff > 0)
 			{
-				cutoff = pdata->attach.cutoff;
-				if (pdata->attach.random> 1)
-					cutoff += (GetRandomDraw() % pdata->attach.random);
+				cutoff = pgroup.attach.cutoff;
+				if (pgroup.attach.random > 1)
+					cutoff += (GetRandomDraw() % pgroup.attach.random);
 			}
 
 			if ((part->lifeSpan - part->lifeCounter) > cutoff)
-			{
-				part->pos.x = x1;
-				part->pos.y = y1;
-				part->pos.z = z1;
-				part->emitterIndex = -1;
-				part->emitterNode = -1;
-			}
-		}
-		else if (part->emitterNode >= 0) // if EmitterNode >= 0 when EmitterIndex < 0, use Lara meshes
-		{
-			phd_vector posNode(0, 0, 0);
-			int node = (part->emitterNode > 14) ? 14 : part->emitterNode;
-			
-			if (pdata)
-			{
-				posNode.x = pdata->attach.offX;
-				posNode.y = pdata->attach.offY;
-				posNode.z = pdata->attach.offZ;
-			}
-
-			GetLaraJointPos(&posNode, node);
-
-			x1 += posNode.x;
-			y1 += posNode.y;
-			z1 += posNode.z;
-
-			int cutoff = -1;
-			// particle attachment cutoff 
-			if (pdata && pdata->attach.cutoff > 0)
-			{
-				cutoff = pdata->attach.cutoff;
-				if (pdata->attach.random > 1)
-					cutoff += (GetRandomDraw() % pdata->attach.random);
-			}
-
-			if ((part->lifeSpan - part->lifeCounter) > cutoff)
-			{
-				part->pos.x = x1;
-				part->pos.y = y1;
-				part->pos.z = z1;
-				part->emitterIndex = -1;
-				part->emitterNode = -1;
-			}
+				part->ParticleDeattach();
 		}
 
 		x1 -= lara_item->pos.xPos;
@@ -408,12 +246,12 @@ void DrawParts()
 		viewCoords[2] = result[2] >> 14;
 
 		// if particle is a line do world to screen transform for second vertex
-		if (!pdata || pdata->spriteSlot <= 0)
+		if (pgroup.spriteSlot <= 0)
 		{
-			float size = Lerp(part->destSize, part->startSize, part->lifeCounter/float(part->lifeSpan));
+			float size = part->sizeCust;
 			auto vel = part->vel;
 
-			if (pdata && pdata->LineIgnoreVel)
+			if (pgroup.LineIgnoreVel)
 				vel = vel.normalized(); // ignore speed contribution to particle's size
 			else
 				size *= (1.0f/32.0f); // else scale down size
@@ -438,169 +276,12 @@ void DrawParts()
 		long minSize = 4;
 
 		// draw the particle to the given screen coordinates
-		part->DrawParticle(pdata, viewCoords, minSize);
+		part->DrawParticle(pgroup, viewCoords, minSize);
 	}
 
 	phd_PopMatrix();
 }
 
-
-// it should be possible to write in Lua a particle initialization function, as in examples below
-
-
-// method 1 - passing absolute x, y, z and room coordinates directly
-void LineParticle(int x, int y, int z, short room)
-{
-	int index = GetFreeParticle();
-	Particle *part = &parts[index];
-
-	// we add the absolute coordinates
-	int xrand = x + (GetRandomControl()&127) - 64;
-	int yrand = y + (GetRandomControl()&127) - 64;
-	int zrand = z + (GetRandomControl()&127) - 64;
-
-	part->roomIndex = room;
-
-	part->pos = Vector3f(xrand, yrand, zrand);
-
-	part->lifeCounter = part->lifeSpan = 240;
-	
-	part->fadeIn = 15;
-	part->fadeOut = 15;
-	
-	part->rot = part->angVel = 0;
-
-	part->colStart = part->colEnd = ColorRGB();
-	
-	part->startSize = part->destSize = 32 + (GetRandomControl()&15);
-
-	part->groupIndex = 0;
-}
-
-
-// method 2 - passing item index and using the de-attachment feature to spawn it at the item's location
-void SpriteParticle(short itemNum)
-{
-	if (GetRandomControl()&3)
-		return;
-
-	int index = GetFreeParticle();
-	Particle *part = &parts[index];
-
-	// we don't need absolute coordinates here - they will be calculated when de-attaching the particle
-	int xrand = (GetRandomControl()&255) - 128;
-	int yrand = (GetRandomControl()&255) - 128;
-	int zrand = (GetRandomControl()&255) - 128;
-
-	part->roomIndex = items[itemNum].room_number; // get the item's room number
-
-	part->pos = Vector3f(xrand, yrand, zrand);
-
-	part->vel.x = (GetRandomControl()&63) - 32;
-	part->vel.y = (GetRandomControl()&31) - 160;
-	part->vel.z = (GetRandomControl()&63) - 32;
-
-	part->accel = Vector3f(0, 5.0f, 0);
-
-	part->lifeCounter = part->lifeSpan = 112 + (GetRandomControl()&15);
-	part->colorFadeTime = part->lifeSpan/2;
-	
-	part->fadeIn = 15;
-	part->fadeOut = 15;
-	
-	part->spriteIndex = 14;
-	part->rot = part->angVel = 0;
-
-	part->colStart = ColorRGB(255, 192 + (GetRandomControl()&63), 0);
-	part->colEnd = ColorRGB(192 + (GetRandomControl()&63), (GetRandomControl()&31), 0);
-
-	part->startSize = 32 + (GetRandomControl()&31);
-	part->destSize = 48 + (GetRandomControl()&31);
-
-	// we give the emitter index - the particle then gets de-attached from the emitter in the draw function
-	part->emitterIndex = itemNum;
-	part->groupIndex = 1;
-}
-
-
-// method 3 - spawn particle at position of Lara's mesh
-// no arguments needed, if the particle won't require any external input (item number, room number, etc)
-void LaraHeadParticle()
-{
-	int index = GetFreeParticle();
-	Particle *part = &parts[index];
-
-	// as in method 2, absolute coordinates are unnecessary
-	int xrand = (GetRandomControl()&127) - 64;
-	int yrand = 0;
-	int zrand = (GetRandomControl()&127) - 64;
-
-	part->pos = Vector3f(xrand, yrand, zrand);
-
-	part->vel.x = (GetRandomControl()&15) - 8;
-	part->vel.y = (GetRandomControl()&7) - 32;
-	part->vel.z = (GetRandomControl()&15)- 8;
-
-	part->accel.y = 1.5f;
-
-	part->lifeCounter = part->lifeSpan = 40 + (GetRandomControl()&15);
-	
-	part->fadeIn = 10;
-	part->fadeOut = 10;
-	
-	part->spriteIndex = 11;
-	part->rot = part->angVel = 0;
-
-	part->colStart.R = part->colEnd.R = 0;
-
-	part->colStart.B = 192 + (GetRandomControl()&63);
-	part->colStart.G = 192 + (GetRandomControl()&63);
-
-	if (GetRandomControl()&1)
-	{
-		part->colEnd.G = 128 + (GetRandomControl()&63);
-		part->colEnd.B = 0;
-	}
-	else
-	{
-		part->colEnd.B = 128 + (GetRandomControl()&63);
-		part->colEnd.G = 0;
-	}
-	
-	part->startSize = 16 + (GetRandomControl()&15);
-	part->destSize = part->startSize * 2;
-
-	part->emitterNode = 8; // spawn from Lara's head mesh
-	// if no emitterIndex is set, the plugin will implicitly use Lara's meshes
-
-	part->groupIndex = 2;
-}
-
-
-// one way of spawning particles is through an emitter nullmesh object
-void ParticleEmitterControl(short item_number)
-{
-	auto item = &items[item_number];
-
-	if (TriggerActive((StrItemTr4*)item))
-	{
-		// based on OCB value, as with FLEP smoke emitter OCBs ? (to discuss)
-		switch (item->trigger_flags)
-		{
-		case 0:
-			LineParticle(item->pos.xPos, item->pos.yPos, item->pos.zPos, item->room_number);
-			break;
-		case 1:
-			SpriteParticle(item_number);
-			break;
-		case 2:
-			LaraHeadParticle();
-			break;
-		default:
-			break;
-		}
-	}
-}
 
 // ************  CallBack functions section  *****************
 
@@ -632,28 +313,11 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// here you can initialize specific items of currnet level.
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
-	ClearMemory(parts, sizeof(Particle) * MAX_PARTS);
-	next_part = 0;
+
 	effect_timer = 0;
 
-
-	// initialize some ParticleGroups
-
-	partgroups[0].blendingMode = POLY_COLORADD;
-	partgroups[0].updateIndex = 1;
-
-	partgroups[1].spriteSlot = SLOT_DEFAULT_SPRITES;
-	partgroups[1].blendingMode = POLY_COLORADD;
-	partgroups[1].updateIndex = 2;
-	partgroups[1].attach.cutoff = 0; // this will de-attach the particle from the emitter immediately after spawning
-
-	partgroups[2].spriteSlot = SLOT_DEFAULT_SPRITES;
-	partgroups[2].blendingMode = POLY_COLORADD;
-	partgroups[2].attach.offY = -80;
-
-	partgroups[3].spriteSlot = SLOT_DEFAULT_SPRITES;
-	partgroups[3].blendingMode = POLY_COLORADD;
-	partgroups[3].updateIndex = 3;
+	ClearMemory(ParticleFactory::parts, sizeof(Particle) * MAX_PARTS);
+	ParticleFactory::nextPart = 0;
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
@@ -1093,13 +757,7 @@ void cbProgrActionMine(void)
 // this callback will be called at start of loading new level and a bit after having started to load level data
 void cbInitObjects(void) 
 {
-	auto obj = &objects[SLOT_UW_PROPULSOR];
-	obj->ceiling = nullptr;
-	obj->floor = nullptr;
-	obj->draw_routine = nullptr;
-	obj->collision = nullptr;
-	obj->initialise = nullptr;
-	obj->control = ParticleEmitterControl;
+
 }
 
 
@@ -1121,17 +779,14 @@ bool RequireMyCallBacks(void)
 	GET_CALLBACK(CB_LOADING_GAME, 0, 0, cbLoadMyData)
 	GET_CALLBACK(CB_ASSIGN_SLOT_MINE, 0,0, cbAssignSlotMine)
 	GET_CALLBACK(CB_INIT_OBJECTS, 0, 0, cbInitObjects)
-	
-	/* unused callbacks which you may uncomment for personal use */
-
-	//GET_CALLBACK(CB_CUSTOMIZE_MINE, 0,0, cbCustomizeMine)
-	//GET_CALLBACK(CB_INIT_GAME, 0, 0, cbInitGame)
-	//GET_CALLBACK(CB_FLIPEFFECT_MINE, 0, 0, cbFlipEffectMine)
-	//GET_CALLBACK(CB_ACTION_MINE, 0,0, cbActionMine)
-	//GET_CALLBACK(CB_CONDITION_MINE,0,0,cbConditionMine)
-	//GET_CALLBACK(CB_PARAMETER_MINE, 0, 0, cbParametersMine)
-	//GET_CALLBACK(CB_CYCLE_BEGIN, 0, 0, cbCycleBegin)
-	//GET_CALLBACK(CB_PROGR_ACTION_MINE, 0, 0, cbProgrActionMine)
+	GET_CALLBACK(CB_CUSTOMIZE_MINE, 0,0, cbCustomizeMine)
+	GET_CALLBACK(CB_INIT_GAME, 0, 0, cbInitGame)
+	GET_CALLBACK(CB_FLIPEFFECT_MINE, 0, 0, cbFlipEffectMine)
+	GET_CALLBACK(CB_ACTION_MINE, 0,0, cbActionMine)
+	GET_CALLBACK(CB_CONDITION_MINE,0,0,cbConditionMine)
+	GET_CALLBACK(CB_PARAMETER_MINE, 0, 0, cbParametersMine)
+	GET_CALLBACK(CB_CYCLE_BEGIN, 0, 0, cbCycleBegin)
+	GET_CALLBACK(CB_PROGR_ACTION_MINE, 0, 0, cbProgrActionMine)
 	
 	return true;
 }

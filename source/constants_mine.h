@@ -81,6 +81,9 @@
 #define	SP_UNDERWEXP	2048
 #define	SP_NODEATTATCH	4096
 
+
+#define phd_PopMatrix() (phd_mxptr -= 12)
+
 // MPS_ flags
 // you should type here your MPS_ flags for plugin command.
 // then you'll test the presence of these flags checking the Trng.MainPluginFlags  value using "&" operator
