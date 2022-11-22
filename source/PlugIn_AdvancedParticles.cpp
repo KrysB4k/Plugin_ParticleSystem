@@ -160,7 +160,8 @@ void UpdateParts()
 		part->colCust.R = Round(Lerp(float(part->colStart.R), float(part->colEnd.R), t));
 		part->colCust.G = Round(Lerp(float(part->colStart.G), float(part->colEnd.G), t));
 		part->colCust.B = Round(Lerp(float(part->colStart.B), float(part->colEnd.B), t));
-		 
+
+		t = part->Parameter();
 		part->sizeCust = Round(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
 
 		UpdateParticle(part, pgroup.updateIndex);

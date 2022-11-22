@@ -37,7 +37,6 @@ void Particle::ParticleAnimate(unsigned int startSprite, unsigned int endSprite,
 
 Vector3f Particle::ParticleAbsPos()
 {
-	const auto &pgroup = ParticleFactory::partGroups[groupIndex];
 	auto absPos = pos;
 
 	if (emitterIndex >= 0 || emitterNode >= 0)
@@ -50,6 +49,8 @@ Vector3f Particle::ParticleAbsPos()
 
 		if (emitterNode >= 0) // if attached to specific mesh node of item
 		{	
+			const auto &pgroup = ParticleFactory::partGroups[groupIndex];
+
 			relPos.x = pgroup.attach.offX;
 			relPos.y = pgroup.attach.offY;
 			relPos.z = pgroup.attach.offZ;
@@ -74,8 +75,6 @@ Vector3f Particle::ParticleAbsPos()
 
 void Particle::ParticleAttach(int itemIndex, int node)
 {
-	const auto &pgroup = ParticleFactory::partGroups[groupIndex];
-
 	auto item = lara_item;
 	if (itemIndex >= 0 && itemIndex < Trng.pGlobTomb4->pAdr->TotItemsMax)
 		item = &items[itemIndex];
@@ -86,11 +85,13 @@ void Particle::ParticleAttach(int itemIndex, int node)
 
 	if (node >= 0) // if attached to specific mesh node of item
 	{	
+		const auto &pgroup = ParticleFactory::partGroups[groupIndex];
+
 		relPos.x = pgroup.attach.offX;
 		relPos.y = pgroup.attach.offY;
 		relPos.z = pgroup.attach.offZ;
 
-		int node = node & 0x1F;
+		node = node & 0x1F;
 
 		if (item == lara_item)
 			node = (node < 14) ? node : 14;
