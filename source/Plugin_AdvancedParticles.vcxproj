@@ -35,7 +35,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Krystian\Documents\Plugin_AdvancedParticles\source;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -78,32 +77,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DefTomb4Funct.cpp" />
+    <ClCompile Include="definitions\DefTomb4Funct.cpp" />
+    <ClCompile Include="definitions\Tomb4Discoveries_mine.cpp" />
     <ClCompile Include="particles\particle.cpp" />
     <ClCompile Include="particles\utilities.cpp" />
     <ClCompile Include="particles\vector3f.cpp" />
     <ClCompile Include="PlugIn_AdvancedParticles.cpp" />
     <ClCompile Include="StdAfx.cpp" />
-    <ClCompile Include="Tomb4Discoveries_mine.cpp" />
-    <ClCompile Include="trng.cpp" />
+    <ClCompile Include="trng\trng.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bass.h" />
-    <ClInclude Include="constants_mine.h" />
-    <ClInclude Include="DefTomb4Funct.h" />
-    <ClInclude Include="includes.h" />
-    <ClInclude Include="macros.h" />
-    <ClInclude Include="macros_mine.h" />
+    <ClInclude Include="definitions\constants_mine.h" />
+    <ClInclude Include="definitions\DefTomb4Funct.h" />
+    <ClInclude Include="definitions\includes.h" />
+    <ClInclude Include="definitions\macros.h" />
+    <ClInclude Include="definitions\macros_mine.h" />
+    <ClInclude Include="definitions\structures.h" />
+    <ClInclude Include="definitions\structures_mine.h" />
+    <ClInclude Include="definitions\Tomb4Discoveries_mine.h" />
+    <ClInclude Include="definitions\Tomb4Globals.h" />
     <ClInclude Include="particles\particle.h" />
     <ClInclude Include="particles\utilities.h" />
     <ClInclude Include="particles\vector3f.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="structures.h" />
-    <ClInclude Include="structures_mine.h" />
-    <ClInclude Include="Tomb4Discoveries_mine.h" />
-    <ClInclude Include="Tomb_NextGeneration.h" />
-    <ClInclude Include="trng.h" />
+    <ClInclude Include="trng\bass.h" />
+    <ClInclude Include="trng\Tomb_NextGeneration.h" />
+    <ClInclude Include="trng\trng.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PlugIn_trng.rc" />

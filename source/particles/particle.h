@@ -52,11 +52,12 @@ struct NodeAttachment
 
 struct ParticleGroup
 {
+	int initIndex;
+	int updateIndex;
+
 	NodeAttachment attach;
 	short spriteSlot;
 	uchar blendingMode;
-	int initIndex;
-	int updateIndex;
 
 	// various particle flags, more may be added with time
 	bool Saved;

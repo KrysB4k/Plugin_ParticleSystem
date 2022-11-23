@@ -13,80 +13,101 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Header Files\particles">
+      <UniqueIdentifier>{14649891-828e-43c0-88e5-dee358203a4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\definitions">
+      <UniqueIdentifier>{5b3e7066-7b7c-4038-a02a-c707b26061f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\trng">
+      <UniqueIdentifier>{1ee7ab92-b4ee-4766-ad85-972b1df00cce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\definitions">
+      <UniqueIdentifier>{32b70ac3-dda0-4e45-a143-3f646d77b5d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\particle">
+      <UniqueIdentifier>{d31967ff-baa4-4fbf-ad87-38850e1f3eb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\trng">
+      <UniqueIdentifier>{a659d701-ed50-47a5-9078-f0c3c44fbf8a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="trng.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PlugIn_AdvancedParticles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DefTomb4Funct.cpp">
+    <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tomb4Discoveries_mine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="definitions\DefTomb4Funct.cpp">
+      <Filter>Source Files\definitions</Filter>
+    </ClCompile>
+    <ClCompile Include="definitions\Tomb4Discoveries_mine.cpp">
+      <Filter>Source Files\definitions</Filter>
     </ClCompile>
     <ClCompile Include="particles\particle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particles\utilities.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\particle</Filter>
     </ClCompile>
     <ClCompile Include="particles\vector3f.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\utilities.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="trng\trng.cpp">
+      <Filter>Source Files\trng</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="constants_mine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DefTomb4Funct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="macros.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="macros_mine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StdAfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="structures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="structures_mine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tomb4Discoveries_mine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tomb_NextGeneration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="trng.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="particles\particle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\utilities.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\particles</Filter>
     </ClInclude>
     <ClInclude Include="particles\vector3f.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\particles</Filter>
     </ClInclude>
-    <ClInclude Include="includes.h">
+    <ClInclude Include="particles\utilities.h">
+      <Filter>Header Files\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\constants_mine.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\DefTomb4Funct.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\includes.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\macros.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\macros_mine.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="trng\bass.h">
+      <Filter>Header Files\trng</Filter>
+    </ClInclude>
+    <ClInclude Include="trng\Tomb_NextGeneration.h">
+      <Filter>Header Files\trng</Filter>
+    </ClInclude>
+    <ClInclude Include="trng\trng.h">
+      <Filter>Header Files\trng</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\structures.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\structures_mine.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\Tomb4Discoveries_mine.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions\Tomb4Globals.h">
+      <Filter>Header Files\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

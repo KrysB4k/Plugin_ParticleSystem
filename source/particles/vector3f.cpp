@@ -65,16 +65,18 @@ Vector3f Vector3f::cross(const Vector3f& v) const
 		);
 }
 
-Vector3f Vector3f::lerp(const Vector3f& v2, float t) const
+Vector3f Vector3f::lerp(const Vector3f& v, float t) const
 {
-	if (t > 1.0f)
-		t = 1.0f;
-	else if (t < 0.0f)
-		t = 0.0f;
+	if (t <= 0.0f)
+		return (*this);
+	else if (t >= 1.0f)
+		return v;
 
-	auto& v1 = *this;
-
-	return (v1 + (v2 - v1) * t);
+	return Vector3f(
+		x + (v.x - x) * t,
+		y + (v.y - y) * t,
+		z + (v.z - z) * t
+		);
 }
 
 Vector3f Vector3f::slerp(const Vector3f& v, float t) const

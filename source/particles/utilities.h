@@ -16,6 +16,8 @@ float SimpleDist(const Vector3f& v1, const Vector3f& v2);
 
 float RealDist(const Vector3f& v1, const Vector3f& v2);
 
+ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t);
+
 ColorRGB RandomColor(int RedRange, int GreenRange, int BlueRange);
 
 ColorRGB AddColors(const ColorRGB& C1, const ColorRGB& C2, bool overflow);

@@ -1,4 +1,4 @@
-#include "includes.h"
+#include "..\definitions\includes.h"
 
 // ************  Utility Functions - can be made accessible in Lua, unless stated otherwise ************
 
@@ -66,6 +66,16 @@ float SimpleDist(const Vector3f &v1, const Vector3f &v2)
 float RealDist(const Vector3f& v1, const Vector3f& v2)
 {
 	return (v1 - v2).magnitude();
+}
+
+
+ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t)
+{
+	return ColorRGB(
+		Round(C1.R + (C2.R - C1.R) * t),
+		Round(C1.G + (C2.G - C1.G) * t),
+		Round(C1.B + (C2.B - C1.B) * t)
+		);
 }
 
 
