@@ -9,6 +9,8 @@ typedef unsigned short ushort;
 typedef unsigned long ulong;
 
 
+// ************  Particle-related structs  ****************
+
 struct ColorRGB
 {
 	uchar R, G, B;
@@ -67,6 +69,8 @@ struct ParticleGroup
 };
 
 
+// ************  Particle struct  ****************
+
 struct Particle
 {
 // fields
@@ -111,19 +115,21 @@ struct Particle
 	Vector3f	ParticleFollow(const Vector3f& v, float factor, float maxSpeed);
 	bool		ParticleHoming(Tr4ItemInfo *item, int targetNode, float homingFactor, float homingAccel, bool predict);
 
+	void		UpdateParticle(int updateIndex);
 	void		DrawParticle(const ParticleGroup& pgroup, long* const view, long smallest_size);
 };
 
 
-class ParticleFactory
+// ************  namespace ParticleFactory - declarations ****************
+
+namespace ParticleFactory
 {
-private:
-	ParticleFactory(){};
+	extern Particle	parts[];
+	extern ParticleGroup partGroups[];
 
-public:
-	static int nextPart;
-	static Particle parts[];
-	static ParticleGroup partGroups[];
+	void ClearParts();
+	void UpdateParts();
+	void DrawParts();
 
-	static int GetFreeParticle();
+	int GetFreeParticle();
 };

@@ -1,5 +1,230 @@
 #include "..\definitions\includes.h"
 
+
+// ************  namespace ParticleFactory  ****************
+
+namespace ParticleFactory
+{
+	int nextPart;
+	Particle parts[MAX_PARTS];
+	ParticleGroup partGroups[MAX_PARTGROUPS];
+};
+
+
+int ParticleFactory::GetFreeParticle()
+{
+	int i, free;
+	Particle* part;
+	
+	for (part = &parts[nextPart], free = nextPart, i = 0; i < MAX_PARTS; ++i)
+	{
+		if (!part->lifeCounter)
+		{
+			nextPart = (free + 1) % MAX_PARTS;
+
+			ClearMemory(&parts[free], sizeof(Particle));
+			parts[free].emitterIndex = -1;
+			parts[free].emitterNode = -1;
+			return free;
+		}
+
+		if (free == MAX_PARTS-1)
+		{
+			part = &parts[0];
+			free = 0;
+		}
+		else
+		{
+			part++;
+			free++;
+		}
+	}
+	
+	int eldest = 0x7FFFFFFF;
+	free = 0;
+	part = &parts[0];
+
+	for (i = 0; i < MAX_PARTS; ++i, ++part)
+	{
+		if (part->lifeCounter < eldest)
+		{
+			free = i;
+			eldest = part->lifeCounter;
+		}
+	}
+
+	nextPart = (free + 1) % MAX_PARTS;
+
+	ClearMemory(&parts[free], sizeof(Particle));
+	parts[free].emitterIndex = -1;
+	parts[free].emitterNode = -1;
+	return free;
+}
+
+
+void ParticleFactory::ClearParts()
+{
+	ClearMemory(parts, sizeof(Particle) * MAX_PARTS);
+	nextPart = 0;
+}
+
+
+void ParticleFactory::UpdateParts()
+{
+	Particle* part = &ParticleFactory::parts[0];
+
+	for (int i = 0; i < MAX_PARTS; ++i, ++part)
+	{
+		if (part->lifeCounter <= 0)
+			continue;
+
+		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
+
+		int fadetime = part->lifeSpan;
+		int lifefactor = (part->lifeSpan - part->lifeCounter);
+
+		if (part->colorFadeTime)
+		{
+			if (part->colorFadeTime < 0 && part->lifeSpan > (-part->colorFadeTime))
+			{
+				fadetime = -part->colorFadeTime;
+				lifefactor = -(part->lifeCounter + part->colorFadeTime);
+			}
+			else if (part->lifeSpan > part->colorFadeTime)
+				fadetime = part->colorFadeTime;
+		}
+
+		float t = lifefactor/float(fadetime);
+		if (t < 0.0f)
+			t = 0.0f;
+		if (t > 1.0f)
+			t = 1.0f;
+
+		part->colCust = Lerp(part->colStart, part->colEnd, t);
+
+		t = part->Parameter();
+		part->sizeCust = Round(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
+
+		part->UpdateParticle(pgroup.updateIndex);
+		
+		part->vel += part->accel;
+		part->pos += part->vel;
+		part->rot += part->rotVel;
+
+		--part->lifeCounter;
+	}
+}
+
+
+void ParticleFactory::DrawParts()
+{
+	phd_PushMatrix();
+	phd_TranslateAbs(lara_item->pos.xPos, lara_item->pos.yPos, lara_item->pos.zPos);
+
+	long* mptr = phd_mxptr;
+
+	Particle* part = &ParticleFactory::parts[0];
+
+	int x1 = 0, y1 = 0, z1 = 0;
+	for (int i = 0; i < MAX_PARTS; ++i, ++part)
+	{
+		if (part->lifeCounter <= 0)
+			continue;
+
+		auto partPos = part->ParticleAbsPos();
+
+		x1 = Round(partPos.x);
+		y1 = Round(partPos.y);
+		z1 = Round(partPos.z);
+
+		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
+
+		if (part->emitterIndex >= 0 || part->emitterNode >= 0)
+		{
+			int cutoff = -1;
+			// particle attachment cutoff 
+			if (pgroup.attach.cutoff > 0)
+			{
+				cutoff = pgroup.attach.cutoff;
+				if (pgroup.attach.random > 1)
+					cutoff += (GetRandomDraw() % pgroup.attach.random);
+			}
+
+			if ((part->lifeSpan - part->lifeCounter) > cutoff)
+				part->ParticleDeattach();
+		}
+
+		x1 -= lara_item->pos.xPos;
+		y1 -= lara_item->pos.yPos;
+		z1 -= lara_item->pos.zPos;
+
+		if (x1 < -20480 || x1 > 20480 ||
+			y1 < -20480 || y1 > 20480 ||
+			z1 < -20480 || z1 > 20480)
+		{
+			part->lifeCounter = 0;
+			continue;
+		}
+
+
+		// convert from world coordinates to screen coordinates
+		long result[3] = {0, 0, 0};
+		long TempMesh[3] = {0, 0, 0};
+		long viewCoords[6] = {0,0,0,0,0,0};
+
+		TempMesh[0] = x1;
+		TempMesh[1] = y1;
+		TempMesh[2] = z1;
+
+		result[0] = (mptr[M00] * TempMesh[0] + mptr[M01] * TempMesh[1] + mptr[M02] * TempMesh[2] + mptr[M03]);
+		result[1] = (mptr[M10] * TempMesh[0] + mptr[M11] * TempMesh[1] + mptr[M12] * TempMesh[2] + mptr[M13]);
+		result[2] = (mptr[M20] * TempMesh[0] + mptr[M21] * TempMesh[1] + mptr[M22] * TempMesh[2] + mptr[M23]);
+
+		float zv = f_persp / float(result[2]);
+		viewCoords[0] = Round(result[0] * zv + f_centerx);
+		viewCoords[1] = Round(result[1] * zv + f_centery);
+		viewCoords[2] = result[2] >> 14;
+
+		// if particle is a line do world to screen transform for second vertex
+		if (pgroup.spriteSlot <= 0)
+		{
+			float size = part->sizeCust;
+			auto vel = part->vel;
+
+			if (pgroup.LineIgnoreVel)
+				vel = vel.normalized(); // ignore speed contribution to particle's size
+			else
+				size *= (1.0f/32.0f); // else scale down size
+
+			vel *= size;
+
+			TempMesh[0] = Round(x1 - vel.x);
+			TempMesh[1] = Round(y1 - vel.y);
+			TempMesh[2] = Round(z1 - vel.z);
+
+			result[0] = (mptr[M00] * TempMesh[0] + mptr[M01] * TempMesh[1] + mptr[M02] * TempMesh[2] + mptr[M03]);
+			result[1] = (mptr[M10] * TempMesh[0] + mptr[M11] * TempMesh[1] + mptr[M12] * TempMesh[2] + mptr[M13]);
+			result[2] = (mptr[M20] * TempMesh[0] + mptr[M21] * TempMesh[1] + mptr[M22] * TempMesh[2] + mptr[M23]);
+
+			zv = f_persp / float(result[2]);
+			viewCoords[3] = Round(result[0] * zv + f_centerx);
+			viewCoords[4] = Round(result[1] * zv + f_centery);
+			viewCoords[5] = result[2] >> 14;
+		}
+
+
+		long minSize = 4;
+
+		// draw the particle to the given screen coordinates
+		part->DrawParticle(pgroup, viewCoords, minSize);
+	}
+
+	phd_PopMatrix();
+}
+
+
+// ************  Particle public methods  ****************
+
 float Particle::Parameter()
 {
 	return (lifeSpan - lifeCounter) / float(lifeSpan);
@@ -236,6 +461,13 @@ bool Particle::ParticleHoming(Tr4ItemInfo* item, int targetNode, float homingFac
 }
 
 
+// stub for effect updating function
+void Particle::UpdateParticle(int updateIndex)
+{
+
+}
+
+
 void Particle::DrawParticle(const ParticleGroup& pgroup, long* const view, long smallest_size)
 {
 	long z1 = view[2];
@@ -416,56 +648,4 @@ void Particle::DrawParticle(const ParticleGroup& pgroup, long* const view, long 
 			(*AddLineSorted)(&v[0], &v[1], 6);
 		}
 	}
-}
-
-
-
-int ParticleFactory::GetFreeParticle()
-{
-	int i, free;
-	Particle* part;
-	
-	for (part = &parts[nextPart], free = nextPart, i = 0; i < MAX_PARTS; ++i)
-	{
-		if (!part->lifeCounter)
-		{
-			nextPart = (free + 1) % MAX_PARTS;
-
-			ClearMemory(&parts[free], sizeof(Particle));
-			parts[free].emitterIndex = -1;
-			parts[free].emitterNode = -1;
-			return free;
-		}
-
-		if (free == MAX_PARTS-1)
-		{
-			part = &parts[0];
-			free = 0;
-		}
-		else
-		{
-			part++;
-			free++;
-		}
-	}
-	
-	int eldest = 0x7FFFFFFF;
-	free = 0;
-	part = &parts[0];
-
-	for (i = 0; i < MAX_PARTS; ++i, ++part)
-	{
-		if (part->lifeCounter < eldest)
-		{
-			free = i;
-			eldest = part->lifeCounter;
-		}
-	}
-
-	nextPart = (free + 1) % MAX_PARTS;
-
-	ClearMemory(&parts[free], sizeof(Particle));
-	parts[free].emitterIndex = -1;
-	parts[free].emitterNode = -1;
-	return free;
 }

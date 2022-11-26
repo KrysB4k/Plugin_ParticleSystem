@@ -12,8 +12,6 @@
 
 // ************  Early function declarations ************
 
-void DrawParts();
-void UpdateParts();
 
 // ************  Global Variables Section *************
 
@@ -27,15 +25,8 @@ char TexMyPluginName[80];
 
 StrMyData MyData;
 
-int ParticleFactory::nextPart;
-Particle ParticleFactory::parts[MAX_PARTS];
-ParticleGroup ParticleFactory::partGroups[MAX_PARTGROUPS];
-
 /* ParticleGroup elements should be initializable from Lua
 (e.g. at level start) but not modifiable during level runtime */
-
-
-unsigned long effect_timer;
 
 
 // ************  Utilities section  ****************
@@ -75,7 +66,7 @@ bool CreateMyCodePatches(void)
 BEGIN_ASM_PROC(Patch_00)
 	CALL UpdateBeetles
 	CALL UpdateFish
-	CALL UpdateParts
+	CALL ParticleFactory::UpdateParts
 	RETN
 END_ASM_PROC
 
@@ -83,7 +74,7 @@ END_ASM_PROC
 BEGIN_ASM_PROC(Patch_01)
 	CALL DrawRopeList
 	CALL S_DrawSparks
-	CALL DrawParts
+	CALL ParticleFactory::DrawParts
 	RETN
 END_ASM_PROC
 
@@ -103,183 +94,6 @@ BEGIN_ASM_PROC(MainPatcher)
 	jmp eax
 END_ASM_PROC
 
-
-
-// ************  Particle associated functions - accessible in Lua, unless stated otherwise ************
-
-
-
-
-// stub for effect spawning function
-void CreateEffect(const EffectBite& bite, int initIndex)
-{
-
-}
-
-
-// stub for effect updating function
-void UpdateParticle(Particle* part, int updateIndex)
-{
-
-}
-
-
-// Generic particle Update and Draw procedures - should not be available from Lua, used only by the plugin
-
-void UpdateParts()
-{
-	Particle* part = &ParticleFactory::parts[0];
-
-	for (int i = 0; i < MAX_PARTS; ++i, ++part)
-	{
-		if (part->lifeCounter <= 0)
-			continue;
-
-		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
-
-		int fadetime = part->lifeSpan;
-		int lifefactor = (part->lifeSpan - part->lifeCounter);
-
-		if (part->colorFadeTime)
-		{
-			if (part->colorFadeTime < 0 && part->lifeSpan > (-part->colorFadeTime))
-			{
-				fadetime = -part->colorFadeTime;
-				lifefactor = -(part->lifeCounter + part->colorFadeTime);
-			}
-			else if (part->lifeSpan > part->colorFadeTime)
-				fadetime = part->colorFadeTime;
-		}
-
-		float t = lifefactor/float(fadetime);
-		if (t < 0.0f)
-			t = 0.0f;
-		if (t > 1.0f)
-			t = 1.0f;
-
-		part->colCust = Lerp(part->colStart, part->colEnd, t);
-
-		t = part->Parameter();
-		part->sizeCust = Round(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
-
-		UpdateParticle(part, pgroup.updateIndex);
-		
-		part->vel += part->accel;
-		part->pos += part->vel;
-		part->rot += part->rotVel;
-
-		--part->lifeCounter;
-	}
-
-	++effect_timer;
-}
-
-
-void DrawParts()
-{
-	phd_PushMatrix();
-	phd_TranslateAbs(lara_item->pos.xPos, lara_item->pos.yPos, lara_item->pos.zPos);
-
-	long* mptr = phd_mxptr;
-
-	Particle* part = &ParticleFactory::parts[0];
-
-	int x1 = 0, y1 = 0, z1 = 0;
-	for (int i = 0; i < MAX_PARTS; ++i, ++part)
-	{
-		if (part->lifeCounter <= 0)
-			continue;
-
-		auto partPos = part->ParticleAbsPos();
-
-		x1 = Round(partPos.x);
-		y1 = Round(partPos.y);
-		z1 = Round(partPos.z);
-
-		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
-
-		if (part->emitterIndex >= 0 || part->emitterNode >= 0)
-		{
-			int cutoff = -1;
-			// particle attachment cutoff 
-			if (pgroup.attach.cutoff > 0)
-			{
-				cutoff = pgroup.attach.cutoff;
-				if (pgroup.attach.random > 1)
-					cutoff += (GetRandomDraw() % pgroup.attach.random);
-			}
-
-			if ((part->lifeSpan - part->lifeCounter) > cutoff)
-				part->ParticleDeattach();
-		}
-
-		x1 -= lara_item->pos.xPos;
-		y1 -= lara_item->pos.yPos;
-		z1 -= lara_item->pos.zPos;
-
-		if (x1 < -20480 || x1 > 20480 ||
-			y1 < -20480 || y1 > 20480 ||
-			z1 < -20480 || z1 > 20480)
-		{
-			part->lifeCounter = 0;
-			continue;
-		}
-
-
-		// convert from world coordinates to screen coordinates
-		long result[3] = {0, 0, 0};
-		long TempMesh[3] = {0, 0, 0};
-		long viewCoords[6] = {0,0,0,0,0,0};
-
-		TempMesh[0] = x1;
-		TempMesh[1] = y1;
-		TempMesh[2] = z1;
-
-		result[0] = (mptr[M00] * TempMesh[0] + mptr[M01] * TempMesh[1] + mptr[M02] * TempMesh[2] + mptr[M03]);
-		result[1] = (mptr[M10] * TempMesh[0] + mptr[M11] * TempMesh[1] + mptr[M12] * TempMesh[2] + mptr[M13]);
-		result[2] = (mptr[M20] * TempMesh[0] + mptr[M21] * TempMesh[1] + mptr[M22] * TempMesh[2] + mptr[M23]);
-
-		float zv = f_persp / float(result[2]);
-		viewCoords[0] = Round(result[0] * zv + f_centerx);
-		viewCoords[1] = Round(result[1] * zv + f_centery);
-		viewCoords[2] = result[2] >> 14;
-
-		// if particle is a line do world to screen transform for second vertex
-		if (pgroup.spriteSlot <= 0)
-		{
-			float size = part->sizeCust;
-			auto vel = part->vel;
-
-			if (pgroup.LineIgnoreVel)
-				vel = vel.normalized(); // ignore speed contribution to particle's size
-			else
-				size *= (1.0f/32.0f); // else scale down size
-
-			vel *= size;
-
-			TempMesh[0] = Round(x1 - vel.x);
-			TempMesh[1] = Round(y1 - vel.y);
-			TempMesh[2] = Round(z1 - vel.z);
-
-			result[0] = (mptr[M00] * TempMesh[0] + mptr[M01] * TempMesh[1] + mptr[M02] * TempMesh[2] + mptr[M03]);
-			result[1] = (mptr[M10] * TempMesh[0] + mptr[M11] * TempMesh[1] + mptr[M12] * TempMesh[2] + mptr[M13]);
-			result[2] = (mptr[M20] * TempMesh[0] + mptr[M21] * TempMesh[1] + mptr[M22] * TempMesh[2] + mptr[M23]);
-
-			zv = f_persp / float(result[2]);
-			viewCoords[3] = Round(result[0] * zv + f_centerx);
-			viewCoords[4] = Round(result[1] * zv + f_centery);
-			viewCoords[5] = result[2] >> 14;
-		}
-
-
-		long minSize = 4;
-
-		// draw the particle to the given screen coordinates
-		part->DrawParticle(pgroup, viewCoords, minSize);
-	}
-
-	phd_PopMatrix();
-}
 
 
 // ************  CallBack functions section  *****************
@@ -313,10 +127,7 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
 
-	effect_timer = 0;
-
-	ClearMemory(ParticleFactory::parts, sizeof(Particle) * MAX_PARTS);
-	ParticleFactory::nextPart = 0;
+	ParticleFactory::ClearParts();
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
