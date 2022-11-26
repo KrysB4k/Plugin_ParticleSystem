@@ -54,6 +54,7 @@ struct NodeAttachment
 
 struct ParticleGroup
 {
+	int groupName; // index for Lua string
 	int initIndex;
 	int updateIndex;
 
