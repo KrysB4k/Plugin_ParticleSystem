@@ -15,3 +15,5 @@
 #include "..\particles\vector3f.h"
 #include "..\particles\particle.h"
 #include "..\particles\utilities.h"
+
+#include <script.h>

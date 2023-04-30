@@ -619,6 +619,8 @@ bool InitializeAll(void)
 
 	// TYPE_HERE: code to allocate global resource to use in the whole game
 
+	script::newstate();
+
 	return true;
 }
 
@@ -629,6 +631,8 @@ void ReleaseAll(void)
 {
 // ************  ReleaseAll() function  ******************
 	FreeLevelResources();
+
+	script::close();
 }
 
 
