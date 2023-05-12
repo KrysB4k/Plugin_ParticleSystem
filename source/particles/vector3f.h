@@ -3,13 +3,16 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-struct Vector3f
+struct Vector3f : public LuaObject
 {
 	float x, y, z;
 
 	Vector3f() : x(0.0f), y(0.0f), z(0.0f) {}
 
 	Vector3f(float a, float b, float c) : x(a), y(b), z(c) {}
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 
 	Vector3f operator- () const;
 

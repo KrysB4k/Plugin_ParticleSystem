@@ -297,3 +297,29 @@ Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 
 	return Vector3f(float(-tilt_x), -4.0f, float(-tilt_z)).normalized();
 }
+
+int Clamp(int x, int min, int max)
+{
+	if (x < min)
+		return min;
+
+	if (x > max)
+		return max;
+
+	return x;
+}
+
+float ShortToRad(short rotation)
+{
+	return M_PI * rotation / 32768;
+}
+
+short RadToShort(float angle)
+{
+	return 32768 * angle / M_PI;
+}
+
+float GetRandom()
+{
+	return (float)rand() / (RAND_MAX + 1);
+}

@@ -42,3 +42,8 @@
 #define camera ((Tr4CameraInfo*)0x7FE700)
 
 #define phd_PopMatrix() (phd_mxptr -= 12)
+
+#define level_items (*(long*)0x4BF564)
+#define number_rooms (*(short*)0x53392C)
+
+#define font_height (*(long*)0x7F4F30)

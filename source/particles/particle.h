@@ -8,10 +8,28 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
 
+namespace Diagnostics
+{
+	extern double performanceMultiplier;
+	extern int activeParticles;
+	extern double initTime;
+	extern double updateTime;
+	extern double drawTime;
+	extern double initTimePeak;
+	extern double updateTimePeak;
+	extern double drawTimePeak;
+
+	double Time(void (*targetFunction)());
+	void SetPeaks();
+	void Print();
+	void Initialise();
+	void ResetFrame();
+	void ResetLevel();
+}
 
 // ************  Particle-related structs  ****************
 
-struct ColorRGB
+struct ColorRGB : public LuaObject
 {
 	uchar R, G, B;
 
@@ -25,6 +43,9 @@ struct ColorRGB
 		G = (HEX >> 8) & 0xFF;
 		R = (HEX >> 16) & 0xFF;
 	}
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 
 	ColorRGB& operator= (ulong HEX)
 	{
@@ -45,18 +66,22 @@ enum SpawnMode
 };
 
 
-struct NodeAttachment
+struct NodeAttachment : LuaObject
 {
 	int offX, offY, offZ;
 	short cutoff, random;
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 };
 
 
-struct ParticleGroup
+struct ParticleGroup : LuaObject
 {
-	int groupName; // index for Lua string
 	int initIndex;
 	int updateIndex;
+
+	uchar groupIndex;
 
 	NodeAttachment attach;
 	short spriteSlot;
@@ -67,12 +92,15 @@ struct ParticleGroup
 	bool NoPerspective;
 	bool LineIgnoreVel;
 	bool WindAffected;
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 };
 
 
 // ************  Particle struct  ****************
 
-struct Particle
+struct Particle : public LuaObject
 {
 // fields
 	Vector3f	pos;
@@ -104,6 +132,9 @@ struct Particle
 	ColorRGB	colEnd;
 	ColorRGB	colCust;
 
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+
 // methods
 	float		Parameter();
 	void		ParticleLimitSpeed(float maxSpeed);
@@ -116,21 +147,32 @@ struct Particle
 	Vector3f	ParticleFollow(const Vector3f& v, float factor, float maxSpeed);
 	bool		ParticleHoming(Tr4ItemInfo *item, int targetNode, float homingFactor, float homingAccel, bool predict);
 
-	void		UpdateParticle(int updateIndex);
 	void		DrawParticle(const ParticleGroup& pgroup, long* const view, long smallest_size);
 };
 
 
 // ************  namespace ParticleFactory - declarations ****************
 
+enum FunctionType
+{
+	FUNCTION_LIBRARY,
+	FUNCTION_INIT,
+	FUNCTION_UPDATE
+};
+
 namespace ParticleFactory
 {
 	extern Particle	parts[];
 	extern ParticleGroup partGroups[];
+	extern FunctionType caller;
 
 	void ClearParts();
+	void ClearPartGroups();
 	void UpdateParts();
 	void DrawParts();
+	void InitParts();
+	void InitPartGroups();
 
 	int GetFreeParticle();
+	int GetFreeParticleGroup();
 };

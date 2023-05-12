@@ -35,3 +35,11 @@ int TestForWall(int x, int y, int z, short* room);
 
 // should not be available in Lua
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z);
+
+int Clamp(int x, int min, int max);
+
+float ShortToRad(short rotation);
+
+short RadToShort(float angle);
+
+float GetRandom();

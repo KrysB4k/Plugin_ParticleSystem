@@ -1,5 +1,341 @@
 #include "..\definitions\includes.h"
 
+namespace Diagnostics
+{
+	double performanceMultiplier;
+	int activeParticles;
+	double initTime;
+	double updateTime;
+	double drawTime;
+	double initTimePeak;
+	double updateTimePeak;
+	double drawTimePeak;
+}
+
+double Diagnostics::Time(void (*targetFunction)())
+{
+	LARGE_INTEGER startTime, endTime;
+
+	QueryPerformanceCounter(&startTime);
+	targetFunction();
+	QueryPerformanceCounter(&endTime);
+	return performanceMultiplier * (endTime.QuadPart - startTime.QuadPart);
+}
+
+void Diagnostics::SetPeaks()
+{
+	if (initTime > initTimePeak)
+		initTimePeak = initTime;
+	if (updateTime > updateTimePeak)
+		updateTimePeak = updateTime;
+	if (drawTime > drawTimePeak)
+		drawTimePeak = drawTime;
+}
+
+void Diagnostics::Print()
+{
+	PrintString(8, 2 * font_height, 6, (char*)Script::FormatString("Init: %.1f", initTime), 0);
+	PrintString(8, 3 * font_height, 6, (char*)Script::FormatString("    peak: %.1f", initTimePeak), 0);
+	PrintString(8, 4 * font_height, 6, (char*)Script::FormatString("Update: %.1f", updateTime), 0);
+	PrintString(8, 5 * font_height, 6, (char*)Script::FormatString("    peak: %.1f", updateTimePeak), 0);
+	PrintString(8, 6 * font_height, 6, (char*)Script::FormatString("Draw: %.1f", drawTime), 0);
+	PrintString(8, 7 * font_height, 6, (char*)Script::FormatString("    peak: %.1f", drawTimePeak), 0);
+	PrintString(8, 10 * font_height, 6, (char*)Script::FormatString("Particles: %d", activeParticles), 0);
+	PrintString(8, 11 * font_height, 6, (char*)Script::FormatString("Memory: %d", Script::GarbageCount()), 0);
+}
+
+void Diagnostics::Initialise()
+{
+	LARGE_INTEGER frequency;
+
+	QueryPerformanceFrequency(&frequency);
+	Diagnostics::performanceMultiplier = (double)1000 / frequency.QuadPart;
+}
+
+void Diagnostics::ResetFrame()
+{
+	activeParticles = 0;
+	initTime = 0;
+	updateTime = 0;
+	drawTime = 0;
+}
+
+void Diagnostics::ResetLevel()
+{
+	initTimePeak = 0;
+	updateTimePeak = 0;
+	drawTimePeak = 0;
+}
+
+int LuaBridge::Call(const char* function)
+{
+	int i, init, update;
+	ParticleGroup* group;
+	float lower, upper;
+
+	switch (function[0])
+	{
+	case 'c':
+		if (!strcmp(function, "cos"))
+		{
+			Script::PushNumber(cosf(Script::ToNumber(1)));
+			return 1;
+		}
+		break;
+	case 'g':
+		if (!strcmp(function, "getFreeParticle"))
+		{
+			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
+				return 0;
+			group = dynamic_cast<ParticleGroup*>((LuaObject*)Script::ToData(1));
+			if (!group)
+				return Script::TypeError(1, "ParticleGroup");
+			i = ParticleFactory::GetFreeParticle();
+			ParticleFactory::parts[i].groupIndex = group->groupIndex;
+			Script::PushData(&ParticleFactory::parts[i]);
+			return 1;
+		}
+		if (!strcmp(function, "getFreeParticleGroup"))
+		{
+			if (ParticleFactory::caller != FUNCTION_LIBRARY)
+				return 0;
+			init = Script::StoreFunction(1);
+			update = Script::StoreFunction(2);
+			i = ParticleFactory::GetFreeParticleGroup();
+			if (i == -1)
+				return 0;
+			ParticleFactory::partGroups[i].initIndex = init;
+			ParticleFactory::partGroups[i].updateIndex = update;
+			Script::PushData(&ParticleFactory::partGroups[i]);
+			return 1;
+		}
+		break;
+	case 'p':
+		if (!strcmp(function, "print"))
+		{
+			Script::Print();
+			return 0;
+		}
+		break;
+	case 'r':
+		if (!strcmp(function, "randfloat"))
+		{
+			lower = Script::ToNumber(1);
+			upper = Script::ToNumber(2);
+			Script::PushNumber(fabsf(upper - lower) * GetRandom() + fminf(lower, upper));
+			return 1;
+		}
+		if (!strcmp(function, "randint"))
+		{
+			lower = Script::ToInteger(1);
+			upper = Script::ToInteger(2);
+			Script::PushInteger(floorf((fabsf(upper - lower) + 1) * GetRandom() + fminf(lower, upper)));
+			return 1;
+		}
+		break;
+	case 's':
+		if (!strcmp(function, "sin"))
+		{
+			Script::PushNumber(sinf(Script::ToNumber(1)));
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+int ColorRGB::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'b':
+		if (!strcmp(field, "b"))
+		{
+			Script::PushNumber((float)B / 255);
+			return 1;
+		}
+		break;
+	case 'g':
+		if (!strcmp(field, "g"))
+		{
+			Script::PushNumber((float)G / 255);
+			return 1;
+		}
+		break;
+	case 'r':
+		if (!strcmp(field, "r"))
+		{
+			Script::PushNumber((float)R / 255);
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+void ColorRGB::NewIndex(const char* field)
+{
+	switch (field[0])
+	{
+	case 'b':
+		if (!strcmp(field, "b"))
+			B = Clamp(255 * Script::ToNumber(1), 0, 255);
+		break;
+	case 'g':
+		if (!strcmp(field, "g"))
+			G = Clamp(255 * Script::ToNumber(1), 0, 255);
+		break;
+	case 'r':
+		if (!strcmp(field, "r"))
+			R = Clamp(255 * Script::ToNumber(1), 0, 255);
+		break;
+	}
+}
+
+int NodeAttachment::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'c':
+		if (!strcmp(field, "cutoff"))
+		{
+			Script::PushInteger(cutoff);
+			return 1;
+		}
+		break;
+	case 'o':
+		if (!strcmp(field, "offX"))
+		{
+			Script::PushInteger(offX);
+			return 1;
+		}
+		if (!strcmp(field, "offY"))
+		{
+			Script::PushInteger(offY);
+			return 1;
+		}
+		if (!strcmp(field, "offZ"))
+		{
+			Script::PushInteger(offZ);
+			return 1;
+		}
+		break;
+	case 'r':
+		if (!strcmp(field, "random"))
+		{
+			Script::PushInteger(random);
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+void NodeAttachment::NewIndex(const char* field)
+{
+	switch (field[0])
+	{
+	case 'c':
+		if (!strcmp(field, "cutoff"))
+			cutoff = Clamp(Script::ToInteger(1), 0, 32767);
+		break;
+	case 'o':
+		if (!strcmp(field, "offX"))
+			offX = Script::ToInteger(1);
+		else if (!strcmp(field, "offY"))
+			offY = Script::ToInteger(1);
+		else if (!strcmp(field, "offZ"))
+			offZ = Script::ToInteger(1);
+		break;
+	case 'r':
+		if (!strcmp(field, "random"))
+			random = Clamp(Script::ToInteger(1), 0, 32767);
+		break;
+	}
+}
+
+int ParticleGroup::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'b':
+		if (!strcmp(field, "blendingMode"))
+		{
+			Script::PushInteger(blendingMode);
+			return 1;
+		}
+		break;
+	case 'l':
+		if (!strcmp(field, "lineIgnoreVel"))
+		{
+			Script::PushBoolean(LineIgnoreVel);
+			return 1;
+		}
+		break;
+	case 'n':
+		if (!strcmp(field, "noPerspective"))
+		{
+			Script::PushBoolean(NoPerspective);
+			return 1;
+		}
+		break;
+	case 's':
+		if (!strcmp(field, "saved"))
+		{
+			Script::PushBoolean(Saved);
+			return 1;
+		}
+		if (!strcmp(field, "spriteSlot"))
+		{
+			Script::PushInteger(spriteSlot);
+			return 1;
+		}
+		break;
+	case 'w':
+		if (!strcmp(field, "windAffected"))
+		{
+			Script::PushBoolean(WindAffected);
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+void ParticleGroup::NewIndex(const char* field)
+{
+	if (ParticleFactory::caller != FUNCTION_LIBRARY)
+		return;
+	switch (field[0])
+	{
+	case 'b':
+		if (!strcmp(field, "blendingMode"))
+			blendingMode = Clamp(Script::ToInteger(1), 0, 13);
+		break;
+	case 'l':
+		if (!strcmp(field, "lineIgnoreVel"))
+			LineIgnoreVel = Script::ToBoolean(1);
+		break;
+	case 'n':
+		if (!strcmp(field, "noPerspective"))
+			NoPerspective = Script::ToBoolean(1);
+		break;
+	case 's':
+		if (!strcmp(field, "saved"))
+			Saved = Script::ToBoolean(1);
+		else if (!strcmp(field, "spriteSlot"))
+		{
+			spriteSlot = Script::ToInteger(1);
+			if (spriteSlot != SLOT_DEFAULT_SPRITES && spriteSlot != SLOT_MISC_SPRITES && spriteSlot != SLOT_CUSTOM_SPRITES)
+				spriteSlot = SLOT_DEFAULT_SPRITES;
+		}
+		break;
+	case 'w':
+		if (!strcmp(field, "windAffected"))
+			WindAffected = Script::ToBoolean(1);
+		break;
+	}
+}
 
 // ************  namespace ParticleFactory  ****************
 
@@ -7,7 +343,9 @@ namespace ParticleFactory
 {
 	int nextPart;
 	Particle parts[MAX_PARTS];
+	int nextPartGroup;
 	ParticleGroup partGroups[MAX_PARTGROUPS];
+	FunctionType caller;
 };
 
 
@@ -22,7 +360,7 @@ int ParticleFactory::GetFreeParticle()
 		{
 			nextPart = (free + 1) % MAX_PARTS;
 
-			ClearMemory(&parts[free], sizeof(Particle));
+			parts[free] = Particle();
 			parts[free].emitterIndex = -1;
 			parts[free].emitterNode = -1;
 			return free;
@@ -55,24 +393,49 @@ int ParticleFactory::GetFreeParticle()
 
 	nextPart = (free + 1) % MAX_PARTS;
 
-	ClearMemory(&parts[free], sizeof(Particle));
+	parts[free] = Particle();
 	parts[free].emitterIndex = -1;
 	parts[free].emitterNode = -1;
 	return free;
 }
 
+int ParticleFactory::GetFreeParticleGroup()
+{
+	int free;
+
+	free = nextPartGroup;
+	if (free < MAX_PARTGROUPS)
+	{
+		nextPartGroup++;
+		partGroups[free] = ParticleGroup();
+		partGroups[free].groupIndex = free;
+		partGroups[free].blendingMode = 2;
+		partGroups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
+		return free;
+	}
+	return -1;
+}
 
 void ParticleFactory::ClearParts()
 {
-	ClearMemory(parts, sizeof(Particle) * MAX_PARTS);
+	for (int i = 0; i < MAX_PARTS; i++)
+		parts[i] = Particle();
 	nextPart = 0;
 }
 
+void ParticleFactory::ClearPartGroups()
+{
+	for (int i = 0; i < MAX_PARTGROUPS; i++)
+		partGroups[i] = ParticleGroup();
+	nextPartGroup = 0;
+}
 
 void ParticleFactory::UpdateParts()
 {
 	Particle* part = &ParticleFactory::parts[0];
 
+	ParticleFactory::caller = FUNCTION_UPDATE;
+	Script::PreFunctionLoop();
 	for (int i = 0; i < MAX_PARTS; ++i, ++part)
 	{
 		if (part->lifeCounter <= 0)
@@ -105,7 +468,7 @@ void ParticleFactory::UpdateParts()
 		t = part->Parameter();
 		part->sizeCust = Round(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
 
-		part->UpdateParticle(pgroup.updateIndex);
+		Script::ExecuteFunction(pgroup.updateIndex, part);
 		
 		part->vel += part->accel;
 		part->pos += part->vel;
@@ -113,6 +476,7 @@ void ParticleFactory::UpdateParts()
 
 		--part->lifeCounter;
 	}
+	Script::PostFunctionLoop();
 }
 
 
@@ -130,6 +494,8 @@ void ParticleFactory::DrawParts()
 	{
 		if (part->lifeCounter <= 0)
 			continue;
+
+		Diagnostics::activeParticles++;
 
 		auto partPos = part->ParticleAbsPos();
 
@@ -222,8 +588,214 @@ void ParticleFactory::DrawParts()
 	phd_PopMatrix();
 }
 
+void ParticleFactory::InitParts()
+{
+	ParticleFactory::caller = FUNCTION_INIT;
+	Script::PreFunctionLoop();
+	for (int i = 0; i < nextPartGroup; i++)
+		Script::ExecuteFunction(partGroups[i].initIndex, nullptr);
+	Script::PostFunctionLoop();
+}
+
+void ParticleFactory::InitPartGroups()
+{
+	ParticleFactory::caller = FUNCTION_LIBRARY;
+	Script::PreFunctionLoop();
+	Script::LoadFunctions("EffectsLibrary.lua");
+	Script::PostFunctionLoop();
+}
 
 // ************  Particle public methods  ****************
+
+int Particle::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'a':
+		if (!strcmp(field, "accel"))
+		{
+			Script::PushData(&accel);
+			return 1;
+		}
+		break;
+	case 'c':
+		if (!strcmp(field, "colCust"))
+		{
+			Script::PushData(&colCust);
+			return 1;
+		}
+		if (!strcmp(field, "colEnd"))
+		{
+			Script::PushData(&colEnd);
+			return 1;
+		}
+		if (!strcmp(field, "colStart"))
+		{
+			Script::PushData(&colStart);
+			return 1;
+		}
+		if (!strcmp(field, "colorFadeTime"))
+		{
+			Script::PushInteger(colorFadeTime);
+			return 1;
+		}
+		break;
+	case 'e':
+		if (!strcmp(field, "emitterIndex"))
+		{
+			Script::PushInteger(emitterIndex);
+			return 1;
+		}
+		if (!strcmp(field, "emitterNode"))
+		{
+			Script::PushInteger(emitterNode);
+			return 1;
+		}
+		break;
+	case 'f':
+		if (!strcmp(field, "fadeIn"))
+		{
+			Script::PushInteger(fadeIn);
+			return 1;
+		}
+		if (!strcmp(field, "fadeOut"))
+		{
+			Script::PushInteger(fadeOut);
+			return 1;
+		}
+		break;
+	case 'l':
+		if (!strcmp(field, "lifeCounter"))
+		{
+			Script::PushInteger(lifeCounter);
+			return 1;
+		}
+		if (!strcmp(field, "lifeSpan"))
+		{
+			Script::PushInteger(lifeSpan);
+			return 1;
+		}
+		break;
+	case 'p':
+		if (!strcmp(field, "pos"))
+		{
+			Script::PushData(&pos);
+			return 1;
+		}
+		break;
+	case 'r':
+		if (!strcmp(field, "roomIndex"))
+		{
+			Script::PushInteger(roomIndex);
+			return 1;
+		}
+		if (!strcmp(field, "rot"))
+		{
+			Script::PushNumber(ShortToRad(rot));
+			return 1;
+		}
+		if (!strcmp(field, "rotVel"))
+		{
+			Script::PushNumber(ShortToRad(rotVel));
+			return 1;
+		}
+		break;
+	case 's':
+		if (!strcmp(field, "sizeCust"))
+		{
+			Script::PushInteger(sizeCust);
+			return 1;
+		}
+		if (!strcmp(field, "sizeEnd"))
+		{
+			Script::PushInteger(sizeEnd);
+			return 1;
+		}
+		if (!strcmp(field, "sizeStart"))
+		{
+			Script::PushInteger(sizeStart);
+			return 1;
+		}
+		if (!strcmp(field, "spriteIndex"))
+		{
+			Script::PushInteger(spriteIndex);
+			return 1;
+		}
+		break;
+	case 'v':
+		if (!strcmp(field, "vel"))
+		{
+			Script::PushData(&vel);
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+void Particle::NewIndex(const char* field)
+{
+	if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
+		return;
+	switch (field[0])
+	{
+	case 'c':
+		if (!strcmp(field, "colorFadeTime"))
+			colorFadeTime = Clamp(Script::ToInteger(1), -32768, 32767);
+		break;
+	case 'e':
+		if (!strcmp(field, "emitterIndex"))
+		{
+			emitterIndex = Clamp(Script::ToInteger(1), -1, level_items - 1);
+			if (emitterIndex != -1)
+				emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+			else
+				emitterNode = -1;
+		}
+		else if (!strcmp(field, "emitterNode"))
+		{
+			if (emitterIndex != -1)
+				emitterNode = Clamp(Script::ToInteger(1), -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+		}
+		break;
+	case 'f':
+		if (!strcmp(field, "fadeIn"))
+			fadeIn = Clamp(Script::ToInteger(1), 0, 255);
+		else if (!strcmp(field, "fadeOut"))
+			fadeOut = Clamp(Script::ToInteger(1), 0, 255);
+		break;
+	case 'l':
+		if (!strcmp(field, "lifeCounter"))
+			lifeCounter = Clamp(Script::ToInteger(1), 0, lifeSpan);
+		else if (!strcmp(field, "lifeSpan"))
+		{
+			lifeSpan = Clamp(Script::ToInteger(1), 0, 32767);
+			lifeCounter = Clamp(lifeCounter, 0, lifeSpan);
+		}
+		break;
+	case 'r':
+		if (!strcmp(field, "roomIndex"))
+		{
+			if (ParticleFactory::caller == FUNCTION_INIT)
+				roomIndex = Clamp(Script::ToInteger(1), 0, number_rooms);
+		}
+		else if (!strcmp(field, "rot"))
+			rot = RadToShort(Script::ToNumber(1));
+		else if (!strcmp(field, "rotVel"))
+			rotVel = RadToShort(Script::ToNumber(1));
+		break;
+	case 's':
+		if (!strcmp(field, "sizeCust"))
+			sizeCust = Clamp(Script::ToInteger(1), 0, 65535);
+		else if (!strcmp(field, "sizeEnd"))
+			sizeEnd = Clamp(Script::ToInteger(1), 0, 65535);
+		else if (!strcmp(field, "sizeStart"))
+			sizeStart = Clamp(Script::ToInteger(1), 0, 65535);
+		else if (!strcmp(field, "spriteIndex"))
+			spriteIndex = Clamp(Script::ToInteger(1), 0, 255);
+		break;
+	}
+}
 
 float Particle::Parameter()
 {
@@ -459,14 +1031,6 @@ bool Particle::ParticleHoming(Tr4ItemInfo* item, int targetNode, float homingFac
 
 	return true;
 }
-
-
-// stub for effect updating function
-void Particle::UpdateParticle(int updateIndex)
-{
-
-}
-
 
 void Particle::DrawParticle(const ParticleGroup& pgroup, long* const view, long smallest_size)
 {

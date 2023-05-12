@@ -1,4 +1,52 @@
-#include "vector3f.h"
+#include "..\definitions\includes.h"
+
+int Vector3f::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'x':
+		if (!strcmp(field, "x"))
+		{
+			Script::PushNumber(x);
+			return 1;
+		}
+		break;
+	case 'y':
+		if (!strcmp(field, "y"))
+		{
+			Script::PushNumber(y);
+			return 1;
+		}
+		break;
+	case 'z':
+		if (!strcmp(field, "z"))
+		{
+			Script::PushNumber(z);
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+void Vector3f::NewIndex(const char* field)
+{
+	switch (field[0])
+	{
+	case 'x':
+		if (!strcmp(field, "x"))
+			x = Script::ToNumber(1);
+		break;
+	case 'y':
+		if (!strcmp(field, "y"))
+			y = Script::ToNumber(1);
+		break;
+	case 'z':
+		if (!strcmp(field, "z"))
+			z = Script::ToNumber(1);
+		break;
+	}
+}
 
 Vector3f Vector3f::operator- () const
 {

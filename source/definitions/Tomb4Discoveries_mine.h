@@ -21,6 +21,7 @@ typedef void (__cdecl *TYPE_TriggerShockwave)(phd_vector *pos, int outer_rad_inn
 typedef void (__cdecl *TYPE_TriggerBlood)(int x, int y, int z, int direction, int speed);
 typedef void (__cdecl *TYPE_UpdateBeetles)(void);
 typedef void (__cdecl *TYPE_UpdateFish)(void);
+typedef void (__cdecl *TYPE_UpdateLightning)(void);
 
 typedef void (__cdecl *TYPE_S_DrawSparks)(void);
 typedef void (__cdecl *TYPE_S_DrawSplashes)(void);
@@ -29,6 +30,7 @@ typedef void (__cdecl *TYPE_DrawBeetles)(void);
 typedef void (__cdecl *TYPE_DrawRopeList)(void);
 typedef void (__cdecl *TYPE_DrawBubbles)(void);
 typedef void (__cdecl *TYPE_DrawDebris)(void);
+typedef void (__cdecl *TYPE_DrawLightning)(void);
 
 typedef void (__cdecl *TYPE_setXY4) (D3DTLVERTEX* v, long x1, long y1, long x2, long y2, long x3, long y3, long x4, long y4, long z, short* clip);
 typedef long (__cdecl *TYPE_ClipLine) (long& x1, long& y1, long z1, long& x2, long& y2, long z2, long xmin, long ymin, long xmax, long ymax);
@@ -48,6 +50,7 @@ extern TYPE_TriggerShockwave TriggerShockwave;
 extern TYPE_TriggerBlood TriggerBlood;
 extern TYPE_UpdateBeetles UpdateBeetles;
 extern TYPE_UpdateFish UpdateFish;
+extern TYPE_UpdateLightning UpdateLightning;
 
 extern TYPE_S_DrawSparks S_DrawSparks;
 extern TYPE_S_DrawSplashes S_DrawSplashes;
@@ -56,6 +59,7 @@ extern TYPE_DrawBeetles DrawBeetles;
 extern TYPE_DrawRopeList DrawRopeList;
 extern TYPE_DrawBubbles DrawBubbles;
 extern TYPE_DrawDebris DrawDebris;
+extern TYPE_DrawLightning DrawLightning;
 
 extern TYPE_setXY4 setXY4;
 extern TYPE_ClipLine ClipLine;

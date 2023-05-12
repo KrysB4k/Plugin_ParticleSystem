@@ -7,6 +7,8 @@
 #include "..\definitions\macros.h"  // definition of macros
 #include "..\trng\trng.h" // list of trng functions imported from trng.cpp source. 
 
+#include <script.h>
+
 #include "..\definitions\constants_mine.h"
 #include "..\definitions\structures_mine.h"
 #include "..\definitions\Tomb4Discoveries_mine.h"
@@ -15,5 +17,3 @@
 #include "..\particles\vector3f.h"
 #include "..\particles\particle.h"
 #include "..\particles\utilities.h"
-
-#include <script.h>
