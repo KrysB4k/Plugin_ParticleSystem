@@ -143,9 +143,13 @@ struct Particle : public LuaObject
 	void		ParticleAttach(int itemIndex, int node);
 	void		ParticleDeattach();
 	bool		ParticleCollideWalls(float rebound);
-	bool		ParticleCollideFloors(float rebound, float friction, bool accurate);
+	bool		ParticleCollideFloors(float rebound, float minBounce, int collMargin, bool accurate);
 	Vector3f	ParticleFollow(const Vector3f& v, float factor, float maxSpeed);
 	bool		ParticleHoming(Tr4ItemInfo *item, int targetNode, float homingFactor, float homingAccel, bool predict);
+
+	Vector3f	BoidSeparationRule(float radius, float factor);
+	Vector3f	BoidCohesionRule(float radius, float factor);
+	Vector3f	BoidAlignmentRule(float radius, float factor);
 
 	void		DrawParticle(const ParticleGroup& pgroup, long* const view, long smallest_size);
 };

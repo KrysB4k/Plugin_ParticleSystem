@@ -8,25 +8,21 @@ short GetOrientDiff(short sourceOrient, short targetOrient);
 
 float Lerp(float a, float b, float t);
 
-Vector3f Lerp(const Vector3f& a, const Vector3f& b, float t);
-
 float InverseLerp(float val1, float val2, float x);
 
 float SimpleDist(const Vector3f& v1, const Vector3f& v2);
+
+int CheckDistFast(const Vector3f& v1, const Vector3f& v2, float dist);
 
 float RealDist(const Vector3f& v1, const Vector3f& v2);
 
 ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t);
 
-ColorRGB RandomColor(int RedRange, int GreenRange, int BlueRange);
-
-ColorRGB AddColors(const ColorRGB& C1, const ColorRGB& C2, bool overflow);
-
 ColorRGB HSLtoRGB(float hue, float sat, float light);
 
-bool TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask);
+long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask);
 
-Tr4ItemInfo* FindNearestTarget(const Vector3f& posTest, short* const slotList, float range);
+int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList);
 
 Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff);
 
@@ -37,6 +33,8 @@ int TestForWall(int x, int y, int z, short* room);
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z);
 
 int Clamp(int x, int min, int max);
+
+float Clamp(float x, float min, float max);
 
 float ShortToRad(short rotation);
 

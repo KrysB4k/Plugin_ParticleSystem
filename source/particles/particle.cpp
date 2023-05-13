@@ -75,27 +75,45 @@ int LuaBridge::Call(const char* function)
 
 	switch (function[0])
 	{
+	case 'b':
+		if (!strcmp(function, "boidAlignment"))
+		{
+			auto part = dynamic_cast<Particle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+			float radius = Script::ToNumber(2);
+			float factor = Script::ToNumber(3);
+			part->vel += part->BoidAlignmentRule(radius, factor);
+			return 0;
+		}
+		if (!strcmp(function, "boidCohesion"))
+		{
+			auto part = dynamic_cast<Particle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+			float radius = Script::ToNumber(2);
+			float factor = Script::ToNumber(3);
+			part->vel += part->BoidCohesionRule(radius, factor);
+			return 0;
+		}
+		if (!strcmp(function, "boidSeparation"))
+		{
+			auto part = dynamic_cast<Particle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+			float radius = Script::ToNumber(2);
+			float factor = Script::ToNumber(3);
+			part->vel += part->BoidSeparationRule(radius, factor);
+			return 0;
+		}
+		break;
 	case 'c':
 		if (!strcmp(function, "cos"))
 		{
 			Script::PushNumber(cosf(Script::ToNumber(1)));
 			return 1;
 		}
-		break;
-	case 'g':
-		if (!strcmp(function, "getFreeParticle"))
-		{
-			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
-				return 0;
-			group = dynamic_cast<ParticleGroup*>((LuaObject*)Script::ToData(1));
-			if (!group)
-				return Script::TypeError(1, "ParticleGroup");
-			i = ParticleFactory::GetFreeParticle();
-			ParticleFactory::parts[i].groupIndex = group->groupIndex;
-			Script::PushData(&ParticleFactory::parts[i]);
-			return 1;
-		}
-		if (!strcmp(function, "getFreeParticleGroup"))
+		if (!strcmp(function, "createGroup"))
 		{
 			if (ParticleFactory::caller != FUNCTION_LIBRARY)
 				return 0;
@@ -109,11 +127,95 @@ int LuaBridge::Call(const char* function)
 			Script::PushData(&ParticleFactory::partGroups[i]);
 			return 1;
 		}
+		if (!strcmp(function, "createParticle"))
+		{
+			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
+				return 0;
+			group = dynamic_cast<ParticleGroup*>((LuaObject*)Script::ToData(1));
+			if (!group)
+				return Script::TypeError(1, "ParticleGroup");
+			i = ParticleFactory::GetFreeParticle();
+			ParticleFactory::parts[i].groupIndex = group->groupIndex;
+			Script::PushData(&ParticleFactory::parts[i]);
+			return 1;
+		}
+		break;
+	case 'g':
+		if (!strcmp(function, "getTombIndex"))
+		{
+			Script::PushInteger(FromNgleIndexToTomb4Index(Script::ToInteger(1)));
+			return 1;
+		}
+		if (!strcmp(function, "getLaraIndex"))
+		{
+			Script::PushInteger(*Trng.pGlobTomb4->pAdr->pLaraIndex);
+			return 1;
+		}
+		if (!strcmp(function, "getItemRoom"))
+		{
+			int index = Script::ToInteger(1);
+			if (index >= 0 && index < level_items)
+			{
+				auto item = &items[index];
+				Script::PushInteger(item->room_number);
+				return 1;
+			}
+			return 0;
+		}
 		break;
 	case 'p':
 		if (!strcmp(function, "print"))
 		{
 			Script::Print();
+			return 0;
+		}
+		if (!strcmp(function, "particleCollideFloors"))
+		{
+			auto part = dynamic_cast<Particle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+			float rebound = Script::ToNumber(2);
+			float minbounce = Script::ToNumber(3);
+			int margin = Script::ToInteger(4);
+			bool accurate = Script::ToBoolean(5);
+			Script::PushBoolean(part->ParticleCollideFloors(rebound, minbounce, margin, accurate));
+			return 1;
+		}
+		if (!strcmp(function, "particleCollideWalls"))
+		{
+			auto part = dynamic_cast<Particle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+			float rebound = Script::ToNumber(2);
+			Script::PushBoolean(part->ParticleCollideWalls(rebound));
+			return 1;
+		}
+		if (!strcmp(function, "particleHoming"))
+		{
+			auto part = dynamic_cast<Particle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+			int index = Script::ToInteger(2);
+			int node = Script::ToInteger(3);
+			float factor = Script::ToNumber(4);
+			float accel = Script::ToNumber(5);
+			bool predict = Script::ToBoolean(6);
+
+			if (index >= 0 && index < level_items)
+			{
+				auto item = &items[index];
+				part->ParticleHoming(item, node, factor, accel, predict);
+			}
+			
+			return 0;
+		}
+		if (!strcmp(function, "particleLimitSpeed"))
+		{
+			auto part = dynamic_cast<Particle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+			float speedMax = Script::ToNumber(2);
+			part->ParticleLimitSpeed(speedMax);
 			return 0;
 		}
 		break;
@@ -179,15 +281,15 @@ void ColorRGB::NewIndex(const char* field)
 	{
 	case 'b':
 		if (!strcmp(field, "b"))
-			B = Clamp(255 * Script::ToNumber(1), 0, 255);
+			B = Clamp(int(255 * Script::ToNumber(1)), 0, 255);
 		break;
 	case 'g':
 		if (!strcmp(field, "g"))
-			G = Clamp(255 * Script::ToNumber(1), 0, 255);
+			G = Clamp(int(255 * Script::ToNumber(1)), 0, 255);
 		break;
 	case 'r':
 		if (!strcmp(field, "r"))
-			R = Clamp(255 * Script::ToNumber(1), 0, 255);
+			R = Clamp(int(255 * Script::ToNumber(1)), 0, 255);
 		break;
 	}
 }
@@ -443,6 +545,22 @@ void ParticleFactory::UpdateParts()
 
 		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
 
+		if (part->emitterIndex >= 0 || part->emitterNode >= 0)
+		{
+			int cutoff = -1;
+			// particle attachment cutoff 
+			if (pgroup.attach.cutoff > 0)
+			{
+				cutoff = pgroup.attach.cutoff;
+				if (pgroup.attach.random > 1)
+					cutoff += (GetRandomDraw() % pgroup.attach.random);
+			}
+
+			if ((part->lifeSpan - part->lifeCounter) > cutoff)
+				part->ParticleDeattach();
+		}
+
+
 		int fadetime = part->lifeSpan;
 		int lifefactor = (part->lifeSpan - part->lifeCounter);
 
@@ -457,12 +575,7 @@ void ParticleFactory::UpdateParts()
 				fadetime = part->colorFadeTime;
 		}
 
-		float t = lifefactor/float(fadetime);
-		if (t < 0.0f)
-			t = 0.0f;
-		if (t > 1.0f)
-			t = 1.0f;
-
+		float t = Clamp(lifefactor / float(fadetime), 0.0f, 1.0f);
 		part->colCust = Lerp(part->colStart, part->colEnd, t);
 
 		t = part->Parameter();
@@ -504,21 +617,6 @@ void ParticleFactory::DrawParts()
 		z1 = Round(partPos.z);
 
 		const auto &pgroup = ParticleFactory::partGroups[part->groupIndex];
-
-		if (part->emitterIndex >= 0 || part->emitterNode >= 0)
-		{
-			int cutoff = -1;
-			// particle attachment cutoff 
-			if (pgroup.attach.cutoff > 0)
-			{
-				cutoff = pgroup.attach.cutoff;
-				if (pgroup.attach.random > 1)
-					cutoff += (GetRandomDraw() % pgroup.attach.random);
-			}
-
-			if ((part->lifeSpan - part->lifeCounter) > cutoff)
-				part->ParticleDeattach();
-		}
 
 		x1 -= lara_item->pos.xPos;
 		y1 -= lara_item->pos.yPos;
@@ -775,10 +873,7 @@ void Particle::NewIndex(const char* field)
 		break;
 	case 'r':
 		if (!strcmp(field, "roomIndex"))
-		{
-			if (ParticleFactory::caller == FUNCTION_INIT)
-				roomIndex = Clamp(Script::ToInteger(1), 0, number_rooms);
-		}
+			roomIndex = Clamp(Script::ToInteger(1), 0, number_rooms - 1);
 		else if (!strcmp(field, "rot"))
 			rot = RadToShort(Script::ToNumber(1));
 		else if (!strcmp(field, "rotVel"))
@@ -919,64 +1014,91 @@ void Particle::ParticleDeattach()
 
 bool Particle::ParticleCollideWalls(float rebound)
 {
-	if (rebound < 0)
-		rebound = 1.0f;
-
-	auto testp = Round(pos + vel);
-
-	short tRoom = roomIndex;
-	int wallStatus = TestForWall(testp.x, testp.y, testp.z, &tRoom);
-	if (roomIndex != tRoom)
-		roomIndex = tRoom;
-
-	if (wallStatus)
+	if (emitterIndex < 0 && emitterNode < 0)
 	{
-		if (TestForWall(Round(pos.x), testp.y, testp.z, &tRoom))
-			vel.z = -(vel.z * rebound);
-		if (TestForWall(testp.x, testp.y, Round(pos.z), &tRoom))
-			vel.x = -(vel.x * rebound);
+		if (rebound < 0)
+			rebound = 1.0f;
 
-		return true;
+		auto testp = Round(pos + vel);
+		auto p = Round(pos);
+
+		if ((p.x >> 10) != (testp.x >> 10) || (p.z >> 10) != (testp.z >> 10))
+		{
+			short tRoom = roomIndex;
+			int wallCurrentPos = TestForWall(p.x, p.y, p.z, &tRoom);
+
+			if (roomIndex != tRoom)
+				roomIndex = tRoom;
+
+			if (!wallCurrentPos)
+			{
+				bool wallCollision = false;
+
+				if (TestForWall(p.x, p.y, testp.z, &tRoom))
+				{
+					vel.z = -(vel.z * rebound);
+					wallCollision = true;
+				}
+				if (TestForWall(testp.x, p.y, p.z, &tRoom))
+				{
+					vel.x = -(vel.x * rebound);
+					wallCollision = true;
+				}
+
+				return wallCollision;
+			}
+		}
 	}
 
 	return false;
 }
 
 
-bool Particle::ParticleCollideFloors(float rebound, float friction, bool accurate)
+bool Particle::ParticleCollideFloors(float rebound, float minBounce, int collMargin, bool accurate)
 {
-	auto testp = Round(pos + vel);
-	short tRoom = roomIndex;
-
-	Tr4FloorInfo* floor = (Tr4FloorInfo*) GetFloor(testp.x, testp.y, testp.z, &tRoom);
-	int fh = GetHeight(floor, testp.x, testp.y, testp.z);
-	int ch = GetCeiling(floor, testp.x, testp.y, testp.z);
-	if (roomIndex != tRoom)
-		roomIndex = tRoom;
-
-	if (rebound < 0)
-		rebound = 1.0f;
-
-	if (fh != (-0x7F00) && (testp.y > fh || testp.y < ch))
+	if (emitterIndex < 0 && emitterNode < 0)
 	{
-		if (friction > 0)
+		if (rebound < 0)
+			rebound = 1.0f;
+
+		auto testp = Round(pos + vel);
+		short tRoom = roomIndex;
+
+		Tr4FloorInfo* floor = (Tr4FloorInfo*)GetFloor(testp.x, testp.y, testp.z, &tRoom);
+
+		if (roomIndex != tRoom)
+			roomIndex = tRoom;
+
+		int height = GetHeight(floor, testp.x, testp.y, testp.z);
+		int fh = height - collMargin;
+		int ch = GetCeiling(floor, testp.x, testp.y, testp.z);
+
+		if (height != (-0x7F00) && (testp.y >= fh || testp.y <= ch))
 		{
-			vel.x *= friction;
-			vel.z *= friction;
+			if (abs(vel.y) > minBounce)
+			{
+				if (testp.y > fh && accurate)
+				{
+					auto n = GetSlopeNormal(floor, testp.x, testp.y, testp.z);
+
+					// get reflection vector off slope surface
+					auto reflected = vel - (n * vel.dot(n) * 2);
+					vel = reflected * rebound;
+				}
+				else
+					vel.y = -(vel.y * rebound);
+
+			}
+			else if (testp.y >= fh)
+				pos.y = fh;
+
+			if (pos.y > fh)
+				pos.y = fh;
+			else if (pos.y < ch)
+				pos.y = ch;
+
+			return true;
 		}
-
-		if (testp.y > fh && accurate)
-		{
-			auto n = GetSlopeNormal(floor, testp.x, testp.y, testp.z);
-
-			// get reflection vector off slope surface
-			auto reflected = vel - (n * vel.dot(n) * 2);
-			vel = reflected * rebound;
-		}
-		else
-			vel.y = -(vel.y * rebound);
-
-		return true;
 	}
 
 	return false;
@@ -998,11 +1120,7 @@ bool Particle::ParticleHoming(Tr4ItemInfo* item, int targetNode, float homingFac
 	if (!item)
 		return false;
 
-	short meshnum = objects[item->object_number].nmeshes;
-	if (targetNode < 0)
-		targetNode = GetRandomControl() % meshnum; // target random node on object
-	else
-		targetNode = (targetNode >= meshnum) ? (meshnum-1) : targetNode;
+	targetNode = Clamp(targetNode, 0, objects[item->object_number].nmeshes);
 
 	auto targetPos = GetJointPos(item, targetNode, 0, 0, 0);
 
@@ -1011,7 +1129,7 @@ bool Particle::ParticleHoming(Tr4ItemInfo* item, int targetNode, float homingFac
 		float s = sin(RAD(item->pos.yRot));
 		float c = cos(RAD(item->pos.yRot));
 
-		Vector3f heading(item->speed * s, item->fallspeed,  item->speed * c);
+		Vector3f heading(item->speed * s, item->fallspeed, item->speed * c);
 
 		float time = RealDist(pos, targetPos) / vel.magnitude();
 
@@ -1020,17 +1138,110 @@ bool Particle::ParticleHoming(Tr4ItemInfo* item, int targetNode, float homingFac
 
 	auto dir = (targetPos - pos).normalized();
 
-	if (homingFactor < 0.0f)
+	if (homingFactor < 0)
 	{
 		dir = -dir;
 		homingFactor = -homingFactor;
 	}
-		
+
 	auto slerpVel = vel.normalized().slerp(dir, homingFactor);
 	vel = slerpVel * (vel.magnitude() + homingAccel);
 
 	return true;
 }
+
+
+Vector3f Particle::BoidSeparationRule(float radius, float factor)
+{
+	Vector3f v;
+
+	for (int i = 0; i < MAX_PARTS; ++i)
+	{
+		auto part = &ParticleFactory::parts[i];
+		if (part->lifeCounter <= 0 || part == this)
+			continue;
+
+		if (part->groupIndex != groupIndex)
+			continue;
+
+		if (SimpleDist(pos, part->pos) < radius)
+		{
+			if (CheckDistFast(pos, part->pos, radius) < 0)
+				v -= (part->pos - pos);
+		}
+	}
+
+	return v * factor;
+}
+
+
+Vector3f Particle::BoidCohesionRule(float radius, float factor)
+{
+	Vector3f v;
+
+	int neighbors = 0;
+	for (int i = 0; i < MAX_PARTS; ++i)
+	{
+		auto part = &ParticleFactory::parts[i];
+		if (part->lifeCounter <= 0 || part == this)
+			continue;
+
+		if (part->groupIndex != groupIndex)
+			continue;
+
+		if (SimpleDist(pos, part->pos) < radius)
+		{
+			if (CheckDistFast(pos, part->pos, radius) < 0)
+			{
+				v += part->pos;
+				++neighbors;
+			}
+		}
+	}
+
+	if (neighbors)
+	{
+		v *= (1.0f / neighbors);
+		v = (v - pos) * factor;
+	}
+
+	return v;
+}
+
+
+Vector3f Particle::BoidAlignmentRule(float radius, float factor)
+{
+	Vector3f v;
+
+	int neighbors = 0;
+	for (int i = 0; i < MAX_PARTS; ++i)
+	{
+		auto part = &ParticleFactory::parts[i];
+		if (part->lifeCounter <= 0 || part == this)
+			continue;
+
+		if (part->groupIndex != groupIndex)
+			continue;
+
+		if (SimpleDist(pos, part->pos) < radius)
+		{
+			if (CheckDistFast(pos, part->pos, radius) < 0)
+			{
+				v += part->vel;
+				++neighbors;
+			}
+		}
+	}
+
+	if (neighbors)
+	{
+		v *= (1.0f / neighbors);
+		v = (v - vel) * factor;
+	}
+
+	return v;
+}
+
 
 void Particle::DrawParticle(const ParticleGroup& pgroup, long* const view, long smallest_size)
 {

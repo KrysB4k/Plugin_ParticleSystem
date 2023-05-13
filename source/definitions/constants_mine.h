@@ -12,7 +12,7 @@
 // type here the constant name for new progressive action you create
 // use progressive number to have always different value for each AXN_ constant/action
 
-#define MAX_PARTS 2048
+#define MAX_PARTS 8192
 #define MAX_PARTGROUPS 256
 #define MAX_PROJECTILES 256
 #define MAX_MESHES 32

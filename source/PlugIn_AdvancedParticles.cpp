@@ -37,6 +37,7 @@ StrMyData MyData;
 void Patch_00()
 {
 	UpdateLightning();
+	Diagnostics::initTime = Diagnostics::Time(ParticleFactory::InitParts);
 	Diagnostics::updateTime = Diagnostics::Time(ParticleFactory::UpdateParts);
 }
 
@@ -519,7 +520,7 @@ void cbParametersMine(WORD ParameterValue, int NumberOfItems, short *pItemArray)
 // this procedure will be called every game cycle (at begin of cycle)
 void cbCycleBegin(void)
 {
-	Diagnostics::initTime = Diagnostics::Time(ParticleFactory::InitParts);
+
 }
 
 // Not yet linked! To link it add to RequireMyCallBacks() function the row:

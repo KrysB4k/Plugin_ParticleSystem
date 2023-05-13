@@ -63,6 +63,21 @@ float SimpleDist(const Vector3f &v1, const Vector3f &v2)
 }
 
 
+int CheckDistFast(const Vector3f& v1, const Vector3f& v2, float dist)
+{
+	auto vdif = v2 - v1;
+	float vdifsqr = (vdif.x * vdif.x + vdif.y * vdif.y + vdif.z * vdif.z);
+	float distsqr = dist * dist;
+
+	if (vdifsqr < distsqr)
+		return -1;
+	else if (vdifsqr > distsqr)
+		return 1;
+
+	return 0;
+}
+
+
 float RealDist(const Vector3f& v1, const Vector3f& v2)
 {
 	return (v1 - v2).magnitude();
@@ -79,48 +94,25 @@ ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t)
 }
 
 
-ColorRGB RandomColor(int RedRange, int GreenRange, int BlueRange)
-{
-	uchar r = (RedRange > 0) ? (GetRandomControl() % RedRange) : 0;
-	uchar g = (GreenRange > 0) ? (GetRandomControl() % GreenRange) : 0;
-	uchar b = (BlueRange > 0) ? (GetRandomControl() % BlueRange) : 0;
-	return ColorRGB(r, g, b);
-}
-
-
-ColorRGB AddColors(const ColorRGB& C1, const ColorRGB& C2, bool overflow)
-{
-	int r = C1.R + C2.R;
-	int g = C1.G + C2.G;
-	int b = C1.B + C2.B;
-
-	if (!overflow)
-	{
-		r = (r > 255) ? 255 : r;
-		g = (g > 255) ? 255 : g;
-		b = (b > 255) ? 255 : b;
-	}
-
-	return ColorRGB(r&255, g&255, b&255);
-}
-
-
 ColorRGB HSLtoRGB(float hue, float sat, float light)
 {
-	hue = fmod(hue, 360.0f);
-	if (sat < 0)
-		sat = 0.0f;
-	else if (sat > 1)
-		sat = 1.0f;
-	if (light < 0)
-		light = 0.0f;
-	else if (light > 1)
-		light = 1.0f;
+	hue = fmodf(hue, 360.0f);
+	if (hue < 0)
+		hue += 360.0f;
+
+	sat = Clamp(sat, 0.f, 1.f);
+	light = Clamp(light, 0.f, 1.f);
+
+	if (sat <= 0.f)
+	{
+		int v = Round(light * 255);
+		return ColorRGB(v, v, v);
+	}
 
 	int hextant = int(hue / 60.0f);
 	float fhue = (hue - hextant * 60.0f) / 60.0f;
 
-	float chroma = (1 - abs(2*light - 1)) * sat;
+	float chroma = (1 - abs(2 * light - 1)) * sat;
 	float xval = chroma * (1 - abs(fmod(hextant + fhue, 2.0f) - 1));
 	float m = light - chroma / 2;
 	float r = 0;
@@ -167,9 +159,9 @@ ColorRGB HSLtoRGB(float hue, float sat, float light)
 }
 
 
-bool TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask)
+long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask)
 {
-	int flags = 0;
+	long flags = 0;
 	int num = 0;
 
 	if (item)
@@ -193,28 +185,29 @@ bool TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned l
 		}
 	}
 
-	return (flags & bitMask) ? true : false;
+	return flags;
 }
 
 
-Tr4ItemInfo* FindNearestTarget(const Vector3f& posTest, short* const slotList, float range)
+int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList)
 {
+	int itemIndex = -1;
 	int nearest = 0x7FFFFFFF;
-	Tr4ItemInfo* ret = nullptr;
 
-	for (int i = 0; i < Trng.pGlobTomb4->pAdr->TotItemsMax; ++i)
+	for (int i = 0; i < level_items; ++i)
 	{
 		auto item = &items[i];
 
 		bool slotCheck = false;
 		const short* slotIter = slotList;
 
-		if (*slotIter == 0x7FFF)
+		if (*slotIter == -1)
 		{
 			if (objects[item->object_number].intelligent &&
 				item->object_number != SLOT_GUIDE &&
-				item->object_number != SLOT_VON_CROY)
+				item->object_number != SLOT_VON_CROY) {
 				slotCheck = true;
+			}
 		}
 		else
 		{
@@ -236,19 +229,17 @@ Tr4ItemInfo* FindNearestTarget(const Vector3f& posTest, short* const slotList, f
 
 			Vector3f target(item->pos.xPos, item->pos.yPos, item->pos.zPos);
 
-			if (SimpleDist(posTest, target) < range)
+			int dist = Round(SimpleDist(posTest, target));
+			if (dist < radius && dist < nearest)
 			{
-				int dist = Round(RealDist(posTest, target));
-				if (dist < nearest)
-				{
-					ret = item;
-					nearest = dist;
-				}
+				nearest = dist;
+				radius = dist;
+				itemIndex = i;
 			}
 		}
 	}
 
-	return ret;
+	return itemIndex;
 }
 
 
@@ -299,6 +290,17 @@ Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 }
 
 int Clamp(int x, int min, int max)
+{
+	if (x < min)
+		return min;
+
+	if (x > max)
+		return max;
+
+	return x;
+}
+
+float Clamp(float x, float min, float max)
 {
 	if (x < min)
 		return min;
