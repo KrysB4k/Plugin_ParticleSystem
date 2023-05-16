@@ -296,6 +296,24 @@ struct Tr4AnimStruct
 }; // 28
 
 
+struct MeshSphere
+{
+	int x, y, z;
+	int r;
+};
+
+
+struct Tr4ShatterItem
+{
+	MeshSphere sphere;
+	void* il;
+	short* meshp;
+	long bit;
+	short yRot;
+	short flags;
+};
+
+
 struct D3DTLVERTEX
 {
 	float sx;
@@ -337,13 +355,6 @@ struct SpriteStruct
 	float y1;	//top
 	float x2;	//right
 	float y2;	//bottom
-};
-
-
-struct MeshSphere
-{
-	int x, y, z;
-	int r;
 };
 
 

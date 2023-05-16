@@ -24,10 +24,7 @@ short GetOrientDiff(short sourceOrient, short targetOrient)
 
 float Lerp(float a, float b, float t)
 {
-	if (t > 1.0f)
-		t = 1.0f;
-	else if (t < 0.0f)
-		t = 0.0f;
+	t = Clamp(t, 0.0f, 1.0f);
 
 	return a + t*(b-a);
 }
@@ -37,12 +34,7 @@ float InverseLerp(float val1, float val2, float x)
 {
 	float t = (x - val1) / (val2 - val1);
 
-		if (t < 0.0f)
-			t = 0.0f;
-		else if (t > 1.0f)
-			t = 1.0f;
-
-	return t;
+	return Clamp(t, 0.0f, 1.0f);
 }
 
 
@@ -100,10 +92,10 @@ ColorRGB HSLtoRGB(float hue, float sat, float light)
 	if (hue < 0)
 		hue += 360.0f;
 
-	sat = Clamp(sat, 0.f, 1.f);
-	light = Clamp(light, 0.f, 1.f);
+	sat = Clamp(sat, 0.0f, 1.0f);
+	light = Clamp(light, 0.0f, 1.0f);
 
-	if (sat <= 0.f)
+	if (sat <= 0)
 	{
 		int v = Round(light * 255);
 		return ColorRGB(v, v, v);
@@ -245,16 +237,44 @@ int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotLi
 
 Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff)
 {
+	static const uchar lara_joint_map[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 8 };
+
 	phd_vector v(xOff, yOff, zOff);
 
 	if (!item->object_number)
-		GetLaraJointPos(&v, joint);
+		GetLaraJointPos(&v, lara_joint_map[joint]);
 	else
 		GetJointAbsPosition((StrItemTr4*)item, (StrMovePosition*)&v, joint);
 
 	return Vector3f(v.x, v.y, v.z);
 }
 
+
+Vector3f RotatePoint3D(const Vector3f& point, short xrot, short yrot, short zrot)
+{
+	Vector3f res;
+
+	phd_PushUnitMatrix();
+	phd_RotYXZ(yrot, xrot, zrot);
+
+	res.x = (phd_mxptr[M00] * point.x + phd_mxptr[M01] * point.y + phd_mxptr[M02] * point.z) * (1.0f / 16384);
+	res.y = (phd_mxptr[M10] * point.x + phd_mxptr[M11] * point.y + phd_mxptr[M12] * point.z) * (1.0f / 16384);
+	res.z = (phd_mxptr[M20] * point.x + phd_mxptr[M21] * point.y + phd_mxptr[M22] * point.z) * (1.0f / 16384);
+
+	phd_PopMatrix();
+
+	return res;
+}
+
+
+Vector3f SphericalToCartesian(float r, float theta, float phi)
+{
+	phi += float(M_PI_2);
+	float x = r * sin(phi) * sin(theta);
+	float z = r * sin(phi) * cos(theta);
+	float y = r * cos(phi);
+	return Vector3f(x, -y, z);
+}
 
 // should not be available in Lua
 int TestForWall(int x, int y, int z, short* room)
@@ -275,7 +295,6 @@ int TestForWall(int x, int y, int z, short* room)
 	return 1; // Wall
 }
 
-
 // should not be available in Lua
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 {
@@ -288,6 +307,66 @@ Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 
 	return Vector3f(float(-tilt_x), -4.0f, float(-tilt_z)).normalized();
 }
+
+
+Vector3f Spline(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
+{
+	auto a = v1 * 2;
+	auto b = (-v0 + v2) * t;
+	auto c = (v0 * 2 - v1 * 5 + v2 * 4 - v3) * (t * t);
+	auto d = (-v0 + v1 * 3 - v2 * 3 + v3) * (t * t * t);
+
+	return (a + b + c + d) * 0.5f;
+}
+
+
+Vector3f SplineStart(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto a = v0 * 2;
+	auto b = (-v0 * 3 + v1 * 4 - v2) * t;
+	auto c = (v0 - v1 * 2 + v2) * (t * t);
+
+	return (a + b + c) * 0.5f;
+}
+
+
+Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto a = v1 * 2;
+	auto b = (-v0 + v2) * t;
+	auto c = (v0 - v1 * 2 + v2) * (t * t);
+
+	return (a + b + c) * 0.5f;
+}
+
+
+Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
+{
+	auto b = (-v0 + v2);
+	auto c = (v0 * 2 - v1 * 5 + v2 * 4 - v3) * 2 * t;
+	auto d = (-v0 + v1 * 3 - v2 * 3 + v3) * 3 * (t * t);
+
+	return (b + c + d) * 0.5f;
+}
+
+
+Vector3f SplineStartDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto b = (-v0 * 3 + v1 * 4 - v2);
+	auto c = (v0 - v1 * 2 + v2) * 2 * t;
+
+	return (b + c) * 0.5f;
+}
+
+
+Vector3f SplineEndDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto b = (-v0 + v2);
+	auto c = (v0 - v1 * 2 + v2) * 2 * t;
+
+	return (b + c) * 0.5f;
+}
+
 
 int Clamp(int x, int min, int max)
 {

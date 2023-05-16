@@ -15,5 +15,6 @@
 #include "..\definitions\Tomb4Globals.h"
 #include "..\definitions\macros_mine.h"
 #include "..\particles\vector3f.h"
+#include "..\particles\perlin.h"
 #include "..\particles\particle.h"
 #include "..\particles\utilities.h"

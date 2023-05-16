@@ -12,11 +12,12 @@
 // type here the constant name for new progressive action you create
 // use progressive number to have always different value for each AXN_ constant/action
 
-#define MAX_PARTS 8192
+#define MAX_SPRITEPARTS 4096
+#define MAX_MESHPARTS 1024
 #define MAX_PARTGROUPS 256
-#define MAX_PROJECTILES 256
 #define MAX_MESHES 32
 
+#define MAX_DRAWDIST 20480
 #define HALF_ANGLE 32768
 
 // MPS_ flags

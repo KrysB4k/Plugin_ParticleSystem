@@ -26,11 +26,27 @@ int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotLi
 
 Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff);
 
+Vector3f RotatePoint3D(const Vector3f& point, short xrot, short yrot, short zrot);
+
+Vector3f SphericalToCartesian(float r, float theta, float phi);
+
 // should not be available in Lua
 int TestForWall(int x, int y, int z, short* room);
 
 // should not be available in Lua
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z);
+
+Vector3f Spline(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t);
+
+Vector3f SplineStart(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
+
+Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
+
+Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t);
+
+Vector3f SplineStartDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
+
+Vector3f SplineEndDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
 
 int Clamp(int x, int min, int max);
 

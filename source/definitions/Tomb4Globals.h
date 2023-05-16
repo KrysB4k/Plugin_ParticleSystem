@@ -37,6 +37,11 @@
 
 #define wibble (*(long*)0x4BF238)
 
+#define GlobalAlpha (*(long*)0x4AB7B8)
+
+#define SmokeWindX (*(long*)0x804D40)
+#define SmokeWindZ (*(long*)0x804D44)
+
 #define rcossin_tbl ((short*)(0x4B34D0))
 
 #define camera ((Tr4CameraInfo*)0x7FE700)

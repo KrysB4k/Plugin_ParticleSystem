@@ -84,6 +84,7 @@
     <ClCompile Include="definitions\DefTomb4Funct.cpp" />
     <ClCompile Include="definitions\Tomb4Discoveries_mine.cpp" />
     <ClCompile Include="particles\particle.cpp" />
+    <ClCompile Include="particles\perlin.cpp" />
     <ClCompile Include="particles\utilities.cpp" />
     <ClCompile Include="particles\vector3f.cpp" />
     <ClCompile Include="PlugIn_AdvancedParticles.cpp" />
@@ -101,6 +102,7 @@
     <ClInclude Include="definitions\Tomb4Discoveries_mine.h" />
     <ClInclude Include="definitions\Tomb4Globals.h" />
     <ClInclude Include="particles\particle.h" />
+    <ClInclude Include="particles\perlin.h" />
     <ClInclude Include="particles\utilities.h" />
     <ClInclude Include="particles\vector3f.h" />
     <ClInclude Include="resource.h" />
