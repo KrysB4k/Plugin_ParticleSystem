@@ -1067,7 +1067,11 @@ bool BaseParticle::CollideFloors(float rebound, float minBounce, int collMargin,
 
 			}
 			else if (testp.y >= fh)
+			{
 				pos.y = fh;
+				vel.y = 0;
+			}
+				
 
 			if (pos.y > fh)
 				pos.y = fh;
@@ -1513,7 +1517,7 @@ Vector3f SpriteParticle::BoidSeparationRule(float radius, float factor)
 
 		if (SimpleDist(pos, part->pos) < radius)
 		{
-			if (CheckDistFast(pos, part->pos, radius))
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 				v -= (part->pos - pos);
 		}
 	}
@@ -1538,7 +1542,7 @@ Vector3f SpriteParticle::BoidCohesionRule(float radius, float factor)
 
 		if (SimpleDist(pos, part->pos) < radius)
 		{
-			if (CheckDistFast(pos, part->pos, radius))
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
 				v += part->pos;
 				++neighbors;
@@ -1572,7 +1576,7 @@ Vector3f SpriteParticle::BoidAlignmentRule(float radius, float factor)
 
 		if (SimpleDist(pos, part->pos) < radius)
 		{
-			if (CheckDistFast(pos, part->pos, radius))
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
 				v += part->vel;
 				++neighbors;
@@ -1908,7 +1912,7 @@ Vector3f MeshParticle::BoidSeparationRule(float radius, float factor)
 
 		if (SimpleDist(pos, part->pos) < radius)
 		{
-			if (CheckDistFast(pos, part->pos, radius))
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 				v -= (part->pos - pos);
 		}
 	}
@@ -1933,7 +1937,7 @@ Vector3f MeshParticle::BoidCohesionRule(float radius, float factor)
 
 		if (SimpleDist(pos, part->pos) < radius)
 		{
-			if (CheckDistFast(pos, part->pos, radius))
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
 				v += part->pos;
 				++neighbors;
@@ -1967,7 +1971,7 @@ Vector3f MeshParticle::BoidAlignmentRule(float radius, float factor)
 
 		if (SimpleDist(pos, part->pos) < radius)
 		{
-			if (CheckDistFast(pos, part->pos, radius))
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
 				v += part->vel;
 				++neighbors;
