@@ -42,6 +42,25 @@ struct ColorRGB : public LuaObject
 	virtual void NewIndex(const char* field) override;
 };
 
+struct Vector3s : public LuaObject
+{
+	short x, y, z;
+
+	Vector3s() : x(0), y(0), z(0) {}
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
+
+struct Vector3i : public LuaObject
+{
+	int x, y, z;
+
+	Vector3i() : x(16384), y(16384), z(16384) {}
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
 
 enum TetherType
 {
@@ -59,7 +78,7 @@ enum DrawMode
 };
 
 
-struct NodeAttachment : LuaObject
+struct NodeAttachment : public LuaObject
 {
 	TetherType tether;
 	short cutoff, random;
@@ -72,7 +91,7 @@ struct NodeAttachment : LuaObject
 
 // ************  ParticleGroup struct  ****************
 
-struct ParticleGroup : LuaObject
+struct ParticleGroup : public LuaObject
 {
 	int initIndex;
 	int updateIndex;
@@ -100,7 +119,7 @@ struct ParticleGroup : LuaObject
 
 // ************  Particle structs  ****************
 
-struct BaseParticle : LuaObject
+struct BaseParticle : public LuaObject
 {
 	// fields
 	Vector3f	pos;
@@ -138,6 +157,10 @@ struct BaseParticle : LuaObject
 	virtual Vector3f BoidSeparationRule(float radius, float factor) = 0;
 	virtual Vector3f BoidCohesionRule(float radius, float factor) = 0;
 	virtual Vector3f BoidAlignmentRule(float radius, float factor) = 0;
+
+	// lua integration
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 };
 
 
@@ -181,17 +204,9 @@ struct SpriteParticle : BaseParticle
 struct MeshParticle : BaseParticle
 {
 	// fields
-	short		rotX;
-	short		rotY;
-	short		rotZ;
-
-	short		rotVelX;
-	short		rotVelY;
-	short		rotVelZ;
-
-	char		scaleX;
-	char		scaleY;
-	char		scaleZ;
+	Vector3s	rot;
+	Vector3s	rotVel;
+	Vector3i	scale;
 
 	short		object;
 	uchar		mesh;

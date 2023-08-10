@@ -130,7 +130,19 @@ int LuaBridge::Call(const char* function)
 			Script::PushData(&ParticleFactory::partGroups[i]);
 			return 1;
 		}
-		if (!strcmp(function, "createParticle"))
+		if (!strcmp(function, "createMeshPart"))
+		{
+			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
+				return 0;
+			group = dynamic_cast<ParticleGroup*>((LuaObject*)Script::ToData(1));
+			if (!group)
+				return Script::TypeError(1, "ParticleGroup");
+			i = ParticleFactory::GetFreeMeshPart();
+			ParticleFactory::meshParts[i].groupIndex = group->groupIndex;
+			Script::PushData(&ParticleFactory::meshParts[i]);
+			return 1;
+		}
+		if (!strcmp(function, "createSpritePart"))
 		{
 			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
 				return 0;
@@ -308,6 +320,102 @@ void ColorRGB::NewIndex(const char* field)
 	}
 }
 
+int Vector3s::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'x':
+		if (!strcmp(field, "x"))
+		{
+			Script::PushNumber(ShortToRad(x));
+			return 1;
+		}
+		break;
+	case 'y':
+		if (!strcmp(field, "y"))
+		{
+			Script::PushNumber(ShortToRad(y));
+			return 1;
+		}
+		break;
+	case 'z':
+		if (!strcmp(field, "z"))
+		{
+			Script::PushNumber(ShortToRad(z));
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+void Vector3s::NewIndex(const char* field)
+{
+	switch (field[0])
+	{
+	case 'x':
+		if (!strcmp(field, "x"))
+			x = RadToShort(Script::ToNumber(1));
+		break;
+	case 'y':
+		if (!strcmp(field, "y"))
+			y = RadToShort(Script::ToNumber(1));
+		break;
+	case 'z':
+		if (!strcmp(field, "z"))
+			z = RadToShort(Script::ToNumber(1));
+		break;
+	}
+}
+
+int Vector3i::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'x':
+		if (!strcmp(field, "x"))
+		{
+			Script::PushNumber((float)x / 16384);
+			return 1;
+		}
+		break;
+	case 'y':
+		if (!strcmp(field, "y"))
+		{
+			Script::PushNumber((float)y / 16384);
+			return 1;
+		}
+		break;
+	case 'z':
+		if (!strcmp(field, "z"))
+		{
+			Script::PushNumber((float)z / 16384);
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+void Vector3i::NewIndex(const char* field)
+{
+	switch (field[0])
+	{
+	case 'x':
+		if (!strcmp(field, "x"))
+			x = Clamp(int(16384 * Script::ToNumber(1)), 0, INT_MAX);
+		break;
+	case 'y':
+		if (!strcmp(field, "y"))
+			y = Clamp(int(16384 * Script::ToNumber(1)), 0, INT_MAX);
+		break;
+	case 'z':
+		if (!strcmp(field, "z"))
+			z = Clamp(int(16384 * Script::ToNumber(1)), 0, INT_MAX);
+		break;
+	}
+}
+
 int NodeAttachment::Index(const char* field)
 {
 	switch (field[0])
@@ -410,26 +518,42 @@ void ParticleGroup::NewIndex(const char* field)
 	{
 	case 'b':
 		if (!strcmp(field, "blendingMode"))
+		{
 			blendingMode = Clamp(Script::ToInteger(1), 0, 13);
+			return;
+		}
 		break;
 	case 'd':
 		if (!strcmp(field, "drawMode"))
+		{
 			drawMode = static_cast<DrawMode>(Clamp(Script::ToInteger(1), 0, 3));
+			return;
+		}
 		break;
 	case 'l':
 		if (!strcmp(field, "lineIgnoreVel"))
+		{
 			LineIgnoreVel = Script::ToBoolean(1);
+			return;
+		}
 		break;
 	case 's':
 		if (!strcmp(field, "saved"))
+		{
 			Saved = Script::ToBoolean(1);
-		else if (!strcmp(field, "screenSpace"))
+			return;
+		}
+		if (!strcmp(field, "screenSpace"))
+		{
 			ScreenSpace = Script::ToBoolean(1);
-		else if (!strcmp(field, "spriteSlot"))
+			return;
+		}
+		if (!strcmp(field, "spriteSlot"))
 		{
 			spriteSlot = Script::ToInteger(1);
 			if (spriteSlot != SLOT_DEFAULT_SPRITES && spriteSlot != SLOT_MISC_SPRITES && spriteSlot != SLOT_CUSTOM_SPRITES)
 				spriteSlot = SLOT_DEFAULT_SPRITES;
+			return;
 		}
 		break;
 	}
@@ -690,9 +814,9 @@ void ParticleFactory::UpdateMeshes()
 
 		part->vel += part->accel;
 		part->pos += part->vel;
-		part->rotX += part->rotVelX;
-		part->rotY += part->rotVelY;
-		part->rotZ += part->rotVelZ;
+		part->rot.x += part->rotVel.x;
+		part->rot.y += part->rotVel.y;
+		part->rot.z += part->rotVel.z;
 
 		--part->lifeCounter;
 	}
@@ -861,6 +985,8 @@ void ParticleFactory::DrawMeshes()
 	{
 		if (part->lifeCounter > 0)
 		{
+			Diagnostics::activeMeshParticles++;
+
 			if (part->object >= 0 && objects[part->object].loaded)
 				part->DrawMeshPart();
 		}
@@ -888,6 +1014,119 @@ void ParticleFactory::InitPartGroups()
 
 
 // ************ Base Particle methods  ****************
+
+int BaseParticle::Index(const char* field)
+{
+	switch (field[0])
+	{
+	case 'a':
+		if (!strcmp(field, "accel"))
+		{
+			Script::PushData(&accel);
+			return 1;
+		}
+		break;
+	case 'e':
+		if (!strcmp(field, "emitterIndex"))
+		{
+			Script::PushInteger(emitterIndex);
+			return 1;
+		}
+		if (!strcmp(field, "emitterNode"))
+		{
+			Script::PushInteger(emitterNode);
+			return 1;
+		}
+		break;
+	case 'l':
+		if (!strcmp(field, "lifeCounter"))
+		{
+			Script::PushInteger(lifeCounter);
+			return 1;
+		}
+		if (!strcmp(field, "lifeSpan"))
+		{
+			Script::PushInteger(lifeSpan);
+			return 1;
+		}
+		break;
+	case 'p':
+		if (!strcmp(field, "pos"))
+		{
+			Script::PushData(&pos);
+			return 1;
+		}
+	case 'r':
+		if (!strcmp(field, "roomIndex"))
+		{
+			Script::PushInteger(roomIndex);
+			return 1;
+		}
+		break;
+	case 't':
+		if (!strcmp(field, "t"))
+		{
+			Script::PushNumber(Parameter());
+			return 1;
+		}
+		break;
+	case 'v':
+		if (!strcmp(field, "vel"))
+		{
+			Script::PushData(&vel);
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
+
+void BaseParticle::NewIndex(const char* field)
+{
+	if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
+		return;
+	switch (field[0])
+	{
+	case 'e':
+		if (!strcmp(field, "emitterIndex"))
+		{
+			emitterIndex = Clamp(Script::ToInteger(1), -1, level_items - 1);
+			if (emitterIndex != -1)
+				emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+			else
+				emitterNode = -1;
+			return;
+		}
+		if (!strcmp(field, "emitterNode"))
+		{
+			if (emitterIndex != -1)
+				emitterNode = Clamp(Script::ToInteger(1), -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+			return;
+		}
+		break;
+	case 'l':
+		if (!strcmp(field, "lifeCounter"))
+		{
+			lifeCounter = Clamp(Script::ToInteger(1), 0, lifeSpan);
+			return;
+		}
+		if (!strcmp(field, "lifeSpan"))
+		{
+			lifeSpan = Clamp(Script::ToInteger(1), 0, 32767);
+			lifeCounter = Clamp(lifeCounter, 0, lifeSpan);
+			return;
+		}
+		break;
+	case 'r':
+		if (!strcmp(field, "roomIndex"))
+		{
+			roomIndex = Clamp(Script::ToInteger(1), 0, number_rooms - 1);
+			return;
+		}
+		break;
+	}
+}
 
 float BaseParticle::Parameter()
 {
@@ -1283,13 +1522,6 @@ int SpriteParticle::Index(const char* field)
 {
 	switch (field[0])
 	{
-	case 'a':
-		if (!strcmp(field, "accel"))
-		{
-			Script::PushData(&accel);
-			return 1;
-		}
-		break;
 	case 'c':
 		if (!strcmp(field, "colCust"))
 		{
@@ -1312,18 +1544,6 @@ int SpriteParticle::Index(const char* field)
 			return 1;
 		}
 		break;
-	case 'e':
-		if (!strcmp(field, "emitterIndex"))
-		{
-			Script::PushInteger(emitterIndex);
-			return 1;
-		}
-		if (!strcmp(field, "emitterNode"))
-		{
-			Script::PushInteger(emitterNode);
-			return 1;
-		}
-		break;
 	case 'f':
 		if (!strcmp(field, "fadeIn"))
 		{
@@ -1336,30 +1556,7 @@ int SpriteParticle::Index(const char* field)
 			return 1;
 		}
 		break;
-	case 'l':
-		if (!strcmp(field, "lifeCounter"))
-		{
-			Script::PushInteger(lifeCounter);
-			return 1;
-		}
-		if (!strcmp(field, "lifeSpan"))
-		{
-			Script::PushInteger(lifeSpan);
-			return 1;
-		}
-		break;
-	case 'p':
-		if (!strcmp(field, "pos"))
-		{
-			Script::PushData(&pos);
-			return 1;
-		}
 	case 'r':
-		if (!strcmp(field, "roomIndex"))
-		{
-			Script::PushInteger(roomIndex);
-			return 1;
-		}
 		if (!strcmp(field, "rot"))
 		{
 			Script::PushNumber(ShortToRad(rot));
@@ -1398,22 +1595,8 @@ int SpriteParticle::Index(const char* field)
 			return 1;
 		}
 		break;
-	case 't':
-		if (!strcmp(field, "t"))
-		{
-			Script::PushNumber(Parameter());
-			return 1;
-		}
-		break;
-	case 'v':
-		if (!strcmp(field, "vel"))
-		{
-			Script::PushData(&vel);
-			return 1;
-		}
-		break;
 	}
-	return 0;
+	return BaseParticle::Index(field);
 }
 
 
@@ -1425,59 +1608,64 @@ void SpriteParticle::NewIndex(const char* field)
 	{
 	case 'c':
 		if (!strcmp(field, "colorFadeTime"))
+		{
 			colorFadeTime = Clamp(Script::ToInteger(1), -32768, 32767);
-		break;
-	case 'e':
-		if (!strcmp(field, "emitterIndex"))
-		{
-			emitterIndex = Clamp(Script::ToInteger(1), -1, level_items - 1);
-			if (emitterIndex != -1)
-				emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
-			else
-				emitterNode = -1;
-		}
-		else if (!strcmp(field, "emitterNode"))
-		{
-			if (emitterIndex != -1)
-				emitterNode = Clamp(Script::ToInteger(1), -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+			return;
 		}
 		break;
 	case 'f':
 		if (!strcmp(field, "fadeIn"))
-			fadeIn = Clamp(Script::ToInteger(1), 0, 255);
-		else if (!strcmp(field, "fadeOut"))
-			fadeOut = Clamp(Script::ToInteger(1), 0, 255);
-		break;
-	case 'l':
-		if (!strcmp(field, "lifeCounter"))
-			lifeCounter = Clamp(Script::ToInteger(1), 0, lifeSpan);
-		else if (!strcmp(field, "lifeSpan"))
 		{
-			lifeSpan = Clamp(Script::ToInteger(1), 0, 32767);
-			lifeCounter = Clamp(lifeCounter, 0, lifeSpan);
+			fadeIn = Clamp(Script::ToInteger(1), 0, 255);
+			return;
+		}
+		if (!strcmp(field, "fadeOut"))
+		{
+			fadeOut = Clamp(Script::ToInteger(1), 0, 255);
+			return;
 		}
 		break;
 	case 'r':
-		if (!strcmp(field, "roomIndex"))
-			roomIndex = Clamp(Script::ToInteger(1), 0, number_rooms - 1);
-		else if (!strcmp(field, "rot"))
+		if (!strcmp(field, "rot"))
+		{
 			rot = RadToShort(Script::ToNumber(1));
-		else if (!strcmp(field, "rotVel"))
+			return;
+		}
+		if (!strcmp(field, "rotVel"))
+		{
 			rotVel = RadToShort(Script::ToNumber(1));
+			return;
+		}
 		break;
 	case 's':
 		if (!strcmp(field, "sizeCust"))
+		{
 			sizeCust = Clamp(Script::ToInteger(1), 0, 65535);
-		else if (!strcmp(field, "sizeEnd"))
+			return;
+		}
+		if (!strcmp(field, "sizeEnd"))
+		{
 			sizeEnd = Clamp(Script::ToInteger(1), 0, 65535);
-		else if (!strcmp(field, "sizeStart"))
+			return;
+		}
+		if (!strcmp(field, "sizeStart"))
+		{
 			sizeStart = Clamp(Script::ToInteger(1), 0, 65535);
-		else if (!strcmp(field, "skew"))
+			return;
+		}
+		if (!strcmp(field, "skew"))
+		{
 			skew = Clamp(Round(Script::ToNumber(1) * 32768), -32768, 32767);
-		else if (!strcmp(field, "spriteIndex"))
+			return;
+		}
+		if (!strcmp(field, "spriteIndex"))
+		{
 			spriteIndex = Clamp(Script::ToInteger(1), 0, 255);
+			return;
+		}
 		break;
 	}
+	BaseParticle::NewIndex(field);
 }
 
 
@@ -1799,13 +1987,88 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 
 int MeshParticle::Index(const char* field)
 {
-	return 0;
+	switch (field[0])
+	{
+	case 'm':
+		if (!strcmp(field, "mesh"))
+		{
+			Script::PushInteger(mesh);
+			return 1;
+		}
+		break;
+	case 'o':
+		if (!strcmp(field, "object"))
+		{
+			Script::PushInteger(object);
+			return 1;
+		}
+		break;
+	case 'r':
+		if (!strcmp(field, "rot"))
+		{
+			Script::PushData(&rot);
+			return 1;
+		}
+		if (!strcmp(field, "rotVel"))
+		{
+			Script::PushData(&rotVel);
+			return 1;
+		}
+		break;
+	case 's':
+		if (!strcmp(field, "scale"))
+		{
+			Script::PushData(&scale);
+			return 1;
+		}
+		break;
+	case 't':
+		if (!strcmp(field, "transparency"))
+		{
+			Script::PushInteger(transparency);
+			return 1;
+		}
+		if (!strcmp(field, "tint"))
+		{
+			Script::PushData(&tint);
+			return 1;
+		}
+		break;
+	}
+	return BaseParticle::Index(field);
 }
 
 
 void MeshParticle::NewIndex(const char* field)
 {
-
+	if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
+		return;
+	switch (field[0])
+	{
+	case 'm':
+		if (!strcmp(field, "mesh"))
+		{
+			mesh = Clamp(Script::ToInteger(1), 0, objects[object].nmeshes - 1);
+			return;
+		}
+		break;
+	case 'o':
+		if (!strcmp(field, "object"))
+		{
+			object = Clamp(Script::ToInteger(1), 0, SLOT_NUMBER_OBJECTS - 1);
+			mesh = Clamp(mesh, 0, objects[object].nmeshes - 1);
+			return;
+		}
+		break;
+	case 't':
+		if (!strcmp(field, "transparency"))
+		{
+			transparency = Clamp(Script::ToInteger(1), 0, 255);
+			return;
+		}
+		break;
+	}
+	BaseParticle::NewIndex(field);
 }
 
 
@@ -1843,13 +2106,13 @@ void MeshParticle::AlignToVel(float factor, bool invert)
 		phi += float(M_PI);
 	}
 
-	int dy = GetOrientDiff(rotY, ANG(phi));
-	int dx = GetOrientDiff(rotX, ANG(theta));
+	int dy = GetOrientDiff(rot.y, ANG(phi));
+	int dx = GetOrientDiff(rot.x, ANG(theta));
 
 	factor = Clamp(factor, 0.0f, 1.0f);
 
-	rotVelY = Round(dy * factor);
-	rotVelX = Round(dx * factor);
+	rotVel.y = Round(dy * factor);
+	rotVel.x = Round(dx * factor);
 }
 
 
@@ -1867,13 +2130,13 @@ void MeshParticle::AlignToTarget(const Vector3f& v, float factor, bool invert)
 		phi += float(M_PI);
 	}
 
-	int dy = GetOrientDiff(rotY, ANG(phi));
-	int dx = GetOrientDiff(rotX, ANG(theta));
+	int dy = GetOrientDiff(rot.y, ANG(phi));
+	int dx = GetOrientDiff(rot.x, ANG(theta));
 
 	factor = Clamp(factor, 0.0f, 1.0f);
 
-	rotVelY = Round(dy * factor);
-	rotVelX = Round(dx * factor);
+	rotVel.y = Round(dy * factor);
+	rotVel.x = Round(dx * factor);
 }
 
 
@@ -1887,7 +2150,7 @@ void MeshParticle::Shatter()
 	ShatterItem.sphere.x = p.x;
 	ShatterItem.sphere.y = p.y;
 	ShatterItem.sphere.z = p.z;
-	ShatterItem.yRot = rotY;
+	ShatterItem.yRot = rot.y;
 
 	ShatterItem.bit = 0;
 	ShatterItem.flags = 0;
@@ -2012,15 +2275,11 @@ void MeshParticle::DrawMeshPart()
 
 	if (phd_mxptr[M23] > phd_znear && phd_mxptr[M23] < phd_zfar)
 	{
-		phd_RotYXZ(rotY, rotX, rotZ);
+		phd_RotYXZ(rot.y, rot.x, rot.z);
 
-		if (scaleX || scaleY || scaleZ)
+		if (scale.x != 16384 || scale.y != 16384 || scale.z != 16384)
 		{
-			int sx = (scaleX + 128) << 7;
-			int sy = (scaleY + 128) << 7;
-			int sz = (scaleZ + 128) << 7;
-
-			StrTripla sVect = { sx, sy, sz };
+			StrTripla sVect = { scale.x, scale.y, scale.z };
 
 			ScaleCurrentMatrix(&sVect);
 		}
