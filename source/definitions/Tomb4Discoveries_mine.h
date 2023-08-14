@@ -22,6 +22,7 @@ typedef long (__cdecl *TYPE_GetFrames) (Tr4ItemInfo* item, short** frm, long* ra
 
 typedef void (__cdecl *TYPE_UpdateLightning)(void);
 typedef void (__cdecl *TYPE_DrawLightning)(void);
+typedef void (__cdecl* TYPE_S_DrawSparks)(void);
 
 typedef void (__cdecl *TYPE_setXY4) (D3DTLVERTEX* v, long x1, long y1, long x2, long y2, long x3, long y3, long x4, long y4, long z, short* clip);
 typedef void (__cdecl *TYPE_setXYZ4) (D3DTLVERTEX* v, long x1, long y1, long z1, long x2, long y2, long z2, long x3, long y3, long z3, long x4, long y4, long z4, short* clip);
@@ -45,6 +46,7 @@ extern TYPE_GetFrames GetFrames;
 
 extern TYPE_UpdateLightning UpdateLightning;
 extern TYPE_DrawLightning DrawLightning;
+extern TYPE_S_DrawSparks S_DrawSparks;
 
 extern TYPE_setXY4 setXY4;
 extern TYPE_setXYZ4 setXYZ4;

@@ -44,7 +44,7 @@ void Patch_00()
 
 void Patch_01()
 {
-	DrawLightning();
+	S_DrawSparks();
 	Diagnostics::drawTime = Diagnostics::Time(ParticleFactory::DrawParts);
 	Diagnostics::SetPeaks();
 	Diagnostics::Print();
@@ -62,7 +62,7 @@ int Patch_UpdateParts(void)
 
 int Patch_DrawParts(void)
 {
-	static DWORD VetOffset[]={0x44E8E7};
+	static DWORD VetOffset[]={0x44E863};
 
 	return ApplyCallPatch(VetOffset, 1, (DWORD)Patch_01);
 }

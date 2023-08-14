@@ -468,6 +468,13 @@ int ParticleGroup::Index(const char* field)
 {
 	switch (field[0])
 	{
+	case 'a':
+		if (!strcmp(field, "attach"))
+		{
+			Script::PushData(&attach);
+			return 1;
+		}
+		break;
 	case 'b':
 		if (!strcmp(field, "blendingMode"))
 		{

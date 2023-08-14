@@ -13,6 +13,7 @@ TYPE_GetFrames GetFrames = (TYPE_GetFrames) 0x450450;
 
 TYPE_UpdateLightning UpdateLightning = (TYPE_UpdateLightning) 0x43A910;
 TYPE_DrawLightning DrawLightning = (TYPE_DrawLightning) 0x48B760;
+TYPE_S_DrawSparks S_DrawSparks = (TYPE_S_DrawSparks) 0x439B40;
 
 TYPE_setXY4 setXY4 = (TYPE_setXY4) 0x483420;
 TYPE_setXYZ3 setXYZ3 = (TYPE_setXYZ3) 0x483BD0;
