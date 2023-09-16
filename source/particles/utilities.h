@@ -57,3 +57,5 @@ float ShortToRad(short rotation);
 short RadToShort(float angle);
 
 float GetRandom();
+
+ushort ConvertTo16BitBGR(ColorRGB c);

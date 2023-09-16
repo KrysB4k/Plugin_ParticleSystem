@@ -139,6 +139,15 @@ int LuaBridge::Call(const char* function)
 				return Script::TypeError(1, "ParticleGroup");
 			i = ParticleFactory::GetFreeMeshPart();
 			ParticleFactory::meshParts[i].groupIndex = group->groupIndex;
+			Tr4ItemInfo* item = &ParticleFactory::meshParts[i].item;
+			item->il.fcnt = -1;
+			item->il.room_number = -1;
+			item->il.RoomChange = 0;
+			item->il.nCurrentLights = 0;
+			item->il.nPrevLights = 0;
+			item->il.ambient = -1;
+			item->il.pCurrentLights = item->il.CurrentLights;
+			item->il.pPrevLights = item->il.PrevLights;
 			Script::PushData(&ParticleFactory::meshParts[i]);
 			return 1;
 		}
@@ -2299,9 +2308,24 @@ void MeshParticle::DrawMeshPart()
 		if (transparency)
 			GlobalAlpha = (255 - transparency) << 24;
 
+		item.pos.xPos = pos.x;
+		item.pos.yPos = pos.y;
+		item.pos.zPos = pos.z;
+		item.pos.xRot = rot.x;
+		item.pos.yRot = rot.y;
+		item.pos.zRot = rot.z;
+		item.room_number = roomIndex;
 
-		/* TODO: allow static as well as dynamic lighting for meshparts */
+		Tr4MeshData* meshData = (Tr4MeshData*)*meshpp;
 
+		if (meshData->prelight)
+			item.shade = ConvertTo16BitBGR(tint);
+		else
+			item.shade = -1;
+
+		short frame[6] = { 0, 0, 0, 0, 0, 0 };
+
+		CalculateObjectLighting(&item, frame);
 
 		phd_PutPolygons(*meshpp, -1);
 		GlobalAlpha = oldAlpha;

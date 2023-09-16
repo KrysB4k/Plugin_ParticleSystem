@@ -404,3 +404,11 @@ float GetRandom()
 {
 	return (float)rand() / (RAND_MAX + 1);
 }
+
+ushort ConvertTo16BitBGR(ColorRGB c)
+{
+	ushort r = (c.R & 0xF8) >> 3;
+	ushort g = (c.G & 0xF8) << 2;
+	ushort b = (c.B & 0xF8) << 7;
+	return b | g | r;
+}

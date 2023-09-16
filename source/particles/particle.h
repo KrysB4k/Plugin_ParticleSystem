@@ -213,6 +213,8 @@ struct MeshParticle : BaseParticle
 	uchar		transparency;
 	ColorRGB	tint;
 
+	Tr4ItemInfo	item;
+
 	// methods
 	virtual void Animate(int startMesh, int endMesh, int framerate) override;
 

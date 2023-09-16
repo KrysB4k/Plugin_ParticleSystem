@@ -23,3 +23,4 @@ TYPE_AddLineSorted* AddLineSorted = (TYPE_AddLineSorted*) 0x5339A0; // function 
 TYPE_AddTriSorted* AddTriSorted = (TYPE_AddTriSorted*) 0x53399C;	// function pointer
 TYPE_AddQuadSorted* AddQuadSorted = (TYPE_AddQuadSorted*) 0x5339A4; // function pointer
 TYPE_phd_PutPolygons phd_PutPolygons = (TYPE_phd_PutPolygons) 0x47BB30;
+TYPE_CalculateObjectLighting CalculateObjectLighting = (TYPE_CalculateObjectLighting) 0x450240;

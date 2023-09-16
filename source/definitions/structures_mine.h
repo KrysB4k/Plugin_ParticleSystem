@@ -124,6 +124,8 @@ struct phd_vector
 {
 	int x, y, z;
 
+	phd_vector() = default;
+
 	phd_vector(int a, int b, int c) : x(a), y(b), z(c) {}
 };
 
@@ -134,6 +136,62 @@ struct phd_3dpos
 	short xRot, yRot, zRot;
 };
 
+struct PCLIGHT
+{
+	float x;
+	float y;
+	float z;
+	float r;
+	float g;
+	float b;
+	long shadow;
+	float Inner;
+	float Outer;
+	float InnerAngle;
+	float OuterAngle;
+	float Cutoff;
+	float nx;
+	float ny;
+	float nz;
+	long ix;
+	long iy;
+	long iz;
+	long inx;
+	long iny;
+	long inz;
+	float tr;
+	float tg;
+	float tb;
+	float rs;
+	float gs;
+	float bs;
+	long fcnt;
+	unsigned char Type;
+	unsigned char Active;
+	phd_vector rlp;
+	long Range;
+};
+
+struct ITEM_LIGHT
+{
+	long r;
+	long g;
+	long b;
+	long ambient;
+	long rs;
+	long gs;
+	long bs;
+	long fcnt;
+	PCLIGHT	CurrentLights[21];
+	PCLIGHT	PrevLights[21];
+	long nCurrentLights;
+	long nPrevLights;
+	long room_number;
+	long RoomChange;
+	phd_vector item_pos;
+	void* pCurrentLights;
+	void* pPrevLights;
+};
 
 struct Tr4ItemInfo
 {
@@ -163,7 +221,7 @@ struct Tr4ItemInfo
 	short item_flags[4];
 	void* data;
 	phd_3dpos pos;
-	BYTE lightdata[5528];
+	ITEM_LIGHT il;
 	DWORD active : 1;
 	DWORD status : 2;
 	DWORD gravity_status : 1;
@@ -385,6 +443,132 @@ struct EffectBite
 	int node;
 };
 
+struct Tr4LightInfo
+{
+	long x;
+	long y;
+	long z;
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+	unsigned char Type;
+	short Intensity;
+	float Inner;
+	float Outer;
+	float Length;
+	float Cutoff;
+	float nx;
+	float ny;
+	float nz;
+};
+
+struct Tr4MeshInfo
+{
+	long x;
+	long y;
+	long z;
+	short y_rot;
+	short shade;
+	short Flags;
+	short static_number;
+};
+
+struct PCLIGHT_INFO
+{
+	float x;
+	float y;
+	float z;
+	float r;
+	float g;
+	float b;
+	long shadow;
+	float Inner;
+	float Outer;
+	float InnerAngle;
+	float OuterAngle;
+	float Cutoff;
+	float nx;
+	float ny;
+	float nz;
+	long ix;
+	long iy;
+	long iz;
+	long inx;
+	long iny;
+	long inz;
+	unsigned char Type;
+	unsigned char Pad;
+};
+
+struct Tr4RoomInfo
+{
+	short* data;
+	short* door;
+	Tr4FloorInfo* floor;
+	Tr4LightInfo* light;
+	Tr4MeshInfo* mesh;
+	long x;
+	long y;
+	long z;
+	long minfloor;
+	long maxceiling;
+	short x_size;
+	short y_size;
+	long ambient;
+	short num_lights;
+	short num_meshes;
+	unsigned char ReverbType;
+	unsigned char FlipNumber;
+	char MeshEffect;
+	char bound_active;
+	short left;
+	short right;
+	short top;
+	short bottom;
+	short test_left;
+	short test_right;
+	short test_top;
+	short test_bottom;
+	short item_number;
+	short fx_number;
+	short flipped_room;
+	unsigned short flags;
+	long nVerts;
+	long nWaterVerts;
+	long nShoreVerts;
+	LPVOID SourceVB;
+	short* FaceData;
+	float posx;
+	float posy;
+	float posz;
+	float* vnormals;
+	float* fnormals;
+	long* prelight;
+	long* prelightwater;
+	long watercalc;
+	float* verts;
+	long gt3cnt;
+	long gt4cnt;
+	PCLIGHT_INFO* pclight;
+};
+
+struct Tr4MeshData
+{
+	short x;
+	short y;
+	short z;
+	short r;
+	short flags;
+	short nVerts;
+	short nNorms;
+	short ngt4;
+	short* gt4;
+	short ngt3;
+	short* gt3;
+	long* prelight;
+	LPVOID SourceVB;
+	float* Normals;
+};
 
 // let below pragma directive at bottom of this source
 #pragma pack(2)
