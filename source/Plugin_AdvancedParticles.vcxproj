@@ -46,6 +46,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)script;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -64,6 +65,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir)script;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -82,6 +84,7 @@
     <ClCompile Include="definitions\DefTomb4Funct.cpp" />
     <ClCompile Include="definitions\Tomb4Discoveries_mine.cpp" />
     <ClCompile Include="particles\particle.cpp" />
+    <ClCompile Include="particles\perlin.cpp" />
     <ClCompile Include="particles\utilities.cpp" />
     <ClCompile Include="particles\vector3f.cpp" />
     <ClCompile Include="PlugIn_AdvancedParticles.cpp" />
@@ -99,6 +102,7 @@
     <ClInclude Include="definitions\Tomb4Discoveries_mine.h" />
     <ClInclude Include="definitions\Tomb4Globals.h" />
     <ClInclude Include="particles\particle.h" />
+    <ClInclude Include="particles\perlin.h" />
     <ClInclude Include="particles\utilities.h" />
     <ClInclude Include="particles\vector3f.h" />
     <ClInclude Include="resource.h" />
@@ -109,6 +113,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PlugIn_trng.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="script\script.vcxproj">
+      <Project>{72bafa81-3674-4994-8edf-88887a66cb34}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

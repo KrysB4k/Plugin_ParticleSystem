@@ -24,10 +24,7 @@ short GetOrientDiff(short sourceOrient, short targetOrient)
 
 float Lerp(float a, float b, float t)
 {
-	if (t > 1.0f)
-		t = 1.0f;
-	else if (t < 0.0f)
-		t = 0.0f;
+	t = Clamp(t, 0.0f, 1.0f);
 
 	return a + t*(b-a);
 }
@@ -37,12 +34,7 @@ float InverseLerp(float val1, float val2, float x)
 {
 	float t = (x - val1) / (val2 - val1);
 
-		if (t < 0.0f)
-			t = 0.0f;
-		else if (t > 1.0f)
-			t = 1.0f;
-
-	return t;
+	return Clamp(t, 0.0f, 1.0f);
 }
 
 
@@ -63,6 +55,21 @@ float SimpleDist(const Vector3f &v1, const Vector3f &v2)
 }
 
 
+int CheckDistFast(const Vector3f& v1, const Vector3f& v2, float dist)
+{
+	auto vdif = v2 - v1;
+	float vdifsqr = (vdif.x * vdif.x + vdif.y * vdif.y + vdif.z * vdif.z);
+	float distsqr = dist * dist;
+
+	if (vdifsqr < distsqr)
+		return -1;
+	else if (vdifsqr > distsqr)
+		return 1;
+
+	return 0;
+}
+
+
 float RealDist(const Vector3f& v1, const Vector3f& v2)
 {
 	return (v1 - v2).magnitude();
@@ -79,48 +86,25 @@ ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t)
 }
 
 
-ColorRGB RandomColor(int RedRange, int GreenRange, int BlueRange)
-{
-	uchar r = (RedRange > 0) ? (GetRandomControl() % RedRange) : 0;
-	uchar g = (GreenRange > 0) ? (GetRandomControl() % GreenRange) : 0;
-	uchar b = (BlueRange > 0) ? (GetRandomControl() % BlueRange) : 0;
-	return ColorRGB(r, g, b);
-}
-
-
-ColorRGB AddColors(const ColorRGB& C1, const ColorRGB& C2, bool overflow)
-{
-	int r = C1.R + C2.R;
-	int g = C1.G + C2.G;
-	int b = C1.B + C2.B;
-
-	if (!overflow)
-	{
-		r = (r > 255) ? 255 : r;
-		g = (g > 255) ? 255 : g;
-		b = (b > 255) ? 255 : b;
-	}
-
-	return ColorRGB(r&255, g&255, b&255);
-}
-
-
 ColorRGB HSLtoRGB(float hue, float sat, float light)
 {
-	hue = fmod(hue, 360.0f);
-	if (sat < 0)
-		sat = 0.0f;
-	else if (sat > 1)
-		sat = 1.0f;
-	if (light < 0)
-		light = 0.0f;
-	else if (light > 1)
-		light = 1.0f;
+	hue = fmodf(hue, 360.0f);
+	if (hue < 0)
+		hue += 360.0f;
+
+	sat = Clamp(sat, 0.0f, 1.0f);
+	light = Clamp(light, 0.0f, 1.0f);
+
+	if (sat <= 0)
+	{
+		int v = Round(light * 255);
+		return ColorRGB(v, v, v);
+	}
 
 	int hextant = int(hue / 60.0f);
 	float fhue = (hue - hextant * 60.0f) / 60.0f;
 
-	float chroma = (1 - abs(2*light - 1)) * sat;
+	float chroma = (1 - abs(2 * light - 1)) * sat;
 	float xval = chroma * (1 - abs(fmod(hextant + fhue, 2.0f) - 1));
 	float m = light - chroma / 2;
 	float r = 0;
@@ -167,9 +151,9 @@ ColorRGB HSLtoRGB(float hue, float sat, float light)
 }
 
 
-bool TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask)
+long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask)
 {
-	int flags = 0;
+	long flags = 0;
 	int num = 0;
 
 	if (item)
@@ -193,28 +177,29 @@ bool TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned l
 		}
 	}
 
-	return (flags & bitMask) ? true : false;
+	return flags;
 }
 
 
-Tr4ItemInfo* FindNearestTarget(const Vector3f& posTest, short* const slotList, float range)
+int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList)
 {
+	int itemIndex = -1;
 	int nearest = 0x7FFFFFFF;
-	Tr4ItemInfo* ret = nullptr;
 
-	for (int i = 0; i < Trng.pGlobTomb4->pAdr->TotItemsMax; ++i)
+	for (int i = 0; i < level_items; ++i)
 	{
 		auto item = &items[i];
 
 		bool slotCheck = false;
 		const short* slotIter = slotList;
 
-		if (*slotIter == 0x7FFF)
+		if (*slotIter == -1)
 		{
 			if (objects[item->object_number].intelligent &&
 				item->object_number != SLOT_GUIDE &&
-				item->object_number != SLOT_VON_CROY)
+				item->object_number != SLOT_VON_CROY) {
 				slotCheck = true;
+			}
 		}
 		else
 		{
@@ -236,34 +221,60 @@ Tr4ItemInfo* FindNearestTarget(const Vector3f& posTest, short* const slotList, f
 
 			Vector3f target(item->pos.xPos, item->pos.yPos, item->pos.zPos);
 
-			if (SimpleDist(posTest, target) < range)
+			int dist = Round(SimpleDist(posTest, target));
+			if (dist < radius && dist < nearest)
 			{
-				int dist = Round(RealDist(posTest, target));
-				if (dist < nearest)
-				{
-					ret = item;
-					nearest = dist;
-				}
+				nearest = dist;
+				radius = dist;
+				itemIndex = i;
 			}
 		}
 	}
 
-	return ret;
+	return itemIndex;
 }
 
 
 Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff)
 {
+	static const uchar lara_joint_map[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 8 };
+
 	phd_vector v(xOff, yOff, zOff);
 
 	if (!item->object_number)
-		GetLaraJointPos(&v, joint);
+		GetLaraJointPos(&v, lara_joint_map[joint]);
 	else
 		GetJointAbsPosition((StrItemTr4*)item, (StrMovePosition*)&v, joint);
 
 	return Vector3f(v.x, v.y, v.z);
 }
 
+
+Vector3f RotatePoint3D(const Vector3f& point, short xrot, short yrot, short zrot)
+{
+	Vector3f res;
+
+	phd_PushUnitMatrix();
+	phd_RotYXZ(yrot, xrot, zrot);
+
+	res.x = (phd_mxptr[M00] * point.x + phd_mxptr[M01] * point.y + phd_mxptr[M02] * point.z) * (1.0f / 16384);
+	res.y = (phd_mxptr[M10] * point.x + phd_mxptr[M11] * point.y + phd_mxptr[M12] * point.z) * (1.0f / 16384);
+	res.z = (phd_mxptr[M20] * point.x + phd_mxptr[M21] * point.y + phd_mxptr[M22] * point.z) * (1.0f / 16384);
+
+	phd_PopMatrix();
+
+	return res;
+}
+
+
+Vector3f SphericalToCartesian(float r, float theta, float phi)
+{
+	phi += float(M_PI_2);
+	float x = r * sin(phi) * sin(theta);
+	float z = r * sin(phi) * cos(theta);
+	float y = r * cos(phi);
+	return Vector3f(x, -y, z);
+}
 
 // should not be available in Lua
 int TestForWall(int x, int y, int z, short* room)
@@ -284,7 +295,6 @@ int TestForWall(int x, int y, int z, short* room)
 	return 1; // Wall
 }
 
-
 // should not be available in Lua
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 {
@@ -296,4 +306,109 @@ Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 	signed char tilt_z = tilts >> 8;
 
 	return Vector3f(float(-tilt_x), -4.0f, float(-tilt_z)).normalized();
+}
+
+
+Vector3f Spline(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
+{
+	auto a = v1 * 2;
+	auto b = (-v0 + v2) * t;
+	auto c = (v0 * 2 - v1 * 5 + v2 * 4 - v3) * (t * t);
+	auto d = (-v0 + v1 * 3 - v2 * 3 + v3) * (t * t * t);
+
+	return (a + b + c + d) * 0.5f;
+}
+
+
+Vector3f SplineStart(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto a = v0 * 2;
+	auto b = (-v0 * 3 + v1 * 4 - v2) * t;
+	auto c = (v0 - v1 * 2 + v2) * (t * t);
+
+	return (a + b + c) * 0.5f;
+}
+
+
+Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto a = v1 * 2;
+	auto b = (-v0 + v2) * t;
+	auto c = (v0 - v1 * 2 + v2) * (t * t);
+
+	return (a + b + c) * 0.5f;
+}
+
+
+Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
+{
+	auto b = (-v0 + v2);
+	auto c = (v0 * 2 - v1 * 5 + v2 * 4 - v3) * 2 * t;
+	auto d = (-v0 + v1 * 3 - v2 * 3 + v3) * 3 * (t * t);
+
+	return (b + c + d) * 0.5f;
+}
+
+
+Vector3f SplineStartDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto b = (-v0 * 3 + v1 * 4 - v2);
+	auto c = (v0 - v1 * 2 + v2) * 2 * t;
+
+	return (b + c) * 0.5f;
+}
+
+
+Vector3f SplineEndDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+{
+	auto b = (-v0 + v2);
+	auto c = (v0 - v1 * 2 + v2) * 2 * t;
+
+	return (b + c) * 0.5f;
+}
+
+
+int Clamp(int x, int min, int max)
+{
+	if (x < min)
+		return min;
+
+	if (x > max)
+		return max;
+
+	return x;
+}
+
+float Clamp(float x, float min, float max)
+{
+	if (x < min)
+		return min;
+
+	if (x > max)
+		return max;
+
+	return x;
+}
+
+float ShortToRad(short rotation)
+{
+	return M_PI * rotation / 32768;
+}
+
+short RadToShort(float angle)
+{
+	return 32768 * angle / M_PI;
+}
+
+float GetRandom()
+{
+	return (float)rand() / (RAND_MAX + 1);
+}
+
+ushort ConvertTo16BitBGR(ColorRGB c)
+{
+	ushort r = (c.R & 0xF8) >> 3;
+	ushort g = (c.G & 0xF8) << 2;
+	ushort b = (c.B & 0xF8) << 7;
+	return b | g | r;
 }

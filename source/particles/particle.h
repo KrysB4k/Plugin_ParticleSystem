@@ -8,73 +8,120 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
 
+namespace Diagnostics
+{
+	extern double performanceMultiplier;
+	extern int activeSpriteParticles;
+	extern int activeMeshParticles;
+	extern double initTime;
+	extern double updateTime;
+	extern double drawTime;
+	extern double initTimePeak;
+	extern double updateTimePeak;
+	extern double drawTimePeak;
+
+	double Time(void (*targetFunction)());
+	void SetPeaks();
+	void Print();
+	void Initialise();
+	void ResetFrame();
+	void ResetLevel();
+}
 
 // ************  Particle-related structs  ****************
 
-struct ColorRGB
+struct ColorRGB : public LuaObject
 {
 	uchar R, G, B;
 
-	ColorRGB(): R(255), G(255), B(255) {}
+	ColorRGB(): R(0), G(0), B(0) {}
 
 	ColorRGB(uchar red, uchar green, uchar blue): R(red), G(green), B(blue) {}
 
-	ColorRGB(ulong HEX)
-	{
-		B = HEX & 0xFF;
-		G = (HEX >> 8) & 0xFF;
-		R = (HEX >> 16) & 0xFF;
-	}
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
 
-	ColorRGB& operator= (ulong HEX)
-	{
-		B = HEX & 0xFF;
-		G = (HEX >> 8) & 0xFF;
-		R = (HEX >> 16) & 0xFF;
+struct Vector3s : public LuaObject
+{
+	short x, y, z;
 
-		return *this;
-	}
+	Vector3s() : x(0), y(0), z(0) {}
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
+
+struct Vector3i : public LuaObject
+{
+	int x, y, z;
+
+	Vector3i() : x(16384), y(16384), z(16384) {}
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
+
+enum TetherType
+{
+	TETHER_ROTATING,
+	TETHER_STATIC
 };
 
 
-enum SpawnMode
+enum DrawMode
 {
-	SPAWN_ABSOLUTE,
-	SPAWN_RELATIVE_ITEM,
-	SPAWN_RELATIVE_ITEMNODE
+	DRAW_SPRITE,
+	DRAW_LINE,
+	DRAW_ARROW,
+	DRAW_NONE
 };
 
 
-struct NodeAttachment
+struct NodeAttachment : public LuaObject
 {
-	int offX, offY, offZ;
+	TetherType tether;
 	short cutoff, random;
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 };
 
 
-struct ParticleGroup
+
+// ************  ParticleGroup struct  ****************
+
+struct ParticleGroup : public LuaObject
 {
-	int groupName; // index for Lua string
 	int initIndex;
 	int updateIndex;
 
 	NodeAttachment attach;
-	short spriteSlot;
-	uchar blendingMode;
 
-	// various particle flags, more may be added with time
+	short spriteSlot;
+
+	int partLimit;
+	mutable int partCount;
+
+	DrawMode drawMode;
+	uchar blendingMode;
+	uchar groupIndex;
+
 	bool Saved;
-	bool NoPerspective;
+	bool ScreenSpace;
+	bool IsBoid;
 	bool LineIgnoreVel;
-	bool WindAffected;
+
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 };
 
 
-// ************  Particle struct  ****************
+// ************  Particle structs  ****************
 
-struct Particle
+struct BaseParticle : public LuaObject
 {
-// fields
+	// fields
 	Vector3f	pos;
 	Vector3f	vel;
 	Vector3f	accel;
@@ -82,55 +129,147 @@ struct Particle
 	short		roomIndex;
 	short		lifeSpan;
 	short		lifeCounter;
-	short		colorFadeTime;
-	short		rot;
-	short		rotVel;
-
-	ushort		sizeStart;
-	ushort		sizeEnd;
-	ushort		sizeCust;
 
 	short		emitterIndex;
 	char		emitterNode;
-
 	uchar		groupIndex;
 
-	uchar		spriteIndex;
+	// methods
+	float		Parameter();
+	Vector3f	AbsPos();
+	void		Attach(int itemIndex, int node);
+	void		Detach();
+	void		LimitSpeed(float maxSpeed);
+	bool		CollideWalls(float rebound);
+	bool		CollideFloors(float rebound, float minBounce, int collMargin, bool accurate);
+	bool		CollidedWithItem(Tr4ItemInfo* item, int radius);
+	bool		TargetHoming(Tr4ItemInfo* item, int targetNode, float homingFactor, float homingAccel, bool predict);
+	Vector3f	FollowTarget(const Vector3f& v, float maxSpeed, float distFactor, float distCutOff);
+	Vector3f	WindVelocities(float factor);
+	Vector3f	SplinePos(const Vector3f v[], int arrSize, float t);
+	Vector3f	SplineVel(const Vector3f v[], int arrSize, float t);
+	Vector3f	AvoidRoomGeometry(int wallMargin, int floorMargin, float factor);
+	Vector3f	AvoidItem(Tr4ItemInfo* item, float radius, float factor);
 
+	virtual void Animate(int start, int end, int frameRate) = 0;
+
+	// boid-specific
+	virtual Vector3f BoidSeparationRule(float radius, float factor) = 0;
+	virtual Vector3f BoidCohesionRule(float radius, float factor) = 0;
+	virtual Vector3f BoidAlignmentRule(float radius, float factor) = 0;
+
+	// lua integration
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
+
+
+struct SpriteParticle : BaseParticle
+{
+	// fields
+	ushort		sizeStart;
+	ushort		sizeEnd;
+	ushort		sizeCust;
+	short		skew;
+
+	short		rot;
+	short		rotVel;
+
+	uchar		spriteIndex;
 	uchar		fadeIn;
 	uchar		fadeOut;
 
+	short		colorFadeTime;
 	ColorRGB	colStart;
 	ColorRGB	colEnd;
 	ColorRGB	colCust;
 
-// methods
-	float		Parameter();
-	void		ParticleLimitSpeed(float maxSpeed);
-	Vector3f	ParticleAbsPos();
-	void		ParticleAnimate(unsigned int startSprite, unsigned int endSprite, int framerate);
-	void		ParticleAttach(int itemIndex, int node);
-	void		ParticleDeattach();
-	bool		ParticleCollideWalls(float rebound);
-	bool		ParticleCollideFloors(float rebound, float friction, bool accurate);
-	Vector3f	ParticleFollow(const Vector3f& v, float factor, float maxSpeed);
-	bool		ParticleHoming(Tr4ItemInfo *item, int targetNode, float homingFactor, float homingAccel, bool predict);
+	// methods
+	virtual void Animate(int start, int end, int frameRate) override;
 
-	void		UpdateParticle(int updateIndex);
-	void		DrawParticle(const ParticleGroup& pgroup, long* const view, long smallest_size);
+	// draw function
+	void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size);
+
+	// boid-specific
+	virtual Vector3f BoidSeparationRule(float radius, float factor) override;
+	virtual Vector3f BoidCohesionRule(float radius, float factor) override;
+	virtual Vector3f BoidAlignmentRule(float radius, float factor) override;
+
+	// lua integration
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
+
+
+struct MeshParticle : BaseParticle
+{
+	// fields
+	Vector3s	rot;
+	Vector3s	rotVel;
+	Vector3i	scale;
+
+	short		object;
+	uchar		mesh;
+	uchar		transparency;
+	ColorRGB	tint;
+
+	Tr4ItemInfo	item;
+
+	// methods
+	virtual void Animate(int startMesh, int endMesh, int framerate) override;
+
+	void		AlignToVel(float factor, bool invert);
+	void		AlignToTarget(const Vector3f& v, float factor, bool invert);
+	void		Shatter();
+
+	// draw function
+	void		DrawMeshPart();
+
+	// boid-specific
+	virtual Vector3f BoidSeparationRule(float radius, float factor) override;
+	virtual Vector3f BoidCohesionRule(float radius, float factor) override;
+	virtual Vector3f BoidAlignmentRule(float radius, float factor) override;
+
+	// lua integration
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 };
 
 
 // ************  namespace ParticleFactory - declarations ****************
 
+enum FunctionType
+{
+	FUNCTION_LIBRARY,
+	FUNCTION_INIT,
+	FUNCTION_UPDATE
+};
+
 namespace ParticleFactory
 {
-	extern Particle	parts[];
+	extern ulong gameTick;
+
+	extern SpriteParticle spriteParts[];
+	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
 
-	void ClearParts();
-	void UpdateParts();
-	void DrawParts();
+	extern FunctionType caller;
 
-	int GetFreeParticle();
+	void ClearParts();
+	void ClearPartGroups();
+
+	void InitParts();
+	void InitPartGroups();
+	
+	void UpdateParts();
+	void UpdateSprites();
+	void UpdateMeshes();
+
+	void DrawParts();
+	void DrawSprites();
+	void DrawMeshes();
+
+	int GetFreeSpritePart();
+	int GetFreeMeshPart();
+	int GetFreeParticleGroup();
 };

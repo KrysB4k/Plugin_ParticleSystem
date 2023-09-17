@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Plugin_AdvancedParticles", "Plugin_AdvancedParticles.vcxproj", "{E6F60CC0-117D-9349-CE60-7FE09464005D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "script", "script\script.vcxproj", "{72BAFA81-3674-4994-8EDF-88887A66CB34}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{E6F60CC0-117D-9349-CE60-7FE09464005D}.Debug|Win32.Build.0 = Debug|Win32
 		{E6F60CC0-117D-9349-CE60-7FE09464005D}.Release|Win32.ActiveCfg = Release|Win32
 		{E6F60CC0-117D-9349-CE60-7FE09464005D}.Release|Win32.Build.0 = Release|Win32
+		{72BAFA81-3674-4994-8EDF-88887A66CB34}.Debug|Win32.ActiveCfg = Debug|Win32
+		{72BAFA81-3674-4994-8EDF-88887A66CB34}.Debug|Win32.Build.0 = Debug|Win32
+		{72BAFA81-3674-4994-8EDF-88887A66CB34}.Release|Win32.ActiveCfg = Release|Win32
+		{72BAFA81-3674-4994-8EDF-88887A66CB34}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

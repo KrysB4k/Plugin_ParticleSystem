@@ -19,7 +19,7 @@ HINSTANCE MyDllInstance=NULL;  // the instance handle of your dll
 
 extern char BufferLog[4096]; // temporary global buffer to host error and warning messages
 
-DWORD MyTomb4PatcherAddress = 0x6708E0;
+DWORD MyTomb4PatcherAddress = 0x0;
 								
 char TexMyPluginName[80];  
 
@@ -34,26 +34,42 @@ StrMyData MyData;
 
 // ************  Patcher Functions section  ***************
 
+void Patch_00()
+{
+	UpdateLightning();
+	Diagnostics::initTime = Diagnostics::Time(ParticleFactory::InitParts);
+	Diagnostics::updateTime = Diagnostics::Time(ParticleFactory::UpdateParts);
+}
+
+
+void Patch_01()
+{
+	S_DrawSparks();
+	Diagnostics::drawTime = Diagnostics::Time(ParticleFactory::DrawParts);
+	Diagnostics::SetPeaks();
+	Diagnostics::Print();
+	Diagnostics::ResetFrame();
+}
+
+
 int Patch_UpdateParts(void)
 {
-	static BYTE VetBytes[]={0x66, 0xB8, 0x0, 0x0, 0xFF, 0x15, 0xE0, 0x8, 0x67, 0x0};
+	static DWORD VetOffset[]={0x4491D1};
 
-	return ApplyCodePatch(0x4491C1, VetBytes, 10);
+	return ApplyCallPatch(VetOffset, 1, (DWORD)Patch_00);
 }
 
 
 int Patch_DrawParts(void)
 {
-	static BYTE VetBytes[]={0x66, 0xB8, 0x1, 0x0, 0xFF, 0x15, 0xE0, 0x8, 0x67, 0x0};
+	static DWORD VetOffset[]={0x44E863};
 
-	return ApplyCodePatch(0x44E85D, VetBytes, 10);
+	return ApplyCallPatch(VetOffset, 1, (DWORD)Patch_01);
 }
 
 
 bool CreateMyCodePatches(void)
 {
-	if (SetReservedDataZone(0x6708E0, 128) != APPC_OK) return false;
-
 	SET_PATCH(Patch_UpdateParts);
 	SET_PATCH(Patch_DrawParts);
 
@@ -62,27 +78,8 @@ bool CreateMyCodePatches(void)
 
 // ************  Assembly Procedures section  ******************
 
-
-BEGIN_ASM_PROC(Patch_00)
-	CALL UpdateBeetles
-	CALL UpdateFish
-	CALL ParticleFactory::UpdateParts
-	RETN
-END_ASM_PROC
-
-
-BEGIN_ASM_PROC(Patch_01)
-	CALL DrawRopeList
-	CALL S_DrawSparks
-	CALL ParticleFactory::DrawParts
-	RETN
-END_ASM_PROC
-
-
 void *SubPatchArray[] = {
 // TYPE_HERE your asm procedure names to call from tomb4 code
-	&Patch_00,
-	&Patch_01,
 	NULL
 };
 
@@ -118,6 +115,9 @@ void cbInitGame(void)
 	// here you can initialize your global data for whole adventure
 	// this procedure will be called only once, before loading title level
 
+	ParticleFactory::ClearParts();
+	ParticleFactory::ClearPartGroups();
+	ParticleFactory::InitPartGroups();
 }
 
 
@@ -127,6 +127,8 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
 
+	Diagnostics::ResetFrame();
+	Diagnostics::ResetLevel();
 	ParticleFactory::ClearParts();
 }
 
@@ -619,6 +621,10 @@ bool InitializeAll(void)
 
 	// TYPE_HERE: code to allocate global resource to use in the whole game
 
+	srand(GetCurrentProcessId());
+	Diagnostics::Initialise();
+	Script::NewState();
+
 	return true;
 }
 
@@ -629,6 +635,8 @@ void ReleaseAll(void)
 {
 // ************  ReleaseAll() function  ******************
 	FreeLevelResources();
+
+	Script::Close();
 }
 
 
