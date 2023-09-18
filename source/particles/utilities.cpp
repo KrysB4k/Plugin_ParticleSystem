@@ -1,4 +1,7 @@
 #include "..\definitions\includes.h"
+#include <random>
+
+std::mt19937 mt;
 
 // ************  Utility Functions - can be made accessible in Lua, unless stated otherwise ************
 
@@ -402,7 +405,7 @@ short RadToShort(float angle)
 
 float GetRandom()
 {
-	return (float)rand() / (RAND_MAX + 1);
+	return (float)mt() / (UINT_MAX);
 }
 
 ushort ConvertTo16BitBGR(ColorRGB c)
