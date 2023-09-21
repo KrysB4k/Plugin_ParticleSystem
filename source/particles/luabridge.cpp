@@ -188,7 +188,8 @@ void NodeAttachment::NewIndex(const char* field)
 		break;
 	case 't':
 		if (!strcmp(field, "tether"))
-			tether = static_cast<TetherType>(Clamp(Script::ToInteger(1), 0, 1));
+			tether = static_cast<TetherType>(Clamp(Script::ToInteger(1), 0, 2));
+		break;
 	}
 }
 
@@ -391,8 +392,8 @@ void BaseParticle::NewIndex(const char* field)
 		}
 		if (!strcmp(field, "lifeSpan"))
 		{
-			lifeSpan = Clamp(Script::ToInteger(1), 0, 32767);
-			lifeCounter = Clamp(lifeCounter, 0, lifeSpan);
+			// set lifeCounter to lifeSpan automatically
+			lifeCounter = lifeSpan = Clamp(Script::ToInteger(1), 0, 32767);
 			return;
 		}
 		break;
@@ -472,9 +473,9 @@ int SpriteParticle::Index(const char* field)
 			Script::PushInteger(sizeStart);
 			return 1;
 		}
-		if (!strcmp(field, "skew"))
+		if (!strcmp(field, "sizeRatio"))
 		{
-			Script::PushNumber(skew / 32768.0f);
+			Script::PushNumber(sizeRatio / 32768.0f);
 			return 1;
 		}
 		if (!strcmp(field, "spriteIndex"))
@@ -503,12 +504,12 @@ void SpriteParticle::NewIndex(const char* field)
 	case 'f':
 		if (!strcmp(field, "fadeIn"))
 		{
-			fadeIn = Clamp(Script::ToInteger(1), 0, 255);
+			fadeIn = Clamp(Script::ToInteger(1), 0, 32767);
 			return;
 		}
 		if (!strcmp(field, "fadeOut"))
 		{
-			fadeOut = Clamp(Script::ToInteger(1), 0, 255);
+			fadeOut = Clamp(Script::ToInteger(1), 0, 32767);
 			return;
 		}
 		break;
@@ -540,14 +541,14 @@ void SpriteParticle::NewIndex(const char* field)
 			sizeStart = Clamp(Script::ToInteger(1), 0, 65535);
 			return;
 		}
-		if (!strcmp(field, "skew"))
+		if (!strcmp(field, "sizeRatio"))
 		{
-			skew = Clamp(Round(Script::ToNumber(1) * 32768), -32768, 32767);
+			sizeRatio = Clamp(Round(Script::ToNumber(1) * 32768), -32768, 32767);
 			return;
 		}
 		if (!strcmp(field, "spriteIndex"))
 		{
-			spriteIndex = Clamp(Script::ToInteger(1), 0, 255);
+			spriteIndex = Clamp(Script::ToInteger(1), 0, 32767);
 			return;
 		}
 		break;
@@ -640,15 +641,54 @@ void MeshParticle::NewIndex(const char* field)
 	BaseParticle::NewIndex(field);
 }
 
+int PerlinNoise::Index(const char* field)
+{
+	return 0;
+}
+
+void PerlinNoise::NewIndex(const char* field)
+{
+
+}
 
 int LuaBridge::Call(const char* function)
 {
 	int i, init, update;
 	ParticleGroup* group;
+	PerlinNoise* perlin;
 	float lower, upper;
 
 	switch (function[0])
 	{
+	case 'a':
+		if (!strcmp(function, "abs"))
+		{
+			Script::PushNumber(abs(Script::ToNumber(1)));
+			return 1;
+		}
+		if (!strcmp(function, "acos"))
+		{
+			Script::PushNumber(acosf(Script::ToNumber(1)));
+			return 1;
+		}
+		if (!strcmp(function, "asin"))
+		{
+			Script::PushNumber(asinf(Script::ToNumber(1)));
+			return 1;
+		}
+		if (!strcmp(function, "atan"))
+		{
+			Script::PushNumber(atanf(Script::ToNumber(1)));
+			return 1;
+		}
+		if (!strcmp(function, "atan2"))
+		{
+			float y = Script::ToNumber(1);
+			float x = Script::ToNumber(2);
+			Script::PushNumber(atan2f(y, x));
+			return 1;
+		}
+		break;
 	case 'b':
 		if (!strcmp(function, "boidAlignment"))
 		{
@@ -682,6 +722,11 @@ int LuaBridge::Call(const char* function)
 		}
 		break;
 	case 'c':
+		if (!strcmp(function, "cbrt"))
+		{
+			Script::PushNumber(cbrtf(Script::ToNumber(1)));
+			return 1;
+		}
 		if (!strcmp(function, "cos"))
 		{
 			Script::PushNumber(cosf(Script::ToNumber(1)));
@@ -722,6 +767,22 @@ int LuaBridge::Call(const char* function)
 			Script::PushData(&ParticleFactory::meshParts[i]);
 			return 1;
 		}
+		if (!strcmp(function, "createPerlinNoise"))
+		{
+			if (ParticleFactory::caller != FUNCTION_LIBRARY)
+				return 0;
+			i = ParticleFactory::GetFreePerlinNoise();
+			if (i == -1)
+				return 0;
+
+			if (Script::ArgCount())
+			{
+				int seed = Script::ToInteger(1);
+				ParticleFactory::perlinNoise[i].SeedPermut(seed);
+			}
+			Script::PushData(&ParticleFactory::perlinNoise[i]);
+			return 1;
+		}
 		if (!strcmp(function, "createSpritePart"))
 		{
 			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
@@ -755,15 +816,77 @@ int LuaBridge::Call(const char* function)
 				Script::PushInteger(item->room_number);
 				return 1;
 			}
+			return Script::ItemIndexError(1, index);
+		}
+		break;
+	case 'm':
+		if (!strcmp(function, "meshAlignVelocity"))
+		{
+			auto part = dynamic_cast<MeshParticle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "MeshParticle");
+			float factor = Script::ToNumber(2);
+			bool invert = false;
+			invert = Script::ToBoolean(3);
+			part->AlignToVel(factor, invert);
+			return 0;
+		}
+		if (!strcmp(function, "meshShatter"))
+		{
+			auto part = dynamic_cast<MeshParticle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "MeshParticle");
+			part->Shatter();
 			return 0;
 		}
 		break;
-	case 'p':
-		if (!strcmp(function, "print"))
+	case 'n':
+		if (!strcmp(function, "noise"))
 		{
-			Script::Print();
-			return 0;
+			float scale, x, y, z, w;
+			perlin = dynamic_cast<PerlinNoise*>((LuaObject*)Script::ToData(1));
+			if (!perlin)
+				return Script::TypeError(1, "PerlinNoise");
+
+			int count = Script::ArgCount();
+			if (count < 3)
+				return Script::ArgCountError(3);
+
+			switch (count)
+			{
+			case 3:
+				scale = Script::ToNumber(2);
+				x = Script::ToNumber(3);
+				Script::PushNumber(perlin->Noise1D(scale, x));
+				return 1;
+
+			case 4:
+				scale = Script::ToNumber(2);
+				x = Script::ToNumber(3);
+				y = Script::ToNumber(4);
+				Script::PushNumber(perlin->Noise2D(scale, x, y));
+				return 1;
+
+			case 5:
+				scale = Script::ToNumber(2);
+				x = Script::ToNumber(3);
+				y = Script::ToNumber(4);
+				z = Script::ToNumber(5);
+				Script::PushNumber(perlin->Noise3D(scale, x, y, z));
+				return 1;
+
+			default:
+				scale = Script::ToNumber(2);
+				x = Script::ToNumber(3);
+				y = Script::ToNumber(4);
+				z = Script::ToNumber(5);
+				w = Script::ToNumber(6);
+				Script::PushNumber(perlin->Noise4D(scale, x, y, z, w));
+				return 1;
+			}
 		}
+		break;
+	case 'p':
 		if (!strcmp(function, "particleAnimate"))
 		{
 			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
@@ -774,6 +897,23 @@ int LuaBridge::Call(const char* function)
 			int framerate = Script::ToInteger(4);
 			part->Animate(start, end, framerate);
 			return 0;
+		}
+		if (!strcmp(function, "particleCollidedItem"))
+		{
+			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
+			if (!part)
+				return Script::TypeError(1, "Particle");
+
+			int index = Script::ToInteger(2);
+			int radius = Script::ToInteger(3);
+
+			if (index >= 0 && index < level_items)
+			{
+				auto item = &items[index];
+				Script::PushBoolean(part->CollidedWithItem(item, radius));
+				return 1;
+			}
+			return Script::ItemIndexError(2, index);
 		}
 		if (!strcmp(function, "particleCollideFloors"))
 		{
@@ -811,9 +951,9 @@ int LuaBridge::Call(const char* function)
 			{
 				auto item = &items[index];
 				part->TargetHoming(item, node, factor, accel, predict);
+				return 0;
 			}
-
-			return 0;
+			return Script::ItemIndexError(2, index);
 		}
 		if (!strcmp(function, "particleLimitSpeed"))
 		{
@@ -822,6 +962,11 @@ int LuaBridge::Call(const char* function)
 				return Script::TypeError(1, "Particle");
 			float speedMax = Script::ToNumber(2);
 			part->LimitSpeed(speedMax);
+			return 0;
+		}
+		if (!strcmp(function, "print"))
+		{
+			Script::Print();
 			return 0;
 		}
 		break;
@@ -847,7 +992,17 @@ int LuaBridge::Call(const char* function)
 			Script::PushNumber(sinf(Script::ToNumber(1)));
 			return 1;
 		}
+		if (!strcmp(function, "sqrt"))
+		{
+			float x = Script::ToNumber(1);
+			if (x < 0)
+				return Script::ArgError(1, Script::FormatString("received negative value \'%f\'", x));
+			Script::PushNumber(sqrtf(x));
+			return 1;
+		}
 		break;
 	}
+	
+		
 	return 0;
 }

@@ -65,7 +65,8 @@ struct Vector3i : public LuaObject
 enum TetherType
 {
 	TETHER_ROTATING,
-	TETHER_STATIC
+	TETHER_STATIC,
+	TETHER_NONE
 };
 
 
@@ -98,18 +99,17 @@ struct ParticleGroup : public LuaObject
 
 	NodeAttachment attach;
 
+	ushort groupIndex;
 	short spriteSlot;
 
 	int partLimit;
 	mutable int partCount;
 
 	DrawMode drawMode;
-	uchar blendingMode;
-	uchar groupIndex;
 
+	uchar blendingMode;
 	bool Saved;
 	bool ScreenSpace;
-	bool IsBoid;
 	bool LineIgnoreVel;
 
 	virtual int Index(const char* field) override;
@@ -126,13 +126,14 @@ struct BaseParticle : public LuaObject
 	Vector3f	vel;
 	Vector3f	accel;
 
+	ushort		groupIndex;
+
 	short		roomIndex;
 	short		lifeSpan;
 	short		lifeCounter;
 
 	short		emitterIndex;
 	char		emitterNode;
-	uchar		groupIndex;
 
 	// methods
 	float		Parameter();
@@ -167,17 +168,18 @@ struct BaseParticle : public LuaObject
 struct SpriteParticle : BaseParticle
 {
 	// fields
+	ushort		spriteIndex;
+
 	ushort		sizeStart;
 	ushort		sizeEnd;
 	ushort		sizeCust;
-	short		skew;
+	short		sizeRatio;
 
 	short		rot;
 	short		rotVel;
 
-	uchar		spriteIndex;
-	uchar		fadeIn;
-	uchar		fadeOut;
+	short		fadeIn;
+	short		fadeOut;
 
 	short		colorFadeTime;
 	ColorRGB	colStart;
@@ -218,12 +220,12 @@ struct MeshParticle : BaseParticle
 	// methods
 	virtual void Animate(int startMesh, int endMesh, int framerate) override;
 
-	void		AlignToVel(float factor, bool invert);
-	void		AlignToTarget(const Vector3f& v, float factor, bool invert);
-	void		Shatter();
+	void	AlignToVel(float factor, bool invert);
+	void	AlignToTarget(const Vector3f& v, float factor, bool invert);
+	void	Shatter();
 
 	// draw function
-	void		DrawMeshPart();
+	void	DrawMeshPart();
 
 	// boid-specific
 	virtual Vector3f BoidSeparationRule(float radius, float factor) override;
@@ -252,11 +254,13 @@ namespace ParticleFactory
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
+	extern PerlinNoise perlinNoise[];
 
 	extern FunctionType caller;
 
 	void ClearParts();
 	void ClearPartGroups();
+	void ClearPerlinNoise();
 
 	void InitParts();
 	void InitPartGroups();
@@ -272,4 +276,5 @@ namespace ParticleFactory
 	int GetFreeSpritePart();
 	int GetFreeMeshPart();
 	int GetFreeParticleGroup();
+	int GetFreePerlinNoise();
 };

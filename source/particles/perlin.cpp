@@ -61,7 +61,7 @@ void PerlinNoise::SeedPermut(int seed)
 }
 
 
-float PerlinNoise::Noise1D(float domainScale, float x)
+float PerlinNoise::Noise1D(float domainScale, float x) const
 {
 	if (domainScale) // scale the noise domain
 	{
@@ -84,7 +84,7 @@ float PerlinNoise::Noise1D(float domainScale, float x)
 }
 
 
-float PerlinNoise::Noise2D(float domainScale, float x, float y)
+float PerlinNoise::Noise2D(float domainScale, float x, float y) const
 {
 	if (domainScale)
 	{
@@ -119,7 +119,7 @@ float PerlinNoise::Noise2D(float domainScale, float x, float y)
 }
 
 
-float PerlinNoise::Noise3D(float domainScale, float x, float y, float z)
+float PerlinNoise::Noise3D(float domainScale, float x, float y, float z) const
 {
 	if (domainScale)
 	{
@@ -169,7 +169,7 @@ float PerlinNoise::Noise3D(float domainScale, float x, float y, float z)
 }
 
 
-float PerlinNoise::Noise4D(float domainScale, float x, float y, float z, float w)
+float PerlinNoise::Noise4D(float domainScale, float x, float y, float z, float w) const
 {
 	if (domainScale)
 	{
@@ -388,7 +388,7 @@ Vector3f PerlinNoise::NoiseGradient3D(float domainScale, float x, float y, float
 }
 
 
-Vector3f PerlinNoise::CurlNoise2D(float domainScale, float x, float y)
+Vector3f PerlinNoise::CurlNoise2D(float domainScale, float x, float y) const
 {
 	auto gradient = NoiseGradient2D(domainScale, x, y);
 
@@ -396,7 +396,7 @@ Vector3f PerlinNoise::CurlNoise2D(float domainScale, float x, float y)
 }
 
 
-Vector3f PerlinNoise::CurlNoise2DTime(float domainScale, float time, float x, float y)
+Vector3f PerlinNoise::CurlNoise2DTime(float domainScale, float time, float x, float y) const
 {
 	auto gradient = NoiseGradient3D(domainScale, x, y, time);
 
@@ -404,31 +404,12 @@ Vector3f PerlinNoise::CurlNoise2DTime(float domainScale, float time, float x, fl
 }
 
 
-Vector3f PerlinNoise::CurlNoise3DCheap(float domainScale, float x, float y, float z)
+Vector3f PerlinNoise::CurlNoise3D(float domainScale, float x, float y, float z) const
 {
-	auto curlXY = CurlNoise2D(domainScale, x, y);
-	auto curlYZ = CurlNoise2D(domainScale, y, z);
-	auto curlZX = CurlNoise2D(domainScale, z, x);
+	// get noise gradients at different offsets
+	auto gx = NoiseGradient3D(domainScale, x, y, z);
+	auto gy = NoiseGradient3D(domainScale, x - 123.4567f, y + 56.7891f, z - 345.6789f);
+	auto gz = NoiseGradient3D(domainScale, x + 56.7891f, y - 123.4567f, z + 345.6789f);
 
-	return Vector3f(curlXY.x + curlZX.y, curlYZ.x + curlXY.y, curlZX.x + curlYZ.y) * 0.5f;
-}
-
-
-Vector3f PerlinNoise::CurlNoise3DTime(float domainScale, float time, float x, float y, float z)
-{
-	auto curlXY = CurlNoise2DTime(domainScale, time, x, y);
-	auto curlYZ = CurlNoise2DTime(domainScale, time, y, z);
-	auto curlZX = CurlNoise2DTime(domainScale, time, z, x);
-
-	return Vector3f(curlXY.x + curlZX.y, curlYZ.x + curlXY.y, curlZX.x + curlYZ.y) * 0.5f;
-}
-
-
-Vector3f PerlinNoise::CurlNoise3DAccurate(const PerlinNoise& nx, const PerlinNoise& ny, const PerlinNoise& nz, float scale, const Vector3f& p)
-{
-	auto gradX = nx.NoiseGradient3D(scale, p.x, p.y, p.z);
-	auto gradY = ny.NoiseGradient3D(scale, p.x, p.y, p.z);
-	auto gradZ = nz.NoiseGradient3D(scale, p.x, p.y, p.z);
-
-	return ComputeCurl3D(gradX, gradY, gradZ);
+	return ComputeCurl3D(gx, gy, gz);
 }

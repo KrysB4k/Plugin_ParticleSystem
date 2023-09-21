@@ -23,11 +23,15 @@ namespace Script
 	bool ToBoolean(int argument);
 	float ToNumber(int argument);
 	void* ToData(int argument);
+	int ArgCount();
 	void ExecuteFunction(int reference, void* value);
 	int StoreFunction(int argument);
 	void Print();
 	void LoadFunctions(const char* filename);
 	int TypeError(int argument, const char* type);
+	int ArgError(int argument, const char* msg);
+	int ArgCountError(int expected);
+	int ItemIndexError(int argument, int index);
 	const char* FormatString(const char* format, ...);
 	int GarbageCount();
 	void PreFunctionLoop();

@@ -58,4 +58,4 @@ short RadToShort(float angle);
 
 float GetRandom();
 
-ushort ConvertTo16BitBGR(ColorRGB c);
+ushort ConvertTo16BitBGR(const ColorRGB& c);

@@ -408,7 +408,7 @@ float GetRandom()
 	return (float)mt() / (UINT_MAX);
 }
 
-ushort ConvertTo16BitBGR(ColorRGB c)
+ushort ConvertTo16BitBGR(const ColorRGB& c)
 {
 	ushort r = (c.R & 0xF8) >> 3;
 	ushort g = (c.G & 0xF8) << 2;

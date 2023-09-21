@@ -83,6 +83,8 @@ namespace ParticleFactory
 	MeshParticle meshParts[MAX_MESHPARTS];
 	int nextPartGroup;
 	ParticleGroup partGroups[MAX_PARTGROUPS];
+	int nextPerlinNoise;
+	PerlinNoise perlinNoise[MAX_PERLIN];
 
 	FunctionType caller;
 };
@@ -208,6 +210,21 @@ int ParticleFactory::GetFreeParticleGroup()
 }
 
 
+int ParticleFactory::GetFreePerlinNoise()
+{
+	int free;
+
+	free = nextPerlinNoise;
+	if (free < MAX_PERLIN)
+	{
+		nextPerlinNoise++;
+		perlinNoise[free] = PerlinNoise();
+		return free;
+	}
+	return -1;
+}
+
+
 void ParticleFactory::ClearParts()
 {
 	for (int i = 0; i < MAX_SPRITEPARTS; i++)
@@ -226,11 +243,26 @@ void ParticleFactory::ClearPartGroups()
 	nextPartGroup = 0;
 }
 
+void ParticleFactory::ClearPerlinNoise()
+{
+	for (int i = 0; i < MAX_PERLIN; i++)
+		perlinNoise[i] = PerlinNoise();
+	nextPerlinNoise = 0;
+}
+
 void ParticleFactory::UpdateParts()
 {
 	UpdateSprites();
 	UpdateMeshes();
 	gameTick++;
+}
+
+ulong randomHashInt(ulong i0)
+{
+	ulong z0 = (i0 * 1831267127) ^ i0;
+	ulong z1 = (z0 * 3915839201) ^ (z0 >> 20);
+	ulong z2 = (z1 * 1561867961) ^ (z1 >> 24);
+	return z2;
 }
 
 void ParticleFactory::UpdateSprites()
@@ -246,7 +278,7 @@ void ParticleFactory::UpdateSprites()
 
 		const auto& pgroup = partGroups[part->groupIndex];
 
-		if (part->emitterIndex >= 0 || part->emitterNode >= 0)
+		if (part->emitterIndex >= 0)
 		{
 			int cutoff = -1;
 
@@ -254,7 +286,7 @@ void ParticleFactory::UpdateSprites()
 			{
 				cutoff = pgroup.attach.cutoff;
 				if (pgroup.attach.random > 1)
-					cutoff += (GetRandomDraw() % pgroup.attach.random);
+					cutoff += (randomHashInt(1725364589 + i) % pgroup.attach.random);
 			}
 
 			if ((part->lifeSpan - part->lifeCounter) > cutoff)
@@ -307,7 +339,7 @@ void ParticleFactory::UpdateMeshes()
 
 		const auto& pgroup = partGroups[part->groupIndex];
 
-		if (part->emitterIndex >= 0 || part->emitterNode >= 0)
+		if (part->emitterIndex >= 0)
 		{
 			int cutoff = -1;
 
@@ -315,7 +347,7 @@ void ParticleFactory::UpdateMeshes()
 			{
 				cutoff = pgroup.attach.cutoff;
 				if (pgroup.attach.random > 1)
-					cutoff += (GetRandomDraw() % pgroup.attach.random);
+					cutoff += (randomHashInt(1725364589 + i) % pgroup.attach.random);
 			}
 
 			if ((part->lifeSpan - part->lifeCounter) > cutoff)
@@ -443,7 +475,7 @@ void ParticleFactory::DrawSprites()
 
 				vel *= size;
 
-				if (part->emitterIndex >= 0 || part->emitterNode >= 0)
+				if (part->emitterIndex >= 0)
 				{
 					if (pgroup.attach.tether == TETHER_ROTATING)
 					{
@@ -455,9 +487,9 @@ void ParticleFactory::DrawSprites()
 						{
 							int node = Clamp(part->emitterNode, 0, objects[item->object_number].nmeshes);
 
-							vel = GetJointPos(item, node, Round(vel.x), Round(vel.y), Round(vel.z));
+							vel = GetJointPos(item, node, Round(vel.x), Round(vel.y), Round(vel.z)) - GetJointPos(item, node, 0, 0, 0);
 						}
-						else if (part->emitterIndex >= 0) // no mesh node, use item's pos
+						else // no mesh node, use item's pos
 						{
 							vel = RotatePoint3D(vel, item->pos.xRot, item->pos.yRot, item->pos.zRot);
 						}
@@ -544,28 +576,26 @@ void BaseParticle::LimitSpeed(float speedMax)
 Vector3f BaseParticle::AbsPos()
 {
 	auto absPos = pos;
+	const auto& tether = ParticleFactory::partGroups[groupIndex].attach.tether;
 
-	if (emitterIndex >= 0 || emitterNode >= 0)
+	if (tether != TetherType::TETHER_NONE && emitterIndex >= 0 && emitterIndex < level_items)
 	{
-		auto item = lara_item;
-		if (emitterIndex >= 0 && emitterIndex < level_items)
-			item = &items[emitterIndex];
+		auto item = &items[emitterIndex];
 
-		const auto& pgroup = ParticleFactory::partGroups[groupIndex];
 		auto relPos = pos;
 
 		if (emitterNode >= 0) // if attached to specific mesh node of item
 		{
 			int node = Clamp(emitterNode, 0, objects[item->object_number].nmeshes);
 
-			if (pgroup.attach.tether == TetherType::TETHER_ROTATING)
+			if (tether == TetherType::TETHER_ROTATING)
 				relPos = GetJointPos(item, node, Round(relPos.x), Round(relPos.y), Round(relPos.z));
 			else
 				relPos += GetJointPos(item, node, 0, 0, 0);
 		}
-		else if (emitterIndex >= 0) // no mesh node, use item's pos
+		else // no mesh node, use item's pos
 		{
-			if (pgroup.attach.tether == TetherType::TETHER_ROTATING)
+			if (tether == TetherType::TETHER_ROTATING)
 				relPos = RotatePoint3D(relPos, item->pos.xRot, item->pos.yRot, item->pos.zRot);
 
 			relPos.x += item->pos.xPos;
@@ -582,39 +612,42 @@ Vector3f BaseParticle::AbsPos()
 
 void BaseParticle::Attach(int itemIndex, int node)
 {
-	auto item = lara_item;
+	Tr4ItemInfo* item = nullptr;
 	if (itemIndex >= 0 && itemIndex < level_items)
 		item = &items[itemIndex];
 	else
-		itemIndex = -1;
+		return;
 
+	node = Clamp(node, -1, objects[item->object_number].nmeshes);
+
+	const auto& tether = ParticleFactory::partGroups[groupIndex].attach.tether;
 	Vector3f relPos;
-	const auto& pgroup = ParticleFactory::partGroups[groupIndex];
 
-	if (node >= 0)
+	if (tether != TetherType::TETHER_NONE)
 	{
-		node = Clamp(node, 0, objects[item->object_number].nmeshes);
+		if (node >= 0)
+		{
+			if (tether == TetherType::TETHER_ROTATING)
+				relPos = GetJointPos(item, node, Round(relPos.x), Round(relPos.y), Round(relPos.z));
+			else
+				relPos += GetJointPos(item, node, 0, 0, 0);
+		}
+		else if (itemIndex >= 0)
+		{
+			if (tether == TetherType::TETHER_ROTATING)
+				relPos = RotatePoint3D(relPos, item->pos.xRot, item->pos.yRot, item->pos.zRot);
 
-		if (pgroup.attach.tether == TetherType::TETHER_ROTATING)
-			relPos = GetJointPos(item, node, Round(relPos.x), Round(relPos.y), Round(relPos.z));
-		else
-			relPos += GetJointPos(item, node, 0, 0, 0);
-	}
-	else if (itemIndex >= 0)
-	{
-		if (pgroup.attach.tether == TetherType::TETHER_ROTATING)
-			relPos = RotatePoint3D(relPos, item->pos.xRot, item->pos.yRot, item->pos.zRot);
+			relPos.x += item->pos.xPos;
+			relPos.y += item->pos.yPos;
+			relPos.z += item->pos.zPos;
 
-		relPos.x += item->pos.xPos;
-		relPos.y += item->pos.yPos;
-		relPos.z += item->pos.zPos;
-
-		node = -1;
+			node = -1;
+		}
 	}
 
 	pos = (AbsPos() - relPos);
 	emitterIndex = itemIndex;
-	emitterNode = node;
+	emitterNode = (char)node;
 }
 
 
@@ -629,7 +662,9 @@ void BaseParticle::Detach()
 
 bool BaseParticle::CollideWalls(float rebound)
 {
-	if (emitterIndex < 0 && emitterNode < 0)
+	const auto& tether = ParticleFactory::partGroups[groupIndex].attach.tether;
+
+	if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 	{
 		rebound = Clamp(rebound, 0.0f, 1.0f);
 
@@ -670,7 +705,9 @@ bool BaseParticle::CollideWalls(float rebound)
 
 bool BaseParticle::CollideFloors(float rebound, float minBounce, int collMargin, bool accurate)
 {
-	if (emitterIndex < 0 && emitterNode < 0)
+	const auto& tether = ParticleFactory::partGroups[groupIndex].attach.tether;
+
+	if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 	{
 		rebound = Clamp(rebound, 0.0f, 1.0f);
 		if (minBounce < 0)
@@ -726,10 +763,10 @@ bool BaseParticle::CollideFloors(float rebound, float minBounce, int collMargin,
 
 bool BaseParticle::CollidedWithItem(Tr4ItemInfo* item, int radius)
 {
-	if (item && emitterIndex < 0 && emitterNode < 0)
+	if (item)
 	{
 		StrBoxCollisione* bounds = GetBoundsAccurate((StrItemTr4*)item);
-		auto p = Round(pos);
+		auto p = Round(AbsPos());
 
 		int y = p.y - item->pos.yPos;
 		if (y >= bounds->MinY - radius && y <= bounds->MaxY + radius)
@@ -1139,9 +1176,9 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 
 		float xsize = 0.5f, ysize = 0.5f;
 
-		if (skew)
+		if (sizeRatio)
 		{
-			xsize = (skew + 32768.0f) / 65536.0f;
+			xsize = (sizeRatio + 32768.0f) / 65536.0f;
 			ysize = 1 - xsize;
 		}
 
@@ -1209,7 +1246,9 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 			v[2].specular = 0xFF000000;
 			v[3].specular = 0xFF000000;
 
-			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
+			int spriteNum = Clamp(spriteIndex, 0, (-objects[pgroup.spriteSlot].nmeshes) - 1);
+
+			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteNum);
 
 			TextureStruct tex;
 
@@ -1303,19 +1342,20 @@ void MeshParticle::AlignToTarget(const Vector3f& v, float factor, bool invert)
 
 void MeshParticle::Shatter()
 {
+	static Tr4ShatterItem shatter;
 	int meshindex = objects[object].mesh_index + (mesh * 2);
 	short** meshpp = &meshes[meshindex];
-	ShatterItem.meshp = *meshpp;
+	shatter.meshp = *meshpp;
 
 	auto p = Round(pos);
-	ShatterItem.sphere.x = p.x;
-	ShatterItem.sphere.y = p.y;
-	ShatterItem.sphere.z = p.z;
-	ShatterItem.yRot = rot.y;
+	shatter.sphere.x = p.x;
+	shatter.sphere.y = p.y;
+	shatter.sphere.z = p.z;
+	shatter.yRot = rot.y;
 
-	ShatterItem.bit = 0;
-	ShatterItem.flags = 0;
-	ShatterObject(&ShatterItem, 0, -32, roomIndex, 0);
+	shatter.bit = 0;
+	shatter.flags = 0;
+	ShatterObject(&shatter, 0, -32, roomIndex, 0);
 
 	lifeCounter = 1;
 }

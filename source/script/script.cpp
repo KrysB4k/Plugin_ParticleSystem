@@ -78,6 +78,11 @@ void* Script::ToData(int argument)
 	return lua_touserdata(lua, argument + 1);
 }
 
+int Script::ArgCount()
+{
+	return (lua_gettop(lua) - 1);
+}
+
 void Script::ExecuteFunction(int reference, void* value)
 {
 	if (reference != LUA_REFNIL)
@@ -133,6 +138,21 @@ void Script::LoadFunctions(const char* filename)
 int Script::TypeError(int argument, const char* type)
 {
 	return luaL_typeerror(lua, argument + 1, type);
+}
+
+int Script::ArgError(int argument, const char* msg)
+{
+	return luaL_argerror(lua, argument + 1, msg);
+}
+
+int Script::ArgCountError(int expected)
+{
+	return luaL_error(lua, "in function \'%s\': %d arguments received, %d expected", lua_tostring(lua, 1), ArgCount(), expected);
+}
+
+int Script::ItemIndexError(int argument, int index)
+{
+	return ArgError(argument, FormatString("index \'%d\' does not correspond to level item", index));
 }
 
 const char* Script::FormatString(const char* format, ...)

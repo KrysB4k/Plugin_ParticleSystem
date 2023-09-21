@@ -1,8 +1,6 @@
 #pragma once
 
-struct Vector3f;
-
-class PerlinNoise
+class PerlinNoise : public LuaObject
 {
 public:
 	PerlinNoise();
@@ -15,21 +13,20 @@ public:
 	void SeedPermut(int seed);
 	
 	// get single (scalar) noise value for n-dimensional input
-	float Noise1D(float domainScale, float x);
-	float Noise2D(float domainScale, float x, float y);
-	float Noise3D(float domainScale, float x, float y, float z);
-	float Noise4D(float domainScale, float x, float y, float z, float w);
+	float Noise1D(float domainScale, float x) const;
+	float Noise2D(float domainScale, float x, float y) const;
+	float Noise3D(float domainScale, float x, float y, float z) const;
+	float Noise4D(float domainScale, float x, float y, float z, float w) const;
 
 	// get curl noise vector for 2D input
-	Vector3f CurlNoise2D(float domainScale, float x, float y);
-	Vector3f CurlNoise2DTime(float domainScale, float time, float x, float y);
+	Vector3f CurlNoise2D(float domainScale, float x, float y) const;
+	Vector3f CurlNoise2DTime(float domainScale, float time, float x, float y) const;
 
-	// get cheap "curl" noise 3D vector (not true curl noise)
-	Vector3f CurlNoise3DCheap(float domainScale, float x, float y, float z);
-	Vector3f CurlNoise3DTime(float domainScale, float time, float x, float y, float z);
+	// get curl noise vector for 3D input
+	Vector3f CurlNoise3D(float domainScale, float x, float y, float z) const;
 
-	// get true curl noise 3D vector (requires sampling 3 noise gradients)
-	static Vector3f CurlNoise3DAccurate(const PerlinNoise& nx, const PerlinNoise& ny, const PerlinNoise& nz, float scale, const Vector3f& p);
+	virtual int Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
 
 private:
 
