@@ -651,11 +651,21 @@ void PerlinNoise::NewIndex(const char* field)
 
 }
 
+int SimplexNoise::Index(const char* field)
+{
+	return 0;
+}
+
+void SimplexNoise::NewIndex(const char* field)
+{
+
+}
+
 int LuaBridge::Call(const char* function)
 {
 	int i, init, update;
 	ParticleGroup* group;
-	PerlinNoise* perlin;
+	BaseNoise* noise;
 	float lower, upper;
 
 	switch (function[0])
@@ -783,6 +793,22 @@ int LuaBridge::Call(const char* function)
 			Script::PushData(&ParticleFactory::perlinNoise[i]);
 			return 1;
 		}
+		if (!strcmp(function, "createSimplexNoise"))
+		{
+			if (ParticleFactory::caller != FUNCTION_LIBRARY)
+				return 0;
+			i = ParticleFactory::GetFreeSimplexNoise();
+			if (i == -1)
+				return 0;
+
+			if (Script::ArgCount())
+			{
+				int seed = Script::ToInteger(1);
+				ParticleFactory::simplexNoise[i].SeedPermut(seed);
+			}
+			Script::PushData(&ParticleFactory::simplexNoise[i]);
+			return 1;
+		}
 		if (!strcmp(function, "createSpritePart"))
 		{
 			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
@@ -844,9 +870,9 @@ int LuaBridge::Call(const char* function)
 		if (!strcmp(function, "noise"))
 		{
 			float scale, x, y, z, w;
-			perlin = dynamic_cast<PerlinNoise*>((LuaObject*)Script::ToData(1));
-			if (!perlin)
-				return Script::TypeError(1, "PerlinNoise");
+			noise = dynamic_cast<BaseNoise*>((LuaObject*)Script::ToData(1));
+			if (!noise)
+				return Script::TypeError(1, "NoiseObject");
 
 			int count = Script::ArgCount();
 			if (count < 3)
@@ -857,14 +883,22 @@ int LuaBridge::Call(const char* function)
 			case 3:
 				scale = Script::ToNumber(2);
 				x = Script::ToNumber(3);
-				Script::PushNumber(perlin->Noise1D(scale, x));
+				if (scale)
+					x /= scale;
+				Script::PushNumber(noise->Noise1D(x));
 				return 1;
 
 			case 4:
 				scale = Script::ToNumber(2);
 				x = Script::ToNumber(3);
 				y = Script::ToNumber(4);
-				Script::PushNumber(perlin->Noise2D(scale, x, y));
+				if (scale)
+				{
+					scale = 1.0f / scale;
+					x *= scale;
+					y *= scale;
+				}
+				Script::PushNumber(noise->Noise2D(x, y));
 				return 1;
 
 			case 5:
@@ -872,7 +906,14 @@ int LuaBridge::Call(const char* function)
 				x = Script::ToNumber(3);
 				y = Script::ToNumber(4);
 				z = Script::ToNumber(5);
-				Script::PushNumber(perlin->Noise3D(scale, x, y, z));
+				if (scale)
+				{
+					scale = 1.0f / scale;
+					x *= scale;
+					y *= scale;
+					z *= scale;
+				}
+				Script::PushNumber(noise->Noise3D(x, y, z));
 				return 1;
 
 			default:
@@ -881,7 +922,15 @@ int LuaBridge::Call(const char* function)
 				y = Script::ToNumber(4);
 				z = Script::ToNumber(5);
 				w = Script::ToNumber(6);
-				Script::PushNumber(perlin->Noise4D(scale, x, y, z, w));
+				if (scale)
+				{
+					scale = 1.0f / scale;
+					x *= scale;
+					y *= scale;
+					z *= scale;
+					w *= scale;
+				}
+				Script::PushNumber(noise->Noise4D(x, y, z, w));
 				return 1;
 			}
 		}

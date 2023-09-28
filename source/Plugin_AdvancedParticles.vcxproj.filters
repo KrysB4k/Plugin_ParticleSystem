@@ -57,10 +57,10 @@
     <ClCompile Include="trng\trng.cpp">
       <Filter>Source Files\trng</Filter>
     </ClCompile>
-    <ClCompile Include="particles\perlin.cpp">
+    <ClCompile Include="particles\luabridge.cpp">
       <Filter>Source Files\particles</Filter>
     </ClCompile>
-    <ClCompile Include="particles\luabridge.cpp">
+    <ClCompile Include="particles\noise.cpp">
       <Filter>Source Files\particles</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,7 +116,7 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="particles\perlin.h">
+    <ClInclude Include="particles\noise.h">
       <Filter>Header Files\particles</Filter>
     </ClInclude>
   </ItemGroup>

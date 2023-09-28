@@ -255,6 +255,7 @@ namespace ParticleFactory
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
 	extern PerlinNoise perlinNoise[];
+	extern SimplexNoise simplexNoise[];
 
 	extern FunctionType caller;
 
@@ -277,4 +278,5 @@ namespace ParticleFactory
 	int GetFreeMeshPart();
 	int GetFreeParticleGroup();
 	int GetFreePerlinNoise();
+	int GetFreeSimplexNoise();
 };

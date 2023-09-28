@@ -85,6 +85,8 @@ namespace ParticleFactory
 	ParticleGroup partGroups[MAX_PARTGROUPS];
 	int nextPerlinNoise;
 	PerlinNoise perlinNoise[MAX_PERLIN];
+	int nextSimplexNoise;
+	SimplexNoise simplexNoise[MAX_SIMPLEX];
 
 	FunctionType caller;
 };
@@ -219,6 +221,21 @@ int ParticleFactory::GetFreePerlinNoise()
 	{
 		nextPerlinNoise++;
 		perlinNoise[free] = PerlinNoise();
+		return free;
+	}
+	return -1;
+}
+
+
+int ParticleFactory::GetFreeSimplexNoise()
+{
+	int free;
+
+	free = nextSimplexNoise;
+	if (free < MAX_SIMPLEX)
+	{
+		nextSimplexNoise++;
+		simplexNoise[free] = SimplexNoise();
 		return free;
 	}
 	return -1;
