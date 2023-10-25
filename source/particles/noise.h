@@ -1,21 +1,14 @@
 #pragma once
 
-class BaseNoise : public LuaObject
+typedef unsigned char uchar;
+
+class Noise
 {
 public:
-	// get single (scalar) noise value for n-dimensional input
-	virtual float Noise1D(float x) const = 0;
-	virtual float Noise2D(float x, float y) const = 0;
-	virtual float Noise3D(float x, float y, float z) const = 0;
-	virtual float Noise4D(float x, float y, float z, float w) const = 0;
-
-	// get curl noise vector for 2D input
-	virtual Vector3f CurlNoise2D(float x, float y) const = 0;
-	virtual Vector3f CurlNoise2DTime(float time, float x, float y) const = 0; // evolve noise with time
-
-	// get curl noise vector for 3D input
-	virtual Vector3f CurlNoise3D(float x, float y, float z) const = 0;
-	virtual Vector3f CurlNoise3DTime(float time, float x, float y, float z) const = 0; // evolve noise with time
+	Noise()
+	{
+		ReferencePermut();
+	}
 
 	// reset to reference permutation table
 	void ReferencePermut();
@@ -23,51 +16,51 @@ public:
 	// generate a new, seed-based permutation table
 	void SeedPermut(int seed);
 
-protected:
+	// get single (scalar) noise value for n-dimensional input
 
-	unsigned char permut[512];
+	float PerlinNoise1D(float x) const;
+	float PerlinNoise2D(float x, float y) const;
+	float PerlinNoise3D(float x, float y, float z) const;
+	float PerlinNoise4D(float x, float y, float z, float w) const;
 
-	BaseNoise()
-	{
-		ReferencePermut();
-	}
+	float SimplexNoise1D(float x) const;
+	float SimplexNoise2D(float x, float y) const;
+	float SimplexNoise3D(float x, float y, float z) const;
+	float SimplexNoise4D(float x, float y, float z, float w) const;
 
-	BaseNoise(int seed)
-	{
-		SeedPermut(seed);
-	}
-};
+	// get curl noise vector (2D or 3D)
 
-
-class PerlinNoise : public BaseNoise
-{
-public:
-
-	PerlinNoise() : BaseNoise() {}
-	PerlinNoise(int seed) : BaseNoise(seed) {}
-
-	virtual float Noise1D(float x) const override;
-	virtual float Noise2D(float x, float y) const override;
-	virtual float Noise3D(float x, float y, float z) const override;
-	virtual float Noise4D(float x, float y, float z, float w) const override;
-
-	virtual Vector3f CurlNoise2D(float x, float y) const override;
-	virtual Vector3f CurlNoise2DTime(float time, float x, float y) const override;
-
-	virtual Vector3f CurlNoise3D(float x, float y, float z) const override;
-	virtual Vector3f CurlNoise3DTime(float time, float x, float y, float z) const override;
-
-	virtual int Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
+	Vector3f PerlinCurl2D(float x, float y) const;
+	Vector3f PerlinCurl2DTime(float time, float x, float y) const; // evolve noise with time
+	Vector3f PerlinCurl3D(float x, float y, float z) const;
+	Vector3f PerlinCurl3DTime(float time, float x, float y, float z) const; // evolve noise with time
+	
+	Vector3f SimplexCurl2D(float x, float y) const;
+	Vector3f SimplexCurl2DTime(float time, float x, float y) const; // evolve noise with time
+	Vector3f SimplexCurl3D(float x, float y, float z) const;
+	Vector3f SimplexCurl3DTime(float time, float x, float y, float z) const; // evolve noise with time
 
 private:
 
-	// get noise analytical derivatives - used for curl noise computation
-	Vector3f NoiseGradient2D(float x, float y) const;
-	Vector3f NoiseGradient3D(float x, float y, float z) const;
-	Vector3f NoiseGradient4D(float x, float y, float z, float w) const;
+	uchar permut[512]; // permutation table
+
+	Vector3f PerlinGradient2D(float x, float y) const;
+	Vector3f PerlinGradient3D(float x, float y, float z) const;
+	Vector3f PerlinGradient4D(float x, float y, float z, float w) const;
+
+	Vector3f SimplexGradient2D(float x, float y) const;
+	Vector3f SimplexGradient3D(float x, float y, float z) const;
+	Vector3f SimplexGradient4D(float x, float y, float z, float w) const;
 
 	static inline int fastfloor(float x) { int xi = static_cast<int>(x); return (x < xi ? xi - 1 : xi); }
+
+	static inline Vector3f computecurl3D(const Vector3f& gradX, const Vector3f& gradY, const Vector3f& gradZ)
+	{
+		return Vector3f(gradZ.y - gradY.z, gradX.z - gradZ.x, gradY.x - gradX.y);
+	}
+
+
+	/******** Perlin implementation stuff ********/
 
 	static inline float fade(float t) { return (t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f)); }
 
@@ -81,16 +74,17 @@ private:
 	{
 		switch (hash & 7)
 		{
-		case 0:		return (xf);
-		case 1:		return (xf + yf);
-		case 2:		return (yf);
-		case 3:		return (-xf + yf);
-		case 4:		return (-xf);
-		case 5:		return (-xf - yf);
-		case 6:		return (-yf);
-		case 7:		return (xf - yf);
-		default:	return  0.0f;
+		case 0:		return (xf + yf);
+		case 1:		return (yf);
+		case 2:		return (-xf + yf);
+		case 3:		return (-xf);
+		case 4:		return (-xf - yf);
+		case 5:		return (-yf);
+		case 6:		return (xf - yf);
+		case 7:		return (xf);
 		}
+
+		return 0.0f; // this return should never occur
 	}
 
 	static inline float dot3D(int hash, float xf, float yf, float zf)
@@ -113,8 +107,9 @@ private:
 		case 13:	return (-yf + zf);
 		case 14:	return (yf - xf);
 		case 15:	return (-yf - zf);
-		default:	return  0.0f;
 		}
+
+		return 0.0f;
 	}
 
 	static inline float dot4D(int hash, float xf, float yf, float zf, float wf)
@@ -153,27 +148,29 @@ private:
 		case 29:	return (-yf + zf - wf);
 		case 30:	return (yf - zf - wf);
 		case 31:	return (-yf - zf - wf);
-		default:	return  0.0f;
 		}
+
+		return 0.0f;
 	}
 
-	static inline Vector3f grad2D(int hash)
+	static inline Vector3f gradVec2D(int hash)
 	{
 		switch (hash & 7)
 		{
-		case 0:		return Vector3f(1, 0, 0);
-		case 1:		return Vector3f(1, 1, 0);
-		case 2:		return Vector3f(0, 1, 0);
-		case 3:		return Vector3f(-1, 1, 0);
-		case 4:		return Vector3f(-1, 0, 0);
-		case 5:		return Vector3f(-1, -1, 0);
-		case 6:		return Vector3f(0, -1, 0);
-		case 7:		return Vector3f(1, -1, 0);
-		default:	return Vector3f();
+		case 0:		return Vector3f(1, 1, 0);
+		case 1:		return Vector3f(0, 1, 0);
+		case 2:		return Vector3f(-1, 1, 0);
+		case 3:		return Vector3f(-1, 0, 0);
+		case 4:		return Vector3f(-1, -1, 0);
+		case 5:		return Vector3f(0, -1, 0);
+		case 6:		return Vector3f(1, -1, 0);
+		case 7:		return Vector3f(1, 0, 0);
 		}
+
+		return Vector3f();
 	}
 
-	static inline Vector3f grad3D(int hash)
+	static inline Vector3f gradVec3D(int hash)
 	{
 		switch (hash & 15)
 		{
@@ -193,16 +190,12 @@ private:
 		case 13:	return Vector3f(0, -1, 1);
 		case 14:	return Vector3f(-1, 1, 0);
 		case 15:	return Vector3f(0, -1, -1);
-		default:	return Vector3f();
 		}
+
+		return Vector3f();
 	}
 
-	static inline Vector3f ComputeCurl3D(const Vector3f& gradX, const Vector3f& gradY, const Vector3f& gradZ)
-	{
-		return Vector3f(gradZ.y - gradY.z, gradX.z - gradZ.x, gradY.x - gradX.y);
-	}
-
-	struct Vector4f
+	struct Vector4f // helper struct
 	{
 		float x, y, z, w;
 
@@ -212,7 +205,7 @@ private:
 		Vector4f operator*(float a) { return Vector4f(x * a, y * a, z * a, w * a); }
 	};
 
-	static inline Vector4f grad4D(int hash)
+	static inline Vector4f gradVec4D(int hash)
 	{
 		switch (hash & 31)
 		{
@@ -248,39 +241,18 @@ private:
 		case 29:	return Vector4f(0, -1, 1, -1);
 		case 30:	return Vector4f(0, 1, -1, -1);
 		case 31:	return Vector4f(0, -1, -1, -1);
-		default:	return Vector4f(0, 0, 0, 0);
 		}
+
+		return Vector4f(0, 0, 0, 0);
 	}
-};
 
 
-class SimplexNoise : public BaseNoise
-{
-public:
-
-	SimplexNoise() : BaseNoise() {}
-	SimplexNoise(int seed) : BaseNoise(seed) {}
-
-	virtual float Noise1D(float x) const override;
-	virtual float Noise2D(float x, float y) const override;
-	virtual float Noise3D(float x, float y, float z) const override;
-	virtual float Noise4D(float x, float y, float z, float w) const override;
-
-	virtual Vector3f CurlNoise2D(float x, float y) const override;
-	virtual Vector3f CurlNoise2DTime(float time, float x, float y) const override;
-
-	virtual Vector3f CurlNoise3D(float x, float y, float z) const override;
-	virtual Vector3f CurlNoise3DTime(float time, float x, float y, float z) const override;
-
-	virtual int Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
-
-private:
+	/******** Simplex implementation stuff ********/
 
 	static const float grad2lut[8][2]; // 2D gradient lookup table
 	static const float grad3lut[16][3]; // 3D gradient lookup table
 	static const float grad4lut[32][4]; // 4D gradient lookup table
-	static const char simplex[64][4]; // 4D simplex traversal table
+	static const uchar simplexlut[64][4]; // 4D simplex traversal table
 
 	static constexpr float F2 = 0.366025403f; // 2D skew factor
 	static constexpr float G2 = 0.211324865f; // 2D unskew factor
@@ -290,13 +262,6 @@ private:
 
 	static constexpr float F4 = 0.309016994f; // 4D skew factor
 	static constexpr float G4 = 0.138196601f; // 4D unskew factor
-
-	// get noise analytical derivatives - used for curl noise computation
-	Vector3f NoiseGradient2D(float x, float y) const;
-	Vector3f NoiseGradient3D(float x, float y, float z) const;
-	Vector3f NoiseGradient4D(float x, float y, float z, float w) const;
-
-	static inline int fastfloor(float x) { int xi = static_cast<int>(x); return (x < xi ? xi - 1 : xi); }
 
 	static inline void grad1(int hash, float& gx) {
 		int h = hash & 15;
@@ -323,10 +288,5 @@ private:
 		gy = grad4lut[h][1];
 		gz = grad4lut[h][2];
 		gw = grad4lut[h][3];
-	}
-
-	static inline Vector3f ComputeCurl3D(const Vector3f& gradX, const Vector3f& gradY, const Vector3f& gradZ)
-	{
-		return Vector3f(gradZ.y - gradY.z, gradX.z - gradZ.x, gradY.x - gradX.y);
 	}
 };

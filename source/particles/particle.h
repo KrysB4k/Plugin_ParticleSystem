@@ -251,17 +251,16 @@ namespace ParticleFactory
 {
 	extern ulong gameTick;
 
+	extern Noise noise;
+
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
-	extern PerlinNoise perlinNoise[];
-	extern SimplexNoise simplexNoise[];
 
 	extern FunctionType caller;
 
 	void ClearParts();
 	void ClearPartGroups();
-	void ClearPerlinNoise();
 
 	void InitParts();
 	void InitPartGroups();
@@ -277,6 +276,4 @@ namespace ParticleFactory
 	int GetFreeSpritePart();
 	int GetFreeMeshPart();
 	int GetFreeParticleGroup();
-	int GetFreePerlinNoise();
-	int GetFreeSimplexNoise();
 };

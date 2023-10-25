@@ -77,16 +77,14 @@ namespace ParticleFactory
 {
 	ulong gameTick;
 
+	Noise noise;
+
 	int nextSpritePart;
 	SpriteParticle spriteParts[MAX_SPRITEPARTS];
 	int nextMeshPart;
 	MeshParticle meshParts[MAX_MESHPARTS];
 	int nextPartGroup;
 	ParticleGroup partGroups[MAX_PARTGROUPS];
-	int nextPerlinNoise;
-	PerlinNoise perlinNoise[MAX_PERLIN];
-	int nextSimplexNoise;
-	SimplexNoise simplexNoise[MAX_SIMPLEX];
 
 	FunctionType caller;
 };
@@ -211,37 +209,6 @@ int ParticleFactory::GetFreeParticleGroup()
 	return -1;
 }
 
-
-int ParticleFactory::GetFreePerlinNoise()
-{
-	int free;
-
-	free = nextPerlinNoise;
-	if (free < MAX_PERLIN)
-	{
-		nextPerlinNoise++;
-		perlinNoise[free] = PerlinNoise();
-		return free;
-	}
-	return -1;
-}
-
-
-int ParticleFactory::GetFreeSimplexNoise()
-{
-	int free;
-
-	free = nextSimplexNoise;
-	if (free < MAX_SIMPLEX)
-	{
-		nextSimplexNoise++;
-		simplexNoise[free] = SimplexNoise();
-		return free;
-	}
-	return -1;
-}
-
-
 void ParticleFactory::ClearParts()
 {
 	for (int i = 0; i < MAX_SPRITEPARTS; i++)
@@ -258,13 +225,6 @@ void ParticleFactory::ClearPartGroups()
 	for (int i = 0; i < MAX_PARTGROUPS; i++)
 		partGroups[i] = ParticleGroup();
 	nextPartGroup = 0;
-}
-
-void ParticleFactory::ClearPerlinNoise()
-{
-	for (int i = 0; i < MAX_PERLIN; i++)
-		perlinNoise[i] = PerlinNoise();
-	nextPerlinNoise = 0;
 }
 
 void ParticleFactory::UpdateParts()
@@ -295,7 +255,7 @@ void ParticleFactory::UpdateSprites()
 
 		const auto& pgroup = partGroups[part->groupIndex];
 
-		if (part->emitterIndex >= 0)
+		if (part->emitterIndex >= 0 && !pgroup.ScreenSpace)
 		{
 			int cutoff = -1;
 
@@ -332,6 +292,9 @@ void ParticleFactory::UpdateSprites()
 
 		Script::ExecuteFunction(pgroup.updateIndex, part);
 
+		if (pgroup.ScreenSpace)
+			part->vel.z = part->accel.z = 0;
+
 		part->vel += part->accel;
 		part->pos += part->vel;
 		part->rot += part->rotVel;
@@ -356,7 +319,7 @@ void ParticleFactory::UpdateMeshes()
 
 		const auto& pgroup = partGroups[part->groupIndex];
 
-		if (part->emitterIndex >= 0)
+		if (part->emitterIndex >= 0 && !pgroup.ScreenSpace)
 		{
 			int cutoff = -1;
 
@@ -372,6 +335,9 @@ void ParticleFactory::UpdateMeshes()
 		}
 
 		Script::ExecuteFunction(pgroup.updateIndex, part);
+
+		if (pgroup.ScreenSpace)
+			part->vel.z = part->accel.z = 0;
 
 		part->vel += part->accel;
 		part->pos += part->vel;

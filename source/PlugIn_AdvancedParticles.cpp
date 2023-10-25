@@ -116,7 +116,6 @@ void cbInitGame(void)
 	// this procedure will be called only once, before loading title level
 
 	ParticleFactory::ClearParts();
-	ParticleFactory::ClearPerlinNoise();
 	ParticleFactory::ClearPartGroups();
 	ParticleFactory::InitPartGroups();
 }
