@@ -1001,7 +1001,7 @@ int LuaBridge::Call(const char* function)
 				Script::PushNumber(ParticleFactory::noise.PerlinNoise3D(x, y, z));
 				return 1;
 
-			case 5:
+			default:
 				scale = GetNumber(1);
 				x = GetNumber(2);
 				y = GetNumber(3);
