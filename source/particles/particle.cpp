@@ -35,15 +35,15 @@ void Diagnostics::SetPeaks()
 
 void Diagnostics::Print()
 {
-	PrintString(8, 2 * font_height, 6, (char*)Script::FormatString("Init: %.1f", initTime), 0);
-	PrintString(8, 3 * font_height, 6, (char*)Script::FormatString("    peak: %.1f", initTimePeak), 0);
-	PrintString(8, 4 * font_height, 6, (char*)Script::FormatString("Update: %.1f", updateTime), 0);
-	PrintString(8, 5 * font_height, 6, (char*)Script::FormatString("    peak: %.1f", updateTimePeak), 0);
-	PrintString(8, 6 * font_height, 6, (char*)Script::FormatString("Draw: %.1f", drawTime), 0);
-	PrintString(8, 7 * font_height, 6, (char*)Script::FormatString("    peak: %.1f", drawTimePeak), 0);
-	PrintString(8, 10 * font_height, 6, (char*)Script::FormatString("Sprite Particles: %d", activeSpriteParticles), 0);
-	PrintString(8, 11 * font_height, 6, (char*)Script::FormatString("Mesh Particles: %d", activeMeshParticles), 0);
-	PrintString(8, 12 * font_height, 6, (char*)Script::FormatString("Memory: %d", Script::GarbageCount()), 0);
+	PrintString(8, 2 * font_height, 6, (char*)FormatString("Init: %.1f", initTime), 0);
+	PrintString(8, 3 * font_height, 6, (char*)FormatString("    peak: %.1f", initTimePeak), 0);
+	PrintString(8, 4 * font_height, 6, (char*)FormatString("Update: %.1f", updateTime), 0);
+	PrintString(8, 5 * font_height, 6, (char*)FormatString("    peak: %.1f", updateTimePeak), 0);
+	PrintString(8, 6 * font_height, 6, (char*)FormatString("Draw: %.1f", drawTime), 0);
+	PrintString(8, 7 * font_height, 6, (char*)FormatString("    peak: %.1f", drawTimePeak), 0);
+	PrintString(8, 10 * font_height, 6, (char*)FormatString("Sprite Particles: %d", activeSpriteParticles), 0);
+	PrintString(8, 11 * font_height, 6, (char*)FormatString("Mesh Particles: %d", activeMeshParticles), 0);
+	PrintString(8, 12 * font_height, 6, (char*)FormatString("Memory: %d", Script::GarbageCount()), 0);
 }
 
 void Diagnostics::Initialise()
@@ -253,7 +253,7 @@ void ParticleFactory::UpdateSprites()
 		if (part->lifeCounter <= 0)
 			continue;
 
-		const auto& pgroup = partGroups[part->groupIndex];
+		auto& pgroup = partGroups[part->groupIndex];
 
 		if (part->emitterIndex >= 0 && !pgroup.ScreenSpace)
 		{
@@ -290,7 +290,8 @@ void ParticleFactory::UpdateSprites()
 		t = part->Parameter();
 		part->sizeCust = Round(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
 
-		Script::ExecuteFunction(pgroup.updateIndex, part);
+		if (!Script::ExecuteFunction(pgroup.updateIndex, part))
+			Script::DeleteFunction(&pgroup.updateIndex);
 
 		if (pgroup.ScreenSpace)
 			part->vel.z = part->accel.z = 0;
@@ -317,7 +318,7 @@ void ParticleFactory::UpdateMeshes()
 		if (part->lifeCounter <= 0)
 			continue;
 
-		const auto& pgroup = partGroups[part->groupIndex];
+		auto& pgroup = partGroups[part->groupIndex];
 
 		if (part->emitterIndex >= 0 && !pgroup.ScreenSpace)
 		{
@@ -334,7 +335,8 @@ void ParticleFactory::UpdateMeshes()
 				part->Detach();
 		}
 
-		Script::ExecuteFunction(pgroup.updateIndex, part);
+		if (!Script::ExecuteFunction(pgroup.updateIndex, part))
+			Script::DeleteFunction(&pgroup.updateIndex);
 
 		if (pgroup.ScreenSpace)
 			part->vel.z = part->accel.z = 0;
@@ -526,7 +528,10 @@ void ParticleFactory::InitParts()
 	ParticleFactory::caller = FUNCTION_INIT;
 	Script::PreFunctionLoop();
 	for (int i = 0; i < nextPartGroup; i++)
-		Script::ExecuteFunction(partGroups[i].initIndex, nullptr);
+	{
+		if (!Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
+			Script::DeleteFunction(&partGroups[i].initIndex);
+	}
 	Script::PostFunctionLoop();
 }
 

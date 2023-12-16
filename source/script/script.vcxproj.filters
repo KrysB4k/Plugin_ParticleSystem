@@ -30,7 +30,7 @@
     <ClInclude Include="lua\lua.hpp">
       <Filter>Header Files\lua</Filter>
     </ClInclude>
-    <ClInclude Include="internal.h">
+    <ClInclude Include="logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -137,7 +137,7 @@
     <ClCompile Include="lua\lzio.c">
       <Filter>Source Files\lua</Filter>
     </ClCompile>
-    <ClCompile Include="internal.cpp">
+    <ClCompile Include="logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -415,3 +415,14 @@ ushort ConvertTo16BitBGR(const ColorRGB& c)
 	ushort b = (c.B & 0xF8) << 7;
 	return b | g | r;
 }
+
+const char* FormatString(const char* format, ...)
+{
+	static char buffer[4096];
+	va_list args;
+
+	va_start(args, format);
+	vsnprintf(buffer, 4096, format, args);
+	va_end(args);
+	return buffer;
+}

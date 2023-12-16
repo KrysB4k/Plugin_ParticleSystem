@@ -30,7 +30,7 @@ namespace Diagnostics
 
 // ************  Particle-related structs  ****************
 
-struct ColorRGB : public LuaObject
+struct ColorRGB final : public LuaObject
 {
 	uchar R, G, B;
 
@@ -38,26 +38,29 @@ struct ColorRGB : public LuaObject
 
 	ColorRGB(uchar red, uchar green, uchar blue): R(red), G(green), B(blue) {}
 
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
 
-struct Vector3s : public LuaObject
+struct Vector3s final : public LuaObject
 {
 	short x, y, z;
 
 	Vector3s() : x(0), y(0), z(0) {}
 
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
 
-struct Vector3i : public LuaObject
+struct Vector3i final : public LuaObject
 {
 	int x, y, z;
 
 	Vector3i() : x(16384), y(16384), z(16384) {}
 
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
@@ -79,11 +82,12 @@ enum DrawMode
 };
 
 
-struct NodeAttachment : public LuaObject
+struct NodeAttachment final : public LuaObject
 {
 	TetherType tether;
 	short cutoff, random;
 
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
@@ -92,7 +96,7 @@ struct NodeAttachment : public LuaObject
 
 // ************  ParticleGroup struct  ****************
 
-struct ParticleGroup : public LuaObject
+struct ParticleGroup final : public LuaObject
 {
 	int initIndex;
 	int updateIndex;
@@ -112,6 +116,7 @@ struct ParticleGroup : public LuaObject
 	bool ScreenSpace;
 	bool LineIgnoreVel;
 
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
@@ -160,12 +165,13 @@ struct BaseParticle : public LuaObject
 	virtual Vector3f BoidAlignmentRule(float radius, float factor) = 0;
 
 	// lua integration
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
 
 
-struct SpriteParticle : BaseParticle
+struct SpriteParticle final : BaseParticle
 {
 	// fields
 	ushort		spriteIndex;
@@ -198,12 +204,13 @@ struct SpriteParticle : BaseParticle
 	virtual Vector3f BoidAlignmentRule(float radius, float factor) override;
 
 	// lua integration
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
 
 
-struct MeshParticle : BaseParticle
+struct MeshParticle final : BaseParticle
 {
 	// fields
 	Vector3s	rot;
@@ -233,6 +240,7 @@ struct MeshParticle : BaseParticle
 	virtual Vector3f BoidAlignmentRule(float radius, float factor) override;
 
 	// lua integration
+	static const char* Name();
 	virtual int Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };

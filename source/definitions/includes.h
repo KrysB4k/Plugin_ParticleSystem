@@ -1,5 +1,8 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "..\trng\bass.h"		// prototypes for extra sound library: bass.dll
 #include "..\trng\Tomb_NextGeneration.h" // mnemonic constants defined in tomb_NextGeneration.dll
 #include "..\definitions\structures.h" // structure of tomb4 program and trng dll

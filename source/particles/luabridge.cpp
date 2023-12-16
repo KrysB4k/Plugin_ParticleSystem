@@ -1,5 +1,64 @@
 #include "..\definitions\includes.h"
 
+namespace
+{
+	template<class T>
+	T* GetData(int argument)
+	{
+		if (!Script::IsData(argument))
+			Script::ThrowError(FormatString("bad argument %d: %s expected", argument, T::Name()));
+		T* object = dynamic_cast<T*>((LuaObject*)Script::ToData(argument));
+		if (!object)
+			Script::ThrowError(FormatString("bad argument %d: %s expected", argument, T::Name()));
+		return object;
+	}
+
+	int GetInteger(int argument)
+	{
+		if (!Script::IsInteger(argument))
+			Script::ThrowError(FormatString("bad argument %d: integer expected", argument));
+		return Script::ToInteger(argument);
+	}
+
+	bool GetBoolean(int argument)
+	{
+		if (!Script::IsBoolean(argument))
+			Script::ThrowError(FormatString("bad argument %d: boolean expected", argument));
+		return Script::ToBoolean(argument);
+	}
+
+	float GetNumber(int argument)
+	{
+		if (!Script::IsNumber(argument))
+			Script::ThrowError(FormatString("bad argument %d: number expected", argument));
+		return Script::ToNumber(argument);
+	}
+
+	int GetFunction(int argument)
+	{
+		if (!Script::IsFunction(argument))
+			Script::ThrowError(FormatString("bad argument %d: function expected", argument));
+		return Script::StoreFunction(argument);
+	}
+
+	int GetArgCount(int minimum, int maximum)
+	{
+		int count;
+
+		count = Script::ArgCount();
+		if (count < minimum)
+			Script::ThrowError(FormatString("too few arguments: at least %d arguments expected", minimum));
+		if (count > maximum)
+			Script::ThrowError(FormatString("too many arguments: at most %d arguments expected", minimum));
+		return count;
+	}
+}
+
+const char* ColorRGB::Name()
+{
+	return "ColorRGB";
+}
+
 int ColorRGB::Index(const char* field)
 {
 	switch (field[0])
@@ -35,17 +94,22 @@ void ColorRGB::NewIndex(const char* field)
 	{
 	case 'b':
 		if (!strcmp(field, "b"))
-			B = Clamp(int(255 * Script::ToNumber(1)), 0, 255);
+			B = Clamp(int(255 * GetNumber(1)), 0, 255);
 		break;
 	case 'g':
 		if (!strcmp(field, "g"))
-			G = Clamp(int(255 * Script::ToNumber(1)), 0, 255);
+			G = Clamp(int(255 * GetNumber(1)), 0, 255);
 		break;
 	case 'r':
 		if (!strcmp(field, "r"))
-			R = Clamp(int(255 * Script::ToNumber(1)), 0, 255);
+			R = Clamp(int(255 * GetNumber(1)), 0, 255);
 		break;
 	}
+}
+
+const char* Vector3f::Name()
+{
+	return "Vector3f";
 }
 
 int Vector3f::Index(const char* field)
@@ -83,17 +147,22 @@ void Vector3f::NewIndex(const char* field)
 	{
 	case 'x':
 		if (!strcmp(field, "x"))
-			x = Script::ToNumber(1);
+			x = GetNumber(1);
 		break;
 	case 'y':
 		if (!strcmp(field, "y"))
-			y = Script::ToNumber(1);
+			y = GetNumber(1);
 		break;
 	case 'z':
 		if (!strcmp(field, "z"))
-			z = Script::ToNumber(1);
+			z = GetNumber(1);
 		break;
 	}
+}
+
+const char* Vector3s::Name()
+{
+	return "Vector3s";
 }
 
 int Vector3s::Index(const char* field)
@@ -131,17 +200,22 @@ void Vector3s::NewIndex(const char* field)
 	{
 	case 'x':
 		if (!strcmp(field, "x"))
-			x = RadToShort(Script::ToNumber(1));
+			x = RadToShort(GetNumber(1));
 		break;
 	case 'y':
 		if (!strcmp(field, "y"))
-			y = RadToShort(Script::ToNumber(1));
+			y = RadToShort(GetNumber(1));
 		break;
 	case 'z':
 		if (!strcmp(field, "z"))
-			z = RadToShort(Script::ToNumber(1));
+			z = RadToShort(GetNumber(1));
 		break;
 	}
+}
+
+const char* Vector3i::Name()
+{
+	return "Vector3i";
 }
 
 int Vector3i::Index(const char* field)
@@ -179,17 +253,22 @@ void Vector3i::NewIndex(const char* field)
 	{
 	case 'x':
 		if (!strcmp(field, "x"))
-			x = Clamp(int(16384 * Script::ToNumber(1)), 0, INT_MAX);
+			x = Clamp(int(16384 * GetNumber(1)), 0, INT_MAX);
 		break;
 	case 'y':
 		if (!strcmp(field, "y"))
-			y = Clamp(int(16384 * Script::ToNumber(1)), 0, INT_MAX);
+			y = Clamp(int(16384 * GetNumber(1)), 0, INT_MAX);
 		break;
 	case 'z':
 		if (!strcmp(field, "z"))
-			z = Clamp(int(16384 * Script::ToNumber(1)), 0, INT_MAX);
+			z = Clamp(int(16384 * GetNumber(1)), 0, INT_MAX);
 		break;
 	}
+}
+
+const char* NodeAttachment::Name()
+{
+	return "NodeAttachment";
 }
 
 int NodeAttachment::Index(const char* field)
@@ -228,17 +307,22 @@ void NodeAttachment::NewIndex(const char* field)
 	{
 	case 'c':
 		if (!strcmp(field, "cutoff"))
-			cutoff = Clamp(Script::ToInteger(1), 0, 32767);
+			cutoff = Clamp(GetInteger(1), 0, 32767);
 		break;
 	case 'r':
 		if (!strcmp(field, "random"))
-			random = Clamp(Script::ToInteger(1), 0, 32767);
+			random = Clamp(GetInteger(1), 0, 32767);
 		break;
 	case 't':
 		if (!strcmp(field, "tether"))
-			tether = static_cast<TetherType>(Clamp(Script::ToInteger(1), 0, 2));
+			tether = static_cast<TetherType>(Clamp(GetInteger(1), 0, 2));
 		break;
 	}
+}
+
+const char* ParticleGroup::Name()
+{
+	return "ParticleGroup";
 }
 
 int ParticleGroup::Index(const char* field)
@@ -303,44 +387,49 @@ void ParticleGroup::NewIndex(const char* field)
 	case 'b':
 		if (!strcmp(field, "blendingMode"))
 		{
-			blendingMode = Clamp(Script::ToInteger(1), 0, 13);
+			blendingMode = Clamp(GetInteger(1), 0, 13);
 			return;
 		}
 		break;
 	case 'd':
 		if (!strcmp(field, "drawMode"))
 		{
-			drawMode = static_cast<DrawMode>(Clamp(Script::ToInteger(1), 0, 3));
+			drawMode = static_cast<DrawMode>(Clamp(GetInteger(1), 0, 3));
 			return;
 		}
 		break;
 	case 'l':
 		if (!strcmp(field, "lineIgnoreVel"))
 		{
-			LineIgnoreVel = Script::ToBoolean(1);
+			LineIgnoreVel = GetBoolean(1);
 			return;
 		}
 		break;
 	case 's':
 		if (!strcmp(field, "saved"))
 		{
-			Saved = Script::ToBoolean(1);
+			Saved = GetBoolean(1);
 			return;
 		}
 		if (!strcmp(field, "screenSpace"))
 		{
-			ScreenSpace = Script::ToBoolean(1);
+			ScreenSpace = GetBoolean(1);
 			return;
 		}
 		if (!strcmp(field, "spriteSlot"))
 		{
-			spriteSlot = Script::ToInteger(1);
+			spriteSlot = GetInteger(1);
 			if (spriteSlot != SLOT_DEFAULT_SPRITES && spriteSlot != SLOT_MISC_SPRITES && spriteSlot != SLOT_CUSTOM_SPRITES)
 				spriteSlot = SLOT_DEFAULT_SPRITES;
 			return;
 		}
 		break;
 	}
+}
+
+const char* BaseParticle::Name()
+{
+	return "BaseParticle";
 }
 
 int BaseParticle::Index(const char* field)
@@ -418,7 +507,7 @@ void BaseParticle::NewIndex(const char* field)
 	case 'e':
 		if (!strcmp(field, "emitterIndex"))
 		{
-			emitterIndex = Clamp(Script::ToInteger(1), -1, level_items - 1);
+			emitterIndex = Clamp(GetInteger(1), -1, level_items - 1);
 			if (emitterIndex != -1)
 				emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
 			else
@@ -428,31 +517,36 @@ void BaseParticle::NewIndex(const char* field)
 		if (!strcmp(field, "emitterNode"))
 		{
 			if (emitterIndex != -1)
-				emitterNode = Clamp(Script::ToInteger(1), -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+				emitterNode = Clamp(GetInteger(1), -1, objects[items[emitterIndex].object_number].nmeshes - 1);
 			return;
 		}
 		break;
 	case 'l':
 		if (!strcmp(field, "lifeCounter"))
 		{
-			lifeCounter = Clamp(Script::ToInteger(1), 0, lifeSpan);
+			lifeCounter = Clamp(GetInteger(1), 0, lifeSpan);
 			return;
 		}
 		if (!strcmp(field, "lifeSpan"))
 		{
 			// set lifeCounter to lifeSpan automatically
-			lifeCounter = lifeSpan = Clamp(Script::ToInteger(1), 0, 32767);
+			lifeCounter = lifeSpan = Clamp(GetInteger(1), 0, 32767);
 			return;
 		}
 		break;
 	case 'r':
 		if (!strcmp(field, "roomIndex"))
 		{
-			roomIndex = Clamp(Script::ToInteger(1), 0, number_rooms - 1);
+			roomIndex = Clamp(GetInteger(1), 0, number_rooms - 1);
 			return;
 		}
 		break;
 	}
+}
+
+const char* SpriteParticle::Name()
+{
+	return "SpriteParticle";
 }
 
 int SpriteParticle::Index(const char* field)
@@ -545,63 +639,68 @@ void SpriteParticle::NewIndex(const char* field)
 	case 'c':
 		if (!strcmp(field, "colorFadeTime"))
 		{
-			colorFadeTime = Clamp(Script::ToInteger(1), -32768, 32767);
+			colorFadeTime = Clamp(GetInteger(1), -32768, 32767);
 			return;
 		}
 		break;
 	case 'f':
 		if (!strcmp(field, "fadeIn"))
 		{
-			fadeIn = Clamp(Script::ToInteger(1), 0, 32767);
+			fadeIn = Clamp(GetInteger(1), 0, 32767);
 			return;
 		}
 		if (!strcmp(field, "fadeOut"))
 		{
-			fadeOut = Clamp(Script::ToInteger(1), 0, 32767);
+			fadeOut = Clamp(GetInteger(1), 0, 32767);
 			return;
 		}
 		break;
 	case 'r':
 		if (!strcmp(field, "rot"))
 		{
-			rot = RadToShort(Script::ToNumber(1));
+			rot = RadToShort(GetNumber(1));
 			return;
 		}
 		if (!strcmp(field, "rotVel"))
 		{
-			rotVel = RadToShort(Script::ToNumber(1));
+			rotVel = RadToShort(GetNumber(1));
 			return;
 		}
 		break;
 	case 's':
 		if (!strcmp(field, "sizeCust"))
 		{
-			sizeCust = Clamp(Script::ToInteger(1), 0, 65535);
+			sizeCust = Clamp(GetInteger(1), 0, 65535);
 			return;
 		}
 		if (!strcmp(field, "sizeEnd"))
 		{
-			sizeEnd = Clamp(Script::ToInteger(1), 0, 65535);
+			sizeEnd = Clamp(GetInteger(1), 0, 65535);
 			return;
 		}
 		if (!strcmp(field, "sizeStart"))
 		{
-			sizeStart = Clamp(Script::ToInteger(1), 0, 65535);
+			sizeStart = Clamp(GetInteger(1), 0, 65535);
 			return;
 		}
 		if (!strcmp(field, "sizeRatio"))
 		{
-			sizeRatio = Clamp(Round(Script::ToNumber(1) * 32768), -32768, 32767);
+			sizeRatio = Clamp(Round(GetNumber(1) * 32768), -32768, 32767);
 			return;
 		}
 		if (!strcmp(field, "spriteIndex"))
 		{
-			spriteIndex = Clamp(Script::ToInteger(1), 0, 32767);
+			spriteIndex = Clamp(GetInteger(1), 0, 32767);
 			return;
 		}
 		break;
 	}
 	BaseParticle::NewIndex(field);
+}
+
+const char* MeshParticle::Name()
+{
+	return "MeshParticle";
 }
 
 int MeshParticle::Index(const char* field)
@@ -666,14 +765,14 @@ void MeshParticle::NewIndex(const char* field)
 	case 'm':
 		if (!strcmp(field, "mesh"))
 		{
-			mesh = Clamp(Script::ToInteger(1), 0, objects[object].nmeshes - 1);
+			mesh = Clamp(GetInteger(1), 0, objects[object].nmeshes - 1);
 			return;
 		}
 		break;
 	case 'o':
 		if (!strcmp(field, "object"))
 		{
-			object = Clamp(Script::ToInteger(1), 0, SLOT_NUMBER_OBJECTS - 1);
+			object = Clamp(GetInteger(1), 0, SLOT_NUMBER_OBJECTS - 1);
 			mesh = Clamp(mesh, 0, objects[object].nmeshes - 1);
 			return;
 		}
@@ -681,7 +780,7 @@ void MeshParticle::NewIndex(const char* field)
 	case 't':
 		if (!strcmp(field, "transparency"))
 		{
-			transparency = Clamp(Script::ToInteger(1), 0, 255);
+			transparency = Clamp(GetInteger(1), 0, 255);
 			return;
 		}
 		break;
@@ -700,28 +799,28 @@ int LuaBridge::Call(const char* function)
 	case 'a':
 		if (!strcmp(function, "abs"))
 		{
-			Script::PushNumber(abs(Script::ToNumber(1)));
+			Script::PushNumber(abs(GetNumber(1)));
 			return 1;
 		}
 		if (!strcmp(function, "acos"))
 		{
-			Script::PushNumber(acosf(Script::ToNumber(1)));
+			Script::PushNumber(acosf(GetNumber(1)));
 			return 1;
 		}
 		if (!strcmp(function, "asin"))
 		{
-			Script::PushNumber(asinf(Script::ToNumber(1)));
+			Script::PushNumber(asinf(GetNumber(1)));
 			return 1;
 		}
 		if (!strcmp(function, "atan"))
 		{
-			Script::PushNumber(atanf(Script::ToNumber(1)));
+			Script::PushNumber(atanf(GetNumber(1)));
 			return 1;
 		}
 		if (!strcmp(function, "atan2"))
 		{
-			float y = Script::ToNumber(1);
-			float x = Script::ToNumber(2);
+			float y = GetNumber(1);
+			float x = GetNumber(2);
 			Script::PushNumber(atan2f(y, x));
 			return 1;
 		}
@@ -729,31 +828,25 @@ int LuaBridge::Call(const char* function)
 	case 'b':
 		if (!strcmp(function, "boidAlignment"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			float radius = Script::ToNumber(2);
-			float factor = Script::ToNumber(3);
+			auto part = GetData<BaseParticle>(1);
+			float radius = GetNumber(2);
+			float factor = GetNumber(3);
 			part->vel += part->BoidAlignmentRule(radius, factor);
 			return 0;
 		}
 		if (!strcmp(function, "boidCohesion"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			float radius = Script::ToNumber(2);
-			float factor = Script::ToNumber(3);
+			auto part = GetData<BaseParticle>(1);
+			float radius = GetNumber(2);
+			float factor = GetNumber(3);
 			part->vel += part->BoidCohesionRule(radius, factor);
 			return 0;
 		}
 		if (!strcmp(function, "boidSeparation"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			float radius = Script::ToNumber(2);
-			float factor = Script::ToNumber(3);
+			auto part = GetData<BaseParticle>(1);
+			float radius = GetNumber(2);
+			float factor = GetNumber(3);
 			part->vel += part->BoidSeparationRule(radius, factor);
 			return 0;
 		}
@@ -761,20 +854,20 @@ int LuaBridge::Call(const char* function)
 	case 'c':
 		if (!strcmp(function, "cbrt"))
 		{
-			Script::PushNumber(cbrtf(Script::ToNumber(1)));
+			Script::PushNumber(cbrtf(GetNumber(1)));
 			return 1;
 		}
 		if (!strcmp(function, "cos"))
 		{
-			Script::PushNumber(cosf(Script::ToNumber(1)));
+			Script::PushNumber(cosf(GetNumber(1)));
 			return 1;
 		}
 		if (!strcmp(function, "createGroup"))
 		{
 			if (ParticleFactory::caller != FUNCTION_LIBRARY)
 				return 0;
-			init = Script::StoreFunction(1);
-			update = Script::StoreFunction(2);
+			init = GetFunction(1);
+			update = GetFunction(2);
 			i = ParticleFactory::GetFreeParticleGroup();
 			if (i == -1)
 				return 0;
@@ -787,9 +880,7 @@ int LuaBridge::Call(const char* function)
 		{
 			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
 				return 0;
-			group = dynamic_cast<ParticleGroup*>((LuaObject*)Script::ToData(1));
-			if (!group)
-				return Script::TypeError(1, "ParticleGroup");
+			group = GetData<ParticleGroup>(1);
 			i = ParticleFactory::GetFreeMeshPart();
 			ParticleFactory::meshParts[i].groupIndex = group->groupIndex;
 			Tr4ItemInfo* item = &ParticleFactory::meshParts[i].item;
@@ -808,9 +899,7 @@ int LuaBridge::Call(const char* function)
 		{
 			if (ParticleFactory::caller != FUNCTION_INIT && ParticleFactory::caller != FUNCTION_UPDATE)
 				return 0;
-			group = dynamic_cast<ParticleGroup*>((LuaObject*)Script::ToData(1));
-			if (!group)
-				return Script::TypeError(1, "ParticleGroup");
+			group = GetData<ParticleGroup>(1);
 			i = ParticleFactory::GetFreeSpritePart();
 			ParticleFactory::spriteParts[i].groupIndex = group->groupIndex;
 			Script::PushData(&ParticleFactory::spriteParts[i]);
@@ -820,7 +909,17 @@ int LuaBridge::Call(const char* function)
 	case 'g':
 		if (!strcmp(function, "getTombIndex"))
 		{
-			Script::PushInteger(FromNgleIndexToTomb4Index(Script::ToInteger(1)));
+			int index = GetInteger(1);
+			if (index >= 0 && index < 6000)
+			{
+				index = FromNgleIndexToTomb4Index(index);
+				if (index != -1)
+				{
+					Script::PushInteger(index);
+					return 1;
+				}
+			}
+			Script::PushInteger(-1);
 			return 1;
 		}
 		if (!strcmp(function, "getLaraIndex"))
@@ -830,33 +929,29 @@ int LuaBridge::Call(const char* function)
 		}
 		if (!strcmp(function, "getItemRoom"))
 		{
-			int index = Script::ToInteger(1);
+			int index = GetInteger(1);
 			if (index >= 0 && index < level_items)
 			{
 				auto item = &items[index];
 				Script::PushInteger(item->room_number);
 				return 1;
 			}
-			return Script::ItemIndexError(1, index);
+			Script::PushInteger(-1);
+			return 1;
 		}
 		break;
 	case 'm':
 		if (!strcmp(function, "meshAlignVelocity"))
 		{
-			auto part = dynamic_cast<MeshParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "MeshParticle");
-			float factor = Script::ToNumber(2);
-			bool invert = false;
-			invert = Script::ToBoolean(3);
+			auto part = GetData<MeshParticle>(1);
+			float factor = GetNumber(2);
+			bool invert = GetBoolean(3);
 			part->AlignToVel(factor, invert);
 			return 0;
 		}
 		if (!strcmp(function, "meshShatter"))
 		{
-			auto part = dynamic_cast<MeshParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "MeshParticle");
+			auto part = GetData<MeshParticle>(1);
 			part->Shatter();
 			return 0;
 		}
@@ -866,24 +961,22 @@ int LuaBridge::Call(const char* function)
 		{
 			float scale, x, y, z, w;
 
-			int count = Script::ArgCount();
-			if (count < 2)
-				return Script::ArgCountError(2);
+			int count = GetArgCount(2, 5);
 
 			switch (count)
 			{
 			case 2:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
+				scale = GetNumber(1);
+				x = GetNumber(2);
 				if (scale)
 					x /= scale;
 				Script::PushNumber(ParticleFactory::noise.PerlinNoise1D(x));
 				return 1;
 
 			case 3:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
-				y = Script::ToNumber(3);
+				scale = GetNumber(1);
+				x = GetNumber(2);
+				y = GetNumber(3);
 				if (scale)
 				{
 					scale = 1.0f / scale;
@@ -894,10 +987,10 @@ int LuaBridge::Call(const char* function)
 				return 1;
 
 			case 4:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
-				y = Script::ToNumber(3);
-				z = Script::ToNumber(4);
+				scale = GetNumber(1);
+				x = GetNumber(2);
+				y = GetNumber(3);
+				z = GetNumber(4);
 				if (scale)
 				{
 					scale = 1.0f / scale;
@@ -908,12 +1001,12 @@ int LuaBridge::Call(const char* function)
 				Script::PushNumber(ParticleFactory::noise.PerlinNoise3D(x, y, z));
 				return 1;
 
-			default:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
-				y = Script::ToNumber(3);
-				z = Script::ToNumber(4);
-				w = Script::ToNumber(5);
+			case 5:
+				scale = GetNumber(1);
+				x = GetNumber(2);
+				y = GetNumber(3);
+				z = GetNumber(4);
+				w = GetNumber(5);
 				if (scale)
 				{
 					scale = 1.0f / scale;
@@ -930,24 +1023,22 @@ int LuaBridge::Call(const char* function)
 		{
 			float scale, x, y, z, w;
 
-			int count = Script::ArgCount();
-			if (count < 2)
-				return Script::ArgCountError(2);
+			int count = GetArgCount(2, 5);
 
 			switch (count)
 			{
 			case 2:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
+				scale = GetNumber(1);
+				x = GetNumber(2);
 				if (scale)
 					x /= scale;
 				Script::PushNumber(ParticleFactory::noise.SimplexNoise1D(x));
 				return 1;
 
 			case 3:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
-				y = Script::ToNumber(3);
+				scale = GetNumber(1);
+				x = GetNumber(2);
+				y = GetNumber(3);
 				if (scale)
 				{
 					scale = 1.0f / scale;
@@ -958,10 +1049,10 @@ int LuaBridge::Call(const char* function)
 				return 1;
 
 			case 4:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
-				y = Script::ToNumber(3);
-				z = Script::ToNumber(4);
+				scale = GetNumber(1);
+				x = GetNumber(2);
+				y = GetNumber(3);
+				z = GetNumber(4);
 				if (scale)
 				{
 					scale = 1.0f / scale;
@@ -973,11 +1064,11 @@ int LuaBridge::Call(const char* function)
 				return 1;
 
 			default:
-				scale = Script::ToNumber(1);
-				x = Script::ToNumber(2);
-				y = Script::ToNumber(3);
-				z = Script::ToNumber(4);
-				w = Script::ToNumber(5);
+				scale = GetNumber(1);
+				x = GetNumber(2);
+				y = GetNumber(3);
+				z = GetNumber(4);
+				w = GetNumber(5);
 				if (scale)
 				{
 					scale = 1.0f / scale;
@@ -994,23 +1085,18 @@ int LuaBridge::Call(const char* function)
 	case 'p':
 		if (!strcmp(function, "particleAnimate"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			int start = Script::ToInteger(2);
-			int end = Script::ToInteger(3);
-			int framerate = Script::ToInteger(4);
+			auto part = GetData<BaseParticle>(1);
+			int start = GetInteger(2);
+			int end = GetInteger(3);
+			int framerate = GetInteger(4);
 			part->Animate(start, end, framerate);
 			return 0;
 		}
 		if (!strcmp(function, "particleCollidedItem"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-
-			int index = Script::ToInteger(2);
-			int radius = Script::ToInteger(3);
+			auto part = GetData<BaseParticle>(1);
+			int index = GetInteger(2);
+			int radius = GetInteger(3);
 
 			if (index >= 0 && index < level_items)
 			{
@@ -1018,39 +1104,34 @@ int LuaBridge::Call(const char* function)
 				Script::PushBoolean(part->CollidedWithItem(item, radius));
 				return 1;
 			}
-			return Script::ItemIndexError(2, index);
+			Script::PushBoolean(false);
+			return 1;
 		}
 		if (!strcmp(function, "particleCollideFloors"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			float rebound = Script::ToNumber(2);
-			float minbounce = Script::ToNumber(3);
-			int margin = Script::ToInteger(4);
-			bool accurate = Script::ToBoolean(5);
+			auto part = GetData<BaseParticle>(1);
+			float rebound = GetNumber(2);
+			float minbounce = GetNumber(3);
+			int margin = GetInteger(4);
+			bool accurate = GetBoolean(5);
 			Script::PushBoolean(part->CollideFloors(rebound, minbounce, margin, accurate));
 			return 1;
 		}
 		if (!strcmp(function, "particleCollideWalls"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			float rebound = Script::ToNumber(2);
+			auto part = GetData<BaseParticle>(1);
+			float rebound = GetNumber(2);
 			Script::PushBoolean(part->CollideWalls(rebound));
 			return 1;
 		}
 		if (!strcmp(function, "particleHoming"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			int index = Script::ToInteger(2);
-			int node = Script::ToInteger(3);
-			float factor = Script::ToNumber(4);
-			float accel = Script::ToNumber(5);
-			bool predict = Script::ToBoolean(6);
+			auto part = GetData<BaseParticle>(1);
+			int index = GetInteger(2);
+			int node = GetInteger(3);
+			float factor = GetNumber(4);
+			float accel = GetNumber(5);
+			bool predict = GetBoolean(6);
 
 			if (index >= 0 && index < level_items)
 			{
@@ -1058,14 +1139,12 @@ int LuaBridge::Call(const char* function)
 				part->TargetHoming(item, node, factor, accel, predict);
 				return 0;
 			}
-			return Script::ItemIndexError(2, index);
+			return 0;
 		}
 		if (!strcmp(function, "particleLimitSpeed"))
 		{
-			auto part = dynamic_cast<BaseParticle*>((LuaObject*)Script::ToData(1));
-			if (!part)
-				return Script::TypeError(1, "Particle");
-			float speedMax = Script::ToNumber(2);
+			auto part = GetData<BaseParticle>(1);
+			float speedMax = GetNumber(2);
 			part->LimitSpeed(speedMax);
 			return 0;
 		}
@@ -1078,15 +1157,15 @@ int LuaBridge::Call(const char* function)
 	case 'r':
 		if (!strcmp(function, "randfloat"))
 		{
-			lower = Script::ToNumber(1);
-			upper = Script::ToNumber(2);
+			lower = GetNumber(1);
+			upper = GetNumber(2);
 			Script::PushNumber(fabsf(upper - lower) * GetRandom() + fminf(lower, upper));
 			return 1;
 		}
 		if (!strcmp(function, "randint"))
 		{
-			lower = Script::ToInteger(1);
-			upper = Script::ToInteger(2);
+			lower = GetInteger(1);
+			upper = GetInteger(2);
 			Script::PushInteger(floorf((fabsf(upper - lower) + 1) * GetRandom() + fminf(lower, upper)));
 			return 1;
 		}
@@ -1094,20 +1173,23 @@ int LuaBridge::Call(const char* function)
 	case 's':
 		if (!strcmp(function, "seedNoise"))
 		{
-			int seed = Script::ToInteger(1);
+			int seed = GetInteger(1);
 			ParticleFactory::noise.SeedPermut(seed);
 			return 0;
 		}
 		if (!strcmp(function, "sin"))
 		{
-			Script::PushNumber(sinf(Script::ToNumber(1)));
+			Script::PushNumber(sinf(GetNumber(1)));
 			return 1;
 		}
 		if (!strcmp(function, "sqrt"))
 		{
-			float x = Script::ToNumber(1);
+			float x = GetNumber(1);
 			if (x < 0)
-				return Script::ArgError(1, Script::FormatString("received negative value \'%f\'", x));
+			{
+				Script::PushNumber(NAN);
+				return 1;
+			}
 			Script::PushNumber(sqrtf(x));
 			return 1;
 		}

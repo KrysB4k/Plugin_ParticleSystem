@@ -59,3 +59,5 @@ short RadToShort(float angle);
 float GetRandom();
 
 ushort ConvertTo16BitBGR(const ColorRGB& c);
+
+const char* FormatString(const char* format, ...);
