@@ -6,38 +6,38 @@ namespace
 	T* GetData(int argument)
 	{
 		if (!Script::IsData(argument))
-			Script::ThrowError(FormatString("bad argument %d: %s expected", argument, T::Name()));
+			Script::ThrowError(FormatString("%s expected", T::Name()));
 		T* object = dynamic_cast<T*>((LuaObject*)Script::ToData(argument));
 		if (!object)
-			Script::ThrowError(FormatString("bad argument %d: %s expected", argument, T::Name()));
+			Script::ThrowError(FormatString("%s expected", T::Name()));
 		return object;
 	}
 
 	int GetInteger(int argument)
 	{
 		if (!Script::IsInteger(argument))
-			Script::ThrowError(FormatString("bad argument %d: integer expected", argument));
+			Script::ThrowError("integer expected");
 		return Script::ToInteger(argument);
 	}
 
 	bool GetBoolean(int argument)
 	{
 		if (!Script::IsBoolean(argument))
-			Script::ThrowError(FormatString("bad argument %d: boolean expected", argument));
+			Script::ThrowError("boolean expected");
 		return Script::ToBoolean(argument);
 	}
 
 	float GetNumber(int argument)
 	{
 		if (!Script::IsNumber(argument))
-			Script::ThrowError(FormatString("bad argument %d: number expected", argument));
+			Script::ThrowError("number expected");
 		return Script::ToNumber(argument);
 	}
 
 	int GetFunction(int argument)
 	{
 		if (!Script::IsFunction(argument))
-			Script::ThrowError(FormatString("bad argument %d: function expected", argument));
+			Script::ThrowError("function or nil expected");
 		return Script::StoreFunction(argument);
 	}
 
@@ -47,10 +47,109 @@ namespace
 
 		count = Script::ArgCount();
 		if (count < minimum)
-			Script::ThrowError(FormatString("too few arguments: at least %d arguments expected", minimum));
+			Script::ThrowError(FormatString("at least %d arguments expected", minimum));
 		if (count > maximum)
-			Script::ThrowError(FormatString("too many arguments: at most %d arguments expected", minimum));
+			Script::ThrowError(FormatString("at most %d arguments expected", minimum));
 		return count;
+	}
+
+	Tr4ItemInfo* GetItem(int argument)
+	{
+		int index = GetInteger(argument);
+		if (index >= 0 && index < level_items)
+			return &items[index];
+		Script::EmitWarning(FormatString("%d does not correspond to a valid Tomb index", index));
+		return nullptr;
+	}
+
+	int GetTombIndex(int argument)
+	{
+		int ngindex = GetInteger(argument);
+		if (ngindex >= 0 && ngindex < 6000)
+		{
+			int index = FromNgleIndexToTomb4Index(ngindex);
+			if (index != -1)
+				return index;
+		}
+		Script::EmitWarning(FormatString("%d does not correspond to a valid NGLE index", ngindex));
+		return -1;
+	}
+
+	float GetMathResult(int argument, float (*operation)(float))
+	{
+		float x = GetNumber(argument);
+		float result = operation(x);
+		if (!isnan(x) && isnan(result))
+			Script::EmitWarning("the operation resulted in a NaN");
+		return result;
+	}
+
+	float GetMathResult(int firstArgument, int secondArgument, float (*operation)(float, float))
+	{
+		float x = GetNumber(1);
+		float y = GetNumber(2);
+		float result = operation(x, y);
+		if (!isnan(x) && !isnan(y) && isnan(result))
+			Script::EmitWarning("the operation resulted in a NaN");
+		return result;
+	}
+
+	int GetClampedInteger(int argument, int min, int max)
+	{
+		int x = GetInteger(argument);
+		if (x < min)
+		{
+			Script::EmitWarning(FormatString("%d is less than the minimum of %d", x, min));
+			return min;
+		}
+		if (x > max)
+		{
+			Script::EmitWarning(FormatString("%d is greater than the maximum of %d", x, max));
+			return max;
+		}
+		return x;
+	}
+
+	float GetClampedNumber(int argument, float min, float max)
+	{
+		float x = GetNumber(argument);
+		if (x < min)
+		{
+			Script::EmitWarning(FormatString("%f is less than the minimum of %f", x, min));
+			return min;
+		}
+		if (x > max)
+		{
+			Script::EmitWarning(FormatString("%f is greater than the maximum of %f", x, max));
+			return max;
+		}
+		return x;
+	}
+
+	int GetConstrainedInteger(int argument, int defaultValue, int count, ...)
+	{
+		va_list args;
+		int x;
+		bool present;
+
+		x = GetInteger(argument);
+		present = false;
+		va_start(args, count);
+		for (int i = 0; i < count; i++)
+		{
+			if (x == va_arg(args, int))
+			{
+				present = true;
+				break;
+			}
+		}
+		va_end(args);
+		if (!present)
+		{
+			Script::EmitWarning(FormatString("%d is not in the list of allowed values", x));
+			return defaultValue;
+		}
+		return x;
 	}
 }
 
@@ -94,15 +193,15 @@ void ColorRGB::NewIndex(const char* field)
 	{
 	case 'b':
 		if (!strcmp(field, "b"))
-			B = Clamp(int(255 * GetNumber(1)), 0, 255);
+			B = 255 * GetClampedNumber(1, 0.0f, 1.0f);
 		break;
 	case 'g':
 		if (!strcmp(field, "g"))
-			G = Clamp(int(255 * GetNumber(1)), 0, 255);
+			G = 255 * GetClampedNumber(1, 0.0f, 1.0f);
 		break;
 	case 'r':
 		if (!strcmp(field, "r"))
-			R = Clamp(int(255 * GetNumber(1)), 0, 255);
+			R = 255 * GetClampedNumber(1, 0.0f, 1.0f);
 		break;
 	}
 }
@@ -253,15 +352,15 @@ void Vector3i::NewIndex(const char* field)
 	{
 	case 'x':
 		if (!strcmp(field, "x"))
-			x = Clamp(int(16384 * GetNumber(1)), 0, INT_MAX);
+			x = 16384 * GetClampedNumber(1, 0.0f, 65536.0f);
 		break;
 	case 'y':
 		if (!strcmp(field, "y"))
-			y = Clamp(int(16384 * GetNumber(1)), 0, INT_MAX);
+			y = 16384 * GetClampedNumber(1, 0.0f, 65536.0f);
 		break;
 	case 'z':
 		if (!strcmp(field, "z"))
-			z = Clamp(int(16384 * GetNumber(1)), 0, INT_MAX);
+			z = 16384 * GetClampedNumber(1, 0.0f, 65536.0f);
 		break;
 	}
 }
@@ -307,15 +406,15 @@ void NodeAttachment::NewIndex(const char* field)
 	{
 	case 'c':
 		if (!strcmp(field, "cutoff"))
-			cutoff = Clamp(GetInteger(1), 0, 32767);
+			cutoff = GetClampedInteger(1, 0, 32767);
 		break;
 	case 'r':
 		if (!strcmp(field, "random"))
-			random = Clamp(GetInteger(1), 0, 32767);
+			random = GetClampedInteger(1, 0, 32767);
 		break;
 	case 't':
 		if (!strcmp(field, "tether"))
-			tether = static_cast<TetherType>(Clamp(GetInteger(1), 0, 2));
+			tether = static_cast<TetherType>(GetClampedInteger(1, 0, 2));
 		break;
 	}
 }
@@ -387,14 +486,14 @@ void ParticleGroup::NewIndex(const char* field)
 	case 'b':
 		if (!strcmp(field, "blendingMode"))
 		{
-			blendingMode = Clamp(GetInteger(1), 0, 13);
+			blendingMode = GetClampedInteger(1, 0, 13);
 			return;
 		}
 		break;
 	case 'd':
 		if (!strcmp(field, "drawMode"))
 		{
-			drawMode = static_cast<DrawMode>(Clamp(GetInteger(1), 0, 3));
+			drawMode = static_cast<DrawMode>(GetClampedInteger(1, 0, 3));
 			return;
 		}
 		break;
@@ -418,9 +517,7 @@ void ParticleGroup::NewIndex(const char* field)
 		}
 		if (!strcmp(field, "spriteSlot"))
 		{
-			spriteSlot = GetInteger(1);
-			if (spriteSlot != SLOT_DEFAULT_SPRITES && spriteSlot != SLOT_MISC_SPRITES && spriteSlot != SLOT_CUSTOM_SPRITES)
-				spriteSlot = SLOT_DEFAULT_SPRITES;
+			spriteSlot = GetConstrainedInteger(1, SLOT_DEFAULT_SPRITES, 3, SLOT_DEFAULT_SPRITES, SLOT_MISC_SPRITES, SLOT_CUSTOM_SPRITES);
 			return;
 		}
 		break;
@@ -507,7 +604,7 @@ void BaseParticle::NewIndex(const char* field)
 	case 'e':
 		if (!strcmp(field, "emitterIndex"))
 		{
-			emitterIndex = Clamp(GetInteger(1), -1, level_items - 1);
+			emitterIndex = GetClampedInteger(1, -1, level_items - 1);
 			if (emitterIndex != -1)
 				emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
 			else
@@ -517,27 +614,27 @@ void BaseParticle::NewIndex(const char* field)
 		if (!strcmp(field, "emitterNode"))
 		{
 			if (emitterIndex != -1)
-				emitterNode = Clamp(GetInteger(1), -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+				emitterNode = GetClampedInteger(1, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
 			return;
 		}
 		break;
 	case 'l':
 		if (!strcmp(field, "lifeCounter"))
 		{
-			lifeCounter = Clamp(GetInteger(1), 0, lifeSpan);
+			lifeCounter = GetClampedInteger(1, 0, lifeSpan);
 			return;
 		}
 		if (!strcmp(field, "lifeSpan"))
 		{
 			// set lifeCounter to lifeSpan automatically
-			lifeCounter = lifeSpan = Clamp(GetInteger(1), 0, 32767);
+			lifeCounter = lifeSpan = GetClampedInteger(1, 0, 32767);
 			return;
 		}
 		break;
 	case 'r':
 		if (!strcmp(field, "roomIndex"))
 		{
-			roomIndex = Clamp(GetInteger(1), 0, number_rooms - 1);
+			roomIndex = GetClampedInteger(1, 0, number_rooms - 1);
 			return;
 		}
 		break;
@@ -639,19 +736,19 @@ void SpriteParticle::NewIndex(const char* field)
 	case 'c':
 		if (!strcmp(field, "colorFadeTime"))
 		{
-			colorFadeTime = Clamp(GetInteger(1), -32768, 32767);
+			colorFadeTime = GetClampedInteger(1, -32768, 32767);
 			return;
 		}
 		break;
 	case 'f':
 		if (!strcmp(field, "fadeIn"))
 		{
-			fadeIn = Clamp(GetInteger(1), 0, 32767);
+			fadeIn = GetClampedInteger(1, 0, 32767);
 			return;
 		}
 		if (!strcmp(field, "fadeOut"))
 		{
-			fadeOut = Clamp(GetInteger(1), 0, 32767);
+			fadeOut = GetClampedInteger(1, 0, 32767);
 			return;
 		}
 		break;
@@ -670,27 +767,27 @@ void SpriteParticle::NewIndex(const char* field)
 	case 's':
 		if (!strcmp(field, "sizeCust"))
 		{
-			sizeCust = Clamp(GetInteger(1), 0, 65535);
+			sizeCust = GetClampedInteger(1, 0, 65535);
 			return;
 		}
 		if (!strcmp(field, "sizeEnd"))
 		{
-			sizeEnd = Clamp(GetInteger(1), 0, 65535);
+			sizeEnd = GetClampedInteger(1, 0, 65535);
 			return;
 		}
 		if (!strcmp(field, "sizeStart"))
 		{
-			sizeStart = Clamp(GetInteger(1), 0, 65535);
+			sizeStart = GetClampedInteger(1, 0, 65535);
 			return;
 		}
 		if (!strcmp(field, "sizeRatio"))
 		{
-			sizeRatio = Clamp(Round(GetNumber(1) * 32768), -32768, 32767);
+			sizeRatio = 32767 * GetClampedNumber(1, -1.0f, 1.0f);
 			return;
 		}
 		if (!strcmp(field, "spriteIndex"))
 		{
-			spriteIndex = Clamp(GetInteger(1), 0, 32767);
+			spriteIndex = GetClampedInteger(1, 0, (-objects[ParticleFactory::partGroups[groupIndex].spriteSlot].nmeshes) - 1);
 			return;
 		}
 		break;
@@ -765,14 +862,14 @@ void MeshParticle::NewIndex(const char* field)
 	case 'm':
 		if (!strcmp(field, "mesh"))
 		{
-			mesh = Clamp(GetInteger(1), 0, objects[object].nmeshes - 1);
+			mesh = GetClampedInteger(1, 0, objects[object].nmeshes - 1);
 			return;
 		}
 		break;
 	case 'o':
 		if (!strcmp(field, "object"))
 		{
-			object = Clamp(GetInteger(1), 0, SLOT_NUMBER_OBJECTS - 1);
+			object = GetClampedInteger(1, 0, SLOT_NUMBER_OBJECTS - 1);
 			mesh = Clamp(mesh, 0, objects[object].nmeshes - 1);
 			return;
 		}
@@ -780,7 +877,7 @@ void MeshParticle::NewIndex(const char* field)
 	case 't':
 		if (!strcmp(field, "transparency"))
 		{
-			transparency = Clamp(GetInteger(1), 0, 255);
+			transparency = GetClampedInteger(1, 0, 255);
 			return;
 		}
 		break;
@@ -799,29 +896,27 @@ int LuaBridge::Call(const char* function)
 	case 'a':
 		if (!strcmp(function, "abs"))
 		{
-			Script::PushNumber(abs(GetNumber(1)));
+			Script::PushNumber(GetMathResult(1, fabsf));
 			return 1;
 		}
 		if (!strcmp(function, "acos"))
 		{
-			Script::PushNumber(acosf(GetNumber(1)));
+			Script::PushNumber(GetMathResult(1, acosf));
 			return 1;
 		}
 		if (!strcmp(function, "asin"))
 		{
-			Script::PushNumber(asinf(GetNumber(1)));
+			Script::PushNumber(GetMathResult(1, asinf));
 			return 1;
 		}
 		if (!strcmp(function, "atan"))
 		{
-			Script::PushNumber(atanf(GetNumber(1)));
+			Script::PushNumber(GetMathResult(1, atanf));
 			return 1;
 		}
 		if (!strcmp(function, "atan2"))
 		{
-			float y = GetNumber(1);
-			float x = GetNumber(2);
-			Script::PushNumber(atan2f(y, x));
+			Script::PushNumber(GetMathResult(1, 2, atan2f));
 			return 1;
 		}
 		break;
@@ -854,12 +949,12 @@ int LuaBridge::Call(const char* function)
 	case 'c':
 		if (!strcmp(function, "cbrt"))
 		{
-			Script::PushNumber(cbrtf(GetNumber(1)));
+			Script::PushNumber(GetMathResult(1, cbrtf));
 			return 1;
 		}
 		if (!strcmp(function, "cos"))
 		{
-			Script::PushNumber(cosf(GetNumber(1)));
+			Script::PushNumber(GetMathResult(1, cosf));
 			return 1;
 		}
 		if (!strcmp(function, "createGroup"))
@@ -909,17 +1004,7 @@ int LuaBridge::Call(const char* function)
 	case 'g':
 		if (!strcmp(function, "getTombIndex"))
 		{
-			int index = GetInteger(1);
-			if (index >= 0 && index < 6000)
-			{
-				index = FromNgleIndexToTomb4Index(index);
-				if (index != -1)
-				{
-					Script::PushInteger(index);
-					return 1;
-				}
-			}
-			Script::PushInteger(-1);
+			Script::PushInteger(GetTombIndex(1));
 			return 1;
 		}
 		if (!strcmp(function, "getLaraIndex"))
@@ -929,14 +1014,8 @@ int LuaBridge::Call(const char* function)
 		}
 		if (!strcmp(function, "getItemRoom"))
 		{
-			int index = GetInteger(1);
-			if (index >= 0 && index < level_items)
-			{
-				auto item = &items[index];
-				Script::PushInteger(item->room_number);
-				return 1;
-			}
-			Script::PushInteger(-1);
+			auto item = GetItem(1);
+			Script::PushInteger(item ? item->room_number : -1);
 			return 1;
 		}
 		break;
@@ -944,7 +1023,7 @@ int LuaBridge::Call(const char* function)
 		if (!strcmp(function, "meshAlignVelocity"))
 		{
 			auto part = GetData<MeshParticle>(1);
-			float factor = GetNumber(2);
+			float factor = GetClampedNumber(2, 0.0f, 1.0f);
 			bool invert = GetBoolean(3);
 			part->AlignToVel(factor, invert);
 			return 0;
@@ -1095,22 +1174,16 @@ int LuaBridge::Call(const char* function)
 		if (!strcmp(function, "particleCollidedItem"))
 		{
 			auto part = GetData<BaseParticle>(1);
-			int index = GetInteger(2);
+			auto item = GetItem(2);
 			int radius = GetInteger(3);
 
-			if (index >= 0 && index < level_items)
-			{
-				auto item = &items[index];
-				Script::PushBoolean(part->CollidedWithItem(item, radius));
-				return 1;
-			}
-			Script::PushBoolean(false);
+			Script::PushBoolean(item ? part->CollidedWithItem(item, radius) : false);
 			return 1;
 		}
 		if (!strcmp(function, "particleCollideFloors"))
 		{
 			auto part = GetData<BaseParticle>(1);
-			float rebound = GetNumber(2);
+			float rebound = GetClampedNumber(2, 0.0f, 1.0f);
 			float minbounce = GetNumber(3);
 			int margin = GetInteger(4);
 			bool accurate = GetBoolean(5);
@@ -1120,25 +1193,21 @@ int LuaBridge::Call(const char* function)
 		if (!strcmp(function, "particleCollideWalls"))
 		{
 			auto part = GetData<BaseParticle>(1);
-			float rebound = GetNumber(2);
+			float rebound = GetClampedNumber(2, 0.0f, 1.0f);
 			Script::PushBoolean(part->CollideWalls(rebound));
 			return 1;
 		}
 		if (!strcmp(function, "particleHoming"))
 		{
 			auto part = GetData<BaseParticle>(1);
-			int index = GetInteger(2);
-			int node = GetInteger(3);
+			auto item = GetItem(2);
+			int node = item ? GetClampedInteger(3, 0, objects[item->object_number].nmeshes) : GetInteger(3);
 			float factor = GetNumber(4);
 			float accel = GetNumber(5);
 			bool predict = GetBoolean(6);
 
-			if (index >= 0 && index < level_items)
-			{
-				auto item = &items[index];
+			if (item)
 				part->TargetHoming(item, node, factor, accel, predict);
-				return 0;
-			}
 			return 0;
 		}
 		if (!strcmp(function, "particleLimitSpeed"))
@@ -1179,18 +1248,12 @@ int LuaBridge::Call(const char* function)
 		}
 		if (!strcmp(function, "sin"))
 		{
-			Script::PushNumber(sinf(GetNumber(1)));
+			Script::PushNumber(GetMathResult(1, sinf));
 			return 1;
 		}
 		if (!strcmp(function, "sqrt"))
 		{
-			float x = GetNumber(1);
-			if (x < 0)
-			{
-				Script::PushNumber(NAN);
-				return 1;
-			}
-			Script::PushNumber(sqrtf(x));
+			Script::PushNumber(GetMathResult(1, sqrtf));
 			return 1;
 		}
 		break;

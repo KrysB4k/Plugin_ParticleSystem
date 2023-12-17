@@ -470,9 +470,7 @@ void ParticleFactory::DrawSprites()
 
 						if (part->emitterNode >= 0) // if attached to specific mesh node of item
 						{
-							int node = Clamp(part->emitterNode, 0, objects[item->object_number].nmeshes);
-
-							vel = GetJointPos(item, node, Round(vel.x), Round(vel.y), Round(vel.z)) - GetJointPos(item, node, 0, 0, 0);
+							vel = GetJointPos(item, part->emitterNode, Round(vel.x), Round(vel.y), Round(vel.z)) - GetJointPos(item, part->emitterNode, 0, 0, 0);
 						}
 						else // no mesh node, use item's pos
 						{
@@ -574,12 +572,10 @@ Vector3f BaseParticle::AbsPos()
 
 		if (emitterNode >= 0) // if attached to specific mesh node of item
 		{
-			int node = Clamp(emitterNode, 0, objects[item->object_number].nmeshes);
-
 			if (tether == TetherType::TETHER_ROTATING)
-				relPos = GetJointPos(item, node, Round(relPos.x), Round(relPos.y), Round(relPos.z));
+				relPos = GetJointPos(item, emitterNode, Round(relPos.x), Round(relPos.y), Round(relPos.z));
 			else
-				relPos += GetJointPos(item, node, 0, 0, 0);
+				relPos += GetJointPos(item, emitterNode, 0, 0, 0);
 		}
 		else // no mesh node, use item's pos
 		{
@@ -654,8 +650,6 @@ bool BaseParticle::CollideWalls(float rebound)
 
 	if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 	{
-		rebound = Clamp(rebound, 0.0f, 1.0f);
-
 		auto testp = Round(pos + vel);
 		auto p = Round(pos);
 
@@ -697,7 +691,6 @@ bool BaseParticle::CollideFloors(float rebound, float minBounce, int collMargin,
 
 	if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 	{
-		rebound = Clamp(rebound, 0.0f, 1.0f);
 		if (minBounce < 0)
 			minBounce = 0.0f;
 
@@ -807,8 +800,6 @@ bool BaseParticle::TargetHoming(Tr4ItemInfo* item, int targetNode, float homingF
 {
 	if (!item)
 		return false;
-
-	targetNode = Clamp(targetNode, 0, objects[item->object_number].nmeshes);
 
 	auto targetPos = GetJointPos(item, targetNode, 0, 0, 0);
 
@@ -1234,9 +1225,7 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 			v[2].specular = 0xFF000000;
 			v[3].specular = 0xFF000000;
 
-			int spriteNum = Clamp(spriteIndex, 0, (-objects[pgroup.spriteSlot].nmeshes) - 1);
-
-			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteNum);
+			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
 
 			TextureStruct tex;
 
@@ -1296,8 +1285,6 @@ void MeshParticle::AlignToVel(float factor, bool invert)
 
 	int dy = GetOrientDiff(rot.y, ANG(phi));
 	int dx = GetOrientDiff(rot.x, ANG(theta));
-
-	factor = Clamp(factor, 0.0f, 1.0f);
 
 	rotVel.y = Round(dy * factor);
 	rotVel.x = Round(dx * factor);
