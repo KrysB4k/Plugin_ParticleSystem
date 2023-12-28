@@ -119,6 +119,9 @@
     <ClInclude Include="particles\noise.h">
       <Filter>Header Files\particles</Filter>
     </ClInclude>
+    <ClInclude Include="particles\luabridge.h">
+      <Filter>Header Files\particles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PlugIn_trng.rc">

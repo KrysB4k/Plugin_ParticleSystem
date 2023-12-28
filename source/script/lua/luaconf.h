@@ -705,8 +705,8 @@
 ** numbers to strings. Define LUA_NOCVTS2N to turn off automatic
 ** coercion from strings to numbers.
 */
-/* #define LUA_NOCVTN2S */
-/* #define LUA_NOCVTS2N */
+#define LUA_NOCVTN2S
+#define LUA_NOCVTS2N
 
 
 /*

@@ -1,6 +1,6 @@
 #pragma once
 
-struct Vector3f final : public LuaObject
+struct Vector3f final : public LuaObjectClass
 {
 	float x, y, z;
 
@@ -9,7 +9,7 @@ struct Vector3f final : public LuaObject
 	Vector3f(float a, float b, float c) : x(a), y(b), z(c) {}
 
 	static const char* Name();
-	virtual int Index(const char* field) override;
+	virtual void Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 
 	Vector3f operator- () const;

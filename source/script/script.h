@@ -2,13 +2,16 @@
 
 struct LuaObject
 {
-	virtual int Index(const char* field) = 0;
+	virtual void Index(const char* field) = 0;
 	virtual void NewIndex(const char* field) = 0;
+	virtual int Call() = 0;
 };
 
 namespace LuaBridge
 {
-	int Call(const char* function);
+	void GlobalIndex(const char* field);
+	void GlobalNewIndex(const char* field);
+	int GlobalCall();
 }
 
 namespace Script
@@ -18,11 +21,11 @@ namespace Script
 	void PushInteger(int value);
 	void PushBoolean(bool value);
 	void PushNumber(float value);
-	void PushData(void* value);
+	void PushData(LuaObject* value);
 	int ToInteger(int argument);
 	bool ToBoolean(int argument);
 	float ToNumber(int argument);
-	void* ToData(int argument);
+	LuaObject* ToData(int argument);
 	int ArgCount();
 	bool IsInteger(int argument);
 	bool IsBoolean(int argument);
@@ -34,7 +37,7 @@ namespace Script
 	void DeleteFunction(int* reference);
 	void Print();
 	void LoadFunctions(const char* filename);
-	void ThrowError(const char* msg);
+	[[noreturn]] void ThrowError(const char* msg);
 	void EmitWarning(const char* msg);
 	void AddInformation(const char* msg);
 	int GarbageCount();

@@ -6,19 +6,29 @@ namespace
 {
 	lua_State* lua;
 
+	void BuildErrorMessage(const char* msg)
+	{
+		luaL_where(lua, 1);
+		lua_pushstring(lua, msg);
+		lua_concat(lua, 2);
+	}
+
+	const char* StringRepresentation(int idx)
+	{
+		return lua_isstring(lua, idx) ? lua_tostring(lua, idx) : nullptr;
+	}
+
 	int MetaIndex(lua_State* L)
 	{
 		LuaObject* object;
 
 		object = (LuaObject*)lua_touserdata(lua, 1);
 		if (!object)
-			return lua_isstring(lua, 2);
-		if (lua_isstring(lua, 2))
 		{
-			lua_remove(lua, 1);
 			try
 			{
-				return object->Index(lua_tostring(lua, 1));
+				LuaBridge::GlobalIndex(StringRepresentation(2));
+				return 1;
 			}
 			catch (const std::exception&)
 			{
@@ -26,7 +36,16 @@ namespace
 			}
 			return lua_error(lua);
 		}
-		return 0;
+		try
+		{
+			object->Index(StringRepresentation(2));
+			return 1;
+		}
+		catch (const std::exception&)
+		{
+
+		}
+		return lua_error(lua);
 	}
 
 	int MetaNewIndex(lua_State* L)
@@ -34,12 +53,11 @@ namespace
 		LuaObject* object;
 
 		object = (LuaObject*)lua_touserdata(lua, 1);
-		if (object && lua_isstring(lua, 2))
+		if (!object)
 		{
-			lua_remove(lua, 1);
 			try
 			{
-				object->NewIndex(lua_tostring(lua, 1));
+				LuaBridge::GlobalNewIndex(StringRepresentation(2));
 				return 0;
 			}
 			catch (const std::exception&)
@@ -48,14 +66,38 @@ namespace
 			}
 			return lua_error(lua);
 		}
-		return 0;
+		try
+		{
+			object->NewIndex(StringRepresentation(2));
+			return 0;
+		}
+		catch (const std::exception&)
+		{
+
+		}
+		return lua_error(lua);
 	}
 
 	int MetaCall(lua_State* L)
 	{
+		LuaObject* object;
+
+		object = (LuaObject*)lua_touserdata(lua, 1);
+		if (!object)
+		{
+			try
+			{
+				return LuaBridge::GlobalCall();
+			}
+			catch (const std::exception&)
+			{
+
+			}
+			return lua_error(lua);
+		}
 		try
 		{
-			return LuaBridge::Call(lua_tostring(lua, 1));
+			return object->Call();
 		}
 		catch (const std::exception&)
 		{
@@ -66,7 +108,7 @@ namespace
 
 	int ExceptionHandler(lua_State* L)
 	{
-		luaL_traceback(lua, lua, lua_isstring(lua, 1) ? lua_tostring(lua, 1) : nullptr, 1);
+		luaL_traceback(lua, lua, StringRepresentation(1), 1);
 		return 1;
 	}
 }
@@ -76,22 +118,19 @@ void Script::NewState()
 	lua = luaL_newstate();
 	Logger::Create();
 	lua_gc(lua, LUA_GCSTOP);
-	lua_pushliteral(lua, "");
-	lua_createtable(lua, 0, 1);
-	lua_pushliteral(lua, "__call");
-	lua_pushcfunction(lua, MetaCall);
-	lua_rawset(lua, -3);
-	lua_setmetatable(lua, -2);
 	lua_pushlightuserdata(lua, nullptr);
-	lua_createtable(lua, 0, 2);
+	lua_createtable(lua, 0, 3);
 	lua_pushliteral(lua, "__index");
 	lua_pushcfunction(lua, MetaIndex);
 	lua_rawset(lua, -3);
 	lua_pushliteral(lua, "__newindex");
 	lua_pushcfunction(lua, MetaNewIndex);
 	lua_rawset(lua, -3);
+	lua_pushliteral(lua, "__call");
+	lua_pushcfunction(lua, MetaCall);
+	lua_rawset(lua, -3);
 	lua_setmetatable(lua, -2);
-	lua_pop(lua, 2);
+	lua_pop(lua, 1);
 }
 
 void Script::Close()
@@ -115,29 +154,37 @@ void Script::PushNumber(float value)
 	lua_pushnumber(lua, value);
 }
 
-void Script::PushData(void* value)
+void Script::PushData(LuaObject* value)
 {
 	lua_pushlightuserdata(lua, value);
 }
 
 int Script::ToInteger(int argument)
 {
-	return (int)roundf(lua_tonumber(lua, argument + 1));
+	if (argument > 0)
+		argument++;
+	return (int)roundf(lua_tonumber(lua, argument));
 }
 
 bool Script::ToBoolean(int argument)
 {
-	return lua_toboolean(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return lua_toboolean(lua, argument);
 }
 
 float Script::ToNumber(int argument)
 {
-	return lua_tonumber(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return lua_tonumber(lua, argument);
 }
 
-void* Script::ToData(int argument)
+LuaObject* Script::ToData(int argument)
 {
-	return lua_touserdata(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return (LuaObject*)lua_touserdata(lua, argument);
 }
 
 int Script::ArgCount()
@@ -147,29 +194,39 @@ int Script::ArgCount()
 
 bool Script::IsInteger(int argument)
 {
-	return lua_isnumber(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return lua_isnumber(lua, argument);
 }
 
 bool Script::IsBoolean(int argument)
 {
-	return lua_isboolean(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return lua_isboolean(lua, argument);
 }
 
 bool Script::IsNumber(int argument)
 {
-	return lua_isnumber(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return lua_isnumber(lua, argument);
 }
 
 bool Script::IsData(int argument)
 {
-	return lua_isuserdata(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return lua_isuserdata(lua, argument);
 }
 
 int Script::StoreFunction(int argument)
 {
-	if (lua_isnil(lua, argument + 1))
+	if (argument > 0)
+		argument++;
+	if (lua_isnil(lua, argument))
 		return LUA_REFNIL;
-	lua_pushvalue(lua, argument + 1);
+	lua_pushvalue(lua, argument);
 	return luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
@@ -201,7 +258,9 @@ bool Script::ExecuteFunction(int reference, void* value)
 
 bool Script::IsFunction(int argument)
 {
-	return lua_isnil(lua, argument + 1) || lua_isfunction(lua, argument + 1);
+	if (argument > 0)
+		argument++;
+	return lua_isnil(lua, argument) || lua_isfunction(lua, argument);
 }
 
 void Script::DeleteFunction(int* reference)
@@ -213,7 +272,6 @@ void Script::DeleteFunction(int* reference)
 void Script::Print()
 {
 	int top;
-	const char* string;
 
 	top = lua_gettop(lua);
 	for (int i = 2; i <= top; i++)
@@ -223,11 +281,7 @@ void Script::Print()
 			lua_pushliteral(lua, "\t");
 			lua_concat(lua, 2);
 		}
-		string = lua_tostring(lua, i);
-		if (!string)
-			lua_pushfstring(lua, "%s: %p", luaL_typename(lua, i), lua_topointer(lua, i));
-		else
-			lua_pushstring(lua, string);
+		luaL_tolstring(lua, i, nullptr);
 	}
 	lua_concat(lua, top - 1);
 	Logger::Debug(lua_tostring(lua, -1));
@@ -252,19 +306,15 @@ void Script::LoadFunctions(const char* filename)
 	}
 }
 
-void Script::ThrowError(const char* msg)
+[[noreturn]] void Script::ThrowError(const char* msg)
 {
-	luaL_where(lua, 1);
-	lua_pushstring(lua, msg);
-	lua_concat(lua, 2);
+	BuildErrorMessage(msg);
 	throw std::exception();
 }
 
 void Script::EmitWarning(const char* msg)
 {
-	luaL_where(lua, 1);
-	lua_pushstring(lua, msg);
-	lua_concat(lua, 2);
+	BuildErrorMessage(msg);
 	luaL_traceback(lua, lua, lua_tostring(lua, -1), 1);
 	Logger::Warning(lua_tostring(lua, -1));
 	lua_pop(lua, 2);
