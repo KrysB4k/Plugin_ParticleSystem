@@ -16,7 +16,10 @@
 
 #include <windows.h>
 
-// TODO: reference additional headers your program requires here
+#define _USE_MATH_DEFINES
+#include <cmath>
+
+#include <optional>
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

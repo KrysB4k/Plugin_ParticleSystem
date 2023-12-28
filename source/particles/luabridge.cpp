@@ -303,6 +303,1056 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 	return nullptr;
 }
 
+std::optional<int> LuaGlobals::RetrieveIntegerConstant(const char* field)
+{
+	switch (field[0])
+	{
+	case 'S':
+		if (!strcmp(field, "SLOT_LARA"))
+			return std::optional(SLOT_LARA);
+		if (!strcmp(field, "SLOT_PISTOLS_ANIM"))
+			return std::optional(SLOT_PISTOLS_ANIM);
+		if (!strcmp(field, "SLOT_UZI_ANIM"))
+			return std::optional(SLOT_UZI_ANIM);
+		if (!strcmp(field, "SLOT_SHOTGUN_ANIM"))
+			return std::optional(SLOT_SHOTGUN_ANIM);
+		if (!strcmp(field, "SLOT_CROSSBOW_ANIM"))
+			return std::optional(SLOT_CROSSBOW_ANIM);
+		if (!strcmp(field, "SLOT_GRENADE_GUN_ANIM"))
+			return std::optional(SLOT_GRENADE_GUN_ANIM);
+		if (!strcmp(field, "SLOT_SIXSHOOTER_ANIM"))
+			return std::optional(SLOT_SIXSHOOTER_ANIM);
+		if (!strcmp(field, "SLOT_FLARE_ANIM"))
+			return std::optional(SLOT_FLARE_ANIM);
+		if (!strcmp(field, "SLOT_LARA_SKIN"))
+			return std::optional(SLOT_LARA_SKIN);
+		if (!strcmp(field, "SLOT_LARA_SKIN_JOINTS"))
+			return std::optional(SLOT_LARA_SKIN_JOINTS);
+		if (!strcmp(field, "SLOT_LARA_SCREAM"))
+			return std::optional(SLOT_LARA_SCREAM);
+		if (!strcmp(field, "SLOT_LARA_CROSSBOW_LASER"))
+			return std::optional(SLOT_LARA_CROSSBOW_LASER);
+		if (!strcmp(field, "SLOT_LARA_REVOLVER_LASER"))
+			return std::optional(SLOT_LARA_REVOLVER_LASER);
+		if (!strcmp(field, "SLOT_LARA_HOLSTERS"))
+			return std::optional(SLOT_LARA_HOLSTERS);
+		if (!strcmp(field, "SLOT_LARA_HOLSTERS_PISTOLS"))
+			return std::optional(SLOT_LARA_HOLSTERS_PISTOLS);
+		if (!strcmp(field, "SLOT_LARA_HOLSTERS_UZIS"))
+			return std::optional(SLOT_LARA_HOLSTERS_UZIS);
+		if (!strcmp(field, "SLOT_LARA_HOLSTERS_SIXSHOOTER"))
+			return std::optional(SLOT_LARA_HOLSTERS_SIXSHOOTER);
+		if (!strcmp(field, "SLOT_LARA_SPEECH_HEAD1"))
+			return std::optional(SLOT_LARA_SPEECH_HEAD1);
+		if (!strcmp(field, "SLOT_LARA_SPEECH_HEAD2"))
+			return std::optional(SLOT_LARA_SPEECH_HEAD2);
+		if (!strcmp(field, "SLOT_LARA_SPEECH_HEAD3"))
+			return std::optional(SLOT_LARA_SPEECH_HEAD3);
+		if (!strcmp(field, "SLOT_LARA_SPEECH_HEAD4"))
+			return std::optional(SLOT_LARA_SPEECH_HEAD4);
+		if (!strcmp(field, "SLOT_ACTOR1_SPEECH_HEAD1"))
+			return std::optional(SLOT_ACTOR1_SPEECH_HEAD1);
+		if (!strcmp(field, "SLOT_ACTOR1_SPEECH_HEAD2"))
+			return std::optional(SLOT_ACTOR1_SPEECH_HEAD2);
+		if (!strcmp(field, "SLOT_ACTOR2_SPEECH_HEAD1"))
+			return std::optional(SLOT_ACTOR2_SPEECH_HEAD1);
+		if (!strcmp(field, "SLOT_ACTOR2_SPEECH_HEAD2"))
+			return std::optional(SLOT_ACTOR2_SPEECH_HEAD2);
+		if (!strcmp(field, "SLOT_LARA_WATER_MESH"))
+			return std::optional(SLOT_LARA_WATER_MESH);
+		if (!strcmp(field, "SLOT_LARA_PETROL_MESH"))
+			return std::optional(SLOT_LARA_PETROL_MESH);
+		if (!strcmp(field, "SLOT_LARA_DIRT_MESH"))
+			return std::optional(SLOT_LARA_DIRT_MESH);
+		if (!strcmp(field, "SLOT_CROWBAR_ANIM"))
+			return std::optional(SLOT_CROWBAR_ANIM);
+		if (!strcmp(field, "SLOT_TORCH_ANIM"))
+			return std::optional(SLOT_TORCH_ANIM);
+		if (!strcmp(field, "SLOT_HAIR"))
+			return std::optional(SLOT_HAIR);
+		if (!strcmp(field, "SLOT_MOTORBIKE"))
+			return std::optional(SLOT_MOTORBIKE);
+		if (!strcmp(field, "SLOT_JEEP"))
+			return std::optional(SLOT_JEEP);
+		if (!strcmp(field, "SLOT_VEHICLE_EXTRA"))
+			return std::optional(SLOT_VEHICLE_EXTRA);
+		if (!strcmp(field, "SLOT_ENEMY_JEEP"))
+			return std::optional(SLOT_ENEMY_JEEP);
+		if (!strcmp(field, "SLOT_SKELETON"))
+			return std::optional(SLOT_SKELETON);
+		if (!strcmp(field, "SLOT_SKELETON_MIP"))
+			return std::optional(SLOT_SKELETON_MIP);
+		if (!strcmp(field, "SLOT_GUIDE"))
+			return std::optional(SLOT_GUIDE);
+		if (!strcmp(field, "SLOT_GUIDE_MIP"))
+			return std::optional(SLOT_GUIDE_MIP);
+		if (!strcmp(field, "SLOT_VON_CROY"))
+			return std::optional(SLOT_VON_CROY);
+		if (!strcmp(field, "SLOT_VON_CROY_MIP"))
+			return std::optional(SLOT_VON_CROY_MIP);
+		if (!strcmp(field, "SLOT_BADDY_1"))
+			return std::optional(SLOT_BADDY_1);
+		if (!strcmp(field, "SLOT_BADDY_1_MIP"))
+			return std::optional(SLOT_BADDY_1_MIP);
+		if (!strcmp(field, "SLOT_BADDY_2"))
+			return std::optional(SLOT_BADDY_2);
+		if (!strcmp(field, "SLOT_BADDY_2_MIP"))
+			return std::optional(SLOT_BADDY_2_MIP);
+		if (!strcmp(field, "SLOT_SETHA"))
+			return std::optional(SLOT_SETHA);
+		if (!strcmp(field, "SLOT_SETHA_MIP"))
+			return std::optional(SLOT_SETHA_MIP);
+		if (!strcmp(field, "SLOT_MUMMY"))
+			return std::optional(SLOT_MUMMY);
+		if (!strcmp(field, "SLOT_MUMMY_MIP"))
+			return std::optional(SLOT_MUMMY_MIP);
+		if (!strcmp(field, "SLOT_SPHINX"))
+			return std::optional(SLOT_SPHINX);
+		if (!strcmp(field, "SLOT_SPHINX_MIP"))
+			return std::optional(SLOT_SPHINX_MIP);
+		if (!strcmp(field, "SLOT_CROCODILE"))
+			return std::optional(SLOT_CROCODILE);
+		if (!strcmp(field, "SLOT_CROCODILE_MIP"))
+			return std::optional(SLOT_CROCODILE_MIP);
+		if (!strcmp(field, "SLOT_HORSEMAN"))
+			return std::optional(SLOT_HORSEMAN);
+		if (!strcmp(field, "SLOT_HORSEMAN_MIP"))
+			return std::optional(SLOT_HORSEMAN_MIP);
+		if (!strcmp(field, "SLOT_SCORPION"))
+			return std::optional(SLOT_SCORPION);
+		if (!strcmp(field, "SLOT_SCORPION_MIP"))
+			return std::optional(SLOT_SCORPION_MIP);
+		if (!strcmp(field, "SLOT_JEAN_YVES"))
+			return std::optional(SLOT_JEAN_YVES);
+		if (!strcmp(field, "SLOT_JEAN_YVES_MIP"))
+			return std::optional(SLOT_JEAN_YVES_MIP);
+		if (!strcmp(field, "SLOT_TROOPS"))
+			return std::optional(SLOT_TROOPS);
+		if (!strcmp(field, "SLOT_TROOPS_MIP"))
+			return std::optional(SLOT_TROOPS_MIP);
+		if (!strcmp(field, "SLOT_KNIGHTS_TEMPLAR"))
+			return std::optional(SLOT_KNIGHTS_TEMPLAR);
+		if (!strcmp(field, "SLOT_KNIGHTS_TEMPLAR_MIP"))
+			return std::optional(SLOT_KNIGHTS_TEMPLAR_MIP);
+		if (!strcmp(field, "SLOT_MUTANT"))
+			return std::optional(SLOT_MUTANT);
+		if (!strcmp(field, "SLOT_MUTANT_MIP"))
+			return std::optional(SLOT_MUTANT_MIP);
+		if (!strcmp(field, "SLOT_HORSE"))
+			return std::optional(SLOT_HORSE);
+		if (!strcmp(field, "SLOT_HORSE_MIP"))
+			return std::optional(SLOT_HORSE_MIP);
+		if (!strcmp(field, "SLOT_BABOON_NORMAL"))
+			return std::optional(SLOT_BABOON_NORMAL);
+		if (!strcmp(field, "SLOT_BABOON_NORMAL_MIP"))
+			return std::optional(SLOT_BABOON_NORMAL_MIP);
+		if (!strcmp(field, "SLOT_BABOON_INV"))
+			return std::optional(SLOT_BABOON_INV);
+		if (!strcmp(field, "SLOT_BABOON_INV_MIP"))
+			return std::optional(SLOT_BABOON_INV_MIP);
+		if (!strcmp(field, "SLOT_BABOON_SILENT"))
+			return std::optional(SLOT_BABOON_SILENT);
+		if (!strcmp(field, "SLOT_BABOON_SILENT_MIP"))
+			return std::optional(SLOT_BABOON_SILENT_MIP);
+		if (!strcmp(field, "SLOT_WILD_BOAR"))
+			return std::optional(SLOT_WILD_BOAR);
+		if (!strcmp(field, "SLOT_WILD_BOAR_MIP"))
+			return std::optional(SLOT_WILD_BOAR_MIP);
+		if (!strcmp(field, "SLOT_HARPY"))
+			return std::optional(SLOT_HARPY);
+		if (!strcmp(field, "SLOT_HARPY_MIP"))
+			return std::optional(SLOT_HARPY_MIP);
+		if (!strcmp(field, "SLOT_DEMIGOD1"))
+			return std::optional(SLOT_DEMIGOD1);
+		if (!strcmp(field, "SLOT_DEMIGOD1_MIP"))
+			return std::optional(SLOT_DEMIGOD1_MIP);
+		if (!strcmp(field, "SLOT_DEMIGOD2"))
+			return std::optional(SLOT_DEMIGOD2);
+		if (!strcmp(field, "SLOT_DEMIGOD2_MIP"))
+			return std::optional(SLOT_DEMIGOD2_MIP);
+		if (!strcmp(field, "SLOT_DEMIGOD3"))
+			return std::optional(SLOT_DEMIGOD3);
+		if (!strcmp(field, "SLOT_DEMIGOD3_MIP"))
+			return std::optional(SLOT_DEMIGOD3_MIP);
+		if (!strcmp(field, "SLOT_LITTLE_BEETLE"))
+			return std::optional(SLOT_LITTLE_BEETLE);
+		if (!strcmp(field, "SLOT_BIG_BEETLE"))
+			return std::optional(SLOT_BIG_BEETLE);
+		if (!strcmp(field, "SLOT_BIG_BEETLE_MIP"))
+			return std::optional(SLOT_BIG_BEETLE_MIP);
+		if (!strcmp(field, "SLOT_WRAITH1"))
+			return std::optional(SLOT_WRAITH1);
+		if (!strcmp(field, "SLOT_WRAITH2"))
+			return std::optional(SLOT_WRAITH2);
+		if (!strcmp(field, "SLOT_WRAITH3"))
+			return std::optional(SLOT_WRAITH3);
+		if (!strcmp(field, "SLOT_WRAITH4"))
+			return std::optional(SLOT_WRAITH4);
+		if (!strcmp(field, "SLOT_BAT"))
+			return std::optional(SLOT_BAT);
+		if (!strcmp(field, "SLOT_DOG"))
+			return std::optional(SLOT_DOG);
+		if (!strcmp(field, "SLOT_DOG_MIP"))
+			return std::optional(SLOT_DOG_MIP);
+		if (!strcmp(field, "SLOT_HAMMERHEAD"))
+			return std::optional(SLOT_HAMMERHEAD);
+		if (!strcmp(field, "SLOT_HAMMERHEAD_MIP"))
+			return std::optional(SLOT_HAMMERHEAD_MIP);
+		if (!strcmp(field, "SLOT_SAS"))
+			return std::optional(SLOT_SAS);
+		if (!strcmp(field, "SLOT_SAS_MIP"))
+			return std::optional(SLOT_SAS_MIP);
+		if (!strcmp(field, "SLOT_SAS_DYING"))
+			return std::optional(SLOT_SAS_DYING);
+		if (!strcmp(field, "SLOT_SAS_DYING_MIP"))
+			return std::optional(SLOT_SAS_DYING_MIP);
+		if (!strcmp(field, "SLOT_SAS_CAPTAIN"))
+			return std::optional(SLOT_SAS_CAPTAIN);
+		if (!strcmp(field, "SLOT_SAS_CAPTAIN_MIP"))
+			return std::optional(SLOT_SAS_CAPTAIN_MIP);
+		if (!strcmp(field, "SLOT_SAS_DRAG_BLOKE"))
+			return std::optional(SLOT_SAS_DRAG_BLOKE);
+		if (!strcmp(field, "SLOT_AHMET"))
+			return std::optional(SLOT_AHMET);
+		if (!strcmp(field, "SLOT_AHMET_MIP"))
+			return std::optional(SLOT_AHMET_MIP);
+		if (!strcmp(field, "SLOT_LARA_DOUBLE"))
+			return std::optional(SLOT_LARA_DOUBLE);
+		if (!strcmp(field, "SLOT_LARA_DOUBLE_MIP"))
+			return std::optional(SLOT_LARA_DOUBLE_MIP);
+		if (!strcmp(field, "SLOT_SMALL_SCORPION"))
+			return std::optional(SLOT_SMALL_SCORPION);
+		if (!strcmp(field, "SLOT_LOCUST_EMITTER"))
+			return std::optional(SLOT_LOCUST_EMITTER);
+		if (!strcmp(field, "SLOT_GAME_PIECE1"))
+			return std::optional(SLOT_GAME_PIECE1);
+		if (!strcmp(field, "SLOT_GAME_PIECE2"))
+			return std::optional(SLOT_GAME_PIECE2);
+		if (!strcmp(field, "SLOT_GAME_PIECE3"))
+			return std::optional(SLOT_GAME_PIECE3);
+		if (!strcmp(field, "SLOT_ENEMY_PIECE"))
+			return std::optional(SLOT_ENEMY_PIECE);
+		if (!strcmp(field, "SLOT_WHEEL_OF_FORTUNE"))
+			return std::optional(SLOT_WHEEL_OF_FORTUNE);
+		if (!strcmp(field, "SLOT_SCALES"))
+			return std::optional(SLOT_SCALES);
+		if (!strcmp(field, "SLOT_DARTS"))
+			return std::optional(SLOT_DARTS);
+		if (!strcmp(field, "SLOT_DART_EMITTER"))
+			return std::optional(SLOT_DART_EMITTER);
+		if (!strcmp(field, "SLOT_HOMING_DART_EMITTER"))
+			return std::optional(SLOT_HOMING_DART_EMITTER);
+		if (!strcmp(field, "SLOT_FALLING_CEILING"))
+			return std::optional(SLOT_FALLING_CEILING);
+		if (!strcmp(field, "SLOT_FALLING_BLOCK"))
+			return std::optional(SLOT_FALLING_BLOCK);
+		if (!strcmp(field, "SLOT_FALLING_BLOCK2"))
+			return std::optional(SLOT_FALLING_BLOCK2);
+		if (!strcmp(field, "SLOT_SMASHABLE_BIKE_WALL"))
+			return std::optional(SLOT_SMASHABLE_BIKE_WALL);
+		if (!strcmp(field, "SLOT_SMASHABLE_BIKE_FLOOR"))
+			return std::optional(SLOT_SMASHABLE_BIKE_FLOOR);
+		if (!strcmp(field, "SLOT_TRAPDOOR1"))
+			return std::optional(SLOT_TRAPDOOR1);
+		if (!strcmp(field, "SLOT_TRAPDOOR2"))
+			return std::optional(SLOT_TRAPDOOR2);
+		if (!strcmp(field, "SLOT_TRAPDOOR3"))
+			return std::optional(SLOT_TRAPDOOR3);
+		if (!strcmp(field, "SLOT_FLOOR_TRAPDOOR1"))
+			return std::optional(SLOT_FLOOR_TRAPDOOR1);
+		if (!strcmp(field, "SLOT_FLOOR_TRAPDOOR2"))
+			return std::optional(SLOT_FLOOR_TRAPDOOR2);
+		if (!strcmp(field, "SLOT_CEILING_TRAPDOOR1"))
+			return std::optional(SLOT_CEILING_TRAPDOOR1);
+		if (!strcmp(field, "SLOT_CEILING_TRAPDOOR2"))
+			return std::optional(SLOT_CEILING_TRAPDOOR2);
+		if (!strcmp(field, "SLOT_SCALING_TRAPDOOR"))
+			return std::optional(SLOT_SCALING_TRAPDOOR);
+		if (!strcmp(field, "SLOT_ROLLINGBALL"))
+			return std::optional(SLOT_ROLLINGBALL);
+		if (!strcmp(field, "SLOT_SPIKEY_FLOOR"))
+			return std::optional(SLOT_SPIKEY_FLOOR);
+		if (!strcmp(field, "SLOT_TEETH_SPIKES"))
+			return std::optional(SLOT_TEETH_SPIKES);
+		if (!strcmp(field, "SLOT_JOBY_SPIKES"))
+			return std::optional(SLOT_JOBY_SPIKES);
+		if (!strcmp(field, "SLOT_SLICER_DICER"))
+			return std::optional(SLOT_SLICER_DICER);
+		if (!strcmp(field, "SLOT_CHAIN"))
+			return std::optional(SLOT_CHAIN);
+		if (!strcmp(field, "SLOT_PLOUGH"))
+			return std::optional(SLOT_PLOUGH);
+		if (!strcmp(field, "SLOT_STARGATE"))
+			return std::optional(SLOT_STARGATE);
+		if (!strcmp(field, "SLOT_HAMMER"))
+			return std::optional(SLOT_HAMMER);
+		if (!strcmp(field, "SLOT_BURNING_FLOOR"))
+			return std::optional(SLOT_BURNING_FLOOR);
+		if (!strcmp(field, "SLOT_COG"))
+			return std::optional(SLOT_COG);
+		if (!strcmp(field, "SLOT_SPIKEBALL"))
+			return std::optional(SLOT_SPIKEBALL);
+		if (!strcmp(field, "SLOT_FLAME"))
+			return std::optional(SLOT_FLAME);
+		if (!strcmp(field, "SLOT_FLAME_EMITTER"))
+			return std::optional(SLOT_FLAME_EMITTER);
+		if (!strcmp(field, "SLOT_FLAME_EMITTER2"))
+			return std::optional(SLOT_FLAME_EMITTER2);
+		if (!strcmp(field, "SLOT_FLAME_EMITTER3"))
+			return std::optional(SLOT_FLAME_EMITTER3);
+		if (!strcmp(field, "SLOT_ROPE"))
+			return std::optional(SLOT_ROPE);
+		if (!strcmp(field, "SLOT_FIREROPE"))
+			return std::optional(SLOT_FIREROPE);
+		if (!strcmp(field, "SLOT_POLEROPE"))
+			return std::optional(SLOT_POLEROPE);
+		if (!strcmp(field, "SLOT_ONEBLOCK_PLATFORM"))
+			return std::optional(SLOT_ONEBLOCK_PLATFORM);
+		if (!strcmp(field, "SLOT_TWOBLOCK_PLATFORM"))
+			return std::optional(SLOT_TWOBLOCK_PLATFORM);
+		if (!strcmp(field, "SLOT_RAISING_BLOCK1"))
+			return std::optional(SLOT_RAISING_BLOCK1);
+		if (!strcmp(field, "SLOT_RAISING_BLOCK2"))
+			return std::optional(SLOT_RAISING_BLOCK2);
+		if (!strcmp(field, "SLOT_EXPANDING_PLATFORM"))
+			return std::optional(SLOT_EXPANDING_PLATFORM);
+		if (!strcmp(field, "SLOT_SQUISHY_BLOCK1"))
+			return std::optional(SLOT_SQUISHY_BLOCK1);
+		if (!strcmp(field, "SLOT_SQUISHY_BLOCK2"))
+			return std::optional(SLOT_SQUISHY_BLOCK2);
+		if (!strcmp(field, "SLOT_PUSHABLE_OBJECT1"))
+			return std::optional(SLOT_PUSHABLE_OBJECT1);
+		if (!strcmp(field, "SLOT_PUSHABLE_OBJECT2"))
+			return std::optional(SLOT_PUSHABLE_OBJECT2);
+		if (!strcmp(field, "SLOT_PUSHABLE_OBJECT3"))
+			return std::optional(SLOT_PUSHABLE_OBJECT3);
+		if (!strcmp(field, "SLOT_PUSHABLE_OBJECT4"))
+			return std::optional(SLOT_PUSHABLE_OBJECT4);
+		if (!strcmp(field, "SLOT_PUSHABLE_OBJECT5"))
+			return std::optional(SLOT_PUSHABLE_OBJECT5);
+		if (!strcmp(field, "SLOT_TRIPWIRE"))
+			return std::optional(SLOT_TRIPWIRE);
+		if (!strcmp(field, "SLOT_SENTRY_GUN"))
+			return std::optional(SLOT_SENTRY_GUN);
+		if (!strcmp(field, "SLOT_MINE"))
+			return std::optional(SLOT_MINE);
+		if (!strcmp(field, "SLOT_MAPPER"))
+			return std::optional(SLOT_MAPPER);
+		if (!strcmp(field, "SLOT_OBELISK"))
+			return std::optional(SLOT_OBELISK);
+		if (!strcmp(field, "SLOT_FLOOR_4BLADE"))
+			return std::optional(SLOT_FLOOR_4BLADE);
+		if (!strcmp(field, "SLOT_ROOF_4BLADE"))
+			return std::optional(SLOT_ROOF_4BLADE);
+		if (!strcmp(field, "SLOT_BIRD_BLADE"))
+			return std::optional(SLOT_BIRD_BLADE);
+		if (!strcmp(field, "SLOT_CATWALK_BLADE"))
+			return std::optional(SLOT_CATWALK_BLADE);
+		if (!strcmp(field, "SLOT_MOVING_BLADE"))
+			return std::optional(SLOT_MOVING_BLADE);
+		if (!strcmp(field, "SLOT_PLINTH_BLADE"))
+			return std::optional(SLOT_PLINTH_BLADE);
+		if (!strcmp(field, "SLOT_SETH_BLADE"))
+			return std::optional(SLOT_SETH_BLADE);
+		if (!strcmp(field, "SLOT_LIGHTNING_CONDUCTOR"))
+			return std::optional(SLOT_LIGHTNING_CONDUCTOR);
+		if (!strcmp(field, "SLOT_ELEMENT_PUZZLE"))
+			return std::optional(SLOT_ELEMENT_PUZZLE);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM1"))
+			return std::optional(SLOT_PUZZLE_ITEM1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM2"))
+			return std::optional(SLOT_PUZZLE_ITEM2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM3"))
+			return std::optional(SLOT_PUZZLE_ITEM3);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM4"))
+			return std::optional(SLOT_PUZZLE_ITEM4);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM5"))
+			return std::optional(SLOT_PUZZLE_ITEM5);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM6"))
+			return std::optional(SLOT_PUZZLE_ITEM6);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM7"))
+			return std::optional(SLOT_PUZZLE_ITEM7);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM8"))
+			return std::optional(SLOT_PUZZLE_ITEM8);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM9"))
+			return std::optional(SLOT_PUZZLE_ITEM9);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM10"))
+			return std::optional(SLOT_PUZZLE_ITEM10);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM11"))
+			return std::optional(SLOT_PUZZLE_ITEM11);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM12"))
+			return std::optional(SLOT_PUZZLE_ITEM12);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM1_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM1_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM1_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM1_COMBO2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM2_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM2_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM2_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM2_COMBO2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM3_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM3_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM3_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM3_COMBO2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM4_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM4_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM4_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM4_COMBO2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM5_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM5_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM5_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM5_COMBO2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM6_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM6_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM6_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM6_COMBO2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM7_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM7_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM7_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM7_COMBO2);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM8_COMBO1"))
+			return std::optional(SLOT_PUZZLE_ITEM8_COMBO1);
+		if (!strcmp(field, "SLOT_PUZZLE_ITEM8_COMBO2"))
+			return std::optional(SLOT_PUZZLE_ITEM8_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM1"))
+			return std::optional(SLOT_KEY_ITEM1);
+		if (!strcmp(field, "SLOT_KEY_ITEM2"))
+			return std::optional(SLOT_KEY_ITEM2);
+		if (!strcmp(field, "SLOT_KEY_ITEM3"))
+			return std::optional(SLOT_KEY_ITEM3);
+		if (!strcmp(field, "SLOT_KEY_ITEM4"))
+			return std::optional(SLOT_KEY_ITEM4);
+		if (!strcmp(field, "SLOT_KEY_ITEM5"))
+			return std::optional(SLOT_KEY_ITEM5);
+		if (!strcmp(field, "SLOT_KEY_ITEM6"))
+			return std::optional(SLOT_KEY_ITEM6);
+		if (!strcmp(field, "SLOT_KEY_ITEM7"))
+			return std::optional(SLOT_KEY_ITEM7);
+		if (!strcmp(field, "SLOT_KEY_ITEM8"))
+			return std::optional(SLOT_KEY_ITEM8);
+		if (!strcmp(field, "SLOT_KEY_ITEM9"))
+			return std::optional(SLOT_KEY_ITEM9);
+		if (!strcmp(field, "SLOT_KEY_ITEM10"))
+			return std::optional(SLOT_KEY_ITEM10);
+		if (!strcmp(field, "SLOT_KEY_ITEM11"))
+			return std::optional(SLOT_KEY_ITEM11);
+		if (!strcmp(field, "SLOT_KEY_ITEM12"))
+			return std::optional(SLOT_KEY_ITEM12);
+		if (!strcmp(field, "SLOT_KEY_ITEM1_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM1_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM1_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM1_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM2_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM2_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM2_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM2_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM3_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM3_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM3_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM3_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM4_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM4_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM4_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM4_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM5_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM5_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM5_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM5_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM6_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM6_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM6_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM6_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM7_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM7_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM7_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM7_COMBO2);
+		if (!strcmp(field, "SLOT_KEY_ITEM8_COMBO1"))
+			return std::optional(SLOT_KEY_ITEM8_COMBO1);
+		if (!strcmp(field, "SLOT_KEY_ITEM8_COMBO2"))
+			return std::optional(SLOT_KEY_ITEM8_COMBO2);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM1"))
+			return std::optional(SLOT_PICKUP_ITEM1);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM2"))
+			return std::optional(SLOT_PICKUP_ITEM2);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM3"))
+			return std::optional(SLOT_PICKUP_ITEM3);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM4"))
+			return std::optional(SLOT_PICKUP_ITEM4);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM1_COMBO1"))
+			return std::optional(SLOT_PICKUP_ITEM1_COMBO1);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM1_COMBO2"))
+			return std::optional(SLOT_PICKUP_ITEM1_COMBO2);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM2_COMBO1"))
+			return std::optional(SLOT_PICKUP_ITEM2_COMBO1);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM2_COMBO2"))
+			return std::optional(SLOT_PICKUP_ITEM2_COMBO2);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM3_COMBO1"))
+			return std::optional(SLOT_PICKUP_ITEM3_COMBO1);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM3_COMBO2"))
+			return std::optional(SLOT_PICKUP_ITEM3_COMBO2);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM4_COMBO1"))
+			return std::optional(SLOT_PICKUP_ITEM4_COMBO1);
+		if (!strcmp(field, "SLOT_PICKUP_ITEM4_COMBO2"))
+			return std::optional(SLOT_PICKUP_ITEM4_COMBO2);
+		if (!strcmp(field, "SLOT_EXAMINE1"))
+			return std::optional(SLOT_EXAMINE1);
+		if (!strcmp(field, "SLOT_EXAMINE2"))
+			return std::optional(SLOT_EXAMINE2);
+		if (!strcmp(field, "SLOT_EXAMINE3"))
+			return std::optional(SLOT_EXAMINE3);
+		if (!strcmp(field, "SLOT_CROWBAR_ITEM"))
+			return std::optional(SLOT_CROWBAR_ITEM);
+		if (!strcmp(field, "SLOT_BURNING_TORCH_ITEM"))
+			return std::optional(SLOT_BURNING_TORCH_ITEM);
+		if (!strcmp(field, "SLOT_CLOCKWORK_BEETLE"))
+			return std::optional(SLOT_CLOCKWORK_BEETLE);
+		if (!strcmp(field, "SLOT_CLOCKWORK_BEETLE_COMBO1"))
+			return std::optional(SLOT_CLOCKWORK_BEETLE_COMBO1);
+		if (!strcmp(field, "SLOT_CLOCKWORK_BEETLE_COMBO2"))
+			return std::optional(SLOT_CLOCKWORK_BEETLE_COMBO2);
+		if (!strcmp(field, "SLOT_MINE_DETECTOR"))
+			return std::optional(SLOT_MINE_DETECTOR);
+		if (!strcmp(field, "SLOT_QUEST_ITEM1"))
+			return std::optional(SLOT_QUEST_ITEM1);
+		if (!strcmp(field, "SLOT_QUEST_ITEM2"))
+			return std::optional(SLOT_QUEST_ITEM2);
+		if (!strcmp(field, "SLOT_QUEST_ITEM3"))
+			return std::optional(SLOT_QUEST_ITEM3);
+		if (!strcmp(field, "SLOT_QUEST_ITEM4"))
+			return std::optional(SLOT_QUEST_ITEM4);
+		if (!strcmp(field, "SLOT_QUEST_ITEM5"))
+			return std::optional(SLOT_QUEST_ITEM5);
+		if (!strcmp(field, "SLOT_QUEST_ITEM6"))
+			return std::optional(SLOT_QUEST_ITEM6);
+		if (!strcmp(field, "SLOT_MAP"))
+			return std::optional(SLOT_MAP);
+		if (!strcmp(field, "SLOT_SECRET_MAP"))
+			return std::optional(SLOT_SECRET_MAP);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE1"))
+			return std::optional(SLOT_PUZZLE_HOLE1);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE2"))
+			return std::optional(SLOT_PUZZLE_HOLE2);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE3"))
+			return std::optional(SLOT_PUZZLE_HOLE3);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE4"))
+			return std::optional(SLOT_PUZZLE_HOLE4);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE5"))
+			return std::optional(SLOT_PUZZLE_HOLE5);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE6"))
+			return std::optional(SLOT_PUZZLE_HOLE6);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE7"))
+			return std::optional(SLOT_PUZZLE_HOLE7);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE8"))
+			return std::optional(SLOT_PUZZLE_HOLE8);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE9"))
+			return std::optional(SLOT_PUZZLE_HOLE9);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE10"))
+			return std::optional(SLOT_PUZZLE_HOLE10);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE11"))
+			return std::optional(SLOT_PUZZLE_HOLE11);
+		if (!strcmp(field, "SLOT_PUZZLE_HOLE12"))
+			return std::optional(SLOT_PUZZLE_HOLE12);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE1"))
+			return std::optional(SLOT_PUZZLE_DONE1);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE2"))
+			return std::optional(SLOT_PUZZLE_DONE2);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE3"))
+			return std::optional(SLOT_PUZZLE_DONE3);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE4"))
+			return std::optional(SLOT_PUZZLE_DONE4);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE5"))
+			return std::optional(SLOT_PUZZLE_DONE5);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE6"))
+			return std::optional(SLOT_PUZZLE_DONE6);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE7"))
+			return std::optional(SLOT_PUZZLE_DONE7);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE8"))
+			return std::optional(SLOT_PUZZLE_DONE8);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE9"))
+			return std::optional(SLOT_PUZZLE_DONE9);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE10"))
+			return std::optional(SLOT_PUZZLE_DONE10);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE11"))
+			return std::optional(SLOT_PUZZLE_DONE11);
+		if (!strcmp(field, "SLOT_PUZZLE_DONE12"))
+			return std::optional(SLOT_PUZZLE_DONE12);
+		if (!strcmp(field, "SLOT_KEY_HOLE1"))
+			return std::optional(SLOT_KEY_HOLE1);
+		if (!strcmp(field, "SLOT_KEY_HOLE2"))
+			return std::optional(SLOT_KEY_HOLE2);
+		if (!strcmp(field, "SLOT_KEY_HOLE3"))
+			return std::optional(SLOT_KEY_HOLE3);
+		if (!strcmp(field, "SLOT_KEY_HOLE4"))
+			return std::optional(SLOT_KEY_HOLE4);
+		if (!strcmp(field, "SLOT_KEY_HOLE5"))
+			return std::optional(SLOT_KEY_HOLE5);
+		if (!strcmp(field, "SLOT_KEY_HOLE6"))
+			return std::optional(SLOT_KEY_HOLE6);
+		if (!strcmp(field, "SLOT_KEY_HOLE7"))
+			return std::optional(SLOT_KEY_HOLE7);
+		if (!strcmp(field, "SLOT_KEY_HOLE8"))
+			return std::optional(SLOT_KEY_HOLE8);
+		if (!strcmp(field, "SLOT_KEY_HOLE9"))
+			return std::optional(SLOT_KEY_HOLE9);
+		if (!strcmp(field, "SLOT_KEY_HOLE10"))
+			return std::optional(SLOT_KEY_HOLE10);
+		if (!strcmp(field, "SLOT_KEY_HOLE11"))
+			return std::optional(SLOT_KEY_HOLE11);
+		if (!strcmp(field, "SLOT_KEY_HOLE12"))
+			return std::optional(SLOT_KEY_HOLE12);
+		if (!strcmp(field, "SLOT_WATERSKIN1_EMPTY"))
+			return std::optional(SLOT_WATERSKIN1_EMPTY);
+		if (!strcmp(field, "SLOT_WATERSKIN1_1"))
+			return std::optional(SLOT_WATERSKIN1_1);
+		if (!strcmp(field, "SLOT_WATERSKIN1_2"))
+			return std::optional(SLOT_WATERSKIN1_2);
+		if (!strcmp(field, "SLOT_WATERSKIN1_3"))
+			return std::optional(SLOT_WATERSKIN1_3);
+		if (!strcmp(field, "SLOT_WATERSKIN2_EMPTY"))
+			return std::optional(SLOT_WATERSKIN2_EMPTY);
+		if (!strcmp(field, "SLOT_WATERSKIN2_1"))
+			return std::optional(SLOT_WATERSKIN2_1);
+		if (!strcmp(field, "SLOT_WATERSKIN2_2"))
+			return std::optional(SLOT_WATERSKIN2_2);
+		if (!strcmp(field, "SLOT_WATERSKIN2_3"))
+			return std::optional(SLOT_WATERSKIN2_3);
+		if (!strcmp(field, "SLOT_WATERSKIN2_4"))
+			return std::optional(SLOT_WATERSKIN2_4);
+		if (!strcmp(field, "SLOT_WATERSKIN2_5"))
+			return std::optional(SLOT_WATERSKIN2_5);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE1"))
+			return std::optional(SLOT_SWITCH_TYPE1);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE2"))
+			return std::optional(SLOT_SWITCH_TYPE2);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE3"))
+			return std::optional(SLOT_SWITCH_TYPE3);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE4"))
+			return std::optional(SLOT_SWITCH_TYPE4);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE5"))
+			return std::optional(SLOT_SWITCH_TYPE5);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE6"))
+			return std::optional(SLOT_SWITCH_TYPE6);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE7"))
+			return std::optional(SLOT_SWITCH_TYPE7);
+		if (!strcmp(field, "SLOT_SWITCH_TYPE8"))
+			return std::optional(SLOT_SWITCH_TYPE8);
+		if (!strcmp(field, "SLOT_UNDERWATER_SWITCH1"))
+			return std::optional(SLOT_UNDERWATER_SWITCH1);
+		if (!strcmp(field, "SLOT_UNDERWATER_SWITCH2"))
+			return std::optional(SLOT_UNDERWATER_SWITCH2);
+		if (!strcmp(field, "SLOT_TURN_SWITCH"))
+			return std::optional(SLOT_TURN_SWITCH);
+		if (!strcmp(field, "SLOT_COG_SWITCH"))
+			return std::optional(SLOT_COG_SWITCH);
+		if (!strcmp(field, "SLOT_LEVER_SWITCH"))
+			return std::optional(SLOT_LEVER_SWITCH);
+		if (!strcmp(field, "SLOT_JUMP_SWITCH"))
+			return std::optional(SLOT_JUMP_SWITCH);
+		if (!strcmp(field, "SLOT_CROWBAR_SWITCH"))
+			return std::optional(SLOT_CROWBAR_SWITCH);
+		if (!strcmp(field, "SLOT_PULLEY"))
+			return std::optional(SLOT_PULLEY);
+		if (!strcmp(field, "SLOT_DOOR_TYPE1"))
+			return std::optional(SLOT_DOOR_TYPE1);
+		if (!strcmp(field, "SLOT_DOOR_TYPE2"))
+			return std::optional(SLOT_DOOR_TYPE2);
+		if (!strcmp(field, "SLOT_DOOR_TYPE3"))
+			return std::optional(SLOT_DOOR_TYPE3);
+		if (!strcmp(field, "SLOT_DOOR_TYPE4"))
+			return std::optional(SLOT_DOOR_TYPE4);
+		if (!strcmp(field, "SLOT_DOOR_TYPE5"))
+			return std::optional(SLOT_DOOR_TYPE5);
+		if (!strcmp(field, "SLOT_DOOR_TYPE6"))
+			return std::optional(SLOT_DOOR_TYPE6);
+		if (!strcmp(field, "SLOT_DOOR_TYPE7"))
+			return std::optional(SLOT_DOOR_TYPE7);
+		if (!strcmp(field, "SLOT_DOOR_TYPE8"))
+			return std::optional(SLOT_DOOR_TYPE8);
+		if (!strcmp(field, "SLOT_PUSHPULL_DOOR1"))
+			return std::optional(SLOT_PUSHPULL_DOOR1);
+		if (!strcmp(field, "SLOT_PUSHPULL_DOOR2"))
+			return std::optional(SLOT_PUSHPULL_DOOR2);
+		if (!strcmp(field, "SLOT_KICK_DOOR1"))
+			return std::optional(SLOT_KICK_DOOR1);
+		if (!strcmp(field, "SLOT_KICK_DOOR2"))
+			return std::optional(SLOT_KICK_DOOR2);
+		if (!strcmp(field, "SLOT_UNDERWATER_DOOR"))
+			return std::optional(SLOT_UNDERWATER_DOOR);
+		if (!strcmp(field, "SLOT_DOUBLE_DOORS"))
+			return std::optional(SLOT_DOUBLE_DOORS);
+		if (!strcmp(field, "SLOT_BRIDGE_FLAT"))
+			return std::optional(SLOT_BRIDGE_FLAT);
+		if (!strcmp(field, "SLOT_BRIDGE_TILT1"))
+			return std::optional(SLOT_BRIDGE_TILT1);
+		if (!strcmp(field, "SLOT_BRIDGE_TILT2"))
+			return std::optional(SLOT_BRIDGE_TILT2);
+		if (!strcmp(field, "SLOT_SARCOPHAGUS"))
+			return std::optional(SLOT_SARCOPHAGUS);
+		if (!strcmp(field, "SLOT_SEQUENCE_DOOR1"))
+			return std::optional(SLOT_SEQUENCE_DOOR1);
+		if (!strcmp(field, "SLOT_SEQUENCE_SWITCH1"))
+			return std::optional(SLOT_SEQUENCE_SWITCH1);
+		if (!strcmp(field, "SLOT_SEQUENCE_SWITCH2"))
+			return std::optional(SLOT_SEQUENCE_SWITCH2);
+		if (!strcmp(field, "SLOT_SEQUENCE_SWITCH3"))
+			return std::optional(SLOT_SEQUENCE_SWITCH3);
+		if (!strcmp(field, "SLOT_SARCOPHAGUS_CUT"))
+			return std::optional(SLOT_SARCOPHAGUS_CUT);
+		if (!strcmp(field, "SLOT_HORUS_STATUE"))
+			return std::optional(SLOT_HORUS_STATUE);
+		if (!strcmp(field, "SLOT_GOD_HEAD"))
+			return std::optional(SLOT_GOD_HEAD);
+		if (!strcmp(field, "SLOT_SETH_DOOR"))
+			return std::optional(SLOT_SETH_DOOR);
+		if (!strcmp(field, "SLOT_STATUE_PLINTH"))
+			return std::optional(SLOT_STATUE_PLINTH);
+		if (!strcmp(field, "SLOT_PISTOLS_ITEM"))
+			return std::optional(SLOT_PISTOLS_ITEM);
+		if (!strcmp(field, "SLOT_PISTOLS_AMMO_ITEM"))
+			return std::optional(SLOT_PISTOLS_AMMO_ITEM);
+		if (!strcmp(field, "SLOT_UZI_ITEM"))
+			return std::optional(SLOT_UZI_ITEM);
+		if (!strcmp(field, "SLOT_UZI_AMMO_ITEM"))
+			return std::optional(SLOT_UZI_AMMO_ITEM);
+		if (!strcmp(field, "SLOT_SHOTGUN_ITEM"))
+			return std::optional(SLOT_SHOTGUN_ITEM);
+		if (!strcmp(field, "SLOT_SHOTGUN_AMMO1_ITEM"))
+			return std::optional(SLOT_SHOTGUN_AMMO1_ITEM);
+		if (!strcmp(field, "SLOT_SHOTGUN_AMMO2_ITEM"))
+			return std::optional(SLOT_SHOTGUN_AMMO2_ITEM);
+		if (!strcmp(field, "SLOT_CROSSBOW_ITEM"))
+			return std::optional(SLOT_CROSSBOW_ITEM);
+		if (!strcmp(field, "SLOT_CROSSBOW_AMMO1_ITEM"))
+			return std::optional(SLOT_CROSSBOW_AMMO1_ITEM);
+		if (!strcmp(field, "SLOT_CROSSBOW_AMMO2_ITEM"))
+			return std::optional(SLOT_CROSSBOW_AMMO2_ITEM);
+		if (!strcmp(field, "SLOT_CROSSBOW_AMMO3_ITEM"))
+			return std::optional(SLOT_CROSSBOW_AMMO3_ITEM);
+		if (!strcmp(field, "SLOT_CROSSBOW_BOLT"))
+			return std::optional(SLOT_CROSSBOW_BOLT);
+		if (!strcmp(field, "SLOT_GRENADE_GUN_ITEM"))
+			return std::optional(SLOT_GRENADE_GUN_ITEM);
+		if (!strcmp(field, "SLOT_GRENADE_GUN_AMMO1_ITEM"))
+			return std::optional(SLOT_GRENADE_GUN_AMMO1_ITEM);
+		if (!strcmp(field, "SLOT_GRENADE_GUN_AMMO2_ITEM"))
+			return std::optional(SLOT_GRENADE_GUN_AMMO2_ITEM);
+		if (!strcmp(field, "SLOT_GRENADE_GUN_AMMO3_ITEM"))
+			return std::optional(SLOT_GRENADE_GUN_AMMO3_ITEM);
+		if (!strcmp(field, "SLOT_GRENADE"))
+			return std::optional(SLOT_GRENADE);
+		if (!strcmp(field, "SLOT_SIXSHOOTER_ITEM"))
+			return std::optional(SLOT_SIXSHOOTER_ITEM);
+		if (!strcmp(field, "SLOT_SIXSHOOTER_AMMO_ITEM"))
+			return std::optional(SLOT_SIXSHOOTER_AMMO_ITEM);
+		if (!strcmp(field, "SLOT_BIGMEDI_ITEM"))
+			return std::optional(SLOT_BIGMEDI_ITEM);
+		if (!strcmp(field, "SLOT_SMALLMEDI_ITEM"))
+			return std::optional(SLOT_SMALLMEDI_ITEM);
+		if (!strcmp(field, "SLOT_LASERSIGHT_ITEM"))
+			return std::optional(SLOT_LASERSIGHT_ITEM);
+		if (!strcmp(field, "SLOT_BINOCULARS_ITEM"))
+			return std::optional(SLOT_BINOCULARS_ITEM);
+		if (!strcmp(field, "SLOT_FLARE_ITEM"))
+			return std::optional(SLOT_FLARE_ITEM);
+		if (!strcmp(field, "SLOT_FLARE_INV_ITEM"))
+			return std::optional(SLOT_FLARE_INV_ITEM);
+		if (!strcmp(field, "SLOT_DIARY_ITEM"))
+			return std::optional(SLOT_DIARY_ITEM);
+		if (!strcmp(field, "SLOT_COMPASS_ITEM"))
+			return std::optional(SLOT_COMPASS_ITEM);
+		if (!strcmp(field, "SLOT_MEMCARD_LOAD_INV_ITEM"))
+			return std::optional(SLOT_MEMCARD_LOAD_INV_ITEM);
+		if (!strcmp(field, "SLOT_MEMCARD_SAVE_INV_ITEM"))
+			return std::optional(SLOT_MEMCARD_SAVE_INV_ITEM);
+		if (!strcmp(field, "SLOT_PC_LOAD_INV_ITEM"))
+			return std::optional(SLOT_PC_LOAD_INV_ITEM);
+		if (!strcmp(field, "SLOT_PC_SAVE_INV_ITEM"))
+			return std::optional(SLOT_PC_SAVE_INV_ITEM);
+		if (!strcmp(field, "SLOT_SMOKE_EMITTER_WHITE"))
+			return std::optional(SLOT_SMOKE_EMITTER_WHITE);
+		if (!strcmp(field, "SLOT_SMOKE_EMITTER_BLACK"))
+			return std::optional(SLOT_SMOKE_EMITTER_BLACK);
+		if (!strcmp(field, "SLOT_STEAM_EMITTER"))
+			return std::optional(SLOT_STEAM_EMITTER);
+		if (!strcmp(field, "SLOT_EARTHQUAKE"))
+			return std::optional(SLOT_EARTHQUAKE);
+		if (!strcmp(field, "SLOT_BUBBLES"))
+			return std::optional(SLOT_BUBBLES);
+		if (!strcmp(field, "SLOT_WATERFALLMIST"))
+			return std::optional(SLOT_WATERFALLMIST);
+		if (!strcmp(field, "SLOT_GUNSHELL"))
+			return std::optional(SLOT_GUNSHELL);
+		if (!strcmp(field, "SLOT_SHOTGUNSHELL"))
+			return std::optional(SLOT_SHOTGUNSHELL);
+		if (!strcmp(field, "SLOT_GUN_FLASH"))
+			return std::optional(SLOT_GUN_FLASH);
+		if (!strcmp(field, "SLOT_BUTTERFLY"))
+			return std::optional(SLOT_BUTTERFLY);
+		if (!strcmp(field, "SLOT_SPRINKLER"))
+			return std::optional(SLOT_SPRINKLER);
+		if (!strcmp(field, "SLOT_RED_LIGHT"))
+			return std::optional(SLOT_RED_LIGHT);
+		if (!strcmp(field, "SLOT_GREEN_LIGHT"))
+			return std::optional(SLOT_GREEN_LIGHT);
+		if (!strcmp(field, "SLOT_BLUE_LIGHT"))
+			return std::optional(SLOT_BLUE_LIGHT);
+		if (!strcmp(field, "SLOT_AMBER_LIGHT"))
+			return std::optional(SLOT_AMBER_LIGHT);
+		if (!strcmp(field, "SLOT_WHITE_LIGHT"))
+			return std::optional(SLOT_WHITE_LIGHT);
+		if (!strcmp(field, "SLOT_BLINKING_LIGHT"))
+			return std::optional(SLOT_BLINKING_LIGHT);
+		if (!strcmp(field, "SLOT_LENS_FLARE"))
+			return std::optional(SLOT_LENS_FLARE);
+		if (!strcmp(field, "SLOT_AI_GUARD"))
+			return std::optional(SLOT_AI_GUARD);
+		if (!strcmp(field, "SLOT_AI_AMBUSH"))
+			return std::optional(SLOT_AI_AMBUSH);
+		if (!strcmp(field, "SLOT_AI_PATROL1"))
+			return std::optional(SLOT_AI_PATROL1);
+		if (!strcmp(field, "SLOT_AI_MODIFY"))
+			return std::optional(SLOT_AI_MODIFY);
+		if (!strcmp(field, "SLOT_AI_FOLLOW"))
+			return std::optional(SLOT_AI_FOLLOW);
+		if (!strcmp(field, "SLOT_AI_PATROL2"))
+			return std::optional(SLOT_AI_PATROL2);
+		if (!strcmp(field, "SLOT_AI_X1"))
+			return std::optional(SLOT_AI_X1);
+		if (!strcmp(field, "SLOT_AI_X2"))
+			return std::optional(SLOT_AI_X2);
+		if (!strcmp(field, "SLOT_LARA_START_POS"))
+			return std::optional(SLOT_LARA_START_POS);
+		if (!strcmp(field, "SLOT_KILL_ALL_TRIGGERS"))
+			return std::optional(SLOT_KILL_ALL_TRIGGERS);
+		if (!strcmp(field, "SLOT_TRIGGER_TRIGGERER"))
+			return std::optional(SLOT_TRIGGER_TRIGGERER);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT1"))
+			return std::optional(SLOT_SMASH_OBJECT1);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT2"))
+			return std::optional(SLOT_SMASH_OBJECT2);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT3"))
+			return std::optional(SLOT_SMASH_OBJECT3);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT4"))
+			return std::optional(SLOT_SMASH_OBJECT4);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT5"))
+			return std::optional(SLOT_SMASH_OBJECT5);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT6"))
+			return std::optional(SLOT_SMASH_OBJECT6);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT7"))
+			return std::optional(SLOT_SMASH_OBJECT7);
+		if (!strcmp(field, "SLOT_SMASH_OBJECT8"))
+			return std::optional(SLOT_SMASH_OBJECT8);
+		if (!strcmp(field, "SLOT_MESHSWAP1"))
+			return std::optional(SLOT_MESHSWAP1);
+		if (!strcmp(field, "SLOT_MESHSWAP2"))
+			return std::optional(SLOT_MESHSWAP2);
+		if (!strcmp(field, "SLOT_MESHSWAP3"))
+			return std::optional(SLOT_MESHSWAP3);
+		if (!strcmp(field, "SLOT_DEATH_SLIDE"))
+			return std::optional(SLOT_DEATH_SLIDE);
+		if (!strcmp(field, "SLOT_BODY_PART"))
+			return std::optional(SLOT_BODY_PART);
+		if (!strcmp(field, "SLOT_CAMERA_TARGET"))
+			return std::optional(SLOT_CAMERA_TARGET);
+		if (!strcmp(field, "SLOT_WATERFALL1"))
+			return std::optional(SLOT_WATERFALL1);
+		if (!strcmp(field, "SLOT_WATERFALL2"))
+			return std::optional(SLOT_WATERFALL2);
+		if (!strcmp(field, "SLOT_WATERFALL3"))
+			return std::optional(SLOT_WATERFALL3);
+		if (!strcmp(field, "SLOT_PLANET_EFFECT"))
+			return std::optional(SLOT_PLANET_EFFECT);
+		if (!strcmp(field, "SLOT_ANIMATING1"))
+			return std::optional(SLOT_ANIMATING1);
+		if (!strcmp(field, "SLOT_ANIMATING1_MIP"))
+			return std::optional(SLOT_ANIMATING1_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING2"))
+			return std::optional(SLOT_ANIMATING2);
+		if (!strcmp(field, "SLOT_ANIMATING2_MIP"))
+			return std::optional(SLOT_ANIMATING2_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING3"))
+			return std::optional(SLOT_ANIMATING3);
+		if (!strcmp(field, "SLOT_ANIMATING3_MIP"))
+			return std::optional(SLOT_ANIMATING3_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING4"))
+			return std::optional(SLOT_ANIMATING4);
+		if (!strcmp(field, "SLOT_ANIMATING4_MIP"))
+			return std::optional(SLOT_ANIMATING4_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING5"))
+			return std::optional(SLOT_ANIMATING5);
+		if (!strcmp(field, "SLOT_ANIMATING5_MIP"))
+			return std::optional(SLOT_ANIMATING5_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING6"))
+			return std::optional(SLOT_ANIMATING6);
+		if (!strcmp(field, "SLOT_ANIMATING6_MIP"))
+			return std::optional(SLOT_ANIMATING6_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING7"))
+			return std::optional(SLOT_ANIMATING7);
+		if (!strcmp(field, "SLOT_ANIMATING7_MIP"))
+			return std::optional(SLOT_ANIMATING7_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING8"))
+			return std::optional(SLOT_ANIMATING8);
+		if (!strcmp(field, "SLOT_ANIMATING8_MIP"))
+			return std::optional(SLOT_ANIMATING8_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING9"))
+			return std::optional(SLOT_ANIMATING9);
+		if (!strcmp(field, "SLOT_ANIMATING9_MIP"))
+			return std::optional(SLOT_ANIMATING9_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING10"))
+			return std::optional(SLOT_ANIMATING10);
+		if (!strcmp(field, "SLOT_ANIMATING10_MIP"))
+			return std::optional(SLOT_ANIMATING10_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING11"))
+			return std::optional(SLOT_ANIMATING11);
+		if (!strcmp(field, "SLOT_ANIMATING11_MIP"))
+			return std::optional(SLOT_ANIMATING11_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING12"))
+			return std::optional(SLOT_ANIMATING12);
+		if (!strcmp(field, "SLOT_ANIMATING12_MIP"))
+			return std::optional(SLOT_ANIMATING12_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING13"))
+			return std::optional(SLOT_ANIMATING13);
+		if (!strcmp(field, "SLOT_ANIMATING13_MIP"))
+			return std::optional(SLOT_ANIMATING13_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING14"))
+			return std::optional(SLOT_ANIMATING14);
+		if (!strcmp(field, "SLOT_ANIMATING14_MIP"))
+			return std::optional(SLOT_ANIMATING14_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING15"))
+			return std::optional(SLOT_ANIMATING15);
+		if (!strcmp(field, "SLOT_ANIMATING15_MIP"))
+			return std::optional(SLOT_ANIMATING15_MIP);
+		if (!strcmp(field, "SLOT_ANIMATING16"))
+			return std::optional(SLOT_ANIMATING16);
+		if (!strcmp(field, "SLOT_ANIMATING16_MIP"))
+			return std::optional(SLOT_ANIMATING16_MIP);
+		if (!strcmp(field, "SLOT_HORIZON"))
+			return std::optional(SLOT_HORIZON);
+		if (!strcmp(field, "SLOT_SKY_GRAPHICS"))
+			return std::optional(SLOT_SKY_GRAPHICS);
+		if (!strcmp(field, "SLOT_BINOCULAR_GRAPHICS"))
+			return std::optional(SLOT_BINOCULAR_GRAPHICS);
+		if (!strcmp(field, "SLOT_TARGET_GRAPHICS"))
+			return std::optional(SLOT_TARGET_GRAPHICS);
+		if (!strcmp(field, "SLOT_DEFAULT_SPRITES"))
+			return std::optional(SLOT_DEFAULT_SPRITES);
+		if (!strcmp(field, "SLOT_MISC_SPRITES"))
+			return std::optional(SLOT_MISC_SPRITES);
+		if (!strcmp(field, "SLOT_MOTOR_BOAT"))
+			return std::optional(SLOT_MOTOR_BOAT);
+		if (!strcmp(field, "SLOT_MOTOR_BOAT_LARA"))
+			return std::optional(SLOT_MOTOR_BOAT_LARA);
+		if (!strcmp(field, "SLOT_RUBBER_BOAT"))
+			return std::optional(SLOT_RUBBER_BOAT);
+		if (!strcmp(field, "SLOT_RUBBER_BOAT_LARA"))
+			return std::optional(SLOT_RUBBER_BOAT_LARA);
+		if (!strcmp(field, "SLOT_MOTORBIKE_LARA"))
+			return std::optional(SLOT_MOTORBIKE_LARA);
+		if (!strcmp(field, "SLOT_FONT_GRAPHICS"))
+			return std::optional(SLOT_FONT_GRAPHICS);
+		if (!strcmp(field, "SLOT_PARALLEL_BARS"))
+			return std::optional(SLOT_PARALLEL_BARS);
+		if (!strcmp(field, "SLOT_PANEL_BORDER"))
+			return std::optional(SLOT_PANEL_BORDER);
+		if (!strcmp(field, "SLOT_PANEL_MIDDLE"))
+			return std::optional(SLOT_PANEL_MIDDLE);
+		if (!strcmp(field, "SLOT_PANEL_CORNER"))
+			return std::optional(SLOT_PANEL_CORNER);
+		if (!strcmp(field, "SLOT_PANEL_DIAGONAL"))
+			return std::optional(SLOT_PANEL_DIAGONAL);
+		if (!strcmp(field, "SLOT_PANEL_STRIP"))
+			return std::optional(SLOT_PANEL_STRIP);
+		if (!strcmp(field, "SLOT_PANEL_HALF_BORDER1"))
+			return std::optional(SLOT_PANEL_HALF_BORDER1);
+		if (!strcmp(field, "SLOT_PANEL_HALF_BORDER2"))
+			return std::optional(SLOT_PANEL_HALF_BORDER2);
+		if (!strcmp(field, "SLOT_PANEL_MIDDLE_CORNER"))
+			return std::optional(SLOT_PANEL_MIDDLE_CORNER);
+		if (!strcmp(field, "SLOT_TIGHT_ROPE"))
+			return std::optional(SLOT_TIGHT_ROPE);
+		if (!strcmp(field, "SLOT_LASER_HEAD"))
+			return std::optional(SLOT_LASER_HEAD);
+		if (!strcmp(field, "SLOT_LASER_HEAD_BASE"))
+			return std::optional(SLOT_LASER_HEAD_BASE);
+		if (!strcmp(field, "SLOT_LASER_HEAD_TENTACLE"))
+			return std::optional(SLOT_LASER_HEAD_TENTACLE);
+		if (!strcmp(field, "SLOT_HYDRA"))
+			return std::optional(SLOT_HYDRA);
+		if (!strcmp(field, "SLOT_HYDRA_MISSILE"))
+			return std::optional(SLOT_HYDRA_MISSILE);
+		if (!strcmp(field, "SLOT_ENEMY_SUB_MARINE"))
+			return std::optional(SLOT_ENEMY_SUB_MARINE);
+		if (!strcmp(field, "SLOT_ENEMY_SUB_MARINE_MIP"))
+			return std::optional(SLOT_ENEMY_SUB_MARINE_MIP);
+		if (!strcmp(field, "SLOT_SUB_MARINE_MISSILE"))
+			return std::optional(SLOT_SUB_MARINE_MISSILE);
+		if (!strcmp(field, "SLOT_FROG_MAN"))
+			return std::optional(SLOT_FROG_MAN);
+		if (!strcmp(field, "SLOT_FROG_MAN_HARPOON"))
+			return std::optional(SLOT_FROG_MAN_HARPOON);
+		if (!strcmp(field, "SLOT_FISH_EMITTER"))
+			return std::optional(SLOT_FISH_EMITTER);
+		if (!strcmp(field, "SLOT_KAYAK"))
+			return std::optional(SLOT_KAYAK);
+		if (!strcmp(field, "SLOT_KAYAK_LARA"))
+			return std::optional(SLOT_KAYAK_LARA);
+		if (!strcmp(field, "SLOT_CUSTOM_SPRITES"))
+			return std::optional(SLOT_CUSTOM_SPRITES);
+		if (!strcmp(field, "SLOT_BRIDGE_TILT3"))
+			return std::optional(SLOT_BRIDGE_TILT3);
+		if (!strcmp(field, "SLOT_BRIDGE_TILT4"))
+			return std::optional(SLOT_BRIDGE_TILT4);
+		if (!strcmp(field, "SLOT_BRIDGE_CUSTOM"))
+			return std::optional(SLOT_BRIDGE_CUSTOM);
+		if (!strcmp(field, "SLOT_ROBOT_CLEANER"))
+			return std::optional(SLOT_ROBOT_CLEANER);
+		if (!strcmp(field, "SLOT_ROBOT_STAR_WARS"))
+			return std::optional(SLOT_ROBOT_STAR_WARS);
+		if (!strcmp(field, "SLOT_MECH_WARRIOR"))
+			return std::optional(SLOT_MECH_WARRIOR);
+		if (!strcmp(field, "SLOT_MECH_WARRIOR_LARA"))
+			return std::optional(SLOT_MECH_WARRIOR_LARA);
+		if (!strcmp(field, "SLOT_UW_PROPULSOR"))
+			return std::optional(SLOT_UW_PROPULSOR);
+		if (!strcmp(field, "SLOT_UW_PROPULSOR_LARA"))
+			return std::optional(SLOT_UW_PROPULSOR_LARA);
+		if (!strcmp(field, "SLOT_MINE_CART"))
+			return std::optional(SLOT_MINE_CART);
+		if (!strcmp(field, "SLOT_MINE_CART_LARA"))
+			return std::optional(SLOT_MINE_CART_LARA);
+		if (!strcmp(field, "SLOT_NEW_SLOT5"))
+			return std::optional(SLOT_NEW_SLOT5);
+		if (!strcmp(field, "SLOT_NEW_SLOT6"))
+			return std::optional(SLOT_NEW_SLOT6);
+		if (!strcmp(field, "SLOT_NEW_SLOT7"))
+			return std::optional(SLOT_NEW_SLOT7);
+		if (!strcmp(field, "SLOT_NEW_SLOT8"))
+			return std::optional(SLOT_NEW_SLOT8);
+		if (!strcmp(field, "SLOT_NEW_SLOT9"))
+			return std::optional(SLOT_NEW_SLOT9);
+		if (!strcmp(field, "SLOT_NEW_SLOT10"))
+			return std::optional(SLOT_NEW_SLOT10);
+		if (!strcmp(field, "SLOT_NEW_SLOT11"))
+			return std::optional(SLOT_NEW_SLOT11);
+		if (!strcmp(field, "SLOT_NEW_SLOT12"))
+			return std::optional(SLOT_NEW_SLOT12);
+		if (!strcmp(field, "SLOT_NEW_SLOT13"))
+			return std::optional(SLOT_NEW_SLOT13);
+		if (!strcmp(field, "SLOT_NEW_SLOT14"))
+			return std::optional(SLOT_NEW_SLOT14);
+		if (!strcmp(field, "SLOT_NEW_SLOT15"))
+			return std::optional(SLOT_NEW_SLOT15);
+		if (!strcmp(field, "SLOT_NEW_SLOT16"))
+			return std::optional(SLOT_NEW_SLOT16);
+		if (!strcmp(field, "SLOT_NEW_SLOT17"))
+			return std::optional(SLOT_NEW_SLOT17);
+		if (!strcmp(field, "SLOT_NEW_SLOT18"))
+			return std::optional(SLOT_NEW_SLOT18);
+		break;
+	}
+	return std::nullopt;
+}
+
 int LuaObjectClass::Call()
 {
 	Script::ThrowError("attempt to call a data object");
@@ -1546,6 +2596,7 @@ int SqrtFunction::Call()
 void LuaBridge::GlobalIndex(const char* field)
 {
 	LuaObject* object;
+	std::optional<int> opt;
 
 	if (field)
 	{
@@ -1555,6 +2606,12 @@ void LuaBridge::GlobalIndex(const char* field)
 			Script::PushData(object);
 			return;
 		}
+		opt = LuaGlobals::RetrieveIntegerConstant(field);
+		if (opt)
+		{
+			Script::PushInteger(*opt);
+			return;
+		}
 		Script::ThrowError("attempt to read from a global variable");
 	}
 	Script::ThrowError("attempt to index the global environment");
@@ -1562,13 +2619,12 @@ void LuaBridge::GlobalIndex(const char* field)
 
 void LuaBridge::GlobalNewIndex(const char* field)
 {
-	LuaObject* object;
-
 	if (field)
 	{
-		object = LuaGlobals::RetrieveFunction(field);
-		if (object)
+		if (LuaGlobals::RetrieveFunction(field))
 			Script::ThrowError("attempt to assign to a built-in function");
+		if (LuaGlobals::RetrieveIntegerConstant(field))
+			Script::ThrowError("attempt to assign to a built-in constant");
 		Script::ThrowError("attempt to write to a global variable");
 	}
 	Script::ThrowError("attempt to index the global environment");

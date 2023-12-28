@@ -209,4 +209,5 @@ namespace LuaGlobals
 	extern SqrtFunction Sqrt;
 
 	LuaObject* RetrieveFunction(const char* field);
+	std::optional<int> RetrieveIntegerConstant(const char* field);
 }
