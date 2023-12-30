@@ -49,7 +49,7 @@ namespace
 		if (count < minimum)
 			Script::ThrowError(FormatString("at least %d arguments expected", minimum));
 		if (count > maximum)
-			Script::ThrowError(FormatString("at most %d arguments expected", minimum));
+			Script::ThrowError(FormatString("at most %d arguments expected", maximum));
 		return count;
 	}
 
