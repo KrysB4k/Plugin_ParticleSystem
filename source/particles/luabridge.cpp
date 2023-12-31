@@ -1890,6 +1890,7 @@ void BaseParticle::Index(const char* field)
 				Script::PushData(&pos);
 				return;
 			}
+			break;
 		case 'r':
 			if (!strcmp(field, "roomIndex"))
 			{
