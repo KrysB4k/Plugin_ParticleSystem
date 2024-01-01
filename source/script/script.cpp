@@ -5,6 +5,7 @@
 namespace
 {
 	lua_State* lua;
+	int metatable;
 
 	void BuildErrorMessage(const char* msg)
 	{
@@ -129,12 +130,15 @@ void Script::NewState()
 	lua_pushliteral(lua, "__call");
 	lua_pushcfunction(lua, MetaCall);
 	lua_rawset(lua, -3);
+	lua_pushvalue(lua, -1);
+	metatable = luaL_ref(lua, LUA_REGISTRYINDEX);
 	lua_setmetatable(lua, -2);
 	lua_pop(lua, 1);
 }
 
 void Script::Close()
 {
+	luaL_unref(lua, LUA_REGISTRYINDEX, metatable);
 	Logger::Close();
 	lua_close(lua);
 }
@@ -339,4 +343,14 @@ void Script::PostFunctionLoop()
 {
 	lua_pop(lua, 1);
 	lua_gc(lua, LUA_GCCOLLECT);
+}
+
+void* Script::CreateManagedData(unsigned int size)
+{
+	void* object;
+
+	object = lua_newuserdatauv(lua, size, 0);
+	lua_rawgeti(lua, LUA_REGISTRYINDEX, metatable);
+	lua_setmetatable(lua, -2);
+	return object;
 }

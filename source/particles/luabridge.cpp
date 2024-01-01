@@ -175,6 +175,12 @@ namespace
 		if (!(ParticleFactory::caller & callers))
 			Script::ThrowError(FormatString("assignment to field \"%s\" is forbidden in this phase", field));
 	}
+
+	template<class T, class... Args>
+	std::enable_if_t<std::is_trivially_destructible_v<T>, T>* ConstructManagedData(Args&&... args)
+	{
+		return new(Script::CreateManagedData(sizeof(T))) T(std::forward<Args>(args)...);
+	}
 }
 
 namespace LuaGlobals
@@ -189,9 +195,11 @@ namespace LuaGlobals
 	BoidSeparationFunction BoidSeparation;
 	CbrtFunction Cbrt;
 	CosFunction Cos;
+	CreateColorFunction CreateColor;
 	CreateGroupFunction CreateGroup;
 	CreateMeshPartFunction CreateMeshPart;
 	CreateSpritePartFunction CreateSpritePart;
+	CreateVectorFunction CreateVector;
 	GetTombIndexFunction GetTombIndex;
 	GetLaraIndexFunction GetLaraIndex;
 	GetItemRoomFunction GetItemRoom;
@@ -242,12 +250,16 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &Cbrt;
 		if (!strcmp(field, "cos"))
 			return &Cos;
+		if (!strcmp(field, "createColor"))
+			return &CreateColor;
 		if (!strcmp(field, "createGroup"))
 			return &CreateGroup;
 		if (!strcmp(field, "createMeshPart"))
 			return &CreateMeshPart;
 		if (!strcmp(field, "createSpritePart"))
 			return &CreateSpritePart;
+		if (!strcmp(field, "createVector"))
+			return &CreateVector;
 		break;
 	case 'g':
 		if (!strcmp(field, "getTombIndex"))
@@ -2288,6 +2300,15 @@ int CosFunction::Call()
 	return 1;
 }
 
+int CreateColorFunction::Call()
+{
+	uchar r = 255 * GetClampedNumber(1, 0.0f, 1.0f);
+	uchar g = 255 * GetClampedNumber(2, 0.0f, 1.0f);
+	uchar b = 255 * GetClampedNumber(3, 0.0f, 1.0f);
+	ConstructManagedData<ColorRGB>(r, g, b);
+	return 1;
+}
+
 int CreateGroupFunction::Call()
 {
 	CheckCaller(FUNCTION_LIBRARY, "createGroup");
@@ -2328,6 +2349,15 @@ int CreateSpritePartFunction::Call()
 	int i = ParticleFactory::GetFreeSpritePart();
 	ParticleFactory::spriteParts[i].groupIndex = group->groupIndex;
 	Script::PushData(&ParticleFactory::spriteParts[i]);
+	return 1;
+}
+
+int CreateVectorFunction::Call()
+{
+	float x = GetNumber(1);
+	float y = GetNumber(2);
+	float z = GetNumber(3);
+	ConstructManagedData<Vector3f>(x, y, z);
 	return 1;
 }
 

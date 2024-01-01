@@ -43,4 +43,5 @@ namespace Script
 	int GarbageCount();
 	void PreFunctionLoop();
 	void PostFunctionLoop();
+	void* CreateManagedData(unsigned int size);
 }
