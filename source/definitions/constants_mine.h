@@ -23,7 +23,7 @@
 #define HALF_ANGLE 32768
 
 #define SIN_PI_6 0.5f
-#define COS_PI_6 0.8660254f
+#define COS_PI_6 0.86602540378443864676f
 
 // MPS_ flags
 // you should type here your MPS_ flags for plugin command.

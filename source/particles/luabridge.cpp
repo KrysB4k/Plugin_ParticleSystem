@@ -2702,6 +2702,8 @@ void LuaBridge::GlobalNewIndex(const char* field)
 			Script::ThrowError("attempt to assign to a built-in function");
 		if (LuaGlobals::RetrieveIntegerConstant(field))
 			Script::ThrowError("attempt to assign to a built-in constant");
+		if (LuaGlobals::RetrieveFloatConstant(field))
+			Script::ThrowError("attempt to assign to a built-in constant");
 		Script::ThrowError("attempt to write to a global variable");
 	}
 	Script::ThrowError("attempt to index the global environment");
