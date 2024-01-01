@@ -395,7 +395,7 @@ void ParticleFactory::DrawSprites()
 			viewCoords[1] = Round(part->pos.y * phd_winxmax);
 			viewCoords[2] = Round(part->pos.z + f_mznear);
 
-			if (pgroup.drawMode)
+			if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
 			{
 				float size = part->sizeCust;
 				auto vel = part->vel;
@@ -448,7 +448,7 @@ void ParticleFactory::DrawSprites()
 			viewCoords[2] = result[2] >> 14;
 
 			// if particle is a line do world to screen transform for second vertex
-			if (pgroup.drawMode)
+			if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
 			{
 				float size = part->sizeCust;
 				auto vel = part->vel;
@@ -950,7 +950,7 @@ void SpriteParticle::Animate(int startSprite, int endSprite, int frameRate)
 		usedSprite = int(Lerp(float(usedSprite), float(usedSprite + length), fmod(numCycles * Parameter(), 1.0f)));
 	}
 
-	spriteIndex = (uchar)(usedSprite);
+	spriteIndex = (ushort)(usedSprite);
 }
 
 
@@ -1082,7 +1082,7 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 		}
 	}
 
-	if (pgroup.drawMode) // line or arrow
+	if (pgroup.drawMode > DrawMode::DRAW_SQUARE) // line or arrow
 	{
 		long x1 = view[0];
 		long y1 = view[1];
@@ -1119,21 +1119,21 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 				float dx = (x2 - x1) * 0.5f;
 				float dy = (y2 - y1) * 0.5f;
 
-				float angle = M_PI / 6.0f;
+				float sx = dx * SIN_PI_6;
+				float cx = dx * COS_PI_6;
+				float sy = dy * SIN_PI_6;
+				float cy = dy * COS_PI_6;
 
-				float rx = dx * cos(-angle) - dy * sin(-angle);
-				float ry = dy * cos(-angle) + dx * sin(-angle);
+				v[1].rhw = (v[0].rhw + v[1].rhw) * 0.5f;
+				v[1].sz = (v[0].sz + v[1].sz) * 0.5f;
 
-				v[1].sx = float(x1 + rx);
-				v[1].sy = float(y1 + ry);
+				v[1].sx = x1 + cx + sy;
+				v[1].sy = y1 + cy - sx;
 
 				(*AddLineSorted)(&v[0], &v[1], 6);
 
-				rx = dx * cos(angle) - dy * sin(angle);
-				ry = dy * cos(angle) + dx * sin(angle);
-
-				v[1].sx = float(x1 + rx);
-				v[1].sy = float(y1 + ry);
+				v[1].sx = x1 + cx - sy;
+				v[1].sy = y1 + cy + sx;
 
 				(*AddLineSorted)(&v[0], &v[1], 6);
 			}
@@ -1225,21 +1225,27 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 			v[2].specular = 0xFF000000;
 			v[3].specular = 0xFF000000;
 
-			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
-
 			TextureStruct tex;
-
 			tex.drawtype = pgroup.blendingMode;
 
-			tex.tpage = sprite->tpage;
-			tex.u1 = sprite->x1;
-			tex.v1 = sprite->y1;
-			tex.u2 = sprite->x2;
-			tex.v2 = sprite->y1;
-			tex.u3 = sprite->x2;
-			tex.v3 = sprite->y2;
-			tex.u4 = sprite->x1;
-			tex.v4 = sprite->y2;
+			if (!pgroup.drawMode)
+			{
+				SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
+				tex.tpage = sprite->tpage;
+				tex.u1 = sprite->x1;
+				tex.v1 = sprite->y1;
+				tex.u2 = sprite->x2;
+				tex.v2 = sprite->y1;
+				tex.u3 = sprite->x2;
+				tex.v3 = sprite->y2;
+				tex.u4 = sprite->x1;
+				tex.v4 = sprite->y2;
+			}
+			else
+			{
+				tex.flag = 0;
+				tex.tpage = 0;
+			}
 
 			(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 0);
 		}

@@ -22,6 +22,9 @@
 #define MAX_DRAWDIST 20480
 #define HALF_ANGLE 32768
 
+#define SIN_PI_6 0.5f
+#define COS_PI_6 0.8660254f
+
 // MPS_ flags
 // you should type here your MPS_ flags for plugin command.
 // then you'll test the presence of these flags checking the Trng.MainPluginFlags  value using "&" operator

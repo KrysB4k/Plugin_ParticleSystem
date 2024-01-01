@@ -210,4 +210,5 @@ namespace LuaGlobals
 
 	LuaObject* RetrieveFunction(const char* field);
 	std::optional<int> RetrieveIntegerConstant(const char* field);
+	std::optional<float> RetrieveFloatConstant(const char* field);
 }
