@@ -143,6 +143,11 @@ struct ParticleLimitSpeedFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct PerformTriggerGroupFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct PrintFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
@@ -201,6 +206,7 @@ namespace LuaGlobals
 	extern ParticleCollideWallsFunction ParticleCollideWalls;
 	extern ParticleHomingFunction ParticleHoming;
 	extern ParticleLimitSpeedFunction ParticleLimitSpeed;
+	extern PerformTriggerGroupFunction PerformTriggergroup;
 	extern PrintFunction Print;
 	extern RandfloatFunction Randfloat;
 	extern RandintFunction Randint;

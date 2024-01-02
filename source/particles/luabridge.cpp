@@ -102,37 +102,46 @@ namespace
 		return result;
 	}
 
-	int GetClampedInteger(int argument, int min, int max)
+	int GetClampedInteger(int argument, int min, int max, bool throwBoundsError)
 	{
 		int x;
 
 		x = GetInteger(argument);
 		if (x < min)
 		{
-			Script::EmitWarning(FormatString("%d is less than the minimum of %d", x, min));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%d is less than the minimum of %d, aborting", x, min));
+			Script::EmitWarning(FormatString("%d is less than the minimum of %d, clamping to minimum", x, min));
 			return min;
 		}
 		if (x > max)
 		{
-			Script::EmitWarning(FormatString("%d is greater than the maximum of %d", x, max));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%d is less than the maximum of %d, aborting", x, min));
+			Script::EmitWarning(FormatString("%d is greater than the maximum of %d, clamping to maximum", x, max));
 			return max;
 		}
 		return x;
 	}
 
-	float GetClampedNumber(int argument, float min, float max)
+	float GetClampedNumber(int argument, float min, float max, bool throwBoundsError)
 	{
 		float x;
 
 		x = GetNumber(argument);
 		if (x < min)
 		{
-			Script::EmitWarning(FormatString("%f is less than the minimum of %f", x, min));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%d is less than the minimum of %d, aborting", x, min));
+			Script::EmitWarning(FormatString("%f is less than the minimum of %f, clamping to minimum", x, min));
 			return min;
 		}
 		if (x > max)
 		{
-			Script::EmitWarning(FormatString("%f is greater than the maximum of %f", x, max));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%d is less than the maximum of %d, aborting", x, min));
+			Script::EmitWarning(FormatString("%f is greater than the maximum of %f, clamping to maximum", x, max));
+
 			return max;
 		}
 		return x;
@@ -205,6 +214,7 @@ namespace LuaGlobals
 	ParticleCollideWallsFunction ParticleCollideWalls;
 	ParticleHomingFunction ParticleHoming;
 	ParticleLimitSpeedFunction ParticleLimitSpeed;
+	PerformTriggerGroupFunction PerformTriggergroup;
 	PrintFunction Print;
 	RandfloatFunction Randfloat;
 	RandintFunction Randint;
@@ -282,6 +292,8 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &ParticleHoming;
 		if (!strcmp(field, "particleLimitSpeed"))
 			return &ParticleLimitSpeed;
+		if (!strcmp(field, "performTriggerGroup"))
+			return &PerformTriggergroup;
 		if (!strcmp(field, "print"))
 			return &Print;
 		break;
@@ -1432,21 +1444,21 @@ void ColorRGB::NewIndex(const char* field)
 		case 'b':
 			if (!strcmp(field, "b"))
 			{
-				B = 255 * GetClampedNumber(-1, 0.0f, 1.0f);
+				B = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
 				return;
 			}
 			break;
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
-				G = 255 * GetClampedNumber(-1, 0.0f, 1.0f);
+				G = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
-				R = 255 * GetClampedNumber(-1, 0.0f, 1.0f);
+				R = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
 				return;
 			}
 			break;
@@ -1639,21 +1651,21 @@ void Vector3i::NewIndex(const char* field)
 		case 'x':
 			if (!strcmp(field, "x"))
 			{
-				x = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f);
+				x = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
 				return;
 			}
 			break;
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
-				y = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f);
+				y = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
 				return;
 			}
 			break;
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
-				z = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f);
+				z = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
 				return;
 			}
 			break;
@@ -1708,21 +1720,21 @@ void NodeAttachment::NewIndex(const char* field)
 		case 'c':
 			if (!strcmp(field, "cutoff"))
 			{
-				cutoff = GetClampedInteger(-1, 0, 32767);
+				cutoff = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "random"))
 			{
-				random = GetClampedInteger(-1, 0, 32767);
+				random = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			break;
 		case 't':
 			if (!strcmp(field, "tether"))
 			{
-				tether = static_cast<TetherType>(GetClampedInteger(-1, 0, 2));
+				tether = static_cast<TetherType>(GetClampedInteger(-1, 0, 2, false));
 				return;
 			}
 			break;
@@ -1802,14 +1814,14 @@ void ParticleGroup::NewIndex(const char* field)
 		case 'b':
 			if (!strcmp(field, "blendingMode"))
 			{
-				blendingMode = GetClampedInteger(-1, 0, 13);
+				blendingMode = GetClampedInteger(-1, 0, 13, false);
 				return;
 			}
 			break;
 		case 'd':
 			if (!strcmp(field, "drawMode"))
 			{
-				drawMode = static_cast<DrawMode>(GetClampedInteger(-1, 0, 3));
+				drawMode = static_cast<DrawMode>(GetClampedInteger(-1, 0, 3, false));
 				return;
 			}
 			break;
@@ -1925,7 +1937,7 @@ void BaseParticle::NewIndex(const char* field)
 		case 'e':
 			if (!strcmp(field, "emitterIndex"))
 			{
-				emitterIndex = GetClampedInteger(-1, -1, level_items - 1);
+				emitterIndex = GetClampedInteger(-1, -1, level_items - 1, false);
 				if (emitterIndex != -1)
 					emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
 				else
@@ -1935,27 +1947,27 @@ void BaseParticle::NewIndex(const char* field)
 			if (!strcmp(field, "emitterNode"))
 			{
 				if (emitterIndex != -1)
-					emitterNode = GetClampedInteger(-1, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+					emitterNode = GetClampedInteger(-1, -1, objects[items[emitterIndex].object_number].nmeshes - 1, false);
 				return;
 			}
 			break;
 		case 'l':
 			if (!strcmp(field, "lifeCounter"))
 			{
-				lifeCounter = GetClampedInteger(-1, 0, lifeSpan);
+				lifeCounter = GetClampedInteger(-1, 0, lifeSpan, false);
 				return;
 			}
 			if (!strcmp(field, "lifeSpan"))
 			{
 				// set lifeCounter to lifeSpan automatically
-				lifeCounter = lifeSpan = GetClampedInteger(-1, 0, 32767);
+				lifeCounter = lifeSpan = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "roomIndex"))
 			{
-				roomIndex = GetClampedInteger(-1, 0, number_rooms - 1);
+				roomIndex = GetClampedInteger(-1, 0, number_rooms - 1, false);
 				return;
 			}
 			break;
@@ -2063,19 +2075,19 @@ void SpriteParticle::NewIndex(const char* field)
 		case 'c':
 			if (!strcmp(field, "colorFadeTime"))
 			{
-				colorFadeTime = GetClampedInteger(-1, -32768, 32767);
+				colorFadeTime = GetClampedInteger(-1, -32768, 32767, false);
 				return;
 			}
 			break;
 		case 'f':
 			if (!strcmp(field, "fadeIn"))
 			{
-				fadeIn = GetClampedInteger(-1, 0, 32767);
+				fadeIn = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			if (!strcmp(field, "fadeOut"))
 			{
-				fadeOut = GetClampedInteger(-1, 0, 32767);
+				fadeOut = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			break;
@@ -2094,27 +2106,27 @@ void SpriteParticle::NewIndex(const char* field)
 		case 's':
 			if (!strcmp(field, "sizeCust"))
 			{
-				sizeCust = GetClampedInteger(-1, 0, 65535);
+				sizeCust = GetClampedInteger(-1, 0, 65535, false);
 				return;
 			}
 			if (!strcmp(field, "sizeEnd"))
 			{
-				sizeEnd = GetClampedInteger(-1, 0, 65535);
+				sizeEnd = GetClampedInteger(-1, 0, 65535, false);
 				return;
 			}
 			if (!strcmp(field, "sizeStart"))
 			{
-				sizeStart = GetClampedInteger(-1, 0, 65535);
+				sizeStart = GetClampedInteger(-1, 0, 65535, false);
 				return;
 			}
 			if (!strcmp(field, "sizeRatio"))
 			{
-				sizeRatio = 32767 * GetClampedNumber(-1, -1.0f, 1.0f);
+				sizeRatio = 32767 * GetClampedNumber(-1, -1.0f, 1.0f, false);
 				return;
 			}
 			if (!strcmp(field, "spriteIndex"))
 			{
-				spriteIndex = GetClampedInteger(-1, 0, (-objects[ParticleFactory::partGroups[groupIndex].spriteSlot].nmeshes) - 1);
+				spriteIndex = GetClampedInteger(-1, 0, (-objects[ParticleFactory::partGroups[groupIndex].spriteSlot].nmeshes) - 1, false);
 				return;
 			}
 			break;
@@ -2194,14 +2206,14 @@ void MeshParticle::NewIndex(const char* field)
 		case 'm':
 			if (!strcmp(field, "mesh"))
 			{
-				mesh = GetClampedInteger(-1, 0, objects[object].nmeshes - 1);
+				mesh = GetClampedInteger(-1, 0, objects[object].nmeshes - 1, false);
 				return;
 			}
 			break;
 		case 'o':
 			if (!strcmp(field, "object"))
 			{
-				object = GetClampedInteger(-1, 0, SLOT_NUMBER_OBJECTS - 1);
+				object = GetClampedInteger(-1, 0, SLOT_NUMBER_OBJECTS - 1, false);
 				mesh = Clamp(mesh, 0, objects[object].nmeshes - 1);
 				return;
 			}
@@ -2209,7 +2221,7 @@ void MeshParticle::NewIndex(const char* field)
 		case 't':
 			if (!strcmp(field, "transparency"))
 			{
-				transparency = GetClampedInteger(-1, 0, 255);
+				transparency = GetClampedInteger(-1, 0, 255, false);
 				return;
 			}
 			break;
@@ -2352,7 +2364,7 @@ int GetItemRoomFunction::Call()
 int MeshAlignVelocityFunction::Call()
 {
 	auto part = GetData<MeshParticle>(1);
-	float factor = GetClampedNumber(2, 0.0f, 1.0f);
+	float factor = GetClampedNumber(2, 0.0f, 1.0f, false);
 	bool invert = GetBoolean(3);
 	part->AlignToVel(factor, invert);
 	return 0;
@@ -2514,7 +2526,7 @@ int ParticleCollidedItemFunction::Call()
 int ParticleCollideFloorsFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	float rebound = GetClampedNumber(2, 0.0f, 1.0f);
+	float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
 	float minbounce = GetNumber(3);
 	int margin = GetInteger(4);
 	bool accurate = GetBoolean(5);
@@ -2525,7 +2537,7 @@ int ParticleCollideFloorsFunction::Call()
 int ParticleCollideWallsFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	float rebound = GetClampedNumber(2, 0.0f, 1.0f);
+	float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
 	Script::PushBoolean(part->CollideWalls(rebound));
 	return 1;
 }
@@ -2534,7 +2546,7 @@ int ParticleHomingFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
 	auto item = GetItem(2);
-	int node = item ? GetClampedInteger(3, 0, objects[item->object_number].nmeshes) : GetInteger(3);
+	int node = item ? GetClampedInteger(3, 0, objects[item->object_number].nmeshes, false) : GetInteger(3);
 	float factor = GetNumber(4);
 	float accel = GetNumber(5);
 	bool predict = GetBoolean(6);
@@ -2550,6 +2562,14 @@ int ParticleLimitSpeedFunction::Call()
 	float speedMax = GetNumber(2);
 	part->LimitSpeed(speedMax);
 	return 0;
+}
+
+int PerformTriggerGroupFunction::Call()
+{
+	int indexTG = GetClampedInteger(1, 1, 9999, true);
+	bool state = PerformTriggerGroup(indexTG) ? true : false;
+	Script::PushBoolean(state);
+	return 1;
 }
 
 int PrintFunction::Call()
