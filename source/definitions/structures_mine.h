@@ -424,19 +424,6 @@ enum MatrixIndex
 };
 
 
-enum BlendMode
-{
-	POLY_TEXTURE,
-	POLY_DECAL,
-	POLY_COLORADD,
-	POLY_SEMITRANS,
-	POLY_NOZBUFFER,
-	POLY_COLORSUB,
-	LINE_COLORADD,
-	POLY_SEMITRANS_ZBUFFER,
-};
-
-
 struct EffectBite
 {
 	int x, y, z;

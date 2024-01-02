@@ -319,6 +319,48 @@ std::optional<int> LuaGlobals::RetrieveIntegerConstant(const char* field)
 {
 	switch (field[0])
 	{
+	case 'B':
+		if (!strcmp(field, "BLEND_TEXTURE"))
+			return std::optional(BlendMode::BLEND_TEXTURE);
+		if (!strcmp(field, "BLEND_DECAL"))
+			return std::optional(BlendMode::BLEND_DECAL);
+		if (!strcmp(field, "BLEND_COLORADD"))
+			return std::optional(BlendMode::BLEND_COLORADD);
+		if (!strcmp(field, "BLEND_SEMITRANS"))
+			return std::optional(BlendMode::BLEND_SEMITRANS);
+		if (!strcmp(field, "BLEND_NOZBUFFER"))
+			return std::optional(BlendMode::BLEND_NOZBUFFER);
+		if (!strcmp(field, "BLEND_COLORSUB"))
+			return std::optional(BlendMode::BLEND_COLORSUB);
+		if (!strcmp(field, "BLEND_SEMITRANS_ZBUFFER"))
+			return std::optional(BlendMode::BLEND_SEMITRANS_ZBUFFER);
+		if (!strcmp(field, "BLEND_DESTINATION_INV"))
+			return std::optional(BlendMode::BLEND_DESTINATION_INV);
+		if (!strcmp(field, "BLEND_SCREEN_DARKEN"))
+			return std::optional(BlendMode::BLEND_SCREEN_DARKEN);
+		if (!strcmp(field, "BLEND_SCREEN_CLEAR"))
+			return std::optional(BlendMode::BLEND_SCREEN_CLEAR);
+		if (!strcmp(field, "BLEND_CUSTOM_11"))
+			return std::optional(BlendMode::BLEND_CUSTOM_11);
+		if (!strcmp(field, "BLEND_CUSTOM_12"))
+			return std::optional(BlendMode::BLEND_CUSTOM_12);
+		if (!strcmp(field, "BLEND_CUSTOM_13"))
+			return std::optional(BlendMode::BLEND_CUSTOM_13);
+		break;
+
+	case 'D':
+		if (!strcmp(field, "DRAW_SPRITE"))
+			return std::optional(DrawMode::DRAW_SPRITE);
+		if (!strcmp(field, "DRAW_SQUARE"))
+			return std::optional(DrawMode::DRAW_SQUARE);
+		if (!strcmp(field, "DRAW_LINE"))
+			return std::optional(DrawMode::DRAW_LINE);
+		if (!strcmp(field, "DRAW_ARROW"))
+			return std::optional(DrawMode::DRAW_ARROW);
+		if (!strcmp(field, "DRAW_NONE"))
+			return std::optional(DrawMode::DRAW_NONE);
+		break;
+
 	case 'S':
 		if (!strcmp(field, "SLOT_LARA"))
 			return std::optional(SLOT_LARA);
@@ -1361,7 +1403,35 @@ std::optional<int> LuaGlobals::RetrieveIntegerConstant(const char* field)
 		if (!strcmp(field, "SLOT_NEW_SLOT18"))
 			return std::optional(SLOT_NEW_SLOT18);
 		break;
+
+	case 'T':
+		if (!strcmp(field, "TETHER_ROTATING"))
+			return std::optional(TetherType::TETHER_ROTATING);
+		if (!strcmp(field, "TETHER_STATIC"))
+			return std::optional(TetherType::TETHER_STATIC);
+		if (!strcmp(field, "TETHER_NONE"))
+			return std::optional(TetherType::TETHER_NONE);
+		break;
 	}
+	return std::nullopt;
+}
+
+std::optional<float> LuaGlobals::RetrieveFloatConstant(const char* field)
+{
+	switch (field[0])
+	{
+	case 'P':
+		if (!strcmp(field, "PI"))
+			return std::optional(M_PI);
+		if (!strcmp(field, "PI_HALF"))
+			return std::optional(M_PI_2);
+		if (!strcmp(field, "PI_QUART"))
+			return std::optional(M_PI_4);
+		if (!strcmp(field, "PI_TWO"))
+			return std::optional(M_PI * 2);
+		break;
+	}
+
 	return std::nullopt;
 }
 
@@ -1734,7 +1804,7 @@ void NodeAttachment::NewIndex(const char* field)
 		case 't':
 			if (!strcmp(field, "tether"))
 			{
-				tether = static_cast<TetherType>(GetClampedInteger(-1, 0, 2, false));
+				tether = static_cast<TetherType>(GetClampedInteger(-1, TetherType::TETHER_ROTATING, TetherType::TETHER_NONE, false));
 				return;
 			}
 			break;
@@ -1814,14 +1884,14 @@ void ParticleGroup::NewIndex(const char* field)
 		case 'b':
 			if (!strcmp(field, "blendingMode"))
 			{
-				blendingMode = GetClampedInteger(-1, 0, 13, false);
+				blendingMode = GetClampedInteger(-1, BlendMode::BLEND_TEXTURE, BlendMode::BLEND_CUSTOM_13, false);
 				return;
 			}
 			break;
 		case 'd':
 			if (!strcmp(field, "drawMode"))
 			{
-				drawMode = static_cast<DrawMode>(GetClampedInteger(-1, 0, 3, false));
+				drawMode = static_cast<DrawMode>(GetClampedInteger(-1, DrawMode::DRAW_SPRITE, DrawMode::DRAW_NONE, false));
 				return;
 			}
 			break;
@@ -2616,7 +2686,8 @@ int SqrtFunction::Call()
 void LuaBridge::GlobalIndex(const char* field)
 {
 	LuaObject* object;
-	std::optional<int> opt;
+	std::optional<int> opt_int;
+	std::optional<float> opt_float;
 
 	if (field)
 	{
@@ -2626,10 +2697,16 @@ void LuaBridge::GlobalIndex(const char* field)
 			Script::PushData(object);
 			return;
 		}
-		opt = LuaGlobals::RetrieveIntegerConstant(field);
-		if (opt)
+		opt_int = LuaGlobals::RetrieveIntegerConstant(field);
+		if (opt_int)
 		{
-			Script::PushInteger(*opt);
+			Script::PushInteger(*opt_int);
+			return;
+		}
+		opt_float = LuaGlobals::RetrieveFloatConstant(field);
+		if (opt_float)
+		{
+			Script::PushNumber(*opt_float);
 			return;
 		}
 		Script::ThrowError("attempt to read from a global variable");
@@ -2644,6 +2721,8 @@ void LuaBridge::GlobalNewIndex(const char* field)
 		if (LuaGlobals::RetrieveFunction(field))
 			Script::ThrowError("attempt to assign to a built-in function");
 		if (LuaGlobals::RetrieveIntegerConstant(field))
+			Script::ThrowError("attempt to assign to a built-in constant");
+		if (LuaGlobals::RetrieveFloatConstant(field))
 			Script::ThrowError("attempt to assign to a built-in constant");
 		Script::ThrowError("attempt to write to a global variable");
 	}
