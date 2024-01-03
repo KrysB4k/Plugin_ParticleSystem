@@ -184,6 +184,17 @@ namespace
 		if (!(ParticleFactory::caller & callers))
 			Script::ThrowError(FormatString("assignment to field \"%s\" is forbidden in this phase", field));
 	}
+
+	template<class T, class... Args>
+	std::enable_if_t<std::is_trivially_destructible_v<T>, T>* ConstructManagedData(Args&&... args)
+	{
+		return new(Script::CreateManagedData(sizeof(T))) T(std::forward<Args>(args)...);
+	}
+
+	void ReadOnlyFieldError(const char* field)
+	{
+		Script::ThrowError(FormatString("field \"%s\" is read-only and cannot be assigned to", field));
+	}
 }
 
 namespace LuaGlobals
@@ -198,9 +209,11 @@ namespace LuaGlobals
 	BoidSeparationFunction BoidSeparation;
 	CbrtFunction Cbrt;
 	CosFunction Cos;
+	CreateColorFunction CreateColor;
 	CreateGroupFunction CreateGroup;
 	CreateMeshPartFunction CreateMeshPart;
 	CreateSpritePartFunction CreateSpritePart;
+	CreateVectorFunction CreateVector;
 	GetTombIndexFunction GetTombIndex;
 	GetLaraIndexFunction GetLaraIndex;
 	GetItemRoomFunction GetItemRoom;
@@ -252,12 +265,16 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &Cbrt;
 		if (!strcmp(field, "cos"))
 			return &Cos;
+		if (!strcmp(field, "createColor"))
+			return &CreateColor;
 		if (!strcmp(field, "createGroup"))
 			return &CreateGroup;
 		if (!strcmp(field, "createMeshPart"))
 			return &CreateMeshPart;
 		if (!strcmp(field, "createSpritePart"))
 			return &CreateSpritePart;
+		if (!strcmp(field, "createVector"))
+			return &CreateVector;
 		break;
 	case 'g':
 		if (!strcmp(field, "getTombIndex"))
@@ -1881,6 +1898,13 @@ void ParticleGroup::NewIndex(const char* field)
 	{
 		switch (field[0])
 		{
+		case 'a':
+			if (!strcmp(field, "attach"))
+			{
+				attach = *GetData<NodeAttachment>(-1);
+				return;
+			}
+			break;
 		case 'b':
 			if (!strcmp(field, "blendingMode"))
 			{
@@ -1972,6 +1996,7 @@ void BaseParticle::Index(const char* field)
 				Script::PushData(&pos);
 				return;
 			}
+			break;
 		case 'r':
 			if (!strcmp(field, "roomIndex"))
 			{
@@ -2004,6 +2029,13 @@ void BaseParticle::NewIndex(const char* field)
 	{
 		switch (field[0])
 		{
+		case 'a':
+			if (!strcmp(field, "accel"))
+			{
+				accel = *GetData<Vector3f>(-1);
+				return;
+			}
+			break;
 		case 'e':
 			if (!strcmp(field, "emitterIndex"))
 			{
@@ -2034,10 +2066,28 @@ void BaseParticle::NewIndex(const char* field)
 				return;
 			}
 			break;
+		case 'p':
+			if (!strcmp(field, "pos"))
+			{
+				pos = *GetData<Vector3f>(-1);
+				return;
+			}
+			break;
 		case 'r':
 			if (!strcmp(field, "roomIndex"))
 			{
 				roomIndex = GetClampedInteger(-1, 0, number_rooms - 1, false);
+				return;
+			}
+			break;
+		case 't':
+			if (!strcmp(field, "t"))
+				ReadOnlyFieldError(field);
+			break;
+		case 'v':
+			if (!strcmp(field, "vel"))
+			{
+				vel = *GetData<Vector3f>(-1);
 				return;
 			}
 			break;
@@ -2143,6 +2193,21 @@ void SpriteParticle::NewIndex(const char* field)
 		switch (field[0])
 		{
 		case 'c':
+			if (!strcmp(field, "colCust"))
+			{
+				colCust = *GetData<ColorRGB>(-1);
+				return;
+			}
+			if (!strcmp(field, "colEnd"))
+			{
+				colEnd = *GetData<ColorRGB>(-1);
+				return;
+			}
+			if (!strcmp(field, "colStart"))
+			{
+				colStart = *GetData<ColorRGB>(-1);
+				return;
+			}
 			if (!strcmp(field, "colorFadeTime"))
 			{
 				colorFadeTime = GetClampedInteger(-1, -32768, 32767, false);
@@ -2288,10 +2353,34 @@ void MeshParticle::NewIndex(const char* field)
 				return;
 			}
 			break;
+		case 'r':
+			if (!strcmp(field, "rot"))
+			{
+				rot = *GetData<Vector3s>(-1);
+				return;
+			}
+			if (!strcmp(field, "rotVel"))
+			{
+				rotVel = *GetData<Vector3s>(-1);
+				return;
+			}
+			break;
+		case 's':
+			if (!strcmp(field, "scale"))
+			{
+				scale = *GetData<Vector3i>(-1);
+				return;
+			}
+			break;
 		case 't':
 			if (!strcmp(field, "transparency"))
 			{
 				transparency = GetClampedInteger(-1, 0, 255, false);
+				return;
+			}
+			if (!strcmp(field, "tint"))
+			{
+				tint = *GetData<ColorRGB>(-1);
 				return;
 			}
 			break;
@@ -2369,6 +2458,15 @@ int CosFunction::Call()
 	return 1;
 }
 
+int CreateColorFunction::Call()
+{
+	uchar r = 255 * GetClampedNumber(1, 0.0f, 1.0f, false);
+	uchar g = 255 * GetClampedNumber(2, 0.0f, 1.0f, false);
+	uchar b = 255 * GetClampedNumber(3, 0.0f, 1.0f, false);
+	ConstructManagedData<ColorRGB>(r, g, b);
+	return 1;
+}
+
 int CreateGroupFunction::Call()
 {
 	CheckCaller(FUNCTION_LIBRARY, "createGroup");
@@ -2409,6 +2507,15 @@ int CreateSpritePartFunction::Call()
 	int i = ParticleFactory::GetFreeSpritePart();
 	ParticleFactory::spriteParts[i].groupIndex = group->groupIndex;
 	Script::PushData(&ParticleFactory::spriteParts[i]);
+	return 1;
+}
+
+int CreateVectorFunction::Call()
+{
+	float x = GetNumber(1);
+	float y = GetNumber(2);
+	float z = GetNumber(3);
+	ConstructManagedData<Vector3f>(x, y, z);
 	return 1;
 }
 

@@ -63,6 +63,11 @@ struct CosFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct CreateColorFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct CreateGroupFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
@@ -74,6 +79,11 @@ struct CreateMeshPartFunction final : public LuaObjectFunction
 };
 
 struct CreateSpritePartFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct CreateVectorFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -190,9 +200,11 @@ namespace LuaGlobals
 	extern BoidSeparationFunction BoidSeparation;
 	extern CbrtFunction Cbrt;
 	extern CosFunction Cos;
+	extern CreateColorFunction CreateColor;
 	extern CreateGroupFunction CreateGroup;
 	extern CreateMeshPartFunction CreateMeshPart;
 	extern CreateSpritePartFunction CreateSpritePart;
+	extern CreateVectorFunction CreateVector;
 	extern GetTombIndexFunction GetTombIndex;
 	extern GetLaraIndexFunction GetLaraIndex;
 	extern GetItemRoomFunction GetItemRoom;
