@@ -117,7 +117,7 @@ namespace
 		if (x > max)
 		{
 			if (throwBoundsError)
-				Script::ThrowError(FormatString("%d is less than the maximum of %d, aborting", x, min));
+				Script::ThrowError(FormatString("%d is greater than the maximum of %d, aborting", x, max));
 			Script::EmitWarning(FormatString("%d is greater than the maximum of %d, clamping to maximum", x, max));
 			return max;
 		}
@@ -132,14 +132,14 @@ namespace
 		if (x < min)
 		{
 			if (throwBoundsError)
-				Script::ThrowError(FormatString("%d is less than the minimum of %d, aborting", x, min));
+				Script::ThrowError(FormatString("%f is less than the minimum of %f, aborting", x, min));
 			Script::EmitWarning(FormatString("%f is less than the minimum of %f, clamping to minimum", x, min));
 			return min;
 		}
 		if (x > max)
 		{
 			if (throwBoundsError)
-				Script::ThrowError(FormatString("%d is less than the maximum of %d, aborting", x, min));
+				Script::ThrowError(FormatString("%f is greater than the maximum of %f, aborting", x, max));
 			Script::EmitWarning(FormatString("%f is greater than the maximum of %f, clamping to maximum", x, max));
 
 			return max;
