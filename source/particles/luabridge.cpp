@@ -212,6 +212,8 @@ namespace LuaGlobals
 	CreateColorFunction CreateColor;
 	CreateGroupFunction CreateGroup;
 	CreateMeshPartFunction CreateMeshPart;
+	CreatePerlinNoiseFunction CreatePerlinNoise;
+	CreateSimplexNoiseFunction CreateSimplexNoise;
 	CreateSpritePartFunction CreateSpritePart;
 	CreateVectorFunction CreateVector;
 	GetTombIndexFunction GetTombIndex;
@@ -219,8 +221,7 @@ namespace LuaGlobals
 	GetItemRoomFunction GetItemRoom;
 	MeshAlignVelocityFunction MeshAlignVelocity;
 	MeshShatterFunction MeshShatter;
-	NoisePerlinFunction NoisePerlin;
-	NoiseSimplexFunction NoiseSimplex;
+	NoiseFunction Noise;
 	ParticleAnimateFunction ParticleAnimate;
 	ParticleCollidedItemFunction ParticleCollidedItem;
 	ParticleCollideFloorsFunction ParticleCollideFloors;
@@ -231,7 +232,6 @@ namespace LuaGlobals
 	PrintFunction Print;
 	RandfloatFunction Randfloat;
 	RandintFunction Randint;
-	SeedNoiseFunction SeedNoise;
 	SinFunction Sin;
 	SqrtFunction Sqrt;
 }
@@ -271,6 +271,10 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &CreateGroup;
 		if (!strcmp(field, "createMeshPart"))
 			return &CreateMeshPart;
+		if (!strcmp(field, "createPerlinNoise"))
+			return &CreatePerlinNoise;
+		if (!strcmp(field, "createSimplexNoise"))
+			return &CreateSimplexNoise;
 		if (!strcmp(field, "createSpritePart"))
 			return &CreateSpritePart;
 		if (!strcmp(field, "createVector"))
@@ -291,10 +295,8 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &MeshShatter;
 		break;
 	case 'n':
-		if (!strcmp(field, "noisePerlin"))
-			return &NoisePerlin;
-		if (!strcmp(field, "noiseSimplex"))
-			return &NoiseSimplex;
+		if (!strcmp(field, "noise"))
+			return &Noise;
 		break;
 	case 'p':
 		if (!strcmp(field, "particleAnimate"))
@@ -321,8 +323,6 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &Randint;
 		break;
 	case 's':
-		if (!strcmp(field, "seedNoise"))
-			return &SeedNoise;
 		if (!strcmp(field, "sin"))
 			return &Sin;
 		if (!strcmp(field, "sqrt"))
@@ -2389,6 +2389,21 @@ void MeshParticle::NewIndex(const char* field)
 	BaseParticle::NewIndex(field);
 }
 
+const char* Noise::Name()
+{
+	return "PerlinNoise or SimplexNoise";
+}
+
+const char* PerlinNoise::Name()
+{
+	return "PerlinNoise";
+}
+
+const char* SimplexNoise::Name()
+{
+	return "SimplexNoise";
+}
+
 int AbsFunction::Call()
 {
 	Script::PushNumber(GetMathResult(1, fabsf));
@@ -2500,6 +2515,34 @@ int CreateMeshPartFunction::Call()
 	return 1;
 }
 
+int CreatePerlinNoiseFunction::Call()
+{
+	CheckCaller(FUNCTION_LIBRARY, "createPerlinNoise");
+
+	int args = GetArgCount(0, 1);
+
+	if (args)
+		ConstructManagedData<PerlinNoise>(PerlinNoise(GetInteger(1)));
+	else
+		ConstructManagedData<PerlinNoise>(PerlinNoise());
+
+	return 1;
+}
+
+int CreateSimplexNoiseFunction::Call()
+{
+	CheckCaller(FUNCTION_LIBRARY, "createSimplexNoise");
+
+	int args = GetArgCount(0, 1);
+
+	if (args)
+		ConstructManagedData<SimplexNoise>(SimplexNoise(GetInteger(1)));
+	else
+		ConstructManagedData<SimplexNoise>(SimplexNoise());
+
+	return 1;
+}
+
 int CreateSpritePartFunction::Call()
 {
 	CheckCaller(FUNCTION_INIT | FUNCTION_UPDATE, "createSpritePart");
@@ -2554,40 +2597,41 @@ int MeshShatterFunction::Call()
 	return 0;
 }
 
-int NoisePerlinFunction::Call()
+int NoiseFunction::Call()
 {
 	float scale, x, y, z, w;
 
-	int count = GetArgCount(2, 5);
+	int count = GetArgCount(3, 6);
+	auto noise = GetData<Noise>(1);
 
 	switch (count)
 	{
-	case 2:
-		scale = GetNumber(1);
-		x = GetNumber(2);
+	case 3:
+		scale = GetNumber(2);
+		x = GetNumber(3);
 		if (scale)
 			x /= scale;
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise1D(x));
+		Script::PushNumber(noise->Noise1D(x));
 		return 1;
 
-	case 3:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
+	case 4:
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
 		if (scale)
 		{
 			scale = 1.0f / scale;
 			x *= scale;
 			y *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise2D(x, y));
+		Script::PushNumber(noise->Noise2D(x, y));
 		return 1;
 
-	case 4:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
+	case 5:
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
+		z = GetNumber(5);
 		if (scale)
 		{
 			scale = 1.0f / scale;
@@ -2595,15 +2639,15 @@ int NoisePerlinFunction::Call()
 			y *= scale;
 			z *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise3D(x, y, z));
+		Script::PushNumber(noise->Noise3D(x, y, z));
 		return 1;
 
 	default:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
-		w = GetNumber(5);
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
+		z = GetNumber(5);
+		w = GetNumber(6);
 		if (scale)
 		{
 			scale = 1.0f / scale;
@@ -2612,73 +2656,11 @@ int NoisePerlinFunction::Call()
 			z *= scale;
 			w *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise4D(x, y, z, w));
+		Script::PushNumber(noise->Noise4D(x, y, z, w));
 		return 1;
 	}
 }
 
-int NoiseSimplexFunction::Call()
-{
-	float scale, x, y, z, w;
-
-	int count = GetArgCount(2, 5);
-
-	switch (count)
-	{
-	case 2:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		if (scale)
-			x /= scale;
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise1D(x));
-		return 1;
-
-	case 3:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		if (scale)
-		{
-			scale = 1.0f / scale;
-			x *= scale;
-			y *= scale;
-		}
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise2D(x, y));
-		return 1;
-
-	case 4:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
-		if (scale)
-		{
-			scale = 1.0f / scale;
-			x *= scale;
-			y *= scale;
-			z *= scale;
-		}
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise3D(x, y, z));
-		return 1;
-
-	default:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
-		w = GetNumber(5);
-		if (scale)
-		{
-			scale = 1.0f / scale;
-			x *= scale;
-			y *= scale;
-			z *= scale;
-			w *= scale;
-		}
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise4D(x, y, z, w));
-		return 1;
-	}
-}
 
 int ParticleAnimateFunction::Call()
 {
@@ -2769,13 +2751,6 @@ int RandintFunction::Call()
 	float upper = GetInteger(2);
 	Script::PushInteger(floorf((fabsf(upper - lower) + 1) * GetRandom() + fminf(lower, upper)));
 	return 1;
-}
-
-int SeedNoiseFunction::Call()
-{
-	int seed = GetInteger(1);
-	ParticleFactory::noise.SeedPermut(seed);
-	return 0;
 }
 
 int SinFunction::Call()

@@ -1,6 +1,6 @@
 #include "..\definitions\includes.h"
 
-void Noise::ReferencePermut()
+void Noise::ReferencePermutation()
 {
 	// Perlin's original permutation table
 	const uchar refTable[] = {
@@ -20,13 +20,12 @@ void Noise::ReferencePermut()
 	};
 
 	for (int i = 0; i < 256; ++i)
-		permut[i] = permut[i + 256] = refTable[i];
+		permtable[i] = permtable[i + 256] = refTable[i];
 }
 
 
-void Noise::SeedPermut(int seed)
+void Noise::SeedPermutation(int seed)
 {
-	// generate random permutation of integers 0-255
 	int i;
 	uchar table[256];
 
@@ -47,13 +46,13 @@ void Noise::SeedPermut(int seed)
 	}
 
 	for (i = 255; i >= 0; i--)
-		permut[i] = permut[i + 256] = table[i];
+		permtable[i] = permtable[i + 256] = table[i];
 }
 
 
 /*********** Perlin noise implementation ***********/
 
-float Noise::PerlinNoise1D(float x) const
+float PerlinNoise::Noise1D(float x) const
 {
 	int xi = fastfloor(x);
 
@@ -63,14 +62,14 @@ float Noise::PerlinNoise1D(float x) const
 
 	xi &= 255;
 
-	int h0 = permut[xi + 0];
-	int h1 = permut[xi + 1];
+	int h0 = permut(xi + 0);
+	int h1 = permut(xi + 1);
 
 	return lerp(dot1D(h0, xf0), dot1D(h1, xf0 - 1), tx) * 2.0f;
 }
 
 
-float Noise::PerlinNoise2D(float x, float y) const
+float PerlinNoise::Noise2D(float x, float y) const
 {
 	int xi = fastfloor(x);
 	int yi = fastfloor(y);
@@ -86,10 +85,10 @@ float Noise::PerlinNoise2D(float x, float y) const
 	float tx = fade(xf0);
 	float ty = fade(yf0);
 
-	int h00 = permut[permut[xi + 0] + yi + 0];
-	int h01 = permut[permut[xi + 0] + yi + 1];
-	int h10 = permut[permut[xi + 1] + yi + 0];
-	int h11 = permut[permut[xi + 1] + yi + 1];
+	int h00 = permut(permut(xi + 0) + yi + 0);
+	int h01 = permut(permut(xi + 0) + yi + 1);
+	int h10 = permut(permut(xi + 1) + yi + 0);
+	int h11 = permut(permut(xi + 1) + yi + 1);
 
 	float x1 = lerp(dot2D(h00, xf0, yf0), dot2D(h10, xf1, yf0), tx);
 	float x2 = lerp(dot2D(h01, xf0, yf1), dot2D(h11, xf1, yf1), tx);
@@ -98,7 +97,7 @@ float Noise::PerlinNoise2D(float x, float y) const
 }
 
 
-float Noise::PerlinNoise3D(float x, float y, float z) const
+float PerlinNoise::Noise3D(float x, float y, float z) const
 {
 	int xi = fastfloor(x);
 	int yi = fastfloor(y);
@@ -119,14 +118,14 @@ float Noise::PerlinNoise3D(float x, float y, float z) const
 	float ty = fade(yf0);
 	float tz = fade(zf0);
 
-	int h000 = permut[permut[permut[xi + 0] + yi + 0] + zi + 0];
-	int h001 = permut[permut[permut[xi + 0] + yi + 0] + zi + 1];
-	int h010 = permut[permut[permut[xi + 0] + yi + 1] + zi + 0];
-	int h011 = permut[permut[permut[xi + 0] + yi + 1] + zi + 1];
-	int h100 = permut[permut[permut[xi + 1] + yi + 0] + zi + 0];
-	int h101 = permut[permut[permut[xi + 1] + yi + 0] + zi + 1];
-	int h110 = permut[permut[permut[xi + 1] + yi + 1] + zi + 0];
-	int h111 = permut[permut[permut[xi + 1] + yi + 1] + zi + 1];
+	int h000 = permut(permut(permut(xi + 0) + yi + 0) + zi + 0);
+	int h001 = permut(permut(permut(xi + 0) + yi + 0) + zi + 1);
+	int h010 = permut(permut(permut(xi + 0) + yi + 1) + zi + 0);
+	int h011 = permut(permut(permut(xi + 0) + yi + 1) + zi + 1);
+	int h100 = permut(permut(permut(xi + 1) + yi + 0) + zi + 0);
+	int h101 = permut(permut(permut(xi + 1) + yi + 0) + zi + 1);
+	int h110 = permut(permut(permut(xi + 1) + yi + 1) + zi + 0);
+	int h111 = permut(permut(permut(xi + 1) + yi + 1) + zi + 1);
 
 	float x11 = lerp(dot3D(h000, xf0, yf0, zf0), dot3D(h100, xf1, yf0, zf0), tx);
 	float x12 = lerp(dot3D(h010, xf0, yf1, zf0), dot3D(h110, xf1, yf1, zf0), tx);
@@ -140,7 +139,7 @@ float Noise::PerlinNoise3D(float x, float y, float z) const
 }
 
 
-float Noise::PerlinNoise4D(float x, float y, float z, float w) const
+float PerlinNoise::Noise4D(float x, float y, float z, float w) const
 {
 	int xi = fastfloor(x);
 	int yi = fastfloor(y);
@@ -167,22 +166,22 @@ float Noise::PerlinNoise4D(float x, float y, float z, float w) const
 	float tz = fade(zf0);
 	float tw = fade(wf0);
 
-	int h0000 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 0] + wi + 0];
-	int h0001 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 0] + wi + 1];
-	int h0010 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 1] + wi + 0];
-	int h0011 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 1] + wi + 1];
-	int h0100 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 0] + wi + 0];
-	int h0101 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 0] + wi + 1];
-	int h0110 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 1] + wi + 0];
-	int h0111 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 1] + wi + 1];
-	int h1000 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 0] + wi + 0];
-	int h1001 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 0] + wi + 1];
-	int h1010 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 1] + wi + 0];
-	int h1011 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 1] + wi + 1];
-	int h1100 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 0] + wi + 0];
-	int h1101 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 0] + wi + 1];
-	int h1110 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 1] + wi + 0];
-	int h1111 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 1] + wi + 1];
+	int h0000 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 0) + wi + 0);
+	int h0001 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 0) + wi + 1);
+	int h0010 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 1) + wi + 0);
+	int h0011 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 1) + wi + 1);
+	int h0100 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 0) + wi + 0);
+	int h0101 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 0) + wi + 1);
+	int h0110 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 1) + wi + 0);
+	int h0111 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 1) + wi + 1);
+	int h1000 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 0) + wi + 0);
+	int h1001 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 0) + wi + 1);
+	int h1010 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 1) + wi + 0);
+	int h1011 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 1) + wi + 1);
+	int h1100 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 0) + wi + 0);
+	int h1101 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 0) + wi + 1);
+	int h1110 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 1) + wi + 0);
+	int h1111 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 1) + wi + 1);
 
 	float x111 = lerp(dot4D(h0000, xf0, yf0, zf0, wf0), dot4D(h1000, xf1, yf0, zf0, wf0), tx);
 	float x112 = lerp(dot4D(h0100, xf0, yf1, zf0, wf0), dot4D(h1100, xf1, yf1, zf0, wf0), tx);
@@ -205,7 +204,7 @@ float Noise::PerlinNoise4D(float x, float y, float z, float w) const
 }
 
 
-Vector3f Noise::PerlinGradient2D(float x, float y) const
+Vector3f PerlinNoise::Gradient2D(float x, float y) const
 {
 	int xi = fastfloor(x);
 	int yi = fastfloor(y);
@@ -223,10 +222,10 @@ Vector3f Noise::PerlinGradient2D(float x, float y) const
 	float dtx = fadederiv(xf0);
 	float dty = fadederiv(yf0);
 
-	int h00 = permut[permut[xi + 0] + yi + 0];
-	int h10 = permut[permut[xi + 1] + yi + 0];
-	int h01 = permut[permut[xi + 0] + yi + 1];
-	int h11 = permut[permut[xi + 1] + yi + 1];
+	int h00 = permut(permut(xi + 0) + yi + 0);
+	int h10 = permut(permut(xi + 1) + yi + 0);
+	int h01 = permut(permut(xi + 0) + yi + 1);
+	int h11 = permut(permut(xi + 1) + yi + 1);
 
 	float v00 = dot2D(h00, xf0, yf0);
 	float v10 = dot2D(h10, xf1, yf0);
@@ -255,7 +254,7 @@ Vector3f Noise::PerlinGradient2D(float x, float y) const
 }
 
 
-Vector3f Noise::PerlinGradient3D(float x, float y, float z) const
+Vector3f PerlinNoise::Gradient3D(float x, float y, float z) const
 {
 	int xi = fastfloor(x);
 	int yi = fastfloor(y);
@@ -279,14 +278,14 @@ Vector3f Noise::PerlinGradient3D(float x, float y, float z) const
 	float dty = fadederiv(yf0);
 	float dtz = fadederiv(zf0);
 
-	int h000 = permut[permut[permut[xi + 0] + yi + 0] + zi + 0];
-	int h001 = permut[permut[permut[xi + 0] + yi + 0] + zi + 1];
-	int h010 = permut[permut[permut[xi + 0] + yi + 1] + zi + 0];
-	int h011 = permut[permut[permut[xi + 0] + yi + 1] + zi + 1];
-	int h100 = permut[permut[permut[xi + 1] + yi + 0] + zi + 0];
-	int h101 = permut[permut[permut[xi + 1] + yi + 0] + zi + 1];
-	int h110 = permut[permut[permut[xi + 1] + yi + 1] + zi + 0];
-	int h111 = permut[permut[permut[xi + 1] + yi + 1] + zi + 1];
+	int h000 = permut(permut(permut(xi + 0) + yi + 0) + zi + 0);
+	int h001 = permut(permut(permut(xi + 0) + yi + 0) + zi + 1);
+	int h010 = permut(permut(permut(xi + 0) + yi + 1) + zi + 0);
+	int h011 = permut(permut(permut(xi + 0) + yi + 1) + zi + 1);
+	int h100 = permut(permut(permut(xi + 1) + yi + 0) + zi + 0);
+	int h101 = permut(permut(permut(xi + 1) + yi + 0) + zi + 1);
+	int h110 = permut(permut(permut(xi + 1) + yi + 1) + zi + 0);
+	int h111 = permut(permut(permut(xi + 1) + yi + 1) + zi + 1);
 
 	float v000 = dot3D(h000, xf0, yf0, zf0);
 	float v100 = dot3D(h100, xf1, yf0, zf0);
@@ -331,7 +330,7 @@ Vector3f Noise::PerlinGradient3D(float x, float y, float z) const
 }
 
 
-Vector3f Noise::PerlinGradient4D(float x, float y, float z, float w) const
+Vector3f PerlinNoise::Gradient4D(float x, float y, float z, float w) const
 {
 	int xi = fastfloor(x);
 	int yi = fastfloor(y);
@@ -362,22 +361,22 @@ Vector3f Noise::PerlinGradient4D(float x, float y, float z, float w) const
 	float dtz = fadederiv(zf0);
 	//float dtw = fadederiv(wf0); not needed, partial derivative in respect to the w variable won't be calculated
 
-	int h0000 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 0] + wi + 0];
-	int h0001 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 0] + wi + 1];
-	int h0010 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 1] + wi + 0];
-	int h0011 = permut[permut[permut[permut[xi + 0] + yi + 0] + zi + 1] + wi + 1];
-	int h0100 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 0] + wi + 0];
-	int h0101 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 0] + wi + 1];
-	int h0110 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 1] + wi + 0];
-	int h0111 = permut[permut[permut[permut[xi + 0] + yi + 1] + zi + 1] + wi + 1];
-	int h1000 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 0] + wi + 0];
-	int h1001 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 0] + wi + 1];
-	int h1010 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 1] + wi + 0];
-	int h1011 = permut[permut[permut[permut[xi + 1] + yi + 0] + zi + 1] + wi + 1];
-	int h1100 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 0] + wi + 0];
-	int h1101 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 0] + wi + 1];
-	int h1110 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 1] + wi + 0];
-	int h1111 = permut[permut[permut[permut[xi + 1] + yi + 1] + zi + 1] + wi + 1];
+	int h0000 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 0) + wi + 0);
+	int h0001 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 0) + wi + 1);
+	int h0010 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 1) + wi + 0);
+	int h0011 = permut(permut(permut(permut(xi + 0) + yi + 0) + zi + 1) + wi + 1);
+	int h0100 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 0) + wi + 0);
+	int h0101 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 0) + wi + 1);
+	int h0110 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 1) + wi + 0);
+	int h0111 = permut(permut(permut(permut(xi + 0) + yi + 1) + zi + 1) + wi + 1);
+	int h1000 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 0) + wi + 0);
+	int h1001 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 0) + wi + 1);
+	int h1010 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 1) + wi + 0);
+	int h1011 = permut(permut(permut(permut(xi + 1) + yi + 0) + zi + 1) + wi + 1);
+	int h1100 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 0) + wi + 0);
+	int h1101 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 0) + wi + 1);
+	int h1110 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 1) + wi + 0);
+	int h1111 = permut(permut(permut(permut(xi + 1) + yi + 1) + zi + 1) + wi + 1);
 
 	float v0000 = dot4D(h0000, xf0, yf0, zf0, wf0);
 	float v1000 = dot4D(h1000, xf1, yf0, zf0, wf0);
@@ -458,38 +457,38 @@ Vector3f Noise::PerlinGradient4D(float x, float y, float z, float w) const
 }
 
 
-Vector3f Noise::PerlinCurl2D(float x, float y) const
+Vector3f PerlinNoise::Curl2D(float x, float y) const
 {
-	auto gradient = PerlinGradient2D(x, y);
+	auto gradient = Gradient2D(x, y);
 
 	return Vector3f(gradient.y, -gradient.x, 0);
 }
 
 
-Vector3f Noise::PerlinCurl2DTime(float time, float x, float y) const
+Vector3f PerlinNoise::Curl2DTime(float time, float x, float y) const
 {
-	auto gradient = PerlinGradient3D(x, y, time);
+	auto gradient = Gradient3D(x, y, time);
 
 	return Vector3f(gradient.y, -gradient.x, 0);
 }
 
 
-Vector3f Noise::PerlinCurl3D(float x, float y, float z) const
+Vector3f PerlinNoise::Curl3D(float x, float y, float z) const
 {
 	// sample noise gradients at different offsets
-	auto gx = PerlinGradient3D(x, y, z);
-	auto gy = PerlinGradient3D(x - 123.4567f, y + 56.7891f, z - 345.6789f);
-	auto gz = PerlinGradient3D(x + 56.7891f, y - 123.4567f, z + 345.6789f);
+	auto gx = Gradient3D(x, y, z);
+	auto gy = Gradient3D(x - 123.4567f, y + 56.7891f, z - 345.6789f);
+	auto gz = Gradient3D(x + 56.7891f, y - 123.4567f, z + 345.6789f);
 
 	return computecurl3D(gx, gy, gz);
 }
 
 
-Vector3f Noise::PerlinCurl3DTime(float time, float x, float y, float z) const
+Vector3f PerlinNoise::Curl3DTime(float time, float x, float y, float z) const
 {
-	auto gx = PerlinGradient4D(x, y, z, time);
-	auto gy = PerlinGradient4D(x - 123.4567f, y + 56.7891f, z - 345.6789f, time + 85.33333f);
-	auto gz = PerlinGradient4D(x + 56.7891f, y - 123.4567f, z + 345.6789f, time + 170.66667f);
+	auto gx = Gradient4D(x, y, z, time);
+	auto gy = Gradient4D(x - 123.4567f, y + 56.7891f, z - 345.6789f, time + 85.33333f);
+	auto gz = Gradient4D(x + 56.7891f, y - 123.4567f, z + 345.6789f, time + 170.66667f);
 
 	return computecurl3D(gx, gy, gz);
 }
@@ -497,12 +496,12 @@ Vector3f Noise::PerlinCurl3DTime(float time, float x, float y, float z) const
 
 /************* Simplex noise implementation *************/
 
-const float Noise::grad2lut[8][2] = {
+const float SimplexNoise::grad2lut[8][2] = {
 	{ -1.0f, -1.0f } , { 1.0f, 0.0f } , { -1.0f, 0.0f } , { 1.0f, 1.0f } ,
 	{ -1.0f, 1.0f } , { 0.0f, -1.0f } , { 0.0f, 1.0f } , { 1.0f, -1.0f }
 };
 
-const float Noise::grad3lut[16][3] = {
+const float SimplexNoise::grad3lut[16][3] = {
 	{ 1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 1.0f },
 	{ -1.0f, 0.0f, 1.0f }, { 0.0f, -1.0f, 1.0f },
 	{ 1.0f, 0.0f, -1.0f }, { 0.0f, 1.0f, -1.0f },
@@ -513,7 +512,7 @@ const float Noise::grad3lut[16][3] = {
 	{ 0.0f, 1.0f, -1.0f }, { 0.0f, -1.0f, -1.0f }
 };
 
-const float Noise::grad4lut[32][4] = {
+const float SimplexNoise::grad4lut[32][4] = {
   { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f, 1.0f, -1.0f }, { 0.0f, 1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f, -1.0f, -1.0f },
   { 0.0f, -1.0f, 1.0f, 1.0f }, { 0.0f, -1.0f, 1.0f, -1.0f }, { 0.0f, -1.0f, -1.0f, 1.0f }, { 0.0f, -1.0f, -1.0f, -1.0f },
   { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 1.0f, -1.0f }, { 1.0f, 0.0f, -1.0f, 1.0f }, { 1.0f, 0.0f, -1.0f, -1.0f },
@@ -524,7 +523,7 @@ const float Noise::grad4lut[32][4] = {
   { -1.0f, 1.0f, 1.0f, 0.0f }, { -1.0f, 1.0f, -1.0f, 0.0f }, { -1.0f, -1.0f, 1.0f, 0.0f }, { -1.0f, -1.0f, -1.0f, 0.0f }
 };
 
-const uchar Noise::simplexlut[64][4] = {
+const uchar SimplexNoise::simplexlut[64][4] = {
   {0,1,2,3},{0,1,3,2},{0,0,0,0},{0,2,3,1},{0,0,0,0},{0,0,0,0},{0,0,0,0},{1,2,3,0},
   {0,2,1,3},{0,0,0,0},{0,3,1,2},{0,3,2,1},{0,0,0,0},{0,0,0,0},{0,0,0,0},{1,3,2,0},
   {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
@@ -536,7 +535,7 @@ const uchar Noise::simplexlut[64][4] = {
 };
 
 
-float Noise::SimplexNoise1D(float x) const
+float SimplexNoise::Noise1D(float x) const
 {
 	float n0 = 0, n1 = 0;
 	float gx0 = 0, gx1 = 0;
@@ -547,11 +546,11 @@ float Noise::SimplexNoise1D(float x) const
 
 	i0 &= 255;
 
-	grad1(permut[i0], gx0);
+	grad1(permut(i0), gx0);
 	float t0 = 1.0f - x0 * x0;
 	n0 = (t0 * t0 * t0) * gx0 * x0;
 
-	grad1(permut[i0 + 1], gx1);
+	grad1(permut(i0 + 1), gx1);
 	float t1 = 1.0f - x1 * x1;
 	n1 = (t1 * t1 * t1) * gx1 * x1;
 
@@ -559,7 +558,7 @@ float Noise::SimplexNoise1D(float x) const
 }
 
 
-float Noise::SimplexNoise2D(float x, float y) const
+float SimplexNoise::Noise2D(float x, float y) const
 {
 	float n0 = 0, n1 = 0, n2 = 0;
 
@@ -594,21 +593,21 @@ float Noise::SimplexNoise2D(float x, float y) const
 	t0 = 0.5f - x0 * x0 - y0 * y0;
 	if (t0 > 0.0f)
 	{
-		grad2(permut[ii + permut[jj]], gx0, gy0);
+		grad2(permut(ii + permut(jj)), gx0, gy0);
 		n0 = (t0 * t0 * t0) * (gx0 * x0 + gy0 * y0);
 	}
 
 	t1 = 0.5f - x1 * x1 - y1 * y1;
 	if (t1 > 0.0f)
 	{
-		grad2(permut[ii + i1 + permut[jj + j1]], gx1, gy1);
+		grad2(permut(ii + i1 + permut(jj + j1)), gx1, gy1);
 		n1 = (t1 * t1 * t1) * (gx1 * x1 + gy1 * y1);
 	}
 
 	t2 = 0.5f - x2 * x2 - y2 * y2;
 	if (t2 > 0.0f)
 	{
-		grad2(permut[ii + 1 + permut[jj + 1]], gx2, gy2);
+		grad2(permut(ii + 1 + permut(jj + 1)), gx2, gy2);
 		n2 = (t2 * t2 * t2) * (gx2 * x2 + gy2 * y2);
 	}
 
@@ -616,7 +615,7 @@ float Noise::SimplexNoise2D(float x, float y) const
 }
 
 
-float Noise::SimplexNoise3D(float x, float y, float z) const
+float SimplexNoise::Noise3D(float x, float y, float z) const
 {
 	float n0 = 0, n1 = 0, n2 = 0, n3 = 0;
 
@@ -674,35 +673,35 @@ float Noise::SimplexNoise3D(float x, float y, float z) const
 	t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;
 	if (t0 > 0.0f)
 	{
-		grad3(permut[ii + permut[jj + permut[kk]]], gx0, gy0, gz0);
+		grad3(permut(ii + permut(jj + permut(kk))), gx0, gy0, gz0);
 		n0 = (t0 * t0 * t0) * (gx0 * x0 + gy0 * y0 + gz0 * z0);
 	}
 
 	t1 = 0.6f - x1 * x1 - y1 * y1 - z1 * z1;
 	if (t1 > 0.0f)
 	{
-		grad3(permut[ii + i1 + permut[jj + j1 + permut[kk + k1]]], gx1, gy1, gz1);
+		grad3(permut(ii + i1 + permut(jj + j1 + permut(kk + k1))), gx1, gy1, gz1);
 		n1 = (t1 * t1 * t1) * (gx1 * x1 + gy1 * y1 + gz1 * z1);
 	}
 
 	t2 = 0.6f - x2 * x2 - y2 * y2 - z2 * z2;
 	if (t2 > 0.0f)
 	{
-		grad3(permut[ii + i2 + permut[jj + j2 + permut[kk + k2]]], gx2, gy2, gz2);
+		grad3(permut(ii + i2 + permut(jj + j2 + permut(kk + k2))), gx2, gy2, gz2);
 		n2 = (t2 * t2 * t2) * (gx2 * x2 + gy2 * y2 + gz2 * z2);
 	}
 
 	t3 = 0.6f - x3 * x3 - y3 * y3 - z3 * z3;
 	if (t3 > 0.0f)
 	{
-		grad3(permut[ii + 1 + permut[jj + 1 + permut[kk + 1]]], gx3, gy3, gz3);
+		grad3(permut(ii + 1 + permut(jj + 1 + permut(kk + 1))), gx3, gy3, gz3);
 		n3 = (t3 * t3 * t3) * (gx3 * x3 + gy3 * y3 + gz3 * z3);
 	}
 
 	return (n0 + n1 + n2 + n3) * 10.0f;
 }
 
-float Noise::SimplexNoise4D(float x, float y, float z, float w) const
+float SimplexNoise::Noise4D(float x, float y, float z, float w) const
 {
 	float n0 = 0, n1 = 0, n2 = 0, n3 = 0, n4 = 0;
 
@@ -784,42 +783,42 @@ float Noise::SimplexNoise4D(float x, float y, float z, float w) const
 	t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
 	if (t0 > 0.0f)
 	{
-		grad4(permut[ii + permut[jj + permut[kk + permut[ll]]]], gx0, gy0, gz0, gw0);
+		grad4(permut(ii + permut(jj + permut(kk + permut(ll)))), gx0, gy0, gz0, gw0);
 		n0 = (t0 * t0 * t0) * (gx0 * x0 + gy0 * y0 + gz0 * z0 + gw0 * w0);
 	}
 
 	t1 = 0.6f - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
 	if (t1 > 0.0f)
 	{
-		grad4(permut[ii + i1 + permut[jj + j1 + permut[kk + k1 + permut[ll + l1]]]], gx1, gy1, gz1, gw1);
+		grad4(permut(ii + i1 + permut(jj + j1 + permut(kk + k1 + permut(ll + l1)))), gx1, gy1, gz1, gw1);
 		n1 = (t1 * t1 * t1) * (gx1 * x1 + gy1 * y1 + gz1 * z1 + gw1 * w1);
 	}
 
 	t2 = 0.6f - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
 	if (t2 > 0.0f)
 	{
-		grad4(permut[ii + i2 + permut[jj + j2 + permut[kk + k2 + permut[ll + l2]]]], gx2, gy2, gz2, gw2);
+		grad4(permut(ii + i2 + permut(jj + j2 + permut(kk + k2 + permut(ll + l2)))), gx2, gy2, gz2, gw2);
 		n2 = (t2 * t2 * t2) * (gx2 * x2 + gy2 * y2 + gz2 * z2 + gw2 * w2);
 	}
 
 	t3 = 0.6f - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
 	if (t3 > 0.0f)
 	{
-		grad4(permut[ii + i3 + permut[jj + j3 + permut[kk + k3 + permut[ll + l3]]]], gx3, gy3, gz3, gw3);
+		grad4(permut(ii + i3 + permut(jj + j3 + permut(kk + k3 + permut(ll + l3)))), gx3, gy3, gz3, gw3);
 		n3 = (t3 * t3 * t3) * (gx3 * x3 + gy3 * y3 + gz3 * z3 + gw3 * w3);
 	}
 
 	t4 = 0.6f - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
 	if (t4 > 0.0f)
 	{
-		grad4(permut[ii + 1 + permut[jj + 1 + permut[kk + 1 + permut[ll + 1]]]], gx4, gy4, gz4, gw4);
+		grad4(permut(ii + 1 + permut(jj + 1 + permut(kk + 1 + permut(ll + 1)))), gx4, gy4, gz4, gw4);
 		n4 = (t4 * t4 * t4) * (gx4 * x4 + gy4 * y4 + gz4 * z4 + gw4 * w4);
 	}
 
 	return (n0 + n1 + n2 + n3 + n4) * 10.0f;
 }
 
-Vector3f Noise::SimplexGradient2D(float x, float y) const
+Vector3f SimplexNoise::Gradient2D(float x, float y) const
 {
 	x *= 0.66666667f;
 	y *= 0.66666667f;
@@ -857,7 +856,7 @@ Vector3f Noise::SimplexGradient2D(float x, float y) const
 	t0 = 0.5f - x0 * x0 - y0 * y0;
 	if (t0 > 0.0f)
 	{
-		grad2(permut[ii + permut[jj]], gx0, gy0);
+		grad2(permut(ii + permut(jj)), gx0, gy0);
 		t20 = t0 * t0;
 		t30 = t20 * t0;
 	}
@@ -865,7 +864,7 @@ Vector3f Noise::SimplexGradient2D(float x, float y) const
 	t1 = 0.5f - x1 * x1 - y1 * y1;
 	if (t1 > 0.0f)
 	{
-		grad2(permut[ii + i1 + permut[jj + j1]], gx1, gy1);
+		grad2(permut(ii + i1 + permut(jj + j1)), gx1, gy1);
 		t21 = t1 * t1;
 		t31 = t21 * t1;
 	}
@@ -873,7 +872,7 @@ Vector3f Noise::SimplexGradient2D(float x, float y) const
 	t2 = 0.5f - x2 * x2 - y2 * y2;
 	if (t2 > 0.0f)
 	{
-		grad2(permut[ii + 1 + permut[jj + 1]], gx2, gy2);
+		grad2(permut(ii + 1 + permut(jj + 1)), gx2, gy2);
 		t22 = t2 * t2;
 		t32 = t22 * t2;
 	}
@@ -900,7 +899,7 @@ Vector3f Noise::SimplexGradient2D(float x, float y) const
 }
 
 
-Vector3f Noise::SimplexGradient3D(float x, float y, float z) const
+Vector3f SimplexNoise::Gradient3D(float x, float y, float z) const
 {
 	x *= 0.66666667f;
 	y *= 0.66666667f;
@@ -963,7 +962,7 @@ Vector3f Noise::SimplexGradient3D(float x, float y, float z) const
 	t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;
 	if (t0 > 0.0f)
 	{
-		grad3(permut[ii + permut[jj + permut[kk]]], gx0, gy0, gz0);
+		grad3(permut(ii + permut(jj + permut(kk))), gx0, gy0, gz0);
 		t20 = t0 * t0;
 		t30 = t20 * t0;
 	}
@@ -971,7 +970,7 @@ Vector3f Noise::SimplexGradient3D(float x, float y, float z) const
 	t1 = 0.6f - x1 * x1 - y1 * y1 - z1 * z1;
 	if (t1 > 0.0f)
 	{
-		grad3(permut[ii + i1 + permut[jj + j1 + permut[kk + k1]]], gx1, gy1, gz1);
+		grad3(permut(ii + i1 + permut(jj + j1 + permut(kk + k1))), gx1, gy1, gz1);
 		t21 = t1 * t1;
 		t31 = t21 * t1;
 	}
@@ -979,7 +978,7 @@ Vector3f Noise::SimplexGradient3D(float x, float y, float z) const
 	t2 = 0.6f - x2 * x2 - y2 * y2 - z2 * z2;
 	if (t2 > 0.0f)
 	{
-		grad3(permut[ii + i2 + permut[jj + j2 + permut[kk + k2]]], gx2, gy2, gz2);
+		grad3(permut(ii + i2 + permut(jj + j2 + permut(kk + k2))), gx2, gy2, gz2);
 		t22 = t2 * t2;
 		t32 = t22 * t2;
 	}
@@ -987,7 +986,7 @@ Vector3f Noise::SimplexGradient3D(float x, float y, float z) const
 	t3 = 0.6f - x3 * x3 - y3 * y3 - z3 * z3;
 	if (t3 > 0.0f)
 	{
-		grad3(permut[ii + 1 + permut[jj + 1 + permut[kk + 1]]], gx3, gy3, gz3);
+		grad3(permut(ii + 1 + permut(jj + 1 + permut(kk + 1))), gx3, gy3, gz3);
 		t23 = t3 * t3;
 		t33 = t23 * t3;
 	}
@@ -1024,7 +1023,7 @@ Vector3f Noise::SimplexGradient3D(float x, float y, float z) const
 }
 
 
-Vector3f Noise::SimplexGradient4D(float x, float y, float z, float w) const
+Vector3f SimplexNoise::Gradient4D(float x, float y, float z, float w) const
 {
 	x *= 0.66666667f;
 	y *= 0.66666667f;
@@ -1114,7 +1113,7 @@ Vector3f Noise::SimplexGradient4D(float x, float y, float z, float w) const
 	{
 		t20 = t0 * t0;
 		t30 = t20 * t0;
-		grad4(permut[ii + permut[jj + permut[kk + permut[ll]]]], gx0, gy0, gz0, gw0);
+		grad4(permut(ii + permut(jj + permut(kk + permut(ll)))), gx0, gy0, gz0, gw0);
 	}
 
 	t1 = 0.6f - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
@@ -1122,7 +1121,7 @@ Vector3f Noise::SimplexGradient4D(float x, float y, float z, float w) const
 	{
 		t21 = t1 * t1;
 		t31 = t21 * t1;
-		grad4(permut[ii + i1 + permut[jj + j1 + permut[kk + k1 + permut[ll + l1]]]], gx1, gy1, gz1, gw1);
+		grad4(permut(ii + i1 + permut(jj + j1 + permut(kk + k1 + permut(ll + l1)))), gx1, gy1, gz1, gw1);
 	}
 
 	t2 = 0.6f - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
@@ -1130,7 +1129,7 @@ Vector3f Noise::SimplexGradient4D(float x, float y, float z, float w) const
 	{
 		t22 = t2 * t2;
 		t32 = t22 * t2;
-		grad4(permut[ii + i2 + permut[jj + j2 + permut[kk + k2 + permut[ll + l2]]]], gx2, gy2, gz2, gw2);
+		grad4(permut(ii + i2 + permut(jj + j2 + permut(kk + k2 + permut(ll + l2)))), gx2, gy2, gz2, gw2);
 	}
 
 	t3 = 0.6f - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
@@ -1138,7 +1137,7 @@ Vector3f Noise::SimplexGradient4D(float x, float y, float z, float w) const
 	{
 		t23 = t3 * t3;
 		t33 = t23 * t3;
-		grad4(permut[ii + i3 + permut[jj + j3 + permut[kk + k3 + permut[ll + l3]]]], gx3, gy3, gz3, gw3);
+		grad4(permut(ii + i3 + permut(jj + j3 + permut(kk + k3 + permut(ll + l3)))), gx3, gy3, gz3, gw3);
 	}
 
 	t4 = 0.6f - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
@@ -1146,7 +1145,7 @@ Vector3f Noise::SimplexGradient4D(float x, float y, float z, float w) const
 	{
 		t24 = t4 * t4;
 		t34 = t24 * t4;
-		grad4(permut[ii + 1 + permut[jj + 1 + permut[kk + 1 + permut[ll + 1]]]], gx4, gy4, gz4, gw4);
+		grad4(permut(ii + 1 + permut(jj + 1 + permut(kk + 1 + permut(ll + 1)))), gx4, gy4, gz4, gw4);
 	}
 
 	float temp0 = t20 * (gx0 * x0 + gy0 * y0 + gz0 * z0 + gw0 * w0);
@@ -1193,37 +1192,37 @@ Vector3f Noise::SimplexGradient4D(float x, float y, float z, float w) const
 }
 
 
-Vector3f Noise::SimplexCurl2D(float x, float y) const
+Vector3f SimplexNoise::Curl2D(float x, float y) const
 {
-	auto gradient = SimplexGradient2D(x, y);
+	auto gradient = Gradient2D(x, y);
 
 	return Vector3f(gradient.y, -gradient.x, 0);
 }
 
 
-Vector3f Noise::SimplexCurl2DTime(float time, float x, float y) const
+Vector3f SimplexNoise::Curl2DTime(float time, float x, float y) const
 {
-	auto gradient = SimplexGradient3D(x, y, time);
+	auto gradient = Gradient3D(x, y, time);
 
 	return Vector3f(gradient.y, -gradient.x, 0);
 }
 
 
-Vector3f Noise::SimplexCurl3D(float x, float y, float z) const
+Vector3f SimplexNoise::Curl3D(float x, float y, float z) const
 {
-	auto gx = SimplexGradient3D(x, y, z);
-	auto gy = SimplexGradient3D(x - 197.53072f, y + 90.86256f, z - 553.08624f);
-	auto gz = SimplexGradient3D(x + 90.86256f, y - 197.53072f, z + 553.08624f);
+	auto gx = Gradient3D(x, y, z);
+	auto gy = Gradient3D(x - 197.53072f, y + 90.86256f, z - 553.08624f);
+	auto gz = Gradient3D(x + 90.86256f, y - 197.53072f, z + 553.08624f);
 
 	return computecurl3D(gx, gy, gz);
 }
 
 
-Vector3f Noise::SimplexCurl3DTime(float time, float x, float y, float z) const
+Vector3f SimplexNoise::Curl3DTime(float time, float x, float y, float z) const
 {
-	auto gx = SimplexGradient4D(x, y, z, time);
-	auto gy = SimplexGradient4D(x - 197.53072f, y + 90.86256f, z - 553.08624f, time + 85.33333f);
-	auto gz = SimplexGradient4D(x + 90.86256f, y - 197.53072f, z + 553.08624f, time + 170.66667f);
+	auto gx = Gradient4D(x, y, z, time);
+	auto gy = Gradient4D(x - 197.53072f, y + 90.86256f, z - 553.08624f, time + 85.33333f);
+	auto gz = Gradient4D(x + 90.86256f, y - 197.53072f, z + 553.08624f, time + 170.66667f);
 
 	return computecurl3D(gx, gy, gz);
 }

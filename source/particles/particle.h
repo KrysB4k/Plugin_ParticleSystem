@@ -279,8 +279,6 @@ namespace ParticleFactory
 {
 	extern ulong gameTick;
 
-	extern Noise noise;
-
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];

@@ -77,8 +77,6 @@ namespace ParticleFactory
 {
 	ulong gameTick;
 
-	Noise noise;
-
 	int nextSpritePart;
 	SpriteParticle spriteParts[MAX_SPRITEPARTS];
 	int nextMeshPart;

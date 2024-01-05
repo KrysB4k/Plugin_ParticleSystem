@@ -78,6 +78,16 @@ struct CreateMeshPartFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct CreatePerlinNoiseFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct CreateSimplexNoiseFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct CreateSpritePartFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
@@ -113,12 +123,7 @@ struct MeshShatterFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
-struct NoisePerlinFunction final : public LuaObjectFunction
-{
-	virtual int Call() override;
-};
-
-struct NoiseSimplexFunction final : public LuaObjectFunction
+struct NoiseFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -173,11 +178,6 @@ struct RandintFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
-struct SeedNoiseFunction final : public LuaObjectFunction
-{
-	virtual int Call() override;
-};
-
 struct SinFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
@@ -203,6 +203,8 @@ namespace LuaGlobals
 	extern CreateColorFunction CreateColor;
 	extern CreateGroupFunction CreateGroup;
 	extern CreateMeshPartFunction CreateMeshPart;
+	extern CreatePerlinNoiseFunction CreatePerlinNoise;
+	extern CreateSimplexNoiseFunction CreateSimplexNoise;
 	extern CreateSpritePartFunction CreateSpritePart;
 	extern CreateVectorFunction CreateVector;
 	extern GetTombIndexFunction GetTombIndex;
@@ -210,8 +212,7 @@ namespace LuaGlobals
 	extern GetItemRoomFunction GetItemRoom;
 	extern MeshAlignVelocityFunction MeshAlignVelocity;
 	extern MeshShatterFunction MeshShatter;
-	extern NoisePerlinFunction NoisePerlin;
-	extern NoiseSimplexFunction NoiseSimplex;
+	extern NoiseFunction Noise;
 	extern ParticleAnimateFunction ParticleAnimate;
 	extern ParticleCollidedItemFunction ParticleCollidedItem;
 	extern ParticleCollideFloorsFunction ParticleCollideFloors;
@@ -222,7 +223,6 @@ namespace LuaGlobals
 	extern PrintFunction Print;
 	extern RandfloatFunction Randfloat;
 	extern RandintFunction Randint;
-	extern SeedNoiseFunction SeedNoise;
 	extern SinFunction Sin;
 	extern SqrtFunction Sqrt;
 
