@@ -2522,9 +2522,9 @@ int CreatePerlinNoiseFunction::Call()
 	int args = GetArgCount(0, 1);
 
 	if (args)
-		ConstructManagedData<PerlinNoise>(PerlinNoise(GetInteger(1)));
+		ConstructManagedData<PerlinNoise>(GetInteger(1));
 	else
-		ConstructManagedData<PerlinNoise>(PerlinNoise());
+		ConstructManagedData<PerlinNoise>();
 
 	return 1;
 }
@@ -2536,9 +2536,9 @@ int CreateSimplexNoiseFunction::Call()
 	int args = GetArgCount(0, 1);
 
 	if (args)
-		ConstructManagedData<SimplexNoise>(SimplexNoise(GetInteger(1)));
+		ConstructManagedData<SimplexNoise>(GetInteger(1));
 	else
-		ConstructManagedData<SimplexNoise>(SimplexNoise());
+		ConstructManagedData<SimplexNoise>();
 
 	return 1;
 }
