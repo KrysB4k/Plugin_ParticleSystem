@@ -58,6 +58,21 @@ struct CbrtFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct CheckDistFastFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ClampFloatFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ClampIntFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct CosFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
@@ -98,12 +113,22 @@ struct CreateVectorFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
-struct GetTombIndexFunction final : public LuaObjectFunction
+struct GetColorFromHSVFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
 
-struct GetLaraIndexFunction final : public LuaObjectFunction
+struct GetDistanceFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct GetGameTickFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct GetItemJointPosFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -113,7 +138,32 @@ struct GetItemRoomFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct GetLaraIndexFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct GetTombIndexFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct LerpFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct LerpInverseFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct MeshAlignVelocityFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct MeshLookAtTargetFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -128,7 +178,37 @@ struct NoiseFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct NoiseCurlFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct NoiseCurlTimeFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ParticleAbsPosFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct ParticleAnimateFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ParticleAttachFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ParticleAttractToItemFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ParticleAvoidRoomGeometryFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -148,12 +228,27 @@ struct ParticleCollideWallsFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct ParticleDetachFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ParticleFollowTargetFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct ParticleHomingFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
 
 struct ParticleLimitSpeedFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct ParticleWindVelocityFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -178,7 +273,27 @@ struct RandintFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct RoundFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct SelectItemFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct SinFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct SoundEffectFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct SphericalToCartesianFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -188,43 +303,78 @@ struct SqrtFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct TriggerDynamicFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct TriggerShockwaveFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 namespace LuaGlobals
 {
-	extern AbsFunction Abs;
-	extern AcosFunction Acos;
-	extern AsinFunction Asin;
-	extern AtanFunction Atan;
-	extern Atan2Function Atan2;
-	extern BoidAlignmentFunction BoidAlignment;
-	extern BoidCohesionFunction BoidCohesion;
-	extern BoidSeparationFunction BoidSeparation;
-	extern CbrtFunction Cbrt;
-	extern CosFunction Cos;
-	extern CreateColorFunction CreateColor;
-	extern CreateGroupFunction CreateGroup;
-	extern CreateMeshPartFunction CreateMeshPart;
-	extern CreatePerlinNoiseFunction CreatePerlinNoise;
-	extern CreateSimplexNoiseFunction CreateSimplexNoise;
-	extern CreateSpritePartFunction CreateSpritePart;
-	extern CreateVectorFunction CreateVector;
-	extern GetTombIndexFunction GetTombIndex;
-	extern GetLaraIndexFunction GetLaraIndex;
-	extern GetItemRoomFunction GetItemRoom;
-	extern MeshAlignVelocityFunction MeshAlignVelocity;
-	extern MeshShatterFunction MeshShatter;
-	extern NoiseFunction Noise;
-	extern ParticleAnimateFunction ParticleAnimate;
-	extern ParticleCollidedItemFunction ParticleCollidedItem;
-	extern ParticleCollideFloorsFunction ParticleCollideFloors;
-	extern ParticleCollideWallsFunction ParticleCollideWalls;
-	extern ParticleHomingFunction ParticleHoming;
-	extern ParticleLimitSpeedFunction ParticleLimitSpeed;
-	extern PerformTriggerGroupFunction PerformTriggergroup;
-	extern PrintFunction Print;
-	extern RandfloatFunction Randfloat;
-	extern RandintFunction Randint;
-	extern SinFunction Sin;
-	extern SqrtFunction Sqrt;
+	extern AbsFunction AbsFunc;
+	extern AcosFunction AcosFunc;
+	extern AsinFunction AsinFunc;
+	extern AtanFunction AtanFunc;
+	extern Atan2Function Atan2Func;
+	extern BoidAlignmentFunction BoidAlignmentFunc;
+	extern BoidCohesionFunction BoidCohesionFunc;
+	extern BoidSeparationFunction BoidSeparationFunc;
+	extern CbrtFunction CbrtFuncFunc;
+	extern CheckDistFastFunction CheckDistFastFunc;
+	extern ClampFloatFunction ClampFloatFunc;
+	extern ClampIntFunction ClampIntFunc;
+	extern CosFunction CosFunc;
+	extern CreateColorFunction CreateColorFunc;
+	extern CreateGroupFunction CreateGroupFunc;
+	extern CreateMeshPartFunction CreateMeshPartFunc;
+	extern CreatePerlinNoiseFunction CreatePerlinNoiseFunc;
+	extern CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
+	extern CreateSpritePartFunction CreateSpritePartFunc;
+	extern CreateVectorFunction CreateVectorFunc;
+	extern GetColorFromHSVFunction GetColorFromHSVFunc;
+	extern GetDistanceFunction GetDistanceFunc;
+	extern GetGameTickFunction GetGameTickFunc;
+	extern GetItemJointPosFunction GetItemJointPosFunc;
+	extern GetItemRoomFunction GetItemRoomFunc;
+	extern GetTombIndexFunction GetTombIndexFunc;
+	extern GetLaraIndexFunction GetLaraIndexFunc;
+	extern LerpFunction LerpFunc;
+	extern LerpInverseFunction LerpInverseFunc;
+	extern MeshAlignVelocityFunction MeshAlignVelocityFunc;
+	extern MeshLookAtTargetFunction MeshLookAtTargetFunc;
+	extern MeshShatterFunction MeshShatterFunc;
+	extern NoiseFunction NoiseFunc;
+	extern NoiseCurlFunction NoiseCurlFunc;
+	extern NoiseCurlTimeFunction NoiseCurlTimeFunc;
+	extern ParticleAbsPosFunction ParticleAbsPosFunc;
+	extern ParticleAnimateFunction ParticleAnimateFunc;
+	extern ParticleAttachFunction ParticleAttachFunc;
+	extern ParticleAttractToItemFunction ParticleAttractToItemFunc;
+	extern ParticleAvoidRoomGeometryFunction ParticleAvoidRoomGeometryFunc;
+	extern ParticleCollidedItemFunction ParticleCollidedItemFunc;
+	extern ParticleCollideFloorsFunction ParticleCollideFloorsFunc;
+	extern ParticleCollideWallsFunction ParticleCollideWallsFunc;
+	extern ParticleDetachFunction ParticleDetachFunc;
+	extern ParticleFollowTargetFunction ParticleFollowTargetFunc;
+	extern ParticleHomingFunction ParticleHomingFunc;
+	extern ParticleLimitSpeedFunction ParticleLimitSpeedFunc;
+	extern ParticleWindVelocityFunction ParticleWindVelocityFunc;
+	extern PerformTriggerGroupFunction PerformTriggerGroupFunc;
+	extern PrintFunction PrintFunc;
+	extern RandfloatFunction RandfloatFunc;
+	extern RandintFunction RandintFunc;
+	extern RoundFunction RoundFunc;
+	extern SelectItemFunction SelectItemFunc;
+	extern SinFunction SinFunc;
+	extern SoundEffectFunction SoundEffectFunc;
+	extern SphericalToCartesianFunction SphericalToCartesianFunc;
+	extern SqrtFunction SqrtFunc;
+	extern TriggerDynamicFunction TriggerDynamicFunc;
+	extern TriggerShockwaveFunction TriggerShockwaveFunc;
 
 	LuaObject* RetrieveFunction(const char* field);
 	std::optional<int> RetrieveIntegerConstant(const char* field);

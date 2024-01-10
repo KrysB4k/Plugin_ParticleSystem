@@ -82,34 +82,31 @@ float RealDist(const Vector3f& v1, const Vector3f& v2)
 ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t)
 {
 	return ColorRGB(
-		Round(C1.R + (C2.R - C1.R) * t),
-		Round(C1.G + (C2.G - C1.G) * t),
-		Round(C1.B + (C2.B - C1.B) * t)
+		(uchar)Round(C1.R + (C2.R - C1.R) * t),
+		(uchar)Round(C1.G + (C2.G - C1.G) * t),
+		(uchar)Round(C1.B + (C2.B - C1.B) * t)
 		);
 }
 
 
-ColorRGB HSLtoRGB(float hue, float sat, float light)
+ColorRGB HSVtoRGB(float hue, float sat, float val)
 {
 	hue = fmodf(hue, 360.0f);
-	if (hue < 0)
+	if (hue < 0.0f)
 		hue += 360.0f;
 
-	sat = Clamp(sat, 0.0f, 1.0f);
-	light = Clamp(light, 0.0f, 1.0f);
-
-	if (sat <= 0)
+	if (sat <= 0.0f)
 	{
-		int v = Round(light * 255);
+		uchar v = Round(val * 255);
 		return ColorRGB(v, v, v);
 	}
 
 	int hextant = int(hue / 60.0f);
 	float fhue = (hue - hextant * 60.0f) / 60.0f;
 
-	float chroma = (1 - abs(2 * light - 1)) * sat;
+	float chroma = sat * val;
 	float xval = chroma * (1 - abs(fmod(hextant + fhue, 2.0f) - 1));
-	float m = light - chroma / 2;
+	float m = val - chroma;
 	float r = 0;
 	float g = 0;
 	float b = 0;
@@ -146,9 +143,9 @@ ColorRGB HSLtoRGB(float hue, float sat, float light)
 		b = xval;
 	}
 
-	ColorRGB c(Round((r + m) * 255),
-		Round((g + m) * 255),
-		Round((b + m) * 255));
+	ColorRGB c((uchar)Round((r + m) * 255),
+		(uchar)Round((g + m) * 255),
+		(uchar)Round((b + m) * 255));
 
 	return c;
 }

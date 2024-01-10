@@ -232,7 +232,7 @@ void ParticleFactory::UpdateParts()
 	gameTick++;
 }
 
-ulong randomHashInt(ulong i0)
+static ulong randomHashInt(ulong i0)
 {
 	ulong z0 = (i0 * 1831267127) ^ i0;
 	ulong z1 = (z0 * 3915839201) ^ (z0 >> 20);
@@ -594,14 +594,10 @@ Vector3f BaseParticle::AbsPos()
 
 void BaseParticle::Attach(int itemIndex, int node)
 {
-	Tr4ItemInfo* item = nullptr;
-	if (itemIndex >= 0 && itemIndex < level_items)
-		item = &items[itemIndex];
-	else
+	if (itemIndex < 0 || itemIndex >= level_items)
 		return;
 
-	node = Clamp(node, -1, objects[item->object_number].nmeshes);
-
+	auto item = &items[itemIndex];
 	const auto& tether = ParticleFactory::partGroups[groupIndex].attach.tether;
 	Vector3f relPos;
 
@@ -768,21 +764,19 @@ bool BaseParticle::CollidedWithItem(Tr4ItemInfo* item, int radius)
 }
 
 
-Vector3f BaseParticle::FollowTarget(const Vector3f& v, float maxSpeed, float distFactor, float distCutOff)
+Vector3f BaseParticle::FollowTarget(const Vector3f& v, float maxSpeed, float distInner, float distOuter)
 {
 	auto dirVect = v - pos;
 
 	float dist = dirVect.magnitude();
 
-	dist -= distCutOff;
-
-	if (dist <= 0)
+	if (dist <= distInner)
 		return Vector3f();
 
 	if (dist > maxSpeed)
 		dirVect *= maxSpeed / dist;
 
-	return dirVect * (dist / (dist + distFactor));
+	return dirVect * InverseLerp(distInner, distOuter, dist);
 }
 
 
@@ -911,7 +905,7 @@ Vector3f BaseParticle::AvoidRoomGeometry(int wallMargin, int floorMargin, float 
 }
 
 
-Vector3f BaseParticle::AvoidItem(Tr4ItemInfo* item, float radius, float factor)
+Vector3f BaseParticle::AttractToItem(Tr4ItemInfo* item, float radius, float factor)
 {
 	Vector3f v;
 
