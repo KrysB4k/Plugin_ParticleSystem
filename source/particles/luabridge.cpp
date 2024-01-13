@@ -2550,10 +2550,10 @@ int CbrtFunction::Call()
 
 int CheckDistFastFunction::Call()
 {
-	auto vec1 = *GetData<Vector3f>(1);
-	auto vec2 = *GetData<Vector3f>(2);
+	auto vec1 = GetData<Vector3f>(1);
+	auto vec2 = GetData<Vector3f>(2);
 	float dist = GetNumber(3);
-	Script::PushInteger(CheckDistFast(vec1, vec2, dist));
+	Script::PushInteger(CheckDistFast(*vec1, *vec2, dist));
 	return 1;
 }
 
@@ -2675,16 +2675,15 @@ int GetColorFromHSVFunction::Call()
 	float h = GetNumber(1);
 	float s = GetClampedNumber(2, 0.0f, 1.0f, false);
 	float v = GetClampedNumber(3, 0.0f, 1.0f, false);
-	auto color = HSVtoRGB(h, s, v);
-	ConstructManagedData<ColorRGB>(color.R, color.G, color.B);
+	ConstructManagedData<ColorRGB>(HSVtoRGB(h, s, v));
 	return 1;
 }
 
 int GetDistanceFunction::Call()
 {
-	auto vec1 = *GetData<Vector3f>(1);
-	auto vec2 = *GetData<Vector3f>(2);
-	Script::PushNumber(RealDist(vec1, vec2));
+	auto vec1 = GetData<Vector3f>(1);
+	auto vec2 = GetData<Vector3f>(2);
+	Script::PushNumber(RealDist(*vec1, *vec2));
 	return 1;
 }
 
@@ -2701,8 +2700,8 @@ int GetItemJointPosFunction::Call()
 	int offX = GetInteger(3);
 	int offY = GetInteger(4);
 	int offZ = GetInteger(5);
-	auto vector = GetJointPos(item, joint, offX, offY, offZ);
-	ConstructManagedData<Vector3f>(vector.x, vector.y, vector.z);
+
+	ConstructManagedData<Vector3f>(GetJointPos(item, joint, offX, offY, offZ));
 	return 1;
 }
 
@@ -2920,8 +2919,7 @@ int NoiseCurlTimeFunction::Call()
 int ParticleAbsPosFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto vector = part->AbsPos();
-	ConstructManagedData<Vector3f>(vector.x, vector.y, vector.z);
+	ConstructManagedData<Vector3f>(part->AbsPos());
 	return 1;
 }
 
@@ -2939,27 +2937,20 @@ int ParticleAttachFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
 	int index = GetInteger(2);
-	auto item = GetItem(2, true);
-	if (item)
-	{
-		int node = GetClampedInteger(3, 0, objects[item->object_number].nmeshes - 1, false);
-		part->Attach(index, node);
-	}
-	
+	if (index < 0 || index >= level_items)
+		Script::ThrowError(FormatString("%d does not correspond to a valid Tomb index", index));
+	int node = GetClampedInteger(3, 0, objects[items[index].object_number].nmeshes - 1, false);
+	part->Attach(index, node);
 	return 0;
 }
 
 int ParticleAttractToItemFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto item = GetItem(2, false);
-	if (item)
-	{
-		float radius = GetNumber(3);
-		float factor = GetNumber(4);
-		part->vel = part->AttractToItem(item, radius, factor);
-	}
-
+	auto item = GetItem(2, true);
+	float radius = GetNumber(3);
+	float factor = GetNumber(4);
+	part->vel = part->AttractToItem(item, radius, factor);
 	return 0;
 }
 
@@ -3013,11 +3004,11 @@ int ParticleDetachFunction::Call()
 int ParticleFollowTargetFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto vect = *GetData<Vector3f>(2);
+	auto vect = GetData<Vector3f>(2);
 	float maxSpeed = GetNumber(3);
 	float distInner = GetNumber(4);
 	float distOuter = GetNumber(5);
-	part->vel = part->FollowTarget(vect, maxSpeed, distInner, distOuter);
+	part->vel = part->FollowTarget(*vect, maxSpeed, distInner, distOuter);
 	return 0;
 }
 
@@ -3089,8 +3080,6 @@ int RoundFunction::Call()
 
 int SelectItemFunction::Call()
 {
-	int index = GetInteger(1);
-
 	Trng.pGlobTomb4->ItemIndexSelected = Trng.pGlobTomb4->IndiceItemCondizione = GetInteger(1);
 	return 0;
 }
@@ -3108,8 +3097,8 @@ int SoundEffectFunction::Call()
 	int y = GetInteger(3);
 	int z = GetInteger(4);
 	int flags = GetInteger(5);
-	
-	SoundEffect(sampleIndex, &phd_vector(x, y, z), flags);
+	auto vec = phd_vector(x, y, z);
+	SoundEffect(sampleIndex, &vec, flags);
 	return 0;
 }
 
@@ -3118,9 +3107,7 @@ int SphericalToCartesianFunction::Call()
 	float r = GetNumber(1);
 	float theta = GetNumber(2);
 	float phi = GetClampedNumber(3, -M_PI_2, M_PI_2, false);
-
-	auto vector = SphericalToCartesian(r, theta, phi);
-	ConstructManagedData<Vector3f>(vector.x, vector.y, vector.z);
+	ConstructManagedData<Vector3f>(SphericalToCartesian(r, theta, phi));
 	return 1;
 }
 
@@ -3157,8 +3144,8 @@ int TriggerShockwaveFunction::Call()
 	int blue = Round(GetClampedNumber(10, 0, 1, false) * 255);
 	int xRot = RadToShort(GetNumber(11));
 	int flags = GetInteger(12);
-
-	TriggerShockwave(&phd_vector(x, y, z), innerRad | (outerRad << 16), speed, RGBA(red, green, blue, life), xRot | (flags << 16));
+	auto vec = phd_vector(x, y, z);
+	TriggerShockwave(&vec, innerRad | (outerRad << 16), speed, RGBA(red, green, blue, life), xRot | (flags << 16));
 	return 0;
 }
 
