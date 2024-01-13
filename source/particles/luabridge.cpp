@@ -57,7 +57,7 @@ namespace
 	{
 		int index;
 		index = GetInteger(argument);
-		if (index < 0 && index >= level_items)
+		if (index < 0 || index >= level_items)
 			Script::ThrowError(FormatString("%d does not correspond to a valid Tomb index", index));
 		return index;
 	}
