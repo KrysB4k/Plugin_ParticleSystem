@@ -53,17 +53,16 @@ namespace
 		return count;
 	}
 
-	Tr4ItemInfo* GetItem(int argument, bool throwError)
+	int GetItemIndex(int argument, bool throwError)
 	{
 		int index;
-
 		index = GetInteger(argument);
 		if (index >= 0 && index < level_items)
-			return &items[index];
+			return index;
 		if (throwError)
 			Script::ThrowError(FormatString("%d does not correspond to a valid Tomb index", index));
 		Script::EmitWarning(FormatString("%d does not correspond to a valid Tomb index", index));
-		return nullptr;
+		return -1;
 	}
 
 	int GetTombIndexByNGLEIndex(int argument)
@@ -2695,7 +2694,7 @@ int GetGameTickFunction::Call()
 
 int GetItemJointPosFunction::Call()
 {
-	auto item = GetItem(1, true);
+	auto item = &items[GetItemIndex(1, true)];
 	int joint = GetClampedInteger(2, 0, objects[item->object_number].nmeshes - 1, false);
 	int offX = GetInteger(3);
 	int offY = GetInteger(4);
@@ -2707,7 +2706,7 @@ int GetItemJointPosFunction::Call()
 
 int GetItemRoomFunction::Call()
 {
-	auto item = GetItem(1, true);
+	auto item = &items[GetItemIndex(1, true)];
 	Script::PushInteger(item->room_number);
 	return 1;
 }
@@ -2936,9 +2935,7 @@ int ParticleAnimateFunction::Call()
 int ParticleAttachFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	int index = GetInteger(2);
-	if (index < 0 || index >= level_items)
-		Script::ThrowError(FormatString("%d does not correspond to a valid Tomb index", index));
+	int index = GetItemIndex(2, true);
 	int node = GetClampedInteger(3, 0, objects[items[index].object_number].nmeshes - 1, false);
 	part->Attach(index, node);
 	return 0;
@@ -2947,7 +2944,7 @@ int ParticleAttachFunction::Call()
 int ParticleAttractToItemFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto item = GetItem(2, true);
+	auto item = &items[GetItemIndex(2, true)];
 	float radius = GetNumber(3);
 	float factor = GetNumber(4);
 	part->vel = part->AttractToItem(item, radius, factor);
@@ -2968,10 +2965,9 @@ int ParticleAvoidRoomGeometryFunction::Call()
 int ParticleCollidedItemFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto item = GetItem(2, false);
+	auto item = &items[GetItemIndex(2, true)];
 	int radius = GetInteger(3);
-
-	Script::PushBoolean(item ? part->CollidedWithItem(item, radius) : false);
+	Script::PushBoolean(part->CollidedWithItem(item, radius));
 	return 1;
 }
 
@@ -3015,14 +3011,12 @@ int ParticleFollowTargetFunction::Call()
 int ParticleHomingFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto item = GetItem(2, false);
+	auto item = &items[GetItemIndex(2, true)];
 	int node = item ? GetClampedInteger(3, 0, objects[item->object_number].nmeshes, false) : GetInteger(3);
 	float factor = GetNumber(4);
 	float accel = GetNumber(5);
 	bool predict = GetBoolean(6);
-
-	if (item)
-		part->TargetHoming(item, node, factor, accel, predict);
+	part->TargetHoming(item, node, factor, accel, predict);
 	return 0;
 }
 
