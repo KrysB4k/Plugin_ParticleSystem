@@ -195,6 +195,13 @@ namespace
 	{
 		Script::ThrowError(FormatString("field \"%s\" is read-only and cannot be assigned to", field));
 	}
+
+	int GetTable(int argument)
+	{
+		if (!Script::IsTable(argument))
+			Script::ThrowError("table expected");
+		return Script::ExplodeTable(argument);
+	}
 }
 
 namespace LuaGlobals
@@ -2677,7 +2684,7 @@ int FindNearestTargetFunction::Call()
 {
 	auto vec = GetData<Vector3f>(1);
 	float radius = GetNumber(2);
-	std::vector<short> slotList(Script::ExplodeTable(3));
+	std::vector<short> slotList(GetTable(3));
 	for (int i = 0; i < slotList.size(); i++)
 		slotList[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
 	Script::PushInteger(FindNearestTarget(*vec, radius, slotList.data()));
