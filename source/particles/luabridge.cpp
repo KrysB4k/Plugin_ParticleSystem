@@ -219,6 +219,7 @@ namespace LuaGlobals
 	CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
 	CreateSpritePartFunction CreateSpritePartFunc;
 	CreateVectorFunction CreateVectorFunc;
+	FindNearestTargetFunction FindNearestTargetFunc;
 	GetColorFromHSVFunction GetColorFromHSVFunc;
 	GetDistanceFunction GetDistanceFunc;
 	GetGameTickFunction GetGameTickFunc;
@@ -310,6 +311,10 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &CreateSpritePartFunc;
 		if (!strcmp(field, "createVector"))
 			return &CreateVectorFunc;
+		break;
+	case 'f':
+		if (!strcmp(field, "findNearestTarget"))
+			return &FindNearestTargetFunc;
 		break;
 	case 'g':
 		if (!strcmp(field, "getColorFromHSV"))
@@ -2665,6 +2670,17 @@ int CreateVectorFunction::Call()
 	float y = GetNumber(2);
 	float z = GetNumber(3);
 	ConstructManagedData<Vector3f>(x, y, z);
+	return 1;
+}
+
+int FindNearestTargetFunction::Call()
+{
+	auto vec = GetData<Vector3f>(1);
+	float radius = GetNumber(2);
+	std::vector<short> slotList(Script::ExplodeTable(3));
+	for (int i = 0; i < slotList.size(); i++)
+		slotList[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
+	Script::PushInteger(FindNearestTarget(*vec, radius, slotList.data()));
 	return 1;
 }
 

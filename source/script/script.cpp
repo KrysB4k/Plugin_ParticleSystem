@@ -266,6 +266,35 @@ void Script::DeleteFunction(int* reference)
 	*reference = LUA_REFNIL;
 }
 
+void Script::PushTable(int argument, int length)
+{
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	lua_createtable(lua, length, 0);
+	for (int i = 0; i < length; i++)
+	{
+		lua_pushvalue(lua, stack + i);
+		lua_rawseti(lua, -2, i + 1);
+	}
+}
+
+int Script::ExplodeTable(int argument)
+{
+	int length, stack;
+
+	stack = ArgumentToStack(argument);
+	length = lua_rawlen(lua, stack);
+	for (int i = 0; i < length; i++)
+		lua_rawgeti(lua, stack, i + 1);
+	return length;
+}
+
+bool Script::IsTable(int argument)
+{
+	return lua_istable(lua, ArgumentToStack(argument));
+}
+
 void Script::Print()
 {
 	int top;

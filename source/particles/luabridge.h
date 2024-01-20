@@ -113,6 +113,11 @@ struct CreateVectorFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct FindNearestTargetFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct GetColorFromHSVFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
@@ -335,6 +340,7 @@ namespace LuaGlobals
 	extern CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
 	extern CreateSpritePartFunction CreateSpritePartFunc;
 	extern CreateVectorFunction CreateVectorFunc;
+	extern FindNearestTargetFunction FindNearestTargetFunc;
 	extern GetColorFromHSVFunction GetColorFromHSVFunc;
 	extern GetDistanceFunction GetDistanceFunc;
 	extern GetGameTickFunction GetGameTickFunc;
