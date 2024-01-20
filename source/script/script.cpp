@@ -112,6 +112,13 @@ namespace
 		luaL_traceback(lua, lua, StringRepresentation(1), 1);
 		return 1;
 	}
+
+	int ArgumentToStack(int argument)
+	{
+		if (argument > 0)
+			return argument + 1;
+		return argument;
+	}
 }
 
 void Script::NewState()
@@ -165,30 +172,22 @@ void Script::PushData(LuaObject* value)
 
 int Script::ToInteger(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return (int)roundf(lua_tonumber(lua, argument));
+	return (int)roundf(lua_tonumber(lua, ArgumentToStack(argument)));
 }
 
 bool Script::ToBoolean(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_toboolean(lua, argument);
+	return lua_toboolean(lua, ArgumentToStack(argument));
 }
 
 float Script::ToNumber(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_tonumber(lua, argument);
+	return lua_tonumber(lua, ArgumentToStack(argument));
 }
 
 LuaObject* Script::ToData(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return (LuaObject*)lua_touserdata(lua, argument);
+	return (LuaObject*)lua_touserdata(lua, ArgumentToStack(argument));
 }
 
 int Script::ArgCount()
@@ -198,39 +197,32 @@ int Script::ArgCount()
 
 bool Script::IsInteger(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isnumber(lua, argument);
+	return lua_isnumber(lua, ArgumentToStack(argument));
 }
 
 bool Script::IsBoolean(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isboolean(lua, argument);
+	return lua_isboolean(lua, ArgumentToStack(argument));
 }
 
 bool Script::IsNumber(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isnumber(lua, argument);
+	return lua_isnumber(lua, ArgumentToStack(argument));
 }
 
 bool Script::IsData(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isuserdata(lua, argument);
+	return lua_isuserdata(lua, ArgumentToStack(argument));
 }
 
 int Script::StoreFunction(int argument)
 {
-	if (argument > 0)
-		argument++;
-	if (lua_isnil(lua, argument))
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	if (lua_isnil(lua, stack))
 		return LUA_REFNIL;
-	lua_pushvalue(lua, argument);
+	lua_pushvalue(lua, stack);
 	return luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
@@ -262,9 +254,10 @@ bool Script::ExecuteFunction(int reference, void* value)
 
 bool Script::IsFunction(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isnil(lua, argument) || lua_isfunction(lua, argument);
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	return lua_isnil(lua, stack) || lua_isfunction(lua, stack);
 }
 
 void Script::DeleteFunction(int* reference)

@@ -5,9 +5,11 @@ namespace
 	template<class T>
 	T* GetData(int argument)
 	{
+		T* object;
+
 		if (!Script::IsData(argument))
 			Script::ThrowError(FormatString("%s expected", T::Name()));
-		T* object = dynamic_cast<T*>(Script::ToData(argument));
+		object = dynamic_cast<T*>(Script::ToData(argument));
 		if (!object)
 			Script::ThrowError(FormatString("%s expected", T::Name()));
 		return object;
