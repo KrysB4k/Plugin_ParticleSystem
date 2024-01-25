@@ -181,51 +181,35 @@ long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned l
 }
 
 
-int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList)
+int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count)
 {
 	int itemIndex = -1;
-	int nearest = 0x7FFFFFFF;
 
 	for (int i = 0; i < level_items; ++i)
 	{
 		auto item = &items[i];
 
 		bool slotCheck = false;
-		const short* slotIter = slotList;
 
-		if (*slotIter == -1)
+		for (int j = 0; j < count; ++j)
 		{
-			if (objects[item->object_number].intelligent &&
-				item->object_number != SLOT_GUIDE &&
-				item->object_number != SLOT_VON_CROY) {
-				slotCheck = true;
-			}
-		}
-		else
-		{
-			while (*slotIter >= 0)
+			if (slotList[j] == item->object_number)
 			{
-				if (*(slotIter++) == item->object_number)
-				{
-					slotCheck = true;
-					break;
-				}
+				slotCheck = true;
+				break;
 			}
 		}
 
-
-		if (slotCheck && item->active)
+		if (slotCheck)
 		{
 			if (objects[item->object_number].intelligent && item->hit_points <= 0)
 				continue;
 
 			Vector3f target(item->pos.xPos, item->pos.yPos, item->pos.zPos);
 
-			int dist = Round(SimpleDist(posTest, target));
-			if (dist < radius && dist < nearest)
+			if (CheckDistFast(posTest, target, radius) < 0)
 			{
-				nearest = dist;
-				radius = dist;
+				radius = RealDist(posTest, target);
 				itemIndex = i;
 			}
 		}

@@ -22,7 +22,7 @@ ColorRGB HSVtoRGB(float hue, float sat, float val);
 
 long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask);
 
-int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList); // TODO: add lua function after implementing tables
+int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count);
 
 Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff);
 

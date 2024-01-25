@@ -2687,7 +2687,7 @@ int FindNearestTargetFunction::Call()
 	std::vector<short> slotList(GetTable(3));
 	for (int i = 0; i < slotList.size(); i++)
 		slotList[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
-	Script::PushInteger(FindNearestTarget(*vec, radius, slotList.data()));
+	Script::PushInteger(FindNearestTarget(*vec, radius, slotList.data(), slotList.size()));
 	return 1;
 }
 
