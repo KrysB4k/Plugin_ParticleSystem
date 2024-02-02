@@ -200,7 +200,10 @@ namespace
 	{
 		if (!Script::IsTable(argument))
 			Script::ThrowError("table expected");
-		return Script::ExplodeTable(argument);
+		int length = Script::ExplodeTable(argument);
+		if (!length)
+			Script::ThrowError("table is empty");
+		return length;
 	}
 
 	Vector3f GetItemPos(int argument)
