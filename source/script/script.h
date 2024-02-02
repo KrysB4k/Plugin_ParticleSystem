@@ -35,6 +35,9 @@ namespace Script
 	bool ExecuteFunction(int reference, void* value);
 	bool IsFunction(int argument);
 	void DeleteFunction(int* reference);
+	void PushTable(int argument, int length);
+	int ExplodeTable(int argument);
+	bool IsTable(int argument);
 	void Print();
 	void LoadFunctions(const char* filename);
 	[[noreturn]] void ThrowError(const char* msg);
@@ -43,4 +46,5 @@ namespace Script
 	int GarbageCount();
 	void PreFunctionLoop();
 	void PostFunctionLoop();
+	void* CreateManagedData(unsigned int size);
 }

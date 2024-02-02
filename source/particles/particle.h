@@ -76,9 +76,29 @@ enum TetherType
 enum DrawMode
 {
 	DRAW_SPRITE,
+	DRAW_SQUARE,
 	DRAW_LINE,
 	DRAW_ARROW,
 	DRAW_NONE
+};
+
+
+enum BlendMode
+{
+	BLEND_TEXTURE,
+	BLEND_DECAL,
+	BLEND_COLORADD,
+	BLEND_SEMITRANS,
+	BLEND_NOZBUFFER,
+	BLEND_COLORSUB,
+	BLEND_LINE,
+	BLEND_SEMITRANS_ZBUFFER,
+	BLEND_DESTINATION_INV,
+	BLEND_SCREEN_DARKEN,
+	BLEND_SCREEN_CLEAR,
+	BLEND_CUSTOM_11,
+	BLEND_CUSTOM_12,
+	BLEND_CUSTOM_13
 };
 
 
@@ -150,12 +170,10 @@ struct BaseParticle : public LuaObjectClass
 	bool		CollideFloors(float rebound, float minBounce, int collMargin, bool accurate);
 	bool		CollidedWithItem(Tr4ItemInfo* item, int radius);
 	bool		TargetHoming(Tr4ItemInfo* item, int targetNode, float homingFactor, float homingAccel, bool predict);
-	Vector3f	FollowTarget(const Vector3f& v, float maxSpeed, float distFactor, float distCutOff);
+	Vector3f	FollowTarget(const Vector3f& v, float maxSpeed, float distInner, float distOuter);
 	Vector3f	WindVelocities(float factor);
-	Vector3f	SplinePos(const Vector3f v[], int arrSize, float t);
-	Vector3f	SplineVel(const Vector3f v[], int arrSize, float t);
+	Vector3f	AttractToItem(Tr4ItemInfo* item, float radius, float factor);
 	Vector3f	AvoidRoomGeometry(int wallMargin, int floorMargin, float factor);
-	Vector3f	AvoidItem(Tr4ItemInfo* item, float radius, float factor);
 
 	virtual void Animate(int start, int end, int frameRate) = 0;
 
@@ -258,8 +276,6 @@ enum FunctionType
 namespace ParticleFactory
 {
 	extern ulong gameTick;
-
-	extern Noise noise;
 
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];

@@ -2,55 +2,37 @@
 
 typedef unsigned char uchar;
 
-class Noise
+class Noise : public LuaObjectClass
 {
 public:
-	Noise()
-	{
-		ReferencePermut();
-	}
 
-	// reset to reference permutation table
-	void ReferencePermut();
-
-	// generate a new, seed-based permutation table
-	void SeedPermut(int seed);
+	static const char* Name();
 
 	// get single (scalar) noise value for n-dimensional input
-
-	float PerlinNoise1D(float x) const;
-	float PerlinNoise2D(float x, float y) const;
-	float PerlinNoise3D(float x, float y, float z) const;
-	float PerlinNoise4D(float x, float y, float z, float w) const;
-
-	float SimplexNoise1D(float x) const;
-	float SimplexNoise2D(float x, float y) const;
-	float SimplexNoise3D(float x, float y, float z) const;
-	float SimplexNoise4D(float x, float y, float z, float w) const;
+	virtual float Noise1D(float x) const = 0;
+	virtual float Noise2D(float x, float y) const = 0;
+	virtual float Noise3D(float x, float y, float z) const = 0;
+	virtual float Noise4D(float x, float y, float z, float w) const = 0;
 
 	// get curl noise vector (2D or 3D)
+	virtual Vector3f Curl2D(float x, float y) const = 0;
+	virtual Vector3f Curl2DTime(float time, float x, float y) const = 0; // evolve noise with time
+	virtual Vector3f Curl3D(float x, float y, float z) const = 0;
+	virtual Vector3f Curl3DTime(float time, float x, float y, float z) const = 0; // evolve noise with time
 
-	Vector3f PerlinCurl2D(float x, float y) const;
-	Vector3f PerlinCurl2DTime(float time, float x, float y) const; // evolve noise with time
-	Vector3f PerlinCurl3D(float x, float y, float z) const;
-	Vector3f PerlinCurl3DTime(float time, float x, float y, float z) const; // evolve noise with time
-	
-	Vector3f SimplexCurl2D(float x, float y) const;
-	Vector3f SimplexCurl2DTime(float time, float x, float y) const; // evolve noise with time
-	Vector3f SimplexCurl3D(float x, float y, float z) const;
-	Vector3f SimplexCurl3DTime(float time, float x, float y, float z) const; // evolve noise with time
+protected:
 
-private:
+	Noise()
+	{
+		ReferencePermutation();
+	}
 
-	uchar permut[512]; // permutation table
+	Noise(int seed)
+	{
+		SeedPermutation(seed);
+	}
 
-	Vector3f PerlinGradient2D(float x, float y) const;
-	Vector3f PerlinGradient3D(float x, float y, float z) const;
-	Vector3f PerlinGradient4D(float x, float y, float z, float w) const;
-
-	Vector3f SimplexGradient2D(float x, float y) const;
-	Vector3f SimplexGradient3D(float x, float y, float z) const;
-	Vector3f SimplexGradient4D(float x, float y, float z, float w) const;
+	inline int permut(int index) const { return permtable[index]; }
 
 	static inline int fastfloor(float x) { int xi = static_cast<int>(x); return (x < xi ? xi - 1 : xi); }
 
@@ -59,8 +41,43 @@ private:
 		return Vector3f(gradZ.y - gradY.z, gradX.z - gradZ.x, gradY.x - gradX.y);
 	}
 
+private:
 
-	/******** Perlin implementation stuff ********/
+	uchar permtable[512]; // permutation table
+
+	// reset to reference permutation table
+	void ReferencePermutation();
+
+	// generate a new, seed-based permutation table
+	void SeedPermutation(int seed);
+};
+
+class PerlinNoise final : public Noise
+{
+public:
+
+	PerlinNoise() : Noise() {}
+	PerlinNoise(int seed) : Noise(seed) {}
+
+	static const char* Name();
+
+	virtual float Noise1D(float x) const override;
+	virtual float Noise2D(float x, float y) const override;
+	virtual float Noise3D(float x, float y, float z) const override;
+	virtual float Noise4D(float x, float y, float z, float w) const override;
+
+	// get curl noise vector (2D or 3D)
+
+	virtual Vector3f Curl2D(float x, float y) const override;
+	virtual Vector3f Curl2DTime(float time, float x, float y) const override; // evolve noise with time
+	virtual Vector3f Curl3D(float x, float y, float z) const override;
+	virtual Vector3f Curl3DTime(float time, float x, float y, float z) const override; // evolve noise with time
+
+private:
+
+	Vector3f Gradient2D(float x, float y) const;
+	Vector3f Gradient3D(float x, float y, float z) const;
+	Vector3f Gradient4D(float x, float y, float z, float w) const;
 
 	static inline float fade(float t) { return (t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f)); }
 
@@ -245,9 +262,34 @@ private:
 
 		return Vector4f(0, 0, 0, 0);
 	}
+};
 
+class SimplexNoise final : public Noise
+{
+public:
 
-	/******** Simplex implementation stuff ********/
+	SimplexNoise() : Noise() {}
+	SimplexNoise(int seed) : Noise(seed) {}
+
+	static const char* Name();
+
+	virtual float Noise1D(float x) const override;
+	virtual float Noise2D(float x, float y) const override;
+	virtual float Noise3D(float x, float y, float z) const override;
+	virtual float Noise4D(float x, float y, float z, float w) const override;
+
+	// get curl noise vector (2D or 3D)
+
+	virtual Vector3f Curl2D(float x, float y) const override;
+	virtual Vector3f Curl2DTime(float time, float x, float y) const override; // evolve noise with time
+	virtual Vector3f Curl3D(float x, float y, float z) const override;
+	virtual Vector3f Curl3DTime(float time, float x, float y, float z) const override; // evolve noise with time
+
+private:
+
+	Vector3f Gradient2D(float x, float y) const;
+	Vector3f Gradient3D(float x, float y, float z) const;
+	Vector3f Gradient4D(float x, float y, float z, float w) const;
 
 	static const float grad2lut[8][2]; // 2D gradient lookup table
 	static const float grad3lut[16][3]; // 3D gradient lookup table

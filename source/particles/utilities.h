@@ -18,11 +18,11 @@ float RealDist(const Vector3f& v1, const Vector3f& v2);
 
 ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t);
 
-ColorRGB HSLtoRGB(float hue, float sat, float light);
+ColorRGB HSVtoRGB(float hue, float sat, float val);
 
-long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask);
+long TestCollisionSpheres(Tr4ItemInfo* item, const Vector3f& posTest, float radius);
 
-int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList);
+int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count);
 
 Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff);
 
@@ -30,23 +30,17 @@ Vector3f RotatePoint3D(const Vector3f& point, short xrot, short yrot, short zrot
 
 Vector3f SphericalToCartesian(float r, float theta, float phi);
 
-// should not be available in Lua
 int TestForWall(int x, int y, int z, short* room);
 
-// should not be available in Lua
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z);
 
-Vector3f Spline(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t);
+Vector3f SplinePosItems(float t, Vector3f v[], int arrSize);
 
-Vector3f SplineStart(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
+Vector3f SplinePosVectors(float t, Vector3f* v[], int arrSize);
 
-Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
+Vector3f SplineVelItems(float t, float duration, Vector3f v[], int arrSize);
 
-Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t);
-
-Vector3f SplineStartDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
-
-Vector3f SplineEndDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t);
+Vector3f SplineVelVectors(float t, float duration, Vector3f* v[], int arrSize);
 
 int Clamp(int x, int min, int max);
 

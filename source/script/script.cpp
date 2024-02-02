@@ -5,6 +5,7 @@
 namespace
 {
 	lua_State* lua;
+	int metatable;
 
 	void BuildErrorMessage(const char* msg)
 	{
@@ -111,6 +112,13 @@ namespace
 		luaL_traceback(lua, lua, StringRepresentation(1), 1);
 		return 1;
 	}
+
+	int ArgumentToStack(int argument)
+	{
+		if (argument > 0)
+			return argument + 1;
+		return argument;
+	}
 }
 
 void Script::NewState()
@@ -129,12 +137,15 @@ void Script::NewState()
 	lua_pushliteral(lua, "__call");
 	lua_pushcfunction(lua, MetaCall);
 	lua_rawset(lua, -3);
+	lua_pushvalue(lua, -1);
+	metatable = luaL_ref(lua, LUA_REGISTRYINDEX);
 	lua_setmetatable(lua, -2);
 	lua_pop(lua, 1);
 }
 
 void Script::Close()
 {
+	luaL_unref(lua, LUA_REGISTRYINDEX, metatable);
 	Logger::Close();
 	lua_close(lua);
 }
@@ -161,30 +172,22 @@ void Script::PushData(LuaObject* value)
 
 int Script::ToInteger(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return (int)roundf(lua_tonumber(lua, argument));
+	return (int)roundf(lua_tonumber(lua, ArgumentToStack(argument)));
 }
 
 bool Script::ToBoolean(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_toboolean(lua, argument);
+	return lua_toboolean(lua, ArgumentToStack(argument));
 }
 
 float Script::ToNumber(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_tonumber(lua, argument);
+	return lua_tonumber(lua, ArgumentToStack(argument));
 }
 
 LuaObject* Script::ToData(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return (LuaObject*)lua_touserdata(lua, argument);
+	return (LuaObject*)lua_touserdata(lua, ArgumentToStack(argument));
 }
 
 int Script::ArgCount()
@@ -194,39 +197,32 @@ int Script::ArgCount()
 
 bool Script::IsInteger(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isnumber(lua, argument);
+	return lua_isnumber(lua, ArgumentToStack(argument));
 }
 
 bool Script::IsBoolean(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isboolean(lua, argument);
+	return lua_isboolean(lua, ArgumentToStack(argument));
 }
 
 bool Script::IsNumber(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isnumber(lua, argument);
+	return lua_isnumber(lua, ArgumentToStack(argument));
 }
 
 bool Script::IsData(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isuserdata(lua, argument);
+	return lua_isuserdata(lua, ArgumentToStack(argument));
 }
 
 int Script::StoreFunction(int argument)
 {
-	if (argument > 0)
-		argument++;
-	if (lua_isnil(lua, argument))
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	if (lua_isnil(lua, stack))
 		return LUA_REFNIL;
-	lua_pushvalue(lua, argument);
+	lua_pushvalue(lua, stack);
 	return luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
@@ -258,15 +254,45 @@ bool Script::ExecuteFunction(int reference, void* value)
 
 bool Script::IsFunction(int argument)
 {
-	if (argument > 0)
-		argument++;
-	return lua_isnil(lua, argument) || lua_isfunction(lua, argument);
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	return lua_isnil(lua, stack) || lua_isfunction(lua, stack);
 }
 
 void Script::DeleteFunction(int* reference)
 {
 	luaL_unref(lua, LUA_REGISTRYINDEX, *reference);
 	*reference = LUA_REFNIL;
+}
+
+void Script::PushTable(int argument, int length)
+{
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	lua_createtable(lua, length, 0);
+	for (int i = 0; i < length; i++)
+	{
+		lua_pushvalue(lua, stack + i);
+		lua_rawseti(lua, -2, i + 1);
+	}
+}
+
+int Script::ExplodeTable(int argument)
+{
+	int length, stack;
+
+	stack = ArgumentToStack(argument);
+	length = lua_rawlen(lua, stack);
+	for (int i = 0; i < length; i++)
+		lua_rawgeti(lua, stack, i + 1);
+	return length;
+}
+
+bool Script::IsTable(int argument)
+{
+	return lua_istable(lua, ArgumentToStack(argument));
 }
 
 void Script::Print()
@@ -339,4 +365,14 @@ void Script::PostFunctionLoop()
 {
 	lua_pop(lua, 1);
 	lua_gc(lua, LUA_GCCOLLECT);
+}
+
+void* Script::CreateManagedData(unsigned int size)
+{
+	void* object;
+
+	object = lua_newuserdatauv(lua, size, 0);
+	lua_rawgeti(lua, LUA_REGISTRYINDEX, metatable);
+	lua_setmetatable(lua, -2);
+	return object;
 }

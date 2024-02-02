@@ -5,9 +5,11 @@ namespace
 	template<class T>
 	T* GetData(int argument)
 	{
+		T* object;
+
 		if (!Script::IsData(argument))
 			Script::ThrowError(FormatString("%s expected", T::Name()));
-		T* object = dynamic_cast<T*>(Script::ToData(argument));
+		object = dynamic_cast<T*>(Script::ToData(argument));
 		if (!object)
 			Script::ThrowError(FormatString("%s expected", T::Name()));
 		return object;
@@ -53,15 +55,13 @@ namespace
 		return count;
 	}
 
-	Tr4ItemInfo* GetItem(int argument)
+	int GetItemIndex(int argument)
 	{
 		int index;
-
 		index = GetInteger(argument);
-		if (index >= 0 && index < level_items)
-			return &items[index];
-		Script::EmitWarning(FormatString("%d does not correspond to a valid Tomb index", index));
-		return nullptr;
+		if (index < 0 || index >= level_items)
+			Script::ThrowError(FormatString("%d does not correspond to a valid Tomb index", index));
+		return index;
 	}
 
 	int GetTombIndexByNGLEIndex(int argument)
@@ -102,37 +102,46 @@ namespace
 		return result;
 	}
 
-	int GetClampedInteger(int argument, int min, int max)
+	int GetClampedInteger(int argument, int min, int max, bool throwBoundsError)
 	{
 		int x;
 
 		x = GetInteger(argument);
 		if (x < min)
 		{
-			Script::EmitWarning(FormatString("%d is less than the minimum of %d", x, min));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%d is less than the minimum of %d, aborting", x, min));
+			Script::EmitWarning(FormatString("%d is less than the minimum of %d, clamping to minimum", x, min));
 			return min;
 		}
 		if (x > max)
 		{
-			Script::EmitWarning(FormatString("%d is greater than the maximum of %d", x, max));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%d is greater than the maximum of %d, aborting", x, max));
+			Script::EmitWarning(FormatString("%d is greater than the maximum of %d, clamping to maximum", x, max));
 			return max;
 		}
 		return x;
 	}
 
-	float GetClampedNumber(int argument, float min, float max)
+	float GetClampedNumber(int argument, float min, float max, bool throwBoundsError)
 	{
 		float x;
 
 		x = GetNumber(argument);
 		if (x < min)
 		{
-			Script::EmitWarning(FormatString("%f is less than the minimum of %f", x, min));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%f is less than the minimum of %f, aborting", x, min));
+			Script::EmitWarning(FormatString("%f is less than the minimum of %f, clamping to minimum", x, min));
 			return min;
 		}
 		if (x > max)
 		{
-			Script::EmitWarning(FormatString("%f is greater than the maximum of %f", x, max));
+			if (throwBoundsError)
+				Script::ThrowError(FormatString("%f is greater than the maximum of %f, aborting", x, max));
+			Script::EmitWarning(FormatString("%f is greater than the maximum of %f, clamping to maximum", x, max));
+
 			return max;
 		}
 		return x;
@@ -175,42 +184,103 @@ namespace
 		if (!(ParticleFactory::caller & callers))
 			Script::ThrowError(FormatString("assignment to field \"%s\" is forbidden in this phase", field));
 	}
+
+	template<class T, class... Args>
+	std::enable_if_t<std::is_trivially_destructible_v<T>, T>* ConstructManagedData(Args&&... args)
+	{
+		return new(Script::CreateManagedData(sizeof(T))) T(std::forward<Args>(args)...);
+	}
+
+	void ReadOnlyFieldError(const char* field)
+	{
+		Script::ThrowError(FormatString("field \"%s\" is read-only and cannot be assigned to", field));
+	}
+
+	int GetTable(int argument)
+	{
+		if (!Script::IsTable(argument))
+			Script::ThrowError("table expected");
+		int length = Script::ExplodeTable(argument);
+		if (!length)
+			Script::ThrowError("table is empty");
+		return length;
+	}
+
+	Vector3f GetItemPos(int argument)
+	{
+		auto item = &items[GetItemIndex(argument)];
+		return Vector3f(item->pos.xPos, item->pos.yPos, item->pos.zPos);
+	}
 }
 
 namespace LuaGlobals
 {
-	AbsFunction Abs;
-	AcosFunction Acos;
-	AsinFunction Asin;
-	AtanFunction Atan;
-	Atan2Function Atan2;
-	BoidAlignmentFunction BoidAlignment;
-	BoidCohesionFunction BoidCohesion;
-	BoidSeparationFunction BoidSeparation;
-	CbrtFunction Cbrt;
-	CosFunction Cos;
-	CreateGroupFunction CreateGroup;
-	CreateMeshPartFunction CreateMeshPart;
-	CreateSpritePartFunction CreateSpritePart;
-	GetTombIndexFunction GetTombIndex;
-	GetLaraIndexFunction GetLaraIndex;
-	GetItemRoomFunction GetItemRoom;
-	MeshAlignVelocityFunction MeshAlignVelocity;
-	MeshShatterFunction MeshShatter;
-	NoisePerlinFunction NoisePerlin;
-	NoiseSimplexFunction NoiseSimplex;
-	ParticleAnimateFunction ParticleAnimate;
-	ParticleCollidedItemFunction ParticleCollidedItem;
-	ParticleCollideFloorsFunction ParticleCollideFloors;
-	ParticleCollideWallsFunction ParticleCollideWalls;
-	ParticleHomingFunction ParticleHoming;
-	ParticleLimitSpeedFunction ParticleLimitSpeed;
-	PrintFunction Print;
-	RandfloatFunction Randfloat;
-	RandintFunction Randint;
-	SeedNoiseFunction SeedNoise;
-	SinFunction Sin;
-	SqrtFunction Sqrt;
+	AbsFunction AbsFunc;
+	AcosFunction AcosFunc;
+	AsinFunction AsinFunc;
+	AtanFunction AtanFunc;
+	Atan2Function Atan2Func;
+	BoidAlignmentFunction BoidAlignmentFunc;
+	BoidCohesionFunction BoidCohesionFunc;
+	BoidSeparationFunction BoidSeparationFunc;
+	CbrtFunction CbrtFunc;
+	CheckDistFastFunction CheckDistFastFunc;
+	ClampFloatFunction ClampFloatFunc;
+	ClampIntFunction ClampIntFunc;
+	CosFunction CosFunc;
+	CreateColorFunction CreateColorFunc;
+	CreateGroupFunction CreateGroupFunc;
+	CreateMeshPartFunction CreateMeshPartFunc;
+	CreatePerlinNoiseFunction CreatePerlinNoiseFunc;
+	CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
+	CreateSpritePartFunction CreateSpritePartFunc;
+	CreateVectorFunction CreateVectorFunc;
+	FindNearestTargetFunction FindNearestTargetFunc;
+	GetColorFromHSVFunction GetColorFromHSVFunc;
+	GetDistanceFunction GetDistanceFunc;
+	GetGameTickFunction GetGameTickFunc;
+	GetItemJointPosFunction GetItemJointPosFunc;
+	GetItemRoomFunction GetItemRoomFunc;
+	GetLaraIndexFunction GetLaraIndexFunc;
+	GetTombIndexFunction GetTombIndexFunc;
+	LerpFunction LerpFunc;
+	LerpInverseFunction LerpInverseFunc;
+	MeshAlignVelocityFunction MeshAlignVelocityFunc;
+	MeshLookAtTargetFunction MeshLookAtTargetFunc;
+	MeshShatterFunction MeshShatterFunc;
+	NoiseFunction NoiseFunc;
+	NoiseCurlFunction NoiseCurlFunc;
+	NoiseCurlTimeFunction NoiseCurlTimeFunc;
+	ParticleAbsPosFunction ParticleAbsPosFunc;
+	ParticleAnimateFunction ParticleAnimateFunc;
+	ParticleAttachFunction ParticleAttachFunc;
+	ParticleAttractToItemFunction ParticleAttractToItemFunc;
+	ParticleAvoidRoomGeometryFunction ParticleAvoidRoomGeometryFunc;
+	ParticleCollidedItemFunction ParticleCollidedItemFunc;
+	ParticleCollideFloorsFunction ParticleCollideFloorsFunc;
+	ParticleCollideWallsFunction ParticleCollideWallsFunc;
+	ParticleDetachFunction ParticleDetachFunc;
+	ParticleFollowTargetFunction ParticleFollowTargetFunc;
+	ParticleHomingFunction ParticleHomingFunc;
+	ParticleLimitSpeedFunction ParticleLimitSpeedFunc;
+	ParticleWindVelocityFunction ParticleWindVelocityFunc;
+	PerformTriggerGroupFunction PerformTriggerGroupFunc;
+	PrintFunction PrintFunc;
+	RandfloatFunction RandfloatFunc;
+	RandintFunction RandintFunc;
+	RoundFunction RoundFunc;
+	SelectItemFunction SelectItemFunc;
+	SinFunction SinFunc;
+	SphericalToCartesianFunction SphericalToCartesianFunc;
+	SplinePosItemsFunction SplinePosItemsFunc;
+	SplinePosVectorsFunction SplinePosVectorsFunc;
+	SplineVelItemsFunction SplineVelItemsFunc;
+	SplineVelVectorsFunction SplineVelVectorsFunc;
+	SoundEffectFunction SoundEffectFunc;
+	SqrtFunction SqrtFunc;
+	TestCollisionSpheresFunction TestCollisionSpheresFunc;
+	TriggerDynamicFunction TriggerDynamicFunc;
+	TriggerShockwaveFunction TriggerShockwaveFunc;
 }
 
 LuaObject* LuaGlobals::RetrieveFunction(const char* field)
@@ -219,85 +289,159 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 	{
 	case 'a':
 		if (!strcmp(field, "abs"))
-			return &Abs;
+			return &AbsFunc;
 		if (!strcmp(field, "acos"))
-			return &Acos;
+			return &AcosFunc;
 		if (!strcmp(field, "asin"))
-			return &Asin;
+			return &AsinFunc;
 		if (!strcmp(field, "atan"))
-			return &Atan;
+			return &AtanFunc;
 		if (!strcmp(field, "atan2"))
-			return &Atan2;
+			return &Atan2Func;
 		break;
 	case 'b':
 		if (!strcmp(field, "boidAlignment"))
-			return &BoidAlignment;
+			return &BoidAlignmentFunc;
 		if (!strcmp(field, "boidCohesion"))
-			return &BoidCohesion;
+			return &BoidCohesionFunc;
 		if (!strcmp(field, "boidSeparation"))
-			return &BoidSeparation;
+			return &BoidSeparationFunc;
 		break;
 	case 'c':
 		if (!strcmp(field, "cbrt"))
-			return &Cbrt;
+			return &CbrtFunc;
+		if (!strcmp(field, "checkDistFast"))
+			return &CheckDistFastFunc;
+		if (!strcmp(field, "clampfloat"))
+			return &ClampFloatFunc;
+		if (!strcmp(field, "clampint"))
+			return &ClampIntFunc;
 		if (!strcmp(field, "cos"))
-			return &Cos;
+			return &CosFunc;
+		if (!strcmp(field, "createColor"))
+			return &CreateColorFunc;
 		if (!strcmp(field, "createGroup"))
-			return &CreateGroup;
+			return &CreateGroupFunc;
 		if (!strcmp(field, "createMeshPart"))
-			return &CreateMeshPart;
+			return &CreateMeshPartFunc;
+		if (!strcmp(field, "createPerlinNoise"))
+			return &CreatePerlinNoiseFunc;
+		if (!strcmp(field, "createSimplexNoise"))
+			return &CreateSimplexNoiseFunc;
 		if (!strcmp(field, "createSpritePart"))
-			return &CreateSpritePart;
+			return &CreateSpritePartFunc;
+		if (!strcmp(field, "createVector"))
+			return &CreateVectorFunc;
+		break;
+	case 'f':
+		if (!strcmp(field, "findNearestTarget"))
+			return &FindNearestTargetFunc;
 		break;
 	case 'g':
-		if (!strcmp(field, "getTombIndex"))
-			return &GetTombIndex;
-		if (!strcmp(field, "getLaraIndex"))
-			return &GetLaraIndex;
+		if (!strcmp(field, "getColorFromHSV"))
+			return &GetColorFromHSVFunc;
+		if (!strcmp(field, "getDistance"))
+			return &GetDistanceFunc;
+		if (!strcmp(field, "getGameTick"))
+			return &GetGameTickFunc;
+		if (!strcmp(field, "getItemJointPosition"))
+			return &GetItemJointPosFunc;
 		if (!strcmp(field, "getItemRoom"))
-			return &GetItemRoom;
+			return &GetItemRoomFunc;
+		if (!strcmp(field, "getLaraIndex"))
+			return &GetLaraIndexFunc;
+		if (!strcmp(field, "getTombIndex"))
+			return &GetTombIndexFunc;
+		break;
+	case 'l':
+		if (!strcmp(field, "lerp"))
+			return &LerpFunc;
+		if (!strcmp(field, "lerpInverse"))
+			return &LerpInverseFunc;
 		break;
 	case 'm':
 		if (!strcmp(field, "meshAlignVelocity"))
-			return &MeshAlignVelocity;
+			return &MeshAlignVelocityFunc;
+		if (!strcmp(field, "meshLookAtTarget"))
+			return &MeshLookAtTargetFunc;
 		if (!strcmp(field, "meshShatter"))
-			return &MeshShatter;
+			return &MeshShatterFunc;
 		break;
 	case 'n':
-		if (!strcmp(field, "noisePerlin"))
-			return &NoisePerlin;
-		if (!strcmp(field, "noiseSimplex"))
-			return &NoiseSimplex;
+		if (!strcmp(field, "noise"))
+			return &NoiseFunc;
+		if (!strcmp(field, "noiseCurl"))
+			return &NoiseCurlFunc;
+		if (!strcmp(field, "noiseCurlTime"))
+			return &NoiseCurlTimeFunc;
 		break;
 	case 'p':
+		if (!strcmp(field, "particleAbsPosition"))
+			return &ParticleAbsPosFunc;
 		if (!strcmp(field, "particleAnimate"))
-			return &ParticleAnimate;
+			return &ParticleAnimateFunc;
+		if (!strcmp(field, "particleAttach"))
+			return &ParticleAttachFunc;
+		if (!strcmp(field, "particleAttractToItem"))
+			return &ParticleAttractToItemFunc;
+		if (!strcmp(field, "particleAvoidRoomGeometry"))
+			return &ParticleAvoidRoomGeometryFunc;
 		if (!strcmp(field, "particleCollidedItem"))
-			return &ParticleCollidedItem;
+			return &ParticleCollidedItemFunc;
 		if (!strcmp(field, "particleCollideFloors"))
-			return &ParticleCollideFloors;
+			return &ParticleCollideFloorsFunc;
 		if (!strcmp(field, "particleCollideWalls"))
-			return &ParticleCollideWalls;
+			return &ParticleCollideWallsFunc;
+		if (!strcmp(field, "particleDetach"))
+			return &ParticleDetachFunc;
+		if (!strcmp(field, "particleFollow"))
+			return &ParticleFollowTargetFunc;
 		if (!strcmp(field, "particleHoming"))
-			return &ParticleHoming;
+			return &ParticleHomingFunc;
 		if (!strcmp(field, "particleLimitSpeed"))
-			return &ParticleLimitSpeed;
+			return &ParticleLimitSpeedFunc;
+		if (!strcmp(field, "particleWind"))
+			return &ParticleWindVelocityFunc;
+		if (!strcmp(field, "performTriggerGroup"))
+			return &PerformTriggerGroupFunc;
 		if (!strcmp(field, "print"))
-			return &Print;
+			return &PrintFunc;
 		break;
 	case 'r':
 		if (!strcmp(field, "randfloat"))
-			return &Randfloat;
+			return &RandfloatFunc;
 		if (!strcmp(field, "randint"))
-			return &Randint;
+			return &RandintFunc;
+		if (!strcmp(field, "round"))
+			return &RoundFunc;
 		break;
 	case 's':
-		if (!strcmp(field, "seedNoise"))
-			return &SeedNoise;
+		if (!strcmp(field, "setActiveItem"))
+			return &SelectItemFunc;
 		if (!strcmp(field, "sin"))
-			return &Sin;
+			return &SinFunc;
+		if (!strcmp(field, "soundEffect"))
+			return &SoundEffectFunc;
+		if (!strcmp(field, "sphericalToCartesian"))
+			return &SphericalToCartesianFunc;
+		if (!strcmp(field, "splinePosItems"))
+			return &SplinePosItemsFunc;
+		if (!strcmp(field, "splinePosVectors"))
+			return &SplinePosVectorsFunc;
+		if (!strcmp(field, "splineVelItems"))
+			return &SplineVelItemsFunc;
+		if (!strcmp(field, "splineVelVectors"))
+			return &SplineVelVectorsFunc;
 		if (!strcmp(field, "sqrt"))
-			return &Sqrt;
+			return &SqrtFunc;
+		break;
+	case 't':
+		if (!strcmp(field, "testCollisionSpheres"))
+			return &TestCollisionSpheresFunc;
+		if (!strcmp(field, "triggerDynamicLight"))
+			return &TriggerDynamicFunc;
+		if (!strcmp(field, "triggerShockwave"))
+			return &TriggerShockwaveFunc;
 		break;
 	}
 	return nullptr;
@@ -307,6 +451,48 @@ std::optional<int> LuaGlobals::RetrieveIntegerConstant(const char* field)
 {
 	switch (field[0])
 	{
+	case 'B':
+		if (!strcmp(field, "BLEND_TEXTURE"))
+			return std::optional(BlendMode::BLEND_TEXTURE);
+		if (!strcmp(field, "BLEND_DECAL"))
+			return std::optional(BlendMode::BLEND_DECAL);
+		if (!strcmp(field, "BLEND_COLORADD"))
+			return std::optional(BlendMode::BLEND_COLORADD);
+		if (!strcmp(field, "BLEND_SEMITRANS"))
+			return std::optional(BlendMode::BLEND_SEMITRANS);
+		if (!strcmp(field, "BLEND_NOZBUFFER"))
+			return std::optional(BlendMode::BLEND_NOZBUFFER);
+		if (!strcmp(field, "BLEND_COLORSUB"))
+			return std::optional(BlendMode::BLEND_COLORSUB);
+		if (!strcmp(field, "BLEND_SEMITRANS_ZBUFFER"))
+			return std::optional(BlendMode::BLEND_SEMITRANS_ZBUFFER);
+		if (!strcmp(field, "BLEND_DESTINATION_INV"))
+			return std::optional(BlendMode::BLEND_DESTINATION_INV);
+		if (!strcmp(field, "BLEND_SCREEN_DARKEN"))
+			return std::optional(BlendMode::BLEND_SCREEN_DARKEN);
+		if (!strcmp(field, "BLEND_SCREEN_CLEAR"))
+			return std::optional(BlendMode::BLEND_SCREEN_CLEAR);
+		if (!strcmp(field, "BLEND_CUSTOM_11"))
+			return std::optional(BlendMode::BLEND_CUSTOM_11);
+		if (!strcmp(field, "BLEND_CUSTOM_12"))
+			return std::optional(BlendMode::BLEND_CUSTOM_12);
+		if (!strcmp(field, "BLEND_CUSTOM_13"))
+			return std::optional(BlendMode::BLEND_CUSTOM_13);
+		break;
+
+	case 'D':
+		if (!strcmp(field, "DRAW_SPRITE"))
+			return std::optional(DrawMode::DRAW_SPRITE);
+		if (!strcmp(field, "DRAW_SQUARE"))
+			return std::optional(DrawMode::DRAW_SQUARE);
+		if (!strcmp(field, "DRAW_LINE"))
+			return std::optional(DrawMode::DRAW_LINE);
+		if (!strcmp(field, "DRAW_ARROW"))
+			return std::optional(DrawMode::DRAW_ARROW);
+		if (!strcmp(field, "DRAW_NONE"))
+			return std::optional(DrawMode::DRAW_NONE);
+		break;
+
 	case 'S':
 		if (!strcmp(field, "SLOT_LARA"))
 			return std::optional(SLOT_LARA);
@@ -1349,7 +1535,35 @@ std::optional<int> LuaGlobals::RetrieveIntegerConstant(const char* field)
 		if (!strcmp(field, "SLOT_NEW_SLOT18"))
 			return std::optional(SLOT_NEW_SLOT18);
 		break;
+
+	case 'T':
+		if (!strcmp(field, "TETHER_ROTATING"))
+			return std::optional(TetherType::TETHER_ROTATING);
+		if (!strcmp(field, "TETHER_STATIC"))
+			return std::optional(TetherType::TETHER_STATIC);
+		if (!strcmp(field, "TETHER_NONE"))
+			return std::optional(TetherType::TETHER_NONE);
+		break;
 	}
+	return std::nullopt;
+}
+
+std::optional<float> LuaGlobals::RetrieveFloatConstant(const char* field)
+{
+	switch (field[0])
+	{
+	case 'P':
+		if (!strcmp(field, "PI"))
+			return std::optional(M_PI);
+		if (!strcmp(field, "PI_HALF"))
+			return std::optional(M_PI_2);
+		if (!strcmp(field, "PI_QUART"))
+			return std::optional(M_PI_4);
+		if (!strcmp(field, "PI_TWO"))
+			return std::optional(M_PI * 2);
+		break;
+	}
+
 	return std::nullopt;
 }
 
@@ -1432,21 +1646,21 @@ void ColorRGB::NewIndex(const char* field)
 		case 'b':
 			if (!strcmp(field, "b"))
 			{
-				B = 255 * GetClampedNumber(-1, 0.0f, 1.0f);
+				B = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
 				return;
 			}
 			break;
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
-				G = 255 * GetClampedNumber(-1, 0.0f, 1.0f);
+				G = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
-				R = 255 * GetClampedNumber(-1, 0.0f, 1.0f);
+				R = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
 				return;
 			}
 			break;
@@ -1639,21 +1853,21 @@ void Vector3i::NewIndex(const char* field)
 		case 'x':
 			if (!strcmp(field, "x"))
 			{
-				x = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f);
+				x = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
 				return;
 			}
 			break;
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
-				y = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f);
+				y = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
 				return;
 			}
 			break;
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
-				z = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f);
+				z = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
 				return;
 			}
 			break;
@@ -1708,21 +1922,21 @@ void NodeAttachment::NewIndex(const char* field)
 		case 'c':
 			if (!strcmp(field, "cutoff"))
 			{
-				cutoff = GetClampedInteger(-1, 0, 32767);
+				cutoff = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "random"))
 			{
-				random = GetClampedInteger(-1, 0, 32767);
+				random = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			break;
 		case 't':
 			if (!strcmp(field, "tether"))
 			{
-				tether = static_cast<TetherType>(GetClampedInteger(-1, 0, 2));
+				tether = static_cast<TetherType>(GetClampedInteger(-1, TetherType::TETHER_ROTATING, TetherType::TETHER_NONE, false));
 				return;
 			}
 			break;
@@ -1799,17 +2013,24 @@ void ParticleGroup::NewIndex(const char* field)
 	{
 		switch (field[0])
 		{
+		case 'a':
+			if (!strcmp(field, "attach"))
+			{
+				attach = *GetData<NodeAttachment>(-1);
+				return;
+			}
+			break;
 		case 'b':
 			if (!strcmp(field, "blendingMode"))
 			{
-				blendingMode = GetClampedInteger(-1, 0, 13);
+				blendingMode = GetClampedInteger(-1, BlendMode::BLEND_TEXTURE, BlendMode::BLEND_CUSTOM_13, false);
 				return;
 			}
 			break;
 		case 'd':
 			if (!strcmp(field, "drawMode"))
 			{
-				drawMode = static_cast<DrawMode>(GetClampedInteger(-1, 0, 3));
+				drawMode = static_cast<DrawMode>(GetClampedInteger(-1, DrawMode::DRAW_SPRITE, DrawMode::DRAW_NONE, false));
 				return;
 			}
 			break;
@@ -1890,6 +2111,7 @@ void BaseParticle::Index(const char* field)
 				Script::PushData(&pos);
 				return;
 			}
+			break;
 		case 'r':
 			if (!strcmp(field, "roomIndex"))
 			{
@@ -1922,10 +2144,17 @@ void BaseParticle::NewIndex(const char* field)
 	{
 		switch (field[0])
 		{
+		case 'a':
+			if (!strcmp(field, "accel"))
+			{
+				accel = *GetData<Vector3f>(-1);
+				return;
+			}
+			break;
 		case 'e':
 			if (!strcmp(field, "emitterIndex"))
 			{
-				emitterIndex = GetClampedInteger(-1, -1, level_items - 1);
+				emitterIndex = GetClampedInteger(-1, -1, level_items - 1, false);
 				if (emitterIndex != -1)
 					emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
 				else
@@ -1935,27 +2164,45 @@ void BaseParticle::NewIndex(const char* field)
 			if (!strcmp(field, "emitterNode"))
 			{
 				if (emitterIndex != -1)
-					emitterNode = GetClampedInteger(-1, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+					emitterNode = GetClampedInteger(-1, -1, objects[items[emitterIndex].object_number].nmeshes - 1, false);
 				return;
 			}
 			break;
 		case 'l':
 			if (!strcmp(field, "lifeCounter"))
 			{
-				lifeCounter = GetClampedInteger(-1, 0, lifeSpan);
+				lifeCounter = GetClampedInteger(-1, 0, lifeSpan, false);
 				return;
 			}
 			if (!strcmp(field, "lifeSpan"))
 			{
 				// set lifeCounter to lifeSpan automatically
-				lifeCounter = lifeSpan = GetClampedInteger(-1, 0, 32767);
+				lifeCounter = lifeSpan = GetClampedInteger(-1, 0, 32767, false);
+				return;
+			}
+			break;
+		case 'p':
+			if (!strcmp(field, "pos"))
+			{
+				pos = *GetData<Vector3f>(-1);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "roomIndex"))
 			{
-				roomIndex = GetClampedInteger(-1, 0, number_rooms - 1);
+				roomIndex = GetClampedInteger(-1, 0, number_rooms - 1, false);
+				return;
+			}
+			break;
+		case 't':
+			if (!strcmp(field, "t"))
+				ReadOnlyFieldError(field);
+			break;
+		case 'v':
+			if (!strcmp(field, "vel"))
+			{
+				vel = *GetData<Vector3f>(-1);
 				return;
 			}
 			break;
@@ -2061,21 +2308,36 @@ void SpriteParticle::NewIndex(const char* field)
 		switch (field[0])
 		{
 		case 'c':
+			if (!strcmp(field, "colCust"))
+			{
+				colCust = *GetData<ColorRGB>(-1);
+				return;
+			}
+			if (!strcmp(field, "colEnd"))
+			{
+				colEnd = *GetData<ColorRGB>(-1);
+				return;
+			}
+			if (!strcmp(field, "colStart"))
+			{
+				colStart = *GetData<ColorRGB>(-1);
+				return;
+			}
 			if (!strcmp(field, "colorFadeTime"))
 			{
-				colorFadeTime = GetClampedInteger(-1, -32768, 32767);
+				colorFadeTime = GetClampedInteger(-1, -32768, 32767, false);
 				return;
 			}
 			break;
 		case 'f':
 			if (!strcmp(field, "fadeIn"))
 			{
-				fadeIn = GetClampedInteger(-1, 0, 32767);
+				fadeIn = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			if (!strcmp(field, "fadeOut"))
 			{
-				fadeOut = GetClampedInteger(-1, 0, 32767);
+				fadeOut = GetClampedInteger(-1, 0, 32767, false);
 				return;
 			}
 			break;
@@ -2094,27 +2356,27 @@ void SpriteParticle::NewIndex(const char* field)
 		case 's':
 			if (!strcmp(field, "sizeCust"))
 			{
-				sizeCust = GetClampedInteger(-1, 0, 65535);
+				sizeCust = GetClampedInteger(-1, 0, 65535, false);
 				return;
 			}
 			if (!strcmp(field, "sizeEnd"))
 			{
-				sizeEnd = GetClampedInteger(-1, 0, 65535);
+				sizeEnd = GetClampedInteger(-1, 0, 65535, false);
 				return;
 			}
 			if (!strcmp(field, "sizeStart"))
 			{
-				sizeStart = GetClampedInteger(-1, 0, 65535);
+				sizeStart = GetClampedInteger(-1, 0, 65535, false);
 				return;
 			}
 			if (!strcmp(field, "sizeRatio"))
 			{
-				sizeRatio = 32767 * GetClampedNumber(-1, -1.0f, 1.0f);
+				sizeRatio = 32767 * GetClampedNumber(-1, -1.0f, 1.0f, false);
 				return;
 			}
 			if (!strcmp(field, "spriteIndex"))
 			{
-				spriteIndex = GetClampedInteger(-1, 0, (-objects[ParticleFactory::partGroups[groupIndex].spriteSlot].nmeshes) - 1);
+				spriteIndex = GetClampedInteger(-1, 0, (-objects[ParticleFactory::partGroups[groupIndex].spriteSlot].nmeshes) - 1, false);
 				return;
 			}
 			break;
@@ -2194,28 +2456,67 @@ void MeshParticle::NewIndex(const char* field)
 		case 'm':
 			if (!strcmp(field, "mesh"))
 			{
-				mesh = GetClampedInteger(-1, 0, objects[object].nmeshes - 1);
+				mesh = GetClampedInteger(-1, 0, objects[object].nmeshes - 1, false);
 				return;
 			}
 			break;
 		case 'o':
 			if (!strcmp(field, "object"))
 			{
-				object = GetClampedInteger(-1, 0, SLOT_NUMBER_OBJECTS - 1);
+				object = GetClampedInteger(-1, 0, SLOT_NUMBER_OBJECTS - 1, false);
 				mesh = Clamp(mesh, 0, objects[object].nmeshes - 1);
+				return;
+			}
+			break;
+		case 'r':
+			if (!strcmp(field, "rot"))
+			{
+				rot = *GetData<Vector3s>(-1);
+				return;
+			}
+			if (!strcmp(field, "rotVel"))
+			{
+				rotVel = *GetData<Vector3s>(-1);
+				return;
+			}
+			break;
+		case 's':
+			if (!strcmp(field, "scale"))
+			{
+				scale = *GetData<Vector3i>(-1);
 				return;
 			}
 			break;
 		case 't':
 			if (!strcmp(field, "transparency"))
 			{
-				transparency = GetClampedInteger(-1, 0, 255);
+				transparency = GetClampedInteger(-1, 0, 255, false);
+				return;
+			}
+			if (!strcmp(field, "tint"))
+			{
+				tint = *GetData<ColorRGB>(-1);
 				return;
 			}
 			break;
 		}
 	}
 	BaseParticle::NewIndex(field);
+}
+
+const char* Noise::Name()
+{
+	return "PerlinNoise or SimplexNoise";
+}
+
+const char* PerlinNoise::Name()
+{
+	return "PerlinNoise";
+}
+
+const char* SimplexNoise::Name()
+{
+	return "SimplexNoise";
 }
 
 int AbsFunction::Call()
@@ -2281,9 +2582,45 @@ int CbrtFunction::Call()
 	return 1;
 }
 
+int CheckDistFastFunction::Call()
+{
+	auto vec1 = GetData<Vector3f>(1);
+	auto vec2 = GetData<Vector3f>(2);
+	float dist = GetNumber(3);
+	Script::PushInteger(CheckDistFast(*vec1, *vec2, dist));
+	return 1;
+}
+
+int ClampFloatFunction::Call()
+{
+	float x = GetNumber(1);
+	float min = GetNumber(2);
+	float max = GetNumber(3);
+	Script::PushNumber(Clamp(x, min, max));
+	return 1;
+}
+
+int ClampIntFunction::Call()
+{
+	int x = GetInteger(1);
+	int min = GetInteger(2);
+	int max = GetInteger(3);
+	Script::PushNumber(Clamp(x, min, max));
+	return 1;
+}
+
 int CosFunction::Call()
 {
 	Script::PushNumber(GetMathResult(1, cosf));
+	return 1;
+}
+
+int CreateColorFunction::Call()
+{
+	uchar r = 255 * GetClampedNumber(1, 0.0f, 1.0f, false);
+	uchar g = 255 * GetClampedNumber(2, 0.0f, 1.0f, false);
+	uchar b = 255 * GetClampedNumber(3, 0.0f, 1.0f, false);
+	ConstructManagedData<ColorRGB>(r, g, b);
 	return 1;
 }
 
@@ -2320,6 +2657,34 @@ int CreateMeshPartFunction::Call()
 	return 1;
 }
 
+int CreatePerlinNoiseFunction::Call()
+{
+	CheckCaller(FUNCTION_LIBRARY, "createPerlinNoise");
+
+	int args = GetArgCount(0, 1);
+
+	if (args)
+		ConstructManagedData<PerlinNoise>(GetInteger(1));
+	else
+		ConstructManagedData<PerlinNoise>();
+
+	return 1;
+}
+
+int CreateSimplexNoiseFunction::Call()
+{
+	CheckCaller(FUNCTION_LIBRARY, "createSimplexNoise");
+
+	int args = GetArgCount(0, 1);
+
+	if (args)
+		ConstructManagedData<SimplexNoise>(GetInteger(1));
+	else
+		ConstructManagedData<SimplexNoise>();
+
+	return 1;
+}
+
 int CreateSpritePartFunction::Call()
 {
 	CheckCaller(FUNCTION_INIT | FUNCTION_UPDATE, "createSpritePart");
@@ -2330,9 +2695,65 @@ int CreateSpritePartFunction::Call()
 	return 1;
 }
 
-int GetTombIndexFunction::Call()
+int CreateVectorFunction::Call()
 {
-	Script::PushInteger(GetTombIndexByNGLEIndex(1));
+	float x = GetNumber(1);
+	float y = GetNumber(2);
+	float z = GetNumber(3);
+	ConstructManagedData<Vector3f>(x, y, z);
+	return 1;
+}
+
+int FindNearestTargetFunction::Call()
+{
+	auto vec = GetData<Vector3f>(1);
+	float radius = GetNumber(2);
+	std::vector<short> slotList(GetTable(3));
+	for (int i = 0; i < slotList.size(); i++)
+		slotList[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
+	Script::PushInteger(FindNearestTarget(*vec, radius, slotList.data(), slotList.size()));
+	return 1;
+}
+
+int GetColorFromHSVFunction::Call()
+{
+	float h = GetNumber(1);
+	float s = GetClampedNumber(2, 0.0f, 1.0f, false);
+	float v = GetClampedNumber(3, 0.0f, 1.0f, false);
+	ConstructManagedData<ColorRGB>(HSVtoRGB(h, s, v));
+	return 1;
+}
+
+int GetDistanceFunction::Call()
+{
+	auto vec1 = GetData<Vector3f>(1);
+	auto vec2 = GetData<Vector3f>(2);
+	Script::PushNumber(RealDist(*vec1, *vec2));
+	return 1;
+}
+
+int GetGameTickFunction::Call()
+{
+	Script::PushInteger(ParticleFactory::gameTick);
+	return 1;
+}
+
+int GetItemJointPosFunction::Call()
+{
+	auto item = &items[GetItemIndex(1)];
+	int joint = GetClampedInteger(2, 0, objects[item->object_number].nmeshes - 1, false);
+	int offX = GetInteger(3);
+	int offY = GetInteger(4);
+	int offZ = GetInteger(5);
+
+	ConstructManagedData<Vector3f>(GetJointPos(item, joint, offX, offY, offZ));
+	return 1;
+}
+
+int GetItemRoomFunction::Call()
+{
+	auto item = &items[GetItemIndex(1)];
+	Script::PushInteger(item->room_number);
 	return 1;
 }
 
@@ -2342,19 +2763,46 @@ int GetLaraIndexFunction::Call()
 	return 1;
 }
 
-int GetItemRoomFunction::Call()
+int GetTombIndexFunction::Call()
 {
-	auto item = GetItem(1);
-	Script::PushInteger(item ? item->room_number : -1);
+	Script::PushInteger(GetTombIndexByNGLEIndex(1));
+	return 1;
+}
+
+int LerpFunction::Call()
+{
+	float a = GetNumber(1);
+	float b = GetNumber(2);
+	float t = GetClampedNumber(3, 0.0f, 1.0f, false);
+	Script::PushNumber(Lerp(a, b, t));
+	return 1;
+}
+
+int LerpInverseFunction::Call()
+{
+	float val1 = GetNumber(1);
+	float val2 = GetNumber(2);
+	float x = GetNumber(3);
+	Script::PushNumber(InverseLerp(val1, val2, x));
 	return 1;
 }
 
 int MeshAlignVelocityFunction::Call()
 {
 	auto part = GetData<MeshParticle>(1);
-	float factor = GetClampedNumber(2, 0.0f, 1.0f);
+	float factor = GetClampedNumber(2, 0.0f, 1.0f, false);
 	bool invert = GetBoolean(3);
 	part->AlignToVel(factor, invert);
+	return 0;
+}
+
+int MeshLookAtTargetFunction::Call()
+{
+	auto part = GetData<MeshParticle>(1);
+	auto vector = GetData<Vector3f>(2);
+	float factor = GetClampedNumber(3, 0.0, 1.0f, false);
+	bool invert = GetBoolean(4);
+	part->AlignToTarget(*vector, factor, invert);
 	return 0;
 }
 
@@ -2365,40 +2813,41 @@ int MeshShatterFunction::Call()
 	return 0;
 }
 
-int NoisePerlinFunction::Call()
+int NoiseFunction::Call()
 {
 	float scale, x, y, z, w;
 
-	int count = GetArgCount(2, 5);
+	int count = GetArgCount(3, 6);
+	auto noise = GetData<Noise>(1);
 
 	switch (count)
 	{
-	case 2:
-		scale = GetNumber(1);
-		x = GetNumber(2);
+	case 3:
+		scale = GetNumber(2);
+		x = GetNumber(3);
 		if (scale)
 			x /= scale;
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise1D(x));
+		Script::PushNumber(noise->Noise1D(x));
 		return 1;
 
-	case 3:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
+	case 4:
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
 		if (scale)
 		{
 			scale = 1.0f / scale;
 			x *= scale;
 			y *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise2D(x, y));
+		Script::PushNumber(noise->Noise2D(x, y));
 		return 1;
 
-	case 4:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
+	case 5:
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
+		z = GetNumber(5);
 		if (scale)
 		{
 			scale = 1.0f / scale;
@@ -2406,15 +2855,15 @@ int NoisePerlinFunction::Call()
 			y *= scale;
 			z *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise3D(x, y, z));
+		Script::PushNumber(noise->Noise3D(x, y, z));
 		return 1;
 
 	default:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
-		w = GetNumber(5);
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
+		z = GetNumber(5);
+		w = GetNumber(6);
 		if (scale)
 		{
 			scale = 1.0f / scale;
@@ -2423,72 +2872,100 @@ int NoisePerlinFunction::Call()
 			z *= scale;
 			w *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.PerlinNoise4D(x, y, z, w));
+		Script::PushNumber(noise->Noise4D(x, y, z, w));
 		return 1;
 	}
 }
 
-int NoiseSimplexFunction::Call()
+int NoiseCurlFunction::Call()
 {
-	float scale, x, y, z, w;
-
-	int count = GetArgCount(2, 5);
+	float scale, x, y, z;
+	Vector3f vector;
+	int count = GetArgCount(4, 5);
+	auto noise = GetData<Noise>(1);
 
 	switch (count)
 	{
-	case 2:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		if (scale)
-			x /= scale;
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise1D(x));
-		return 1;
-
-	case 3:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		if (scale)
-		{
-			scale = 1.0f / scale;
-			x *= scale;
-			y *= scale;
-		}
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise2D(x, y));
-		return 1;
-
 	case 4:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
 		if (scale)
 		{
 			scale = 1.0f / scale;
 			x *= scale;
 			y *= scale;
-			z *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise3D(x, y, z));
+		vector = noise->Curl2D(x, y);
+		ConstructManagedData<Vector3f>(vector.x, vector.y, 0);
 		return 1;
 
 	default:
-		scale = GetNumber(1);
-		x = GetNumber(2);
-		y = GetNumber(3);
-		z = GetNumber(4);
-		w = GetNumber(5);
+		scale = GetNumber(2);
+		x = GetNumber(3);
+		y = GetNumber(4);
+		z = GetNumber(5);
 		if (scale)
 		{
 			scale = 1.0f / scale;
 			x *= scale;
 			y *= scale;
 			z *= scale;
-			w *= scale;
 		}
-		Script::PushNumber(ParticleFactory::noise.SimplexNoise4D(x, y, z, w));
+		vector = noise->Curl3D(x, y, z);
+		ConstructManagedData<Vector3f>(vector.x, vector.y, vector.z);
 		return 1;
 	}
+}
+
+int NoiseCurlTimeFunction::Call()
+{
+	float scale, time, x, y, z;
+	Vector3f vector;
+	int count = GetArgCount(5, 6);
+	auto noise = GetData<Noise>(1);
+
+	switch (count)
+	{
+	case 5:
+		scale = GetNumber(2);
+		time = GetNumber(3);
+		x = GetNumber(4);
+		y = GetNumber(5);
+		if (scale)
+		{
+			scale = 1.0f / scale;
+			x *= scale;
+			y *= scale;
+		}
+		vector = noise->Curl2DTime(time, x, y);
+		ConstructManagedData<Vector3f>(vector.x, vector.y, 0);
+		return 1;
+
+	default:
+		scale = GetNumber(2);
+		time = GetNumber(3);
+		x = GetNumber(4);
+		y = GetNumber(5);
+		z = GetNumber(6);
+		if (scale)
+		{
+			scale = 1.0f / scale;
+			x *= scale;
+			y *= scale;
+			z *= scale;
+		}
+		vector = noise->Curl3DTime(time, x, y, z);
+		ConstructManagedData<Vector3f>(vector.x, vector.y, vector.z);
+		return 1;
+	}
+}
+
+int ParticleAbsPosFunction::Call()
+{
+	auto part = GetData<BaseParticle>(1);
+	ConstructManagedData<Vector3f>(part->AbsPos());
+	return 1;
 }
 
 int ParticleAnimateFunction::Call()
@@ -2501,20 +2978,49 @@ int ParticleAnimateFunction::Call()
 	return 0;
 }
 
+int ParticleAttachFunction::Call()
+{
+	auto part = GetData<BaseParticle>(1);
+	int index = GetItemIndex(2);
+	int node = GetClampedInteger(3, -1, objects[items[index].object_number].nmeshes - 1, false);
+	part->Attach(index, node);
+	return 0;
+}
+
+int ParticleAttractToItemFunction::Call()
+{
+	auto part = GetData<BaseParticle>(1);
+	auto item = &items[GetItemIndex(2)];
+	float radius = GetNumber(3);
+	float factor = GetNumber(4);
+	part->vel = part->AttractToItem(item, radius, factor);
+	return 0;
+}
+
+int ParticleAvoidRoomGeometryFunction::Call()
+{
+	auto part = GetData<BaseParticle>(1);
+	int wallMargin = GetInteger(2);
+	int floorMargin = GetInteger(3);
+	float factor = GetNumber(4);
+	part->vel += part->AvoidRoomGeometry(wallMargin, floorMargin, factor);
+
+	return 0;
+}
+
 int ParticleCollidedItemFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto item = GetItem(2);
+	auto item = &items[GetItemIndex(2)];
 	int radius = GetInteger(3);
-
-	Script::PushBoolean(item ? part->CollidedWithItem(item, radius) : false);
+	Script::PushBoolean(part->CollidedWithItem(item, radius));
 	return 1;
 }
 
 int ParticleCollideFloorsFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	float rebound = GetClampedNumber(2, 0.0f, 1.0f);
+	float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
 	float minbounce = GetNumber(3);
 	int margin = GetInteger(4);
 	bool accurate = GetBoolean(5);
@@ -2525,22 +3031,38 @@ int ParticleCollideFloorsFunction::Call()
 int ParticleCollideWallsFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	float rebound = GetClampedNumber(2, 0.0f, 1.0f);
+	float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
 	Script::PushBoolean(part->CollideWalls(rebound));
 	return 1;
+}
+
+int ParticleDetachFunction::Call()
+{
+	auto part = GetData<BaseParticle>(1);
+	part->Detach();
+	return 0;
+}
+
+int ParticleFollowTargetFunction::Call()
+{
+	auto part = GetData<BaseParticle>(1);
+	auto vect = GetData<Vector3f>(2);
+	float maxSpeed = GetNumber(3);
+	float distInner = GetNumber(4);
+	float distOuter = GetNumber(5);
+	part->vel = part->FollowTarget(*vect, maxSpeed, distInner, distOuter);
+	return 0;
 }
 
 int ParticleHomingFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto item = GetItem(2);
-	int node = item ? GetClampedInteger(3, 0, objects[item->object_number].nmeshes) : GetInteger(3);
+	auto item = &items[GetItemIndex(2)];
+	int node = item ? GetClampedInteger(3, 0, objects[item->object_number].nmeshes, false) : GetInteger(3);
 	float factor = GetNumber(4);
 	float accel = GetNumber(5);
 	bool predict = GetBoolean(6);
-
-	if (item)
-		part->TargetHoming(item, node, factor, accel, predict);
+	part->TargetHoming(item, node, factor, accel, predict);
 	return 0;
 }
 
@@ -2550,6 +3072,22 @@ int ParticleLimitSpeedFunction::Call()
 	float speedMax = GetNumber(2);
 	part->LimitSpeed(speedMax);
 	return 0;
+}
+
+int ParticleWindVelocityFunction::Call()
+{
+	auto part = GetData<BaseParticle>(1);
+	float factor = GetNumber(2);
+	part->vel += part->WindVelocities(factor);
+	return 0;
+}
+
+int PerformTriggerGroupFunction::Call()
+{
+	int indexTG = GetClampedInteger(1, 1, 9999, true);
+	bool state = PerformTriggerGroup(indexTG) ? true : false;
+	Script::PushBoolean(state);
+	return 1;
 }
 
 int PrintFunction::Call()
@@ -2574,10 +3112,15 @@ int RandintFunction::Call()
 	return 1;
 }
 
-int SeedNoiseFunction::Call()
+int RoundFunction::Call()
 {
-	int seed = GetInteger(1);
-	ParticleFactory::noise.SeedPermut(seed);
+	Script::PushInteger(Round(GetNumber(1)));
+	return 1;
+}
+
+int SelectItemFunction::Call()
+{
+	Trng.pGlobTomb4->ItemIndexSelected = Trng.pGlobTomb4->IndiceItemCondizione = GetInteger(1);
 	return 0;
 }
 
@@ -2587,16 +3130,123 @@ int SinFunction::Call()
 	return 1;
 }
 
+int SoundEffectFunction::Call()
+{
+	int sampleIndex = GetInteger(1);
+	int x = GetInteger(2);
+	int y = GetInteger(3);
+	int z = GetInteger(4);
+	int flags = GetInteger(5);
+	auto vec = phd_vector(x, y, z);
+	SoundEffect(sampleIndex, &vec, flags);
+	return 0;
+}
+
+int SphericalToCartesianFunction::Call()
+{
+	float r = GetNumber(1);
+	float theta = GetNumber(2);
+	float phi = GetClampedNumber(3, -M_PI_2, M_PI_2, false);
+	ConstructManagedData<Vector3f>(SphericalToCartesian(r, theta, phi));
+	return 1;
+}
+
+int SplinePosItemsFunction::Call()
+{
+	float t = GetNumber(1);
+	std::vector<Vector3f> vecList(GetTable(2));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetItemPos(i + 3);
+	ConstructManagedData<Vector3f>(SplinePosItems(t, vecList.data(), vecList.size()));
+	return 1;
+}
+
+int SplinePosVectorsFunction::Call()
+{
+	float t = GetNumber(1);
+	std::vector<Vector3f*> vecList(GetTable(2));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetData<Vector3f>(i + 3);
+	Vector3f vec = SplinePosVectors(t, vecList.data(), vecList.size());
+	ConstructManagedData<Vector3f>(vec);
+	return 1;
+}
+
+int SplineVelItemsFunction::Call()
+{
+	float t = GetNumber(1);
+	float duration = GetNumber(2);
+	std::vector<Vector3f> vecList(GetTable(3));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetItemPos(i + 4);
+	ConstructManagedData<Vector3f>(SplineVelItems(t, duration, vecList.data(), vecList.size()));
+	return 1;
+}
+
+int SplineVelVectorsFunction::Call()
+{
+	float t = GetNumber(1);
+	float duration = GetNumber(2);
+	std::vector<Vector3f*> vecList(GetTable(3));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetData<Vector3f>(i + 4);
+	Vector3f vec = SplineVelVectors(t, duration, vecList.data(), vecList.size());
+	ConstructManagedData<Vector3f>(vec);
+	return 1;
+}
+
 int SqrtFunction::Call()
 {
 	Script::PushNumber(GetMathResult(1, sqrtf));
 	return 1;
 }
 
+int TestCollisionSpheresFunction::Call()
+{
+	auto item = &items[GetItemIndex(1)];
+	auto vec = GetData<Vector3f>(2);
+	float radius = GetNumber(3);
+	Script::PushInteger(TestCollisionSpheres(item, *vec, radius));
+	return 1;
+}
+
+int TriggerDynamicFunction::Call()
+{
+	int x = GetInteger(1);
+	int y = GetInteger(2);
+	int z = GetInteger(3);
+	int intensity = GetInteger(4);
+	int red = Round(GetClampedNumber(5, 0, 1, false) * 255);
+	int green = Round(GetClampedNumber(6, 0, 1, false) * 255);
+	int blue = Round(GetClampedNumber(7, 0, 1, false) * 255);
+	TriggerDynamic(x, y, z, intensity, red, green, blue);
+	return 0;
+}
+
+int TriggerShockwaveFunction::Call()
+{
+	int x = GetInteger(1);
+	int y = GetInteger(2);
+	int z = GetInteger(3);
+	int innerRad = GetClampedInteger(4, -32768, 32767, false);
+	int outerRad = GetClampedInteger(5, -32768, 32767, false);
+	int speed = GetInteger(6);
+	int life = GetClampedInteger(7, 0, 255, false);
+	int red = Round(GetClampedNumber(8, 0, 1, false) * 255);
+	int green = Round(GetClampedNumber(9, 0, 1, false) * 255);
+	int blue = Round(GetClampedNumber(10, 0, 1, false) * 255);
+	int xRot = RadToShort(GetNumber(11));
+	int flags = GetInteger(12);
+	auto vec = phd_vector(x, y, z);
+	TriggerShockwave(&vec, innerRad | (outerRad << 16), speed, RGBA(red, green, blue, life), xRot | (flags << 16));
+	return 0;
+}
+
 void LuaBridge::GlobalIndex(const char* field)
 {
 	LuaObject* object;
-	std::optional<int> opt;
+	std::optional<int> opt_int;
+	std::optional<float> opt_float;
 
 	if (field)
 	{
@@ -2606,10 +3256,16 @@ void LuaBridge::GlobalIndex(const char* field)
 			Script::PushData(object);
 			return;
 		}
-		opt = LuaGlobals::RetrieveIntegerConstant(field);
-		if (opt)
+		opt_int = LuaGlobals::RetrieveIntegerConstant(field);
+		if (opt_int)
 		{
-			Script::PushInteger(*opt);
+			Script::PushInteger(*opt_int);
+			return;
+		}
+		opt_float = LuaGlobals::RetrieveFloatConstant(field);
+		if (opt_float)
+		{
+			Script::PushNumber(*opt_float);
 			return;
 		}
 		Script::ThrowError("attempt to read from a global variable");
@@ -2624,6 +3280,8 @@ void LuaBridge::GlobalNewIndex(const char* field)
 		if (LuaGlobals::RetrieveFunction(field))
 			Script::ThrowError("attempt to assign to a built-in function");
 		if (LuaGlobals::RetrieveIntegerConstant(field))
+			Script::ThrowError("attempt to assign to a built-in constant");
+		if (LuaGlobals::RetrieveFloatConstant(field))
 			Script::ThrowError("attempt to assign to a built-in constant");
 		Script::ThrowError("attempt to write to a global variable");
 	}

@@ -82,34 +82,31 @@ float RealDist(const Vector3f& v1, const Vector3f& v2)
 ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t)
 {
 	return ColorRGB(
-		Round(C1.R + (C2.R - C1.R) * t),
-		Round(C1.G + (C2.G - C1.G) * t),
-		Round(C1.B + (C2.B - C1.B) * t)
+		(uchar)Round(C1.R + (C2.R - C1.R) * t),
+		(uchar)Round(C1.G + (C2.G - C1.G) * t),
+		(uchar)Round(C1.B + (C2.B - C1.B) * t)
 		);
 }
 
 
-ColorRGB HSLtoRGB(float hue, float sat, float light)
+ColorRGB HSVtoRGB(float hue, float sat, float val)
 {
 	hue = fmodf(hue, 360.0f);
-	if (hue < 0)
+	if (hue < 0.0f)
 		hue += 360.0f;
 
-	sat = Clamp(sat, 0.0f, 1.0f);
-	light = Clamp(light, 0.0f, 1.0f);
-
-	if (sat <= 0)
+	if (sat <= 0.0f)
 	{
-		int v = Round(light * 255);
+		uchar v = Round(val * 255);
 		return ColorRGB(v, v, v);
 	}
 
 	int hextant = int(hue / 60.0f);
 	float fhue = (hue - hextant * 60.0f) / 60.0f;
 
-	float chroma = (1 - abs(2 * light - 1)) * sat;
+	float chroma = sat * val;
 	float xval = chroma * (1 - abs(fmod(hextant + fhue, 2.0f) - 1));
-	float m = light - chroma / 2;
+	float m = val - chroma;
 	float r = 0;
 	float g = 0;
 	float b = 0;
@@ -146,15 +143,15 @@ ColorRGB HSLtoRGB(float hue, float sat, float light)
 		b = xval;
 	}
 
-	ColorRGB c(Round((r + m) * 255),
-		Round((g + m) * 255),
-		Round((b + m) * 255));
+	ColorRGB c((uchar)Round((r + m) * 255),
+		(uchar)Round((g + m) * 255),
+		(uchar)Round((b + m) * 255));
 
 	return c;
 }
 
 
-long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned long bitMask)
+long TestCollisionSpheres(Tr4ItemInfo* item, const Vector3f& posTest, float radius)
 {
 	long flags = 0;
 	int num = 0;
@@ -167,7 +164,7 @@ long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned l
 		for (int i = 0; i < num; ++i)
 		{
 			auto sph = &SphereList[i];
-			int r = sph->r;
+			int r = sph->r + radius;
 			if (r > 0)
 			{
 				int x = Round(posTest.x - sph->x);
@@ -184,51 +181,35 @@ long TestCollisionSpheres(const Vector3f& posTest, Tr4ItemInfo* item, unsigned l
 }
 
 
-int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList)
+int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count)
 {
 	int itemIndex = -1;
-	int nearest = 0x7FFFFFFF;
 
 	for (int i = 0; i < level_items; ++i)
 	{
 		auto item = &items[i];
 
 		bool slotCheck = false;
-		const short* slotIter = slotList;
 
-		if (*slotIter == -1)
+		for (int j = 0; j < count; ++j)
 		{
-			if (objects[item->object_number].intelligent &&
-				item->object_number != SLOT_GUIDE &&
-				item->object_number != SLOT_VON_CROY) {
-				slotCheck = true;
-			}
-		}
-		else
-		{
-			while (*slotIter >= 0)
+			if (slotList[j] == item->object_number)
 			{
-				if (*(slotIter++) == item->object_number)
-				{
-					slotCheck = true;
-					break;
-				}
+				slotCheck = true;
+				break;
 			}
 		}
 
-
-		if (slotCheck && item->active)
+		if (slotCheck)
 		{
 			if (objects[item->object_number].intelligent && item->hit_points <= 0)
 				continue;
 
 			Vector3f target(item->pos.xPos, item->pos.yPos, item->pos.zPos);
 
-			int dist = Round(SimpleDist(posTest, target));
-			if (dist < radius && dist < nearest)
+			if (CheckDistFast(posTest, target, radius) < 0)
 			{
-				nearest = dist;
-				radius = dist;
+				radius = RealDist(posTest, target);
 				itemIndex = i;
 			}
 		}
@@ -279,7 +260,7 @@ Vector3f SphericalToCartesian(float r, float theta, float phi)
 	return Vector3f(x, -y, z);
 }
 
-// should not be available in Lua
+
 int TestForWall(int x, int y, int z, short* room)
 {
 	void *floor = GetFloor(x, y, z, room);
@@ -298,7 +279,7 @@ int TestForWall(int x, int y, int z, short* room)
 	return 1; // Wall
 }
 
-// should not be available in Lua
+
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 {
 	if (!floor)
@@ -312,7 +293,7 @@ Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z)
 }
 
 
-Vector3f Spline(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
+static Vector3f Spline(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
 {
 	auto a = v1 * 2;
 	auto b = (-v0 + v2) * t;
@@ -323,7 +304,7 @@ Vector3f Spline(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, cons
 }
 
 
-Vector3f SplineStart(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+static Vector3f SplineStart(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
 {
 	auto a = v0 * 2;
 	auto b = (-v0 * 3 + v1 * 4 - v2) * t;
@@ -333,7 +314,7 @@ Vector3f SplineStart(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2,
 }
 
 
-Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+static Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
 {
 	auto a = v1 * 2;
 	auto b = (-v0 + v2) * t;
@@ -343,7 +324,57 @@ Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, f
 }
 
 
-Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
+Vector3f SplinePosItems(float t, Vector3f v[], int arrSize)
+{
+	Vector3f splinePos;
+
+	if (arrSize < 2)
+		return v[0];
+
+	if (arrSize == 2)
+		return v[0].lerp(v[1], t);
+
+	int div = arrSize - 1;
+	int index = int(t * div);
+	float tp = (t * div) - index;
+
+	if (!index)
+		splinePos = SplineStart(v[index], v[index + 1], v[index + 2], tp);
+	else if (index + 1 == div)
+		splinePos = SplineEnd(v[index - 1], v[index], v[index + 1], tp);
+	else
+		splinePos = Spline(v[index - 1], v[index], v[index + 1], v[index + 2], tp);
+
+	return splinePos;
+}
+
+
+Vector3f SplinePosVectors(float t, Vector3f* v[], int arrSize)
+{
+	Vector3f splinePos;
+
+	if (arrSize < 2)
+		return *v[0];
+
+	if (arrSize == 2)
+		return v[0]->lerp(*v[1], t);
+
+	int div = arrSize - 1;
+	int index = int(t * div);
+	float tp = (t * div) - index;
+
+	if (!index)
+		splinePos = SplineStart(*v[index], *v[index + 1], *v[index + 2], tp);
+	else if (index + 1 == div)
+		splinePos = SplineEnd(*v[index - 1], *v[index], *v[index + 1], tp);
+	else
+		splinePos = Spline(*v[index - 1], *v[index], *v[index + 1], *v[index + 2], tp);
+
+	return splinePos;
+}
+
+
+static Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
 {
 	auto b = (-v0 + v2);
 	auto c = (v0 * 2 - v1 * 5 + v2 * 4 - v3) * 2 * t;
@@ -353,7 +384,7 @@ Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f
 }
 
 
-Vector3f SplineStartDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+static Vector3f SplineStartDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
 {
 	auto b = (-v0 * 3 + v1 * 4 - v2);
 	auto c = (v0 - v1 * 2 + v2) * 2 * t;
@@ -362,12 +393,62 @@ Vector3f SplineStartDerivative(const Vector3f& v0, const Vector3f& v1, const Vec
 }
 
 
-Vector3f SplineEndDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
+static Vector3f SplineEndDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float t)
 {
 	auto b = (-v0 + v2);
 	auto c = (v0 - v1 * 2 + v2) * 2 * t;
 
 	return (b + c) * 0.5f;
+}
+
+
+Vector3f SplineVelItems(float t, float duration, Vector3f v[], int arrSize)
+{
+	Vector3f splineVel;
+	int div = arrSize - 1;
+
+	if (div < 1)
+		return splineVel;
+
+	if (div == 1)
+		return (v[1] - v[0]) * (1.0f / duration);
+
+	int index = int(t * div);
+	float tp = (t * div) - index;
+
+	if (!index)
+		splineVel = SplineStartDerivative(v[index], v[index + 1], v[index + 2], tp);
+	else if (index + 1 == div)
+		splineVel = SplineEndDerivative(v[index - 1], v[index], v[index + 1], tp);
+	else
+		splineVel = SplineDerivative(v[index - 1], v[index], v[index + 1], v[index + 2], tp);
+
+	return splineVel * (float(div) / duration);
+}
+
+
+Vector3f SplineVelVectors(float t, float duration, Vector3f* v[], int arrSize)
+{
+	Vector3f splineVel;
+	int div = arrSize - 1;
+
+	if (div < 1)
+		return splineVel;
+
+	if (div == 1)
+		return (*v[1] - *v[0]) * (1.0f / duration);
+
+	int index = int(t * div);
+	float tp = (t * div) - index;
+
+	if (!index)
+		splineVel = SplineStartDerivative(*v[index], *v[index + 1], *v[index + 2], tp);
+	else if (index + 1 == div)
+		splineVel = SplineEndDerivative(*v[index - 1], *v[index], *v[index + 1], tp);
+	else
+		splineVel = SplineDerivative(*v[index - 1], *v[index], *v[index + 1], *v[index + 2], tp);
+
+	return splineVel * (float(div) / duration);
 }
 
 

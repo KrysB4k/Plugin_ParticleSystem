@@ -77,8 +77,6 @@ namespace ParticleFactory
 {
 	ulong gameTick;
 
-	Noise noise;
-
 	int nextSpritePart;
 	SpriteParticle spriteParts[MAX_SPRITEPARTS];
 	int nextMeshPart;
@@ -234,7 +232,7 @@ void ParticleFactory::UpdateParts()
 	gameTick++;
 }
 
-ulong randomHashInt(ulong i0)
+static ulong randomHashInt(ulong i0)
 {
 	ulong z0 = (i0 * 1831267127) ^ i0;
 	ulong z1 = (z0 * 3915839201) ^ (z0 >> 20);
@@ -395,7 +393,7 @@ void ParticleFactory::DrawSprites()
 			viewCoords[1] = Round(part->pos.y * phd_winxmax);
 			viewCoords[2] = Round(part->pos.z + f_mznear);
 
-			if (pgroup.drawMode)
+			if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
 			{
 				float size = part->sizeCust;
 				auto vel = part->vel;
@@ -448,7 +446,7 @@ void ParticleFactory::DrawSprites()
 			viewCoords[2] = result[2] >> 14;
 
 			// if particle is a line do world to screen transform for second vertex
-			if (pgroup.drawMode)
+			if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
 			{
 				float size = part->sizeCust;
 				auto vel = part->vel;
@@ -596,14 +594,10 @@ Vector3f BaseParticle::AbsPos()
 
 void BaseParticle::Attach(int itemIndex, int node)
 {
-	Tr4ItemInfo* item = nullptr;
-	if (itemIndex >= 0 && itemIndex < level_items)
-		item = &items[itemIndex];
-	else
+	if (itemIndex < 0 || itemIndex >= level_items)
 		return;
 
-	node = Clamp(node, -1, objects[item->object_number].nmeshes);
-
+	auto item = &items[itemIndex];
 	const auto& tether = ParticleFactory::partGroups[groupIndex].attach.tether;
 	Vector3f relPos;
 
@@ -770,21 +764,19 @@ bool BaseParticle::CollidedWithItem(Tr4ItemInfo* item, int radius)
 }
 
 
-Vector3f BaseParticle::FollowTarget(const Vector3f& v, float maxSpeed, float distFactor, float distCutOff)
+Vector3f BaseParticle::FollowTarget(const Vector3f& v, float maxSpeed, float distInner, float distOuter)
 {
 	auto dirVect = v - pos;
 
 	float dist = dirVect.magnitude();
 
-	dist -= distCutOff;
-
-	if (dist <= 0)
+	if (dist <= distInner)
 		return Vector3f();
 
 	if (dist > maxSpeed)
 		dirVect *= maxSpeed / dist;
 
-	return dirVect * (dist / (dist + distFactor));
+	return dirVect * InverseLerp(distInner, distOuter, dist);
 }
 
 
@@ -830,56 +822,6 @@ bool BaseParticle::TargetHoming(Tr4ItemInfo* item, int targetNode, float homingF
 }
 
 
-Vector3f BaseParticle::SplinePos(const Vector3f v[], int arrSize, float t)
-{
-	if (arrSize < 2)
-		return pos;
-
-	if (arrSize == 2)
-		return v[0].lerp(v[1], t);
-
-	int div = arrSize - 1;
-	int index = int(t * div);
-	float tp = (t * div) - index;
-
-	Vector3f splinePos;
-
-	if (!index)
-		splinePos = SplineStart(v[index], v[index + 1], v[index + 2], tp);
-	else if (index + 1 == div)
-		splinePos = SplineEnd(v[index - 1], v[index], v[index + 1], tp);
-	else
-		splinePos = Spline(v[index - 1], v[index], v[index + 1], v[index + 2], tp);
-
-	return splinePos;
-}
-
-
-Vector3f BaseParticle::SplineVel(const Vector3f v[], int arrSize, float t)
-{
-	Vector3f splineVel;
-	int div = arrSize - 1;
-
-	if (div < 1)
-		return splineVel;
-
-	if (div == 1)
-		return (v[1] - v[0]) * (1.0f / lifeSpan);
-
-	int index = int(t * div);
-	float tp = (t * div) - index;
-
-	if (!index)
-		splineVel = SplineStartDerivative(v[index], v[index + 1], v[index + 2], tp);
-	else if (index + 1 == div)
-		splineVel = SplineEndDerivative(v[index - 1], v[index], v[index + 1], tp);
-	else
-		splineVel = SplineDerivative(v[index - 1], v[index], v[index + 1], v[index + 2], tp);
-
-	return splineVel * (float(div) / lifeSpan);
-}
-
-
 Vector3f BaseParticle::AvoidRoomGeometry(int wallMargin, int floorMargin, float factor)
 {
 	Vector3f v;
@@ -913,7 +855,7 @@ Vector3f BaseParticle::AvoidRoomGeometry(int wallMargin, int floorMargin, float 
 }
 
 
-Vector3f BaseParticle::AvoidItem(Tr4ItemInfo* item, float radius, float factor)
+Vector3f BaseParticle::AttractToItem(Tr4ItemInfo* item, float radius, float factor)
 {
 	Vector3f v;
 
@@ -950,7 +892,7 @@ void SpriteParticle::Animate(int startSprite, int endSprite, int frameRate)
 		usedSprite = int(Lerp(float(usedSprite), float(usedSprite + length), fmod(numCycles * Parameter(), 1.0f)));
 	}
 
-	spriteIndex = (uchar)(usedSprite);
+	spriteIndex = (ushort)(usedSprite);
 }
 
 
@@ -1082,7 +1024,7 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 		}
 	}
 
-	if (pgroup.drawMode) // line or arrow
+	if (pgroup.drawMode > DrawMode::DRAW_SQUARE) // line or arrow
 	{
 		long x1 = view[0];
 		long y1 = view[1];
@@ -1119,21 +1061,21 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 				float dx = (x2 - x1) * 0.5f;
 				float dy = (y2 - y1) * 0.5f;
 
-				float angle = M_PI / 6.0f;
+				float sx = dx * SIN_PI_6;
+				float cx = dx * COS_PI_6;
+				float sy = dy * SIN_PI_6;
+				float cy = dy * COS_PI_6;
 
-				float rx = dx * cos(-angle) - dy * sin(-angle);
-				float ry = dy * cos(-angle) + dx * sin(-angle);
+				v[1].rhw = (v[0].rhw + v[1].rhw) * 0.5f;
+				v[1].sz = (v[0].sz + v[1].sz) * 0.5f;
 
-				v[1].sx = float(x1 + rx);
-				v[1].sy = float(y1 + ry);
+				v[1].sx = x1 + cx + sy;
+				v[1].sy = y1 + cy - sx;
 
 				(*AddLineSorted)(&v[0], &v[1], 6);
 
-				rx = dx * cos(angle) - dy * sin(angle);
-				ry = dy * cos(angle) + dx * sin(angle);
-
-				v[1].sx = float(x1 + rx);
-				v[1].sy = float(y1 + ry);
+				v[1].sx = x1 + cx - sy;
+				v[1].sy = y1 + cy + sx;
 
 				(*AddLineSorted)(&v[0], &v[1], 6);
 			}
@@ -1225,21 +1167,27 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 			v[2].specular = 0xFF000000;
 			v[3].specular = 0xFF000000;
 
-			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
-
 			TextureStruct tex;
-
 			tex.drawtype = pgroup.blendingMode;
 
-			tex.tpage = sprite->tpage;
-			tex.u1 = sprite->x1;
-			tex.v1 = sprite->y1;
-			tex.u2 = sprite->x2;
-			tex.v2 = sprite->y1;
-			tex.u3 = sprite->x2;
-			tex.v3 = sprite->y2;
-			tex.u4 = sprite->x1;
-			tex.v4 = sprite->y2;
+			if (!pgroup.drawMode)
+			{
+				SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
+				tex.tpage = sprite->tpage;
+				tex.u1 = sprite->x1;
+				tex.v1 = sprite->y1;
+				tex.u2 = sprite->x2;
+				tex.v2 = sprite->y1;
+				tex.u3 = sprite->x2;
+				tex.v3 = sprite->y2;
+				tex.u4 = sprite->x1;
+				tex.v4 = sprite->y2;
+			}
+			else
+			{
+				tex.flag = 0;
+				tex.tpage = 0;
+			}
 
 			(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 0);
 		}
