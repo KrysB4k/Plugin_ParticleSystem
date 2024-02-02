@@ -822,56 +822,6 @@ bool BaseParticle::TargetHoming(Tr4ItemInfo* item, int targetNode, float homingF
 }
 
 
-Vector3f BaseParticle::SplinePos(const Vector3f v[], int arrSize, float t)
-{
-	if (arrSize < 2)
-		return pos;
-
-	if (arrSize == 2)
-		return v[0].lerp(v[1], t);
-
-	int div = arrSize - 1;
-	int index = int(t * div);
-	float tp = (t * div) - index;
-
-	Vector3f splinePos;
-
-	if (!index)
-		splinePos = SplineStart(v[index], v[index + 1], v[index + 2], tp);
-	else if (index + 1 == div)
-		splinePos = SplineEnd(v[index - 1], v[index], v[index + 1], tp);
-	else
-		splinePos = Spline(v[index - 1], v[index], v[index + 1], v[index + 2], tp);
-
-	return splinePos;
-}
-
-
-Vector3f BaseParticle::SplineVel(const Vector3f v[], int arrSize, float t)
-{
-	Vector3f splineVel;
-	int div = arrSize - 1;
-
-	if (div < 1)
-		return splineVel;
-
-	if (div == 1)
-		return (v[1] - v[0]) * (1.0f / lifeSpan);
-
-	int index = int(t * div);
-	float tp = (t * div) - index;
-
-	if (!index)
-		splineVel = SplineStartDerivative(v[index], v[index + 1], v[index + 2], tp);
-	else if (index + 1 == div)
-		splineVel = SplineEndDerivative(v[index - 1], v[index], v[index + 1], tp);
-	else
-		splineVel = SplineDerivative(v[index - 1], v[index], v[index + 1], v[index + 2], tp);
-
-	return splineVel * (float(div) / lifeSpan);
-}
-
-
 Vector3f BaseParticle::AvoidRoomGeometry(int wallMargin, int floorMargin, float factor)
 {
 	Vector3f v;

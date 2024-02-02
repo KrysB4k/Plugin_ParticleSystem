@@ -202,6 +202,12 @@ namespace
 			Script::ThrowError("table expected");
 		return Script::ExplodeTable(argument);
 	}
+
+	Vector3f GetItemPos(int argument)
+	{
+		auto item = &items[GetItemIndex(argument)];
+		return Vector3f(item->pos.xPos, item->pos.yPos, item->pos.zPos);
+	}
 }
 
 namespace LuaGlobals
@@ -263,8 +269,13 @@ namespace LuaGlobals
 	SelectItemFunction SelectItemFunc;
 	SinFunction SinFunc;
 	SphericalToCartesianFunction SphericalToCartesianFunc;
+	SplinePosItemsFunction SplinePosItemsFunc;
+	SplinePosVectorsFunction SplinePosVectorsFunc;
+	SplineVelItemsFunction SplineVelItemsFunc;
+	SplineVelVectorsFunction SplineVelVectorsFunc;
 	SoundEffectFunction SoundEffectFunc;
 	SqrtFunction SqrtFunc;
+	TestCollisionSpheresFunction TestCollisionSpheresFunc;
 	TriggerDynamicFunction TriggerDynamicFunc;
 	TriggerShockwaveFunction TriggerShockwaveFunc;
 }
@@ -366,7 +377,7 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &ParticleAbsPosFunc;
 		if (!strcmp(field, "particleAnimate"))
 			return &ParticleAnimateFunc;
-		if (!strcmp(field, "particleAttachTo"))
+		if (!strcmp(field, "particleAttach"))
 			return &ParticleAttachFunc;
 		if (!strcmp(field, "particleAttractToItem"))
 			return &ParticleAttractToItemFunc;
@@ -410,10 +421,20 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &SoundEffectFunc;
 		if (!strcmp(field, "sphericalToCartesian"))
 			return &SphericalToCartesianFunc;
+		if (!strcmp(field, "splinePosItems"))
+			return &SplinePosItemsFunc;
+		if (!strcmp(field, "splinePosVectors"))
+			return &SplinePosVectorsFunc;
+		if (!strcmp(field, "splineVelItems"))
+			return &SplineVelItemsFunc;
+		if (!strcmp(field, "splineVelVectors"))
+			return &SplineVelVectorsFunc;
 		if (!strcmp(field, "sqrt"))
 			return &SqrtFunc;
 		break;
 	case 't':
+		if (!strcmp(field, "testCollisionSpheres"))
+			return &TestCollisionSpheresFunc;
 		if (!strcmp(field, "triggerDynamicLight"))
 			return &TriggerDynamicFunc;
 		if (!strcmp(field, "triggerShockwave"))
@@ -2958,7 +2979,7 @@ int ParticleAttachFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
 	int index = GetItemIndex(2);
-	int node = GetClampedInteger(3, 0, objects[items[index].object_number].nmeshes - 1, false);
+	int node = GetClampedInteger(3, -1, objects[items[index].object_number].nmeshes - 1, false);
 	part->Attach(index, node);
 	return 0;
 }
@@ -3127,9 +3148,62 @@ int SphericalToCartesianFunction::Call()
 	return 1;
 }
 
+int SplinePosItemsFunction::Call()
+{
+	float t = GetNumber(1);
+	std::vector<Vector3f> vecList(GetTable(2));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetItemPos(i + 3);
+	ConstructManagedData<Vector3f>(SplinePosItems(t, vecList.data(), vecList.size()));
+	return 1;
+}
+
+int SplinePosVectorsFunction::Call()
+{
+	float t = GetNumber(1);
+	std::vector<Vector3f*> vecList(GetTable(2));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetData<Vector3f>(i + 3);
+	Vector3f vec = SplinePosVectors(t, vecList.data(), vecList.size());
+	ConstructManagedData<Vector3f>(vec);
+	return 1;
+}
+
+int SplineVelItemsFunction::Call()
+{
+	float t = GetNumber(1);
+	float duration = GetNumber(2);
+	std::vector<Vector3f> vecList(GetTable(3));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetItemPos(i + 4);
+	ConstructManagedData<Vector3f>(SplineVelItems(t, duration, vecList.data(), vecList.size()));
+	return 1;
+}
+
+int SplineVelVectorsFunction::Call()
+{
+	float t = GetNumber(1);
+	float duration = GetNumber(2);
+	std::vector<Vector3f*> vecList(GetTable(3));
+	for (int i = 0; i < vecList.size(); i++)
+		vecList[i] = GetData<Vector3f>(i + 4);
+	Vector3f vec = SplineVelVectors(t, duration, vecList.data(), vecList.size());
+	ConstructManagedData<Vector3f>(vec);
+	return 1;
+}
+
 int SqrtFunction::Call()
 {
 	Script::PushNumber(GetMathResult(1, sqrtf));
+	return 1;
+}
+
+int TestCollisionSpheresFunction::Call()
+{
+	auto item = &items[GetItemIndex(1)];
+	auto vec = GetData<Vector3f>(2);
+	float radius = GetNumber(3);
+	Script::PushInteger(TestCollisionSpheres(item, *vec, radius));
 	return 1;
 }
 

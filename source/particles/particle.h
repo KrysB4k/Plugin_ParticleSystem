@@ -172,8 +172,6 @@ struct BaseParticle : public LuaObjectClass
 	bool		TargetHoming(Tr4ItemInfo* item, int targetNode, float homingFactor, float homingAccel, bool predict);
 	Vector3f	FollowTarget(const Vector3f& v, float maxSpeed, float distInner, float distOuter);
 	Vector3f	WindVelocities(float factor);
-	Vector3f	SplinePos(const Vector3f v[], int arrSize, float t); // TODO: add lua function after implementing tables
-	Vector3f	SplineVel(const Vector3f v[], int arrSize, float t); // TODO: add lua function after implementing tables
 	Vector3f	AttractToItem(Tr4ItemInfo* item, float radius, float factor);
 	Vector3f	AvoidRoomGeometry(int wallMargin, int floorMargin, float factor);
 

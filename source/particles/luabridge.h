@@ -303,7 +303,32 @@ struct SphericalToCartesianFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct SplinePosItemsFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct SplinePosVectorsFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct SplineVelItemsFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct SplineVelVectorsFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct SqrtFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct TestCollisionSpheresFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -368,6 +393,10 @@ namespace LuaGlobals
 	extern ParticleFollowTargetFunction ParticleFollowTargetFunc;
 	extern ParticleHomingFunction ParticleHomingFunc;
 	extern ParticleLimitSpeedFunction ParticleLimitSpeedFunc;
+	extern SplinePosItemsFunction SplinePosItemsFunc;
+	extern SplinePosVectorsFunction SplinePosVectorsFunc;
+	extern SplineVelItemsFunction SplineVelItemsFunc;
+	extern SplineVelVectorsFunction SplineVelVectorsFunc;
 	extern ParticleWindVelocityFunction ParticleWindVelocityFunc;
 	extern PerformTriggerGroupFunction PerformTriggerGroupFunc;
 	extern PrintFunction PrintFunc;
@@ -379,6 +408,7 @@ namespace LuaGlobals
 	extern SoundEffectFunction SoundEffectFunc;
 	extern SphericalToCartesianFunction SphericalToCartesianFunc;
 	extern SqrtFunction SqrtFunc;
+	extern TestCollisionSpheresFunction TestCollisionSpheresFunc;
 	extern TriggerDynamicFunction TriggerDynamicFunc;
 	extern TriggerShockwaveFunction TriggerShockwaveFunc;
 
