@@ -35,7 +35,6 @@ struct ColorRGB final : public LuaObjectClass
 	uchar R, G, B;
 
 	ColorRGB(): R(0), G(0), B(0) {}
-
 	ColorRGB(uchar red, uchar green, uchar blue): R(red), G(green), B(blue) {}
 
 	static const char* Name();
@@ -43,15 +42,21 @@ struct ColorRGB final : public LuaObjectClass
 	virtual void NewIndex(const char* field) override;
 };
 
-struct Vector3s final : public LuaObjectClass
+struct Vector3s final : public LuaObjectClassRotation
 {
 	short x, y, z;
 
 	Vector3s() : x(0), y(0), z(0) {}
+	Vector3s(short xrot, short yrot, short zrot) : x(xrot), y(yrot), z(zrot) {}
 
 	static const char* Name();
 	virtual void Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
+
+	virtual short GetX() override;
+	virtual short GetY() override;
+	virtual short GetZ() override;
+	virtual Vector3s GetVector() override;
 };
 
 struct Vector3i final : public LuaObjectClass

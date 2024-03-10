@@ -1,10 +1,82 @@
 #pragma once
 
+struct Vector3f;
+struct Vector3s;
+
 struct LuaObjectClass : public LuaObject
 {
 	virtual int Call() final override;
 	virtual void Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
+};
+
+struct LuaObjectClassPosition : public LuaObjectClass
+{
+	static const char* Name();
+
+	virtual float GetX() = 0;
+	virtual float GetY() = 0;
+	virtual float GetZ() = 0;
+	virtual Vector3f GetVector() = 0;
+};
+
+struct LuaObjectClassRotation : public LuaObjectClass
+{
+	static const char* Name();
+
+	virtual short GetX() = 0;
+	virtual short GetY() = 0;
+	virtual short GetZ() = 0;
+	virtual Vector3s GetVector() = 0;
+};
+
+struct LuaItemInfoPos final : public LuaObjectClassPosition
+{
+	LuaItemInfoPos(phd_3dpos* position) : pos(position) {}
+
+	static const char* Name();
+	virtual void Index(const char* field) final override;
+	virtual void NewIndex(const char* field) final override;
+
+	virtual float GetX() final override;
+	virtual float GetY() final override;
+	virtual float GetZ() final override;
+	virtual Vector3f GetVector() final override;
+
+private:
+
+	phd_3dpos* const pos;
+};
+
+struct LuaItemInfoRot final : public LuaObjectClassRotation
+{
+	LuaItemInfoRot(phd_3dpos* position) : pos(position) {}
+
+	static const char* Name();
+	virtual void Index(const char* field) final override;
+	virtual void NewIndex(const char* field) final override;
+
+	virtual short GetX() final override;
+	virtual short GetY() final override;
+	virtual short GetZ() final override;
+	virtual Vector3s GetVector() final override;
+
+private:
+
+	phd_3dpos* const pos;
+};
+
+struct LuaItemInfoWrapper final : public LuaObjectClass
+{
+	LuaItemInfoWrapper(Tr4ItemInfo* item) : itemptr(item) {}
+
+	static const char* Name();
+	virtual void Index(const char* field) final override;
+	virtual void NewIndex(const char* field) final override;
+
+private:
+
+	Tr4ItemInfo* const itemptr;
 };
 
 struct LuaObjectFunction : public LuaObject
@@ -134,6 +206,11 @@ struct GetGameTickFunction final : public LuaObjectFunction
 };
 
 struct GetItemJointPosFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct GetItemInfoFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -353,7 +430,7 @@ namespace LuaGlobals
 	extern BoidAlignmentFunction BoidAlignmentFunc;
 	extern BoidCohesionFunction BoidCohesionFunc;
 	extern BoidSeparationFunction BoidSeparationFunc;
-	extern CbrtFunction CbrtFuncFunc;
+	extern CbrtFunction CbrtFunc;
 	extern CheckDistFastFunction CheckDistFastFunc;
 	extern ClampFloatFunction ClampFloatFunc;
 	extern ClampIntFunction ClampIntFunc;
@@ -369,6 +446,7 @@ namespace LuaGlobals
 	extern GetColorFromHSVFunction GetColorFromHSVFunc;
 	extern GetDistanceFunction GetDistanceFunc;
 	extern GetGameTickFunction GetGameTickFunc;
+	extern GetItemInfoFunction GetItemInfoFunc;
 	extern GetItemJointPosFunction GetItemJointPosFunc;
 	extern GetItemRoomFunction GetItemRoomFunc;
 	extern GetTombIndexFunction GetTombIndexFunc;

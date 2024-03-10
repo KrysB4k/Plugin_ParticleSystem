@@ -324,7 +324,7 @@ static Vector3f SplineEnd(const Vector3f& v0, const Vector3f& v1, const Vector3f
 }
 
 
-Vector3f SplinePosItems(float t, Vector3f v[], int arrSize)
+Vector3f SplinePos(float t, Vector3f v[], int arrSize)
 {
 	Vector3f splinePos;
 
@@ -347,32 +347,6 @@ Vector3f SplinePosItems(float t, Vector3f v[], int arrSize)
 
 	return splinePos;
 }
-
-
-Vector3f SplinePosVectors(float t, Vector3f* v[], int arrSize)
-{
-	Vector3f splinePos;
-
-	if (arrSize < 2)
-		return *v[0];
-
-	if (arrSize == 2)
-		return v[0]->lerp(*v[1], t);
-
-	int div = arrSize - 1;
-	int index = int(t * div);
-	float tp = (t * div) - index;
-
-	if (!index)
-		splinePos = SplineStart(*v[index], *v[index + 1], *v[index + 2], tp);
-	else if (index + 1 == div)
-		splinePos = SplineEnd(*v[index - 1], *v[index], *v[index + 1], tp);
-	else
-		splinePos = Spline(*v[index - 1], *v[index], *v[index + 1], *v[index + 2], tp);
-
-	return splinePos;
-}
-
 
 static Vector3f SplineDerivative(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, float t)
 {
@@ -402,7 +376,7 @@ static Vector3f SplineEndDerivative(const Vector3f& v0, const Vector3f& v1, cons
 }
 
 
-Vector3f SplineVelItems(float t, float duration, Vector3f v[], int arrSize)
+Vector3f SplineVel(float t, float duration, Vector3f v[], int arrSize)
 {
 	Vector3f splineVel;
 	int div = arrSize - 1;
@@ -425,32 +399,6 @@ Vector3f SplineVelItems(float t, float duration, Vector3f v[], int arrSize)
 
 	return splineVel * (float(div) / duration);
 }
-
-
-Vector3f SplineVelVectors(float t, float duration, Vector3f* v[], int arrSize)
-{
-	Vector3f splineVel;
-	int div = arrSize - 1;
-
-	if (div < 1)
-		return splineVel;
-
-	if (div == 1)
-		return (*v[1] - *v[0]) * (1.0f / duration);
-
-	int index = int(t * div);
-	float tp = (t * div) - index;
-
-	if (!index)
-		splineVel = SplineStartDerivative(*v[index], *v[index + 1], *v[index + 2], tp);
-	else if (index + 1 == div)
-		splineVel = SplineEndDerivative(*v[index - 1], *v[index], *v[index + 1], tp);
-	else
-		splineVel = SplineDerivative(*v[index - 1], *v[index], *v[index + 1], *v[index + 2], tp);
-
-	return splineVel * (float(div) / duration);
-}
-
 
 int Clamp(int x, int min, int max)
 {
