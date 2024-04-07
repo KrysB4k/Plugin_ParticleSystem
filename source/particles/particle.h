@@ -56,7 +56,7 @@ struct Vector3s final : public LuaObjectClassRotation
 	virtual short GetX() override;
 	virtual short GetY() override;
 	virtual short GetZ() override;
-	virtual Vector3s GetVector() override;
+	virtual explicit operator Vector3s() override;
 };
 
 struct Vector3i final : public LuaObjectClass

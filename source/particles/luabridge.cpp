@@ -1605,12 +1605,12 @@ void LuaObjectFunction::NewIndex(const char* field)
 
 const char* LuaObjectClassPosition::Name()
 {
-	return "Vector3f or ItemPos";
+	return Vector3f::Name();
 }
 
 const char* LuaObjectClassRotation::Name()
 {
-	return "Vector3s or ItemRot";
+	return Vector3s::Name();
 }
 
 const char* Vector3f::Name()
@@ -1697,11 +1697,6 @@ float Vector3f::GetZ()
 	return z;
 }
 
-Vector3f Vector3f::GetVector()
-{
-	return *this;
-}
-
 const char* Vector3s::Name()
 {
 	return "Vector3s";
@@ -1786,14 +1781,14 @@ short Vector3s::GetZ()
 	return z;
 }
 
-Vector3s Vector3s::GetVector()
+Vector3s::operator Vector3s()
 {
 	return *this;
 }
 
 const char* LuaItemInfoPos::Name()
 {
-	return "ItemPos";
+	return Vector3f::Name();
 }
 
 void LuaItemInfoPos::Index(const char* field)
@@ -1875,14 +1870,14 @@ float LuaItemInfoPos::GetZ()
 	return pos->zPos;
 }
 
-Vector3f LuaItemInfoPos::GetVector()
+LuaItemInfoPos::operator Vector3f()
 {
 	return Vector3f(pos->xPos, pos->yPos, pos->zPos);
 }
 
 const char* LuaItemInfoRot::Name()
 {
-	return "ItemRot";
+	return Vector3s::Name();
 }
 
 void LuaItemInfoRot::Index(const char* field)
@@ -1964,7 +1959,7 @@ short LuaItemInfoRot::GetZ()
 	return pos->zRot;
 }
 
-Vector3s LuaItemInfoRot::GetVector()
+LuaItemInfoRot::operator Vector3s()
 {
 	return Vector3s(pos->xRot, pos->yRot, pos->zRot);
 }
@@ -2378,7 +2373,7 @@ void BaseParticle::NewIndex(const char* field)
 		case 'a':
 			if (!strcmp(field, "accel"))
 			{
-				accel = GetData<LuaObjectClassPosition>(-1)->GetVector();
+				accel = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));
 				return;
 			}
 			break;
@@ -2415,7 +2410,7 @@ void BaseParticle::NewIndex(const char* field)
 		case 'p':
 			if (!strcmp(field, "pos"))
 			{
-				pos = GetData<LuaObjectClassPosition>(-1)->GetVector();
+				pos = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));
 				return;
 			}
 			break;
@@ -2433,7 +2428,7 @@ void BaseParticle::NewIndex(const char* field)
 		case 'v':
 			if (!strcmp(field, "vel"))
 			{
-				vel = GetData<LuaObjectClassPosition>(-1)->GetVector();
+				vel = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));
 				return;
 			}
 			break;
@@ -2702,12 +2697,12 @@ void MeshParticle::NewIndex(const char* field)
 		case 'r':
 			if (!strcmp(field, "rot"))
 			{
-				rot = GetData<LuaObjectClassRotation>(-1)->GetVector();
+				rot = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 				return;
 			}
 			if (!strcmp(field, "rotVel"))
 			{
-				rotVel = GetData<LuaObjectClassRotation>(-1)->GetVector();
+				rotVel = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 				return;
 			}
 			break;
@@ -3082,8 +3077,8 @@ int CbrtFunction::Call()
 
 int CheckDistFastFunction::Call()
 {
-	auto vec1 = GetData<LuaObjectClassPosition>(1)->GetVector();
-	auto vec2 = GetData<LuaObjectClassPosition>(2)->GetVector();
+	Vector3f vec1 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
+	Vector3f vec2 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float dist = GetNumber(3);
 	Script::PushInteger(CheckDistFast(vec1, vec2, dist));
 	return 1;
@@ -3204,7 +3199,7 @@ int CreateVectorFunction::Call()
 
 int FindNearestTargetFunction::Call()
 {
-	auto vec = GetData<LuaObjectClassPosition>(1)->GetVector();
+	Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
 	float radius = GetNumber(2);
 	std::vector<short> slotList(GetTable(3));
 	for (int i = 0; i < slotList.size(); i++)
@@ -3224,8 +3219,8 @@ int GetColorFromHSVFunction::Call()
 
 int GetDistanceFunction::Call()
 {
-	auto vec1 = GetData<LuaObjectClassPosition>(1)->GetVector();
-	auto vec2 = GetData<LuaObjectClassPosition>(2)->GetVector();
+	Vector3f vec1 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
+	Vector3f vec2 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	Script::PushNumber(RealDist(vec1, vec2));
 	return 1;
 }
@@ -3303,7 +3298,7 @@ int MeshAlignVelocityFunction::Call()
 int MeshLookAtTargetFunction::Call()
 {
 	auto part = GetData<MeshParticle>(1);
-	auto vector = GetData<LuaObjectClassPosition>(2)->GetVector();
+	Vector3f vector = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float factor = GetClampedNumber(3, 0.0, 1.0f, false);
 	bool invert = GetBoolean(4);
 	part->AlignToTarget(vector, factor, invert);
@@ -3550,7 +3545,7 @@ int ParticleDetachFunction::Call()
 int ParticleFollowTargetFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto vect = GetData<LuaObjectClassPosition>(2)->GetVector();
+	Vector3f vect = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float maxSpeed = GetNumber(3);
 	float distInner = GetNumber(4);
 	float distOuter = GetNumber(5);
@@ -3670,7 +3665,7 @@ int SplinePosVectorsFunction::Call()
 	float t = GetNumber(1);
 	std::vector<Vector3f> vecList(GetTable(2));
 	for (int i = 0; i < vecList.size(); i++)
-		vecList[i] = GetData<LuaObjectClassPosition>(i + 3)->GetVector();
+		vecList[i] = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(i + 3));
 	Vector3f vec = SplinePos(t, vecList.data(), vecList.size());
 	ConstructManagedData<Vector3f>(vec);
 	return 1;
@@ -3693,7 +3688,7 @@ int SplineVelVectorsFunction::Call()
 	float duration = GetNumber(2);
 	std::vector<Vector3f> vecList(GetTable(3));
 	for (int i = 0; i < vecList.size(); i++)
-		vecList[i] = GetData<LuaObjectClassPosition>(i + 4)->GetVector();
+		vecList[i] = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(i + 4));
 	Vector3f vec = SplineVel(t, duration, vecList.data(), vecList.size());
 	ConstructManagedData<Vector3f>(vec);
 	return 1;
@@ -3708,7 +3703,7 @@ int SqrtFunction::Call()
 int TestCollisionSpheresFunction::Call()
 {
 	auto item = &items[GetItemIndex(1)];
-	auto vec = GetData<LuaObjectClassPosition>(2)->GetVector();
+	Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float radius = GetNumber(3);
 	Script::PushInteger(TestCollisionSpheres(item, vec, radius));
 	return 1;
