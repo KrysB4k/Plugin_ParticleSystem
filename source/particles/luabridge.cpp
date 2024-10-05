@@ -239,6 +239,7 @@ namespace LuaGlobals
 	GetColorFromHSVFunction GetColorFromHSVFunc;
 	GetDistanceFunction GetDistanceFunc;
 	GetGameTickFunction GetGameTickFunc;
+	GetItemInfoFunction GetItemInfoFunc;
 	GetItemJointPosFunction GetItemJointPosFunc;
 	GetItemRoomFunction GetItemRoomFunc;
 	GetLaraIndexFunction GetLaraIndexFunc;
@@ -346,6 +347,8 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &GetGameTickFunc;
 		if (!strcmp(field, "getItemJointPosition"))
 			return &GetItemJointPosFunc;
+		if (!strcmp(field, "getItemInfo"))
+			return &GetItemInfoFunc;
 		if (!strcmp(field, "getItemRoom"))
 			return &GetItemRoomFunc;
 		if (!strcmp(field, "getLaraIndex"))
@@ -1575,14 +1578,14 @@ int LuaObjectClass::Call()
 void LuaObjectClass::Index(const char* field)
 {
 	if (field)
-		Script::ThrowError(FormatString("attempt to access inexistent field %s", field));
+		Script::ThrowError(FormatString("attempt to access inexistent field \"%s\"", field));
 	Script::ThrowError("attempt to index a data object");
 }
 
 void LuaObjectClass::NewIndex(const char* field)
 {
 	if (field)
-		Script::ThrowError(FormatString("attempt to access inexistent field %s", field));
+		Script::ThrowError(FormatString("attempt to access inexistent field \"%s\"", field));
 	Script::ThrowError("attempt to index a data object");
 }
 
@@ -1600,73 +1603,14 @@ void LuaObjectFunction::NewIndex(const char* field)
 	Script::ThrowError("attempt to index a function object");
 }
 
-const char* ColorRGB::Name()
+const char* LuaObjectClassPosition::Name()
 {
-	return "ColorRGB";
+	return Vector3f::Name();
 }
 
-void ColorRGB::Index(const char* field)
+const char* LuaObjectClassRotation::Name()
 {
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'b':
-			if (!strcmp(field, "b"))
-			{
-				Script::PushNumber((float)B / 255);
-				return;
-			}
-			break;
-		case 'g':
-			if (!strcmp(field, "g"))
-			{
-				Script::PushNumber((float)G / 255);
-				return;
-			}
-			break;
-		case 'r':
-			if (!strcmp(field, "r"))
-			{
-				Script::PushNumber((float)R / 255);
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::Index(field);
-}
-
-void ColorRGB::NewIndex(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'b':
-			if (!strcmp(field, "b"))
-			{
-				B = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
-				return;
-			}
-			break;
-		case 'g':
-			if (!strcmp(field, "g"))
-			{
-				G = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
-				return;
-			}
-			break;
-		case 'r':
-			if (!strcmp(field, "r"))
-			{
-				R = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::NewIndex(field);
+	return Vector3s::Name();
 }
 
 const char* Vector3f::Name()
@@ -1738,6 +1682,21 @@ void Vector3f::NewIndex(const char* field)
 	LuaObjectClass::NewIndex(field);
 }
 
+float Vector3f::GetX()
+{
+	return x;
+}
+
+float Vector3f::GetY()
+{
+	return y;
+}
+
+float Vector3f::GetZ()
+{
+	return z;
+}
+
 const char* Vector3s::Name()
 {
 	return "Vector3s";
@@ -1807,6 +1766,204 @@ void Vector3s::NewIndex(const char* field)
 	LuaObjectClass::NewIndex(field);
 }
 
+short Vector3s::GetX()
+{
+	return x;
+}
+
+short Vector3s::GetY()
+{
+	return y;
+}
+
+short Vector3s::GetZ()
+{
+	return z;
+}
+
+Vector3s::operator Vector3s()
+{
+	return *this;
+}
+
+const char* LuaItemInfoPos::Name()
+{
+	return Vector3f::Name();
+}
+
+void LuaItemInfoPos::Index(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'x':
+			if (!strcmp(field, "x"))
+			{
+				Script::PushNumber(pos->xPos);
+				return;
+			}
+			break;
+		case 'y':
+			if (!strcmp(field, "y"))
+			{
+				Script::PushNumber(pos->yPos);
+				return;
+			}
+			break;
+		case 'z':
+			if (!strcmp(field, "z"))
+			{
+				Script::PushNumber(pos->zPos);
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::Index(field);
+}
+
+void LuaItemInfoPos::NewIndex(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'x':
+			if (!strcmp(field, "x"))
+			{
+				pos->xPos = GetNumber(-1);
+				return;
+			}
+			break;
+		case 'y':
+			if (!strcmp(field, "y"))
+			{
+				pos->yPos = GetNumber(-1);
+				return;
+			}
+			break;
+		case 'z':
+			if (!strcmp(field, "z"))
+			{
+				pos->zPos = GetNumber(-1);
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::NewIndex(field);
+}
+
+float LuaItemInfoPos::GetX()
+{
+	return pos->xPos;
+}
+
+float LuaItemInfoPos::GetY()
+{
+	return pos->yPos;
+}
+
+float LuaItemInfoPos::GetZ()
+{
+	return pos->zPos;
+}
+
+LuaItemInfoPos::operator Vector3f()
+{
+	return Vector3f(pos->xPos, pos->yPos, pos->zPos);
+}
+
+const char* LuaItemInfoRot::Name()
+{
+	return Vector3s::Name();
+}
+
+void LuaItemInfoRot::Index(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'x':
+			if (!strcmp(field, "x"))
+			{
+				Script::PushNumber(ShortToRad(pos->xRot));
+				return;
+			}
+			break;
+		case 'y':
+			if (!strcmp(field, "y"))
+			{
+				Script::PushNumber(ShortToRad(pos->yRot));
+				return;
+			}
+			break;
+		case 'z':
+			if (!strcmp(field, "z"))
+			{
+				Script::PushNumber(ShortToRad(pos->zRot));
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::Index(field);
+}
+
+void LuaItemInfoRot::NewIndex(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'x':
+			if (!strcmp(field, "x"))
+			{
+				pos->xRot = RadToShort(GetNumber(-1));
+				return;
+			}
+			break;
+		case 'y':
+			if (!strcmp(field, "y"))
+			{
+				pos->yRot = RadToShort(GetNumber(-1));
+				return;
+			}
+			break;
+		case 'z':
+			if (!strcmp(field, "z"))
+			{
+				pos->zRot = RadToShort(GetNumber(-1));
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::NewIndex(field);
+}
+
+short LuaItemInfoRot::GetX()
+{
+	return pos->xRot;
+}
+
+short LuaItemInfoRot::GetY()
+{
+	return pos->yRot;
+}
+
+short LuaItemInfoRot::GetZ()
+{
+	return pos->zRot;
+}
+
+LuaItemInfoRot::operator Vector3s()
+{
+	return Vector3s(pos->xRot, pos->yRot, pos->zRot);
+}
+
 const char* Vector3i::Name()
 {
 	return "Vector3i";
@@ -1868,6 +2025,75 @@ void Vector3i::NewIndex(const char* field)
 			if (!strcmp(field, "z"))
 			{
 				z = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::NewIndex(field);
+}
+
+const char* ColorRGB::Name()
+{
+	return "ColorRGB";
+}
+
+void ColorRGB::Index(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'b':
+			if (!strcmp(field, "b"))
+			{
+				Script::PushNumber((float)B / 255);
+				return;
+			}
+			break;
+		case 'g':
+			if (!strcmp(field, "g"))
+			{
+				Script::PushNumber((float)G / 255);
+				return;
+			}
+			break;
+		case 'r':
+			if (!strcmp(field, "r"))
+			{
+				Script::PushNumber((float)R / 255);
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::Index(field);
+}
+
+void ColorRGB::NewIndex(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'b':
+			if (!strcmp(field, "b"))
+			{
+				B = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
+				return;
+			}
+			break;
+		case 'g':
+			if (!strcmp(field, "g"))
+			{
+				G = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
+				return;
+			}
+			break;
+		case 'r':
+			if (!strcmp(field, "r"))
+			{
+				R = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
 				return;
 			}
 			break;
@@ -2147,7 +2373,7 @@ void BaseParticle::NewIndex(const char* field)
 		case 'a':
 			if (!strcmp(field, "accel"))
 			{
-				accel = *GetData<Vector3f>(-1);
+				accel = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));
 				return;
 			}
 			break;
@@ -2184,7 +2410,7 @@ void BaseParticle::NewIndex(const char* field)
 		case 'p':
 			if (!strcmp(field, "pos"))
 			{
-				pos = *GetData<Vector3f>(-1);
+				pos = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));
 				return;
 			}
 			break;
@@ -2202,7 +2428,7 @@ void BaseParticle::NewIndex(const char* field)
 		case 'v':
 			if (!strcmp(field, "vel"))
 			{
-				vel = *GetData<Vector3f>(-1);
+				vel = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));
 				return;
 			}
 			break;
@@ -2471,12 +2697,12 @@ void MeshParticle::NewIndex(const char* field)
 		case 'r':
 			if (!strcmp(field, "rot"))
 			{
-				rot = *GetData<Vector3s>(-1);
+				rot = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 				return;
 			}
 			if (!strcmp(field, "rotVel"))
 			{
-				rotVel = *GetData<Vector3s>(-1);
+				rotVel = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 				return;
 			}
 			break;
@@ -2502,6 +2728,273 @@ void MeshParticle::NewIndex(const char* field)
 		}
 	}
 	BaseParticle::NewIndex(field);
+}
+
+const char* LuaItemInfoWrapper::Name()
+{
+	return "ItemInfo";
+}
+
+void LuaItemInfoWrapper::Index(const char* field)
+{
+	if (field && itemptr)
+	{
+		switch (field[0])
+		{
+		case 'a':
+			if (!strcmp(field, "animNumber"))
+			{
+				int anim = itemptr->anim_number - objects[itemptr->object_number].anim_index;
+				Script::PushInteger(anim);
+				return;
+			}
+			break;
+		case 'c':
+			if (!strcmp(field, "currentAnimState"))
+			{
+				Script::PushInteger(itemptr->current_anim_state);
+				return;
+			}
+			break;
+		case 'f':
+			if (!strcmp(field, "fallSpeed"))
+			{
+				Script::PushInteger(itemptr->fallspeed);
+				return;
+			}
+			if (!strcmp(field, "floorDistance"))
+			{
+				Script::PushInteger(itemptr->floor);
+				return;
+			}
+			if (!strcmp(field, "frameNumber"))
+			{
+				int frame = itemptr->frame_number - anims[itemptr->anim_number].frame_base;
+				Script::PushInteger(frame);
+				return;
+			}
+			break;
+		case 'g':
+			if (!strcmp(field, "goalAnimState"))
+			{
+				Script::PushInteger(itemptr->goal_anim_state);
+				return;
+			}
+			break;
+		case 'h':
+			if (!strcmp(field, "hitPoints"))
+			{
+				Script::PushInteger(itemptr->hit_points);
+				return;
+			}
+			break;
+		case 'i':
+			if (!strcmp(field, "itemFlag1"))
+			{
+				Script::PushInteger(itemptr->item_flags[0]);
+				return;
+			}
+			if (!strcmp(field, "itemFlag2"))
+			{
+				Script::PushInteger(itemptr->item_flags[1]);
+				return;
+			}
+			if (!strcmp(field, "itemFlag3"))
+			{
+				Script::PushInteger(itemptr->item_flags[2]);
+				return;
+			}
+			if (!strcmp(field, "itemFlag4"))
+			{
+				Script::PushInteger(itemptr->item_flags[3]);
+				return;
+			}
+			break;
+		case 'm':
+			if (!strcmp(field, "meshBits"))
+			{
+				Script::PushInteger(itemptr->mesh_bits);
+				return;
+			}
+			break;
+		case 'o':
+			if (!strcmp(field, "ocbNumber"))
+			{
+				Script::PushInteger(itemptr->trigger_flags);
+				return;
+			}
+			break;
+		case 'p':
+			if (!strcmp(field, "pos"))
+			{
+				ConstructManagedData<LuaItemInfoPos>(&itemptr->pos);
+				return;
+			}
+		case 'r':
+			if (!strcmp(field, "roomNumber"))
+			{
+				Script::PushInteger(itemptr->room_number);
+				return;
+			}
+			if (!strcmp(field, "rot"))
+			{
+				ConstructManagedData<LuaItemInfoRot>(&itemptr->pos);
+				return;
+			}
+			break;
+		case 's':
+			if (!strcmp(field, "slotNumber"))
+			{
+				Script::PushInteger(itemptr->object_number);
+				return;
+			}
+			if (!strcmp(field, "speed"))
+			{
+				Script::PushInteger(itemptr->speed);
+				return;
+			}
+			break;
+		case 't':
+			if (!strcmp(field, "triggered"))
+			{
+				Script::PushBoolean(TriggerActive((StrItemTr4*)itemptr));
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::Index(field);
+}
+
+void LuaItemInfoWrapper::NewIndex(const char* field)
+{
+	if (field && itemptr)
+	{
+		switch (field[0])
+		{
+		case 'a':
+			if (!strcmp(field, "animNumber"))
+			{
+				int anim = GetClampedInteger(-1, 0, 1000, false) + objects[itemptr->object_number].anim_index;
+				itemptr->anim_number = anim;
+				itemptr->frame_number = anims[itemptr->anim_number].frame_base;
+				return;
+			}
+			break;
+		case 'c':
+			if (!strcmp(field, "currentAnimState"))
+			{
+				itemptr->current_anim_state = GetClampedInteger(-1, 0, 32767, false);
+				return;
+			}
+			break;
+		case 'f':
+			if (!strcmp(field, "fallSpeed"))
+			{
+				itemptr->fallspeed = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			if (!strcmp(field, "floorDistance"))
+			{
+				ReadOnlyFieldError(field);
+			}
+			if (!strcmp(field, "frameNumber"))
+			{
+				int maxFrames = anims[itemptr->anim_number].frame_end - anims[itemptr->anim_number].frame_base;
+				int frame = GetClampedInteger(-1, 0, maxFrames - 1, false);
+				itemptr->frame_number = anims[itemptr->anim_number].frame_base + frame;
+				return;
+			}
+			break;
+		case 'g':
+			if (!strcmp(field, "goalAnimState"))
+			{
+				itemptr->goal_anim_state = GetClampedInteger(-1, 0, 32767, false);
+				return;
+			}
+			break;
+		case 'h':
+			if (!strcmp(field, "hitPoints"))
+			{
+				itemptr->hit_points = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			break;
+		case 'i':
+			if (!strcmp(field, "itemFlag1"))
+			{
+				itemptr->item_flags[0] = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			if (!strcmp(field, "itemFlag2"))
+			{
+				itemptr->item_flags[1] = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			if (!strcmp(field, "itemFlag3"))
+			{
+				itemptr->item_flags[2] = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			if (!strcmp(field, "itemFlag4"))
+			{
+				itemptr->item_flags[3] = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			break;
+		case 'm':
+			if (!strcmp(field, "meshBits"))
+			{
+				ReadOnlyFieldError(field);
+			}
+			break;
+		case 'o':
+			if (!strcmp(field, "ocbNumber"))
+			{
+				itemptr->trigger_flags = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			break;
+		case 'p':
+			if (!strcmp(field, "pos"))
+			{
+				auto position = GetData<LuaObjectClassPosition>(-1);
+				itemptr->pos.xPos = Round(position->GetX());
+				itemptr->pos.yPos = Round(position->GetY());
+				itemptr->pos.zPos = Round(position->GetZ());
+				return;
+			}
+			break;
+		case 'r':
+			if (!strcmp(field, "roomNumber"))
+			{
+				ReadOnlyFieldError(field);
+			}
+			if (!strcmp(field, "rot"))
+			{
+				auto rotation = GetData<LuaObjectClassRotation>(-1);
+				itemptr->pos.xRot = rotation->GetX();
+				itemptr->pos.yRot = rotation->GetY();
+				itemptr->pos.zRot = rotation->GetZ();
+				return;
+			}
+			break;
+		case 's':
+			if (!strcmp(field, "speed"))
+			{
+				itemptr->speed = GetClampedInteger(-1, -32768, 32767, false);
+				return;
+			}
+			break;
+		case 't':
+			if (!strcmp(field, "triggered"))
+			{
+				ReadOnlyFieldError(field);
+			}
+			break;
+		}
+	}
+	LuaObjectClass::NewIndex(field);
 }
 
 const char* Noise::Name()
@@ -2584,10 +3077,10 @@ int CbrtFunction::Call()
 
 int CheckDistFastFunction::Call()
 {
-	auto vec1 = GetData<Vector3f>(1);
-	auto vec2 = GetData<Vector3f>(2);
+	Vector3f vec1 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
+	Vector3f vec2 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float dist = GetNumber(3);
-	Script::PushInteger(CheckDistFast(*vec1, *vec2, dist));
+	Script::PushInteger(CheckDistFast(vec1, vec2, dist));
 	return 1;
 }
 
@@ -2706,12 +3199,12 @@ int CreateVectorFunction::Call()
 
 int FindNearestTargetFunction::Call()
 {
-	auto vec = GetData<Vector3f>(1);
+	Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
 	float radius = GetNumber(2);
 	std::vector<short> slotList(GetTable(3));
 	for (int i = 0; i < slotList.size(); i++)
 		slotList[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
-	Script::PushInteger(FindNearestTarget(*vec, radius, slotList.data(), slotList.size()));
+	Script::PushInteger(FindNearestTarget(vec, radius, slotList.data(), slotList.size()));
 	return 1;
 }
 
@@ -2726,15 +3219,21 @@ int GetColorFromHSVFunction::Call()
 
 int GetDistanceFunction::Call()
 {
-	auto vec1 = GetData<Vector3f>(1);
-	auto vec2 = GetData<Vector3f>(2);
-	Script::PushNumber(RealDist(*vec1, *vec2));
+	Vector3f vec1 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
+	Vector3f vec2 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
+	Script::PushNumber(RealDist(vec1, vec2));
 	return 1;
 }
 
 int GetGameTickFunction::Call()
 {
 	Script::PushInteger(ParticleFactory::gameTick);
+	return 1;
+}
+
+int GetItemInfoFunction::Call()
+{
+	ConstructManagedData<LuaItemInfoWrapper>(&items[GetItemIndex(1)]);
 	return 1;
 }
 
@@ -2799,10 +3298,10 @@ int MeshAlignVelocityFunction::Call()
 int MeshLookAtTargetFunction::Call()
 {
 	auto part = GetData<MeshParticle>(1);
-	auto vector = GetData<Vector3f>(2);
+	Vector3f vector = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float factor = GetClampedNumber(3, 0.0, 1.0f, false);
 	bool invert = GetBoolean(4);
-	part->AlignToTarget(*vector, factor, invert);
+	part->AlignToTarget(vector, factor, invert);
 	return 0;
 }
 
@@ -3046,11 +3545,11 @@ int ParticleDetachFunction::Call()
 int ParticleFollowTargetFunction::Call()
 {
 	auto part = GetData<BaseParticle>(1);
-	auto vect = GetData<Vector3f>(2);
+	Vector3f vect = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float maxSpeed = GetNumber(3);
 	float distInner = GetNumber(4);
 	float distOuter = GetNumber(5);
-	part->vel = part->FollowTarget(*vect, maxSpeed, distInner, distOuter);
+	part->vel = part->FollowTarget(vect, maxSpeed, distInner, distOuter);
 	return 0;
 }
 
@@ -3120,7 +3619,7 @@ int RoundFunction::Call()
 
 int SelectItemFunction::Call()
 {
-	Trng.pGlobTomb4->ItemIndexSelected = Trng.pGlobTomb4->IndiceItemCondizione = GetInteger(1);
+	Trng.pGlobTomb4->ItemIndexSelected = Trng.pGlobTomb4->IndiceItemCondizione = GetItemIndex(1);
 	return 0;
 }
 
@@ -3132,13 +3631,13 @@ int SinFunction::Call()
 
 int SoundEffectFunction::Call()
 {
-	int sampleIndex = GetInteger(1);
+	int sfxIndex = GetInteger(1);
 	int x = GetInteger(2);
 	int y = GetInteger(3);
 	int z = GetInteger(4);
 	int flags = GetInteger(5);
 	auto vec = phd_vector(x, y, z);
-	SoundEffect(sampleIndex, &vec, flags);
+	SoundEffect(sfxIndex, &vec, flags);
 	return 0;
 }
 
@@ -3157,17 +3656,17 @@ int SplinePosItemsFunction::Call()
 	std::vector<Vector3f> vecList(GetTable(2));
 	for (int i = 0; i < vecList.size(); i++)
 		vecList[i] = GetItemPos(i + 3);
-	ConstructManagedData<Vector3f>(SplinePosItems(t, vecList.data(), vecList.size()));
+	ConstructManagedData<Vector3f>(SplinePos(t, vecList.data(), vecList.size()));
 	return 1;
 }
 
 int SplinePosVectorsFunction::Call()
 {
 	float t = GetNumber(1);
-	std::vector<Vector3f*> vecList(GetTable(2));
+	std::vector<Vector3f> vecList(GetTable(2));
 	for (int i = 0; i < vecList.size(); i++)
-		vecList[i] = GetData<Vector3f>(i + 3);
-	Vector3f vec = SplinePosVectors(t, vecList.data(), vecList.size());
+		vecList[i] = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(i + 3));
+	Vector3f vec = SplinePos(t, vecList.data(), vecList.size());
 	ConstructManagedData<Vector3f>(vec);
 	return 1;
 }
@@ -3179,7 +3678,7 @@ int SplineVelItemsFunction::Call()
 	std::vector<Vector3f> vecList(GetTable(3));
 	for (int i = 0; i < vecList.size(); i++)
 		vecList[i] = GetItemPos(i + 4);
-	ConstructManagedData<Vector3f>(SplineVelItems(t, duration, vecList.data(), vecList.size()));
+	ConstructManagedData<Vector3f>(SplineVel(t, duration, vecList.data(), vecList.size()));
 	return 1;
 }
 
@@ -3187,10 +3686,10 @@ int SplineVelVectorsFunction::Call()
 {
 	float t = GetNumber(1);
 	float duration = GetNumber(2);
-	std::vector<Vector3f*> vecList(GetTable(3));
+	std::vector<Vector3f> vecList(GetTable(3));
 	for (int i = 0; i < vecList.size(); i++)
-		vecList[i] = GetData<Vector3f>(i + 4);
-	Vector3f vec = SplineVelVectors(t, duration, vecList.data(), vecList.size());
+		vecList[i] = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(i + 4));
+	Vector3f vec = SplineVel(t, duration, vecList.data(), vecList.size());
 	ConstructManagedData<Vector3f>(vec);
 	return 1;
 }
@@ -3204,9 +3703,9 @@ int SqrtFunction::Call()
 int TestCollisionSpheresFunction::Call()
 {
 	auto item = &items[GetItemIndex(1)];
-	auto vec = GetData<Vector3f>(2);
+	Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 	float radius = GetNumber(3);
-	Script::PushInteger(TestCollisionSpheres(item, *vec, radius));
+	Script::PushInteger(TestCollisionSpheres(item, vec, radius));
 	return 1;
 }
 

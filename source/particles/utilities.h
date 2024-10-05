@@ -34,13 +34,9 @@ int TestForWall(int x, int y, int z, short* room);
 
 Vector3f GetSlopeNormal(Tr4FloorInfo *floor, int x, int y, int z);
 
-Vector3f SplinePosItems(float t, Vector3f v[], int arrSize);
+Vector3f SplinePos(float t, Vector3f v[], int arrSize);
 
-Vector3f SplinePosVectors(float t, Vector3f* v[], int arrSize);
-
-Vector3f SplineVelItems(float t, float duration, Vector3f v[], int arrSize);
-
-Vector3f SplineVelVectors(float t, float duration, Vector3f* v[], int arrSize);
+Vector3f SplineVel(float t, float duration, Vector3f v[], int arrSize);
 
 int Clamp(int x, int min, int max);
 

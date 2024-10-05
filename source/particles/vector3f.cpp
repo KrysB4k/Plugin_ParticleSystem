@@ -38,6 +38,11 @@ Vector3f& Vector3f::operator*= (float a)
 	return *this;
 }
 
+Vector3f::operator Vector3f()
+{
+	return *this;
+}
+
 float Vector3f::magnitude() const
 {
 	return sqrt(x*x + y*y + z*z);
