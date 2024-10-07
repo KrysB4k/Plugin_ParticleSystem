@@ -282,6 +282,7 @@ namespace LuaGlobals
 	TestCollisionSpheresFunction TestCollisionSpheresFunc;
 	TriggerDynamicFunction TriggerDynamicFunc;
 	TriggerShockwaveFunction TriggerShockwaveFunc;
+	TrngVarWrapper TrngVars;
 }
 
 LuaObject* LuaGlobals::RetrieveFunction(const char* field)
@@ -447,6 +448,14 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &TriggerShockwaveFunc;
 		break;
 	}
+	return nullptr;
+}
+
+LuaObject* LuaGlobals::RetrieveTrngVars(const char* field)
+{
+	if (!strcmp(field, "Vars"))
+		return &TrngVars;
+
 	return nullptr;
 }
 
@@ -2997,6 +3006,630 @@ void LuaItemInfoWrapper::NewIndex(const char* field)
 	LuaObjectClass::NewIndex(field);
 }
 
+void TrngVarWrapper::Index(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'C':
+			if (!strcmp(field, "CurrentValue"))
+			{
+				Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.CurrentValue);
+				return;
+			}
+			break;
+
+		case 'G':
+			switch (field[6])
+			{
+			case 'B':
+				switch (field[10])
+				{
+				case 'A':
+					if (!strcmp(field, "GlobalByteAlfa1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte1);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteAlfa2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte2);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteAlfa3"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte3);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteAlfa4"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte4);
+						return;
+					}
+					break;
+
+				case 'B':
+					if (!strcmp(field, "GlobalByteBeta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte1);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteBeta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte2);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteBeta3"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte3);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteBeta4"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte4);
+						return;
+					}
+					break;
+
+				case 'D':
+					if (!strcmp(field, "GlobalByteDelta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte1);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteDelta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte2);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteDelta3"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte3);
+						return;
+					}
+					if (!strcmp(field, "GlobalByteDelta4"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte4);
+						return;
+					}
+					break;
+				}
+
+			case 'L':
+				if (!strcmp(field, "GlobalLongAlfa"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Long);
+					return;
+				}
+				if (!strcmp(field, "GlobalLongBeta"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Long);
+					return;
+				}
+				if (!strcmp(field, "GlobalLongDelta"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Long);
+					return;
+				}
+				if (!strcmp(field, "GlobalLongTimer"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Timer);
+					return;
+				}
+				break;
+
+			case 'S':
+				switch (field[11])
+				{
+				case 'A':
+					if (!strcmp(field, "GlobalShortAlfa1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short1);
+						return;
+					}
+					if (!strcmp(field, "GlobalShortAlfa2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short2);
+						return;
+					}
+					break;
+
+				case 'B':
+					if (!strcmp(field, "GlobalShortBeta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short1);
+						return;
+					}
+					if (!strcmp(field, "GlobalShortBeta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short2);
+						return;
+					}
+					break;
+
+				case 'D':
+					if (!strcmp(field, "GlobalShortDelta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short1);
+						return;
+					}
+					if (!strcmp(field, "GlobalShortDelta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short2);
+						return;
+					}
+					break;
+				}
+			}
+			break;
+
+		case 'L':
+			switch (field[5])
+			{
+			case 'B':
+				switch (field[9])
+				{
+				case 'A':
+					if (!strcmp(field, "LocalByteAlfa1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte1);
+						return;
+					}
+					if (!strcmp(field, "LocalByteAlfa2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte2);
+						return;
+					}
+					if (!strcmp(field, "LocalByteAlfa3"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte3);
+						return;
+					}
+					if (!strcmp(field, "LocalByteAlfa4"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte4);
+						return;
+					}
+					break;
+
+				case 'B':
+					if (!strcmp(field, "LocalByteBeta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte1);
+						return;
+					}
+					if (!strcmp(field, "LocalByteBeta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte2);
+						return;
+					}
+					if (!strcmp(field, "LocalByteBeta3"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte3);
+						return;
+					}
+					if (!strcmp(field, "LocalByteBeta4"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte4);
+						return;
+					}
+					break;
+
+				case 'D':
+					if (!strcmp(field, "LocalByteDelta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte1);
+						return;
+					}
+					if (!strcmp(field, "LocalByteDelta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte2);
+						return;
+					}
+					if (!strcmp(field, "LocalByteDelta3"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte3);
+						return;
+					}
+					if (!strcmp(field, "LocalByteDelta4"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte4);
+						return;
+					}
+					break;
+				}
+
+			case 'L':
+				if (!strcmp(field, "LocalLongAlfa"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Long);
+					return;
+				}
+				if (!strcmp(field, "LocalLongBeta"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Long);
+					return;
+				}
+				if (!strcmp(field, "LocalLongDelta"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Long);
+					return;
+				}
+				if (!strcmp(field, "LocalLongTimer"))
+				{
+					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Timer);
+					return;
+				}
+				break;
+
+			case 'S':
+				switch (field[10])
+				{
+				case 'A':
+					if (!strcmp(field, "LocalShortAlfa1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short1);
+						return;
+					}
+					if (!strcmp(field, "LocalShortAlfa2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short2);
+						return;
+					}
+					break;
+
+				case 'B':
+					if (!strcmp(field, "LocalShortBeta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short1);
+						return;
+					}
+					if (!strcmp(field, "LocalShortBeta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short2);
+						return;
+					}
+					break;
+
+				case 'D':
+					if (!strcmp(field, "LocalShortDelta1"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short1);
+						return;
+					}
+					if (!strcmp(field, "LocalShortDelta2"))
+					{
+						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short2);
+						return;
+					}
+					break;
+				}
+			}
+			break;
+		}
+	}
+
+	Script::ThrowError(FormatString("TRNG variable %s is not recognized", field));
+}
+
+void TrngVarWrapper::NewIndex(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'C':
+			if (!strcmp(field, "CurrentValue"))
+			{
+				Trng.pGlobTomb4->pBaseVariableTRNG->Globals.CurrentValue = GetInteger(-1);
+				return;
+			}
+			break;
+
+		case 'G':
+			if (strlen(field) > 11)
+			{
+				switch (field[6])
+				{
+				case 'B':
+					switch (field[10])
+					{
+					case 'A':
+						if (!strcmp(field, "GlobalByteAlfa1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteAlfa2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte2 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteAlfa3"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte3 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteAlfa4"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte4 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "GlobalByteBeta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteBeta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte2 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteBeta3"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte3 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteBeta4"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte4 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "GlobalByteDelta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteDelta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte2 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteDelta3"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte3 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteDelta4"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte4 = GetInteger(-1);
+							return;
+						}
+						break;
+					}
+					break;
+
+				case 'L':
+					if (!strcmp(field, "GlobalLongAlfa"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "GlobalLongBeta"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "GlobalLongDelta"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "GlobalLongTimer"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Timer = GetInteger(-1);
+						return;
+					}
+					break;
+
+				case 'S':
+					switch (field[11])
+					{
+					case 'A':
+						if (!strcmp(field, "GlobalShortAlfa1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalShortAlfa2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short2 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "GlobalShortBeta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalShortBeta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short2 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "GlobalShortDelta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "GlobalShortDelta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short2 = GetInteger(-1);
+							return;
+						}
+						break;
+					}
+					break;
+				}
+				break;
+			}
+			break;
+
+		case 'L':
+			if (strlen(field) > 10)
+			{
+				switch (field[5])
+				{
+				case 'B':
+					switch (field[9])
+					{
+					case 'A':
+						if (!strcmp(field, "LocalByteAlfa1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteAlfa2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte2 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteAlfa3"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte3 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteAlfa4"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte4 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "LocalByteBeta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteBeta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte2 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteBeta3"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte3 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteBeta4"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte4 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "LocalByteDelta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteDelta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte2 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteDelta3"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte3 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalByteDelta4"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte4 = GetInteger(-1);
+							return;
+						}
+						break;
+					}
+
+				case 'L':
+					if (!strcmp(field, "LocalLongAlfa"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "LocalLongBeta"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "LocalLongDelta"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "LocalLongTimer"))
+					{
+						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Timer = GetInteger(-1);
+						return;
+					}
+					break;
+
+				case 'S':
+					switch (field[10])
+					{
+					case 'A':
+						if (!strcmp(field, "LocalShortAlfa1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalShortAlfa2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short2 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "LocalShortBeta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalShortBeta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short2 = GetInteger(-1);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "LocalShortDelta1"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short1 = GetInteger(-1);
+							return;
+						}
+						if (!strcmp(field, "LocalShortDelta2"))
+						{
+							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short2 = GetInteger(-1);
+							return;
+						}
+						break;
+					}
+				}
+				break;
+			}
+			break;
+		}
+	}
+
+	Script::ThrowError(FormatString("TRNG variable %s is not recognized", field));
+}
+
 const char* Noise::Name()
 {
 	return "PerlinNoise or SimplexNoise";
@@ -3749,6 +4382,12 @@ void LuaBridge::GlobalIndex(const char* field)
 
 	if (field)
 	{
+		object = LuaGlobals::RetrieveTrngVars(field);
+		if (object)
+		{
+			Script::PushData(object);
+			return;
+		}
 		object = LuaGlobals::RetrieveFunction(field);
 		if (object)
 		{
@@ -3776,6 +4415,8 @@ void LuaBridge::GlobalNewIndex(const char* field)
 {
 	if (field)
 	{
+		if (LuaGlobals::RetrieveTrngVars(field))
+			Script::ThrowError("illegal assigment operation to TRNG vars");
 		if (LuaGlobals::RetrieveFunction(field))
 			Script::ThrowError("attempt to assign to a built-in function");
 		if (LuaGlobals::RetrieveIntegerConstant(field))

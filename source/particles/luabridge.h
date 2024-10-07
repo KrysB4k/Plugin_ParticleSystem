@@ -79,6 +79,12 @@ private:
 	Tr4ItemInfo* const itemptr;
 };
 
+struct TrngVarWrapper final : public LuaObjectClass
+{
+	virtual void Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
+
 struct LuaObjectFunction : public LuaObject
 {
 	virtual void Index(const char* field) final override;
@@ -489,8 +495,10 @@ namespace LuaGlobals
 	extern TestCollisionSpheresFunction TestCollisionSpheresFunc;
 	extern TriggerDynamicFunction TriggerDynamicFunc;
 	extern TriggerShockwaveFunction TriggerShockwaveFunc;
+	extern TrngVarWrapper TrngVars;
 
 	LuaObject* RetrieveFunction(const char* field);
+	LuaObject* RetrieveTrngVars(const char* field);
 	std::optional<int> RetrieveIntegerConstant(const char* field);
 	std::optional<float> RetrieveFloatConstant(const char* field);
 }
