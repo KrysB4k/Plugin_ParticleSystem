@@ -170,9 +170,14 @@ void Script::PushData(LuaObject* value)
 	lua_pushlightuserdata(lua, value);
 }
 
+void Script::PushString(const char* string)
+{
+	lua_pushstring(lua, string);
+}
+
 int Script::ToInteger(int argument)
 {
-	return (int)roundf(lua_tonumber(lua, ArgumentToStack(argument)));
+	return lroundf(lua_tonumber(lua, ArgumentToStack(argument)));
 }
 
 bool Script::ToBoolean(int argument)
@@ -188,6 +193,11 @@ float Script::ToNumber(int argument)
 LuaObject* Script::ToData(int argument)
 {
 	return (LuaObject*)lua_touserdata(lua, ArgumentToStack(argument));
+}
+
+const char* Script::ToString(int argument)
+{
+	return lua_tostring(lua, ArgumentToStack(argument));
 }
 
 int Script::ArgCount()
@@ -213,6 +223,11 @@ bool Script::IsNumber(int argument)
 bool Script::IsData(int argument)
 {
 	return lua_isuserdata(lua, ArgumentToStack(argument));
+}
+
+bool Script::IsString(int argument)
+{
+	return lua_isstring(lua, ArgumentToStack(argument));
 }
 
 int Script::StoreFunction(int argument)

@@ -43,6 +43,13 @@ namespace
 		return Script::StoreFunction(argument);
 	}
 
+	const char* GetLuaString(int argument)
+	{
+		if (!Script::IsString(argument))
+			Script::ThrowError("string expected");
+		return Script::ToString(argument);
+	}
+
 	int GetArgCount(int minimum, int maximum)
 	{
 		int count;
@@ -3008,6 +3015,9 @@ void LuaItemInfoWrapper::NewIndex(const char* field)
 
 void TrngVarWrapper::Index(const char* field)
 {
+	auto vars = Trng.pGlobTomb4->pBaseVariableTRNG;
+	int length = strlen(field);
+
 	if (field)
 	{
 		switch (field[0])
@@ -3015,320 +3025,13 @@ void TrngVarWrapper::Index(const char* field)
 		case 'C':
 			if (!strcmp(field, "CurrentValue"))
 			{
-				Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.CurrentValue);
+				Script::PushInteger(vars->Globals.CurrentValue);
 				return;
 			}
 			break;
 
 		case 'G':
-			switch (field[6])
-			{
-			case 'B':
-				switch (field[10])
-				{
-				case 'A':
-					if (!strcmp(field, "GlobalByteAlfa1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte1);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteAlfa2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte2);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteAlfa3"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte3);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteAlfa4"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte4);
-						return;
-					}
-					break;
-
-				case 'B':
-					if (!strcmp(field, "GlobalByteBeta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte1);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteBeta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte2);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteBeta3"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte3);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteBeta4"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte4);
-						return;
-					}
-					break;
-
-				case 'D':
-					if (!strcmp(field, "GlobalByteDelta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte1);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteDelta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte2);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteDelta3"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte3);
-						return;
-					}
-					if (!strcmp(field, "GlobalByteDelta4"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte4);
-						return;
-					}
-					break;
-				}
-
-			case 'L':
-				if (!strcmp(field, "GlobalLongAlfa"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Long);
-					return;
-				}
-				if (!strcmp(field, "GlobalLongBeta"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Long);
-					return;
-				}
-				if (!strcmp(field, "GlobalLongDelta"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Long);
-					return;
-				}
-				if (!strcmp(field, "GlobalLongTimer"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Timer);
-					return;
-				}
-				break;
-
-			case 'S':
-				switch (field[11])
-				{
-				case 'A':
-					if (!strcmp(field, "GlobalShortAlfa1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short1);
-						return;
-					}
-					if (!strcmp(field, "GlobalShortAlfa2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short2);
-						return;
-					}
-					break;
-
-				case 'B':
-					if (!strcmp(field, "GlobalShortBeta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short1);
-						return;
-					}
-					if (!strcmp(field, "GlobalShortBeta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short2);
-						return;
-					}
-					break;
-
-				case 'D':
-					if (!strcmp(field, "GlobalShortDelta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short1);
-						return;
-					}
-					if (!strcmp(field, "GlobalShortDelta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short2);
-						return;
-					}
-					break;
-				}
-			}
-			break;
-
-		case 'L':
-			switch (field[5])
-			{
-			case 'B':
-				switch (field[9])
-				{
-				case 'A':
-					if (!strcmp(field, "LocalByteAlfa1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte1);
-						return;
-					}
-					if (!strcmp(field, "LocalByteAlfa2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte2);
-						return;
-					}
-					if (!strcmp(field, "LocalByteAlfa3"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte3);
-						return;
-					}
-					if (!strcmp(field, "LocalByteAlfa4"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte4);
-						return;
-					}
-					break;
-
-				case 'B':
-					if (!strcmp(field, "LocalByteBeta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte1);
-						return;
-					}
-					if (!strcmp(field, "LocalByteBeta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte2);
-						return;
-					}
-					if (!strcmp(field, "LocalByteBeta3"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte3);
-						return;
-					}
-					if (!strcmp(field, "LocalByteBeta4"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte4);
-						return;
-					}
-					break;
-
-				case 'D':
-					if (!strcmp(field, "LocalByteDelta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte1);
-						return;
-					}
-					if (!strcmp(field, "LocalByteDelta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte2);
-						return;
-					}
-					if (!strcmp(field, "LocalByteDelta3"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte3);
-						return;
-					}
-					if (!strcmp(field, "LocalByteDelta4"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte4);
-						return;
-					}
-					break;
-				}
-
-			case 'L':
-				if (!strcmp(field, "LocalLongAlfa"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Long);
-					return;
-				}
-				if (!strcmp(field, "LocalLongBeta"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Long);
-					return;
-				}
-				if (!strcmp(field, "LocalLongDelta"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Long);
-					return;
-				}
-				if (!strcmp(field, "LocalLongTimer"))
-				{
-					Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Timer);
-					return;
-				}
-				break;
-
-			case 'S':
-				switch (field[10])
-				{
-				case 'A':
-					if (!strcmp(field, "LocalShortAlfa1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short1);
-						return;
-					}
-					if (!strcmp(field, "LocalShortAlfa2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short2);
-						return;
-					}
-					break;
-
-				case 'B':
-					if (!strcmp(field, "LocalShortBeta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short1);
-						return;
-					}
-					if (!strcmp(field, "LocalShortBeta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short2);
-						return;
-					}
-					break;
-
-				case 'D':
-					if (!strcmp(field, "LocalShortDelta1"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short1);
-						return;
-					}
-					if (!strcmp(field, "LocalShortDelta2"))
-					{
-						Script::PushInteger(Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short2);
-						return;
-					}
-					break;
-				}
-			}
-			break;
-		}
-	}
-
-	Script::ThrowError(FormatString("TRNG variable %s is not recognized", field));
-}
-
-void TrngVarWrapper::NewIndex(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'C':
-			if (!strcmp(field, "CurrentValue"))
-			{
-				Trng.pGlobTomb4->pBaseVariableTRNG->Globals.CurrentValue = GetInteger(-1);
-				return;
-			}
-			break;
-
-		case 'G':
-			if (strlen(field) > 11)
+			if (length >= 12)
 			{
 				switch (field[6])
 				{
@@ -3338,22 +3041,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'A':
 						if (!strcmp(field, "GlobalByteAlfa1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte1 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte1);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte2 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte2);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa3"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte3 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte3);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa4"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Byte4 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte4);
 							return;
 						}
 						break;
@@ -3361,22 +3064,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "GlobalByteBeta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte1 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte1);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte2 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte2);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta3"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte3 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte3);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta4"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Byte4 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte4);
 							return;
 						}
 						break;
@@ -3384,47 +3087,46 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "GlobalByteDelta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte1 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte1);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte2 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte2);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta3"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte3 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte3);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta4"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Byte4 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte4);
 							return;
 						}
 						break;
 					}
-					break;
 
 				case 'L':
 					if (!strcmp(field, "GlobalLongAlfa"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Long = GetInteger(-1);
+						Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Long);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongBeta"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Long = GetInteger(-1);
+						Script::PushInteger(vars->Globals.NumWar.Name.Beta.Long);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongDelta"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Long = GetInteger(-1);
+						Script::PushInteger(vars->Globals.NumWar.Name.Delta.Long);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongTimer"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Timer = GetInteger(-1);
+						Script::PushInteger(vars->Globals.NumWar.Name.Timer);
 						return;
 					}
 					break;
@@ -3435,12 +3137,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'A':
 						if (!strcmp(field, "GlobalShortAlfa1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short1 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Short1);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortAlfa2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Alfa.Short2 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Short2);
 							return;
 						}
 						break;
@@ -3448,12 +3150,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "GlobalShortBeta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short1 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Short1);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortBeta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Beta.Short2 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Short2);
 							return;
 						}
 						break;
@@ -3461,49 +3163,58 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "GlobalShortDelta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short1 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Short1);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortDelta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Globals.NumWar.Name.Delta.Short2 = GetInteger(-1);
+							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Short2);
 							return;
 						}
 						break;
 					}
-					break;
 				}
-				break;
 			}
-			break;
 
 		case 'L':
-			if (strlen(field) > 10)
+			if (!strcmp(field, "LastInputNumber"))
+			{
+				Script::PushInteger(vars->Globals.LastInputNumber);
+				return;
+			}
+			if (!strcmp(field, "LastInputText"))
+			{
+				Script::PushString(vars->Globals.LastInputText);
+				return;
+			}
+
+			if (length >= 11)
 			{
 				switch (field[5])
 				{
+
 				case 'B':
 					switch (field[9])
 					{
 					case 'A':
 						if (!strcmp(field, "LocalByteAlfa1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte1 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Alfa.Byte1);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte2 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Alfa.Byte2);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa3"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte3 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Alfa.Byte3);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa4"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Byte4 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Alfa.Byte4);
 							return;
 						}
 						break;
@@ -3511,22 +3222,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "LocalByteBeta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte1 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Beta.Byte1);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte2 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Beta.Byte2);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta3"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte3 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Beta.Byte3);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta4"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Byte4 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Beta.Byte4);
 							return;
 						}
 						break;
@@ -3534,22 +3245,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "LocalByteDelta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte1 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Delta.Byte1);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte2 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Delta.Byte2);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta3"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte3 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Delta.Byte3);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta4"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Byte4 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Delta.Byte4);
 							return;
 						}
 						break;
@@ -3558,22 +3269,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 				case 'L':
 					if (!strcmp(field, "LocalLongAlfa"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Long = GetInteger(-1);
+						Script::PushInteger(vars->Locals.Name.Alfa.Long);
 						return;
 					}
 					if (!strcmp(field, "LocalLongBeta"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Long = GetInteger(-1);
+						Script::PushInteger(vars->Locals.Name.Beta.Long);
 						return;
 					}
 					if (!strcmp(field, "LocalLongDelta"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Long = GetInteger(-1);
+						Script::PushInteger(vars->Locals.Name.Delta.Long);
 						return;
 					}
 					if (!strcmp(field, "LocalLongTimer"))
 					{
-						Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Timer = GetInteger(-1);
+						Script::PushInteger(vars->Locals.Name.Timer);
 						return;
 					}
 					break;
@@ -3584,12 +3295,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'A':
 						if (!strcmp(field, "LocalShortAlfa1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short1 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Alfa.Short1);
 							return;
 						}
 						if (!strcmp(field, "LocalShortAlfa2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Alfa.Short2 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Alfa.Short2);
 							return;
 						}
 						break;
@@ -3597,12 +3308,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "LocalShortBeta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short1 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Beta.Short1);
 							return;
 						}
 						if (!strcmp(field, "LocalShortBeta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Beta.Short2 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Beta.Short2);
 							return;
 						}
 						break;
@@ -3610,18 +3321,1711 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "LocalShortDelta1"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short1 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Delta.Short1);
 							return;
 						}
 						if (!strcmp(field, "LocalShortDelta2"))
 						{
-							Trng.pGlobTomb4->pBaseVariableTRNG->Locals.Name.Delta.Short2 = GetInteger(-1);
+							Script::PushInteger(vars->Locals.Name.Delta.Short2);
+							return;
+						}
+						break;
+					}
+					break;
+				}
+			}
+			
+		case 'S':
+			if (length >= 6)
+			{
+				switch (field[5])
+				{
+				case 'B':
+					if (length >= 10)
+					{
+						switch (field[9])
+						{
+						case 'A':
+							if (!strcmp(field, "StoreByteA1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[0]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteA2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[1]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteA3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[2]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteA4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[3]);
+								return;
+							}
+							break;
+						case 'B':
+							if (!strcmp(field, "StoreByteB1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[4]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteB2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[5]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteB3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[6]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteB4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[7]);
+								return;
+							}
+							break;
+						case 'C':
+							if (!strcmp(field, "StoreByteC1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[8]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteC2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[9]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteC3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[10]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteC4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[11]);
+								return;
+							}
+							break;
+						case 'D':
+							if (!strcmp(field, "StoreByteD1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[12]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteD2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[13]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteD3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[14]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteD4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[15]);
+								return;
+							}
+							break;
+						case 'E':
+							if (!strcmp(field, "StoreByteE1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[16]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteE2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[17]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteE3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[18]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteE4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[19]);
+								return;
+							}
+							break;
+						case 'F':
+							if (!strcmp(field, "StoreByteF1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[20]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteF2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[21]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteF3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[22]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteF4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[23]);
+								return;
+							}
+							break;
+						case 'G':
+							if (!strcmp(field, "StoreByteG1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[24]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteG2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[25]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteG3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[26]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteG4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[27]);
+								return;
+							}
+							break;
+						case 'H':
+							if (!strcmp(field, "StoreByteH1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[28]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteH2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[29]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteH3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[30]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteH4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[31]);
+								return;
+							}
+							break;
+						case 'I':
+							if (!strcmp(field, "StoreByteI1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[32]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteI2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[33]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteI3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[34]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteI4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[35]);
+								return;
+							}
+							break;
+						case 'J':
+							if (!strcmp(field, "StoreByteJ1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[36]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteJ2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[37]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteJ3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[38]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteJ4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[39]);
+								return;
+							}
+							break;
+						case 'K':
+							if (!strcmp(field, "StoreByteK1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[40]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteK2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[41]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteK3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[42]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteK4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[43]);
+								return;
+							}
+							break;
+						case 'L':
+							if (!strcmp(field, "StoreByteL1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[44]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteL2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[45]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteL3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[46]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteL4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[47]);
+								return;
+							}
+							break;
+						case 'M':
+							if (!strcmp(field, "StoreByteM1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[48]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteM2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[49]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteM3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[50]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteM4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[51]);
+								return;
+							}
+							break;
+						case 'N':
+							if (!strcmp(field, "StoreByteN1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[52]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteN2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[53]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteN3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[54]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteN4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[55]);
+								return;
+							}
+							break;
+						case 'O':
+							if (!strcmp(field, "StoreByteO1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[56]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteO2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[57]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteO3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[58]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteO4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[59]);
+								return;
+							}
+							break;
+						case 'P':
+							if (!strcmp(field, "StoreByteP1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[60]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteP2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[61]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteP3"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[62]);
+								return;
+							}
+							if (!strcmp(field, "StoreByteP4"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreByte[63]);
+								return;
+							}
+							break;
+						}
+					}
+
+				case 'L':
+					if (!strcmp(field, "StoreLongA"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[0]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongB"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[1]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongC"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[2]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongD"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[3]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongE"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[4]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongF"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[5]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongG"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[6]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongH"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[7]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongI"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[8]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongJ"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[9]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongK"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[10]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongL"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[11]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongM"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[12]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongN"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[13]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongO"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[14]);
+						return;
+					}
+					if (!strcmp(field, "StoreLongP"))
+					{
+						Script::PushInteger(vars->Globals.VetStoreLong[15]);
+						return;
+					}
+					break;
+
+				case 'S':
+					if (length >= 11)
+					{
+						switch (field[10])
+						{
+						case 'A':
+							if (!strcmp(field, "StoreShortA1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[0]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortA2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[1]);
+								return;
+							}
+							break;
+						case 'B':
+							if (!strcmp(field, "StoreShortB1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[2]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortB2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[3]);
+								return;
+							}
+							break;
+						case 'C':
+							if (!strcmp(field, "StoreShortC1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[4]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortC2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[5]);
+								return;
+							}
+							break;
+						case 'D':
+							if (!strcmp(field, "StoreShortD1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[6]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortD2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[7]);
+								return;
+							}
+							break;
+						case 'E':
+							if (!strcmp(field, "StoreShortE1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[8]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortE2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[9]);
+								return;
+							}
+							break;
+						case 'F':
+							if (!strcmp(field, "StoreShortF1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[10]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortF2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[11]);
+								return;
+							}
+							break;
+						case 'G':
+							if (!strcmp(field, "StoreShortG1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[12]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortG2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[13]);
+								return;
+							}
+							break;
+						case 'H':
+							if (!strcmp(field, "StoreShortH1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[14]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortH2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[15]);
+								return;
+							}
+							break;
+						case 'I':
+							if (!strcmp(field, "StoreShortI1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[16]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortI2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[17]);
+								return;
+							}
+							break;
+						case 'J':
+							if (!strcmp(field, "StoreShortJ1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[18]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortJ2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[19]);
+								return;
+							}
+							break;
+						case 'K':
+							if (!strcmp(field, "StoreShortK1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[20]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortK2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[21]);
+								return;
+							}
+							break;
+						case 'L':
+							if (!strcmp(field, "StoreShortL1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[22]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortL2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[23]);
+								return;
+							}
+							break;
+						case 'M':
+							if (!strcmp(field, "StoreShortM1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[24]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortM2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[25]);
+								return;
+							}
+							break;
+						case 'N':
+							if (!strcmp(field, "StoreShortN1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[26]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortN2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[27]);
+								return;
+							}
+							break;
+						case 'O':
+							if (!strcmp(field, "StoreShortO1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[28]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortO2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[29]);
+								return;
+							}
+							break;
+						case 'P':
+							if (!strcmp(field, "StoreShortP1"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[30]);
+								return;
+							}
+							if (!strcmp(field, "StoreShortP2"))
+							{
+								Script::PushInteger(vars->Globals.VetStoreShort[31]);
+								return;
+							}
+							break;
+						}
+					}
+				}
+			}
+
+		case 'T':
+			if (!strcmp(field, "TextBig"))
+			{
+				Script::PushString(vars->Globals.TextBig);
+				return;
+			}
+			if (!strcmp(field, "Text1"))
+			{
+				Script::PushString(vars->Globals.VetTextVar[0].Text);
+				return;
+			}
+			if (!strcmp(field, "Text2"))
+			{
+				Script::PushString(vars->Globals.VetTextVar[1].Text);
+				return;
+			}
+			if (!strcmp(field, "Text3"))
+			{
+				Script::PushString(vars->Globals.VetTextVar[2].Text);
+				return;
+			}
+			if (!strcmp(field, "Text4"))
+			{
+				Script::PushString(vars->Globals.VetTextVar[3].Text);
+				return;
+			}
+			break;
+		}
+	}
+
+	Script::ThrowError(FormatString("TRNG variable %s is not recognized", field));
+}
+
+void TrngVarWrapper::NewIndex(const char* field)
+{
+	auto vars = Trng.pGlobTomb4->pBaseVariableTRNG;
+	int length = strlen(field);
+
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'C':
+			if (!strcmp(field, "CurrentValue"))
+			{
+				vars->Globals.CurrentValue = GetInteger(-1);
+				return;
+			}
+			break;
+
+		case 'G':
+			if (length >= 12)
+			{
+				switch (field[6])
+				{
+				case 'B':
+					switch (field[10])
+					{
+					case 'A':
+						if (!strcmp(field, "GlobalByteAlfa1"))
+						{
+							vars->Globals.NumWar.Name.Alfa.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteAlfa2"))
+						{
+							vars->Globals.NumWar.Name.Alfa.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteAlfa3"))
+						{
+							vars->Globals.NumWar.Name.Alfa.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteAlfa4"))
+						{
+							vars->Globals.NumWar.Name.Alfa.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "GlobalByteBeta1"))
+						{
+							vars->Globals.NumWar.Name.Beta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteBeta2"))
+						{
+							vars->Globals.NumWar.Name.Beta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteBeta3"))
+						{
+							vars->Globals.NumWar.Name.Beta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteBeta4"))
+						{
+							vars->Globals.NumWar.Name.Beta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "GlobalByteDelta1"))
+						{
+							vars->Globals.NumWar.Name.Delta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteDelta2"))
+						{
+							vars->Globals.NumWar.Name.Delta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteDelta3"))
+						{
+							vars->Globals.NumWar.Name.Delta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalByteDelta4"))
+						{
+							vars->Globals.NumWar.Name.Delta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						break;
+					}
+
+				case 'L':
+					if (!strcmp(field, "GlobalLongAlfa"))
+					{
+						vars->Globals.NumWar.Name.Alfa.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "GlobalLongBeta"))
+					{
+						vars->Globals.NumWar.Name.Beta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "GlobalLongDelta"))
+					{
+						vars->Globals.NumWar.Name.Delta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "GlobalLongTimer"))
+					{
+						vars->Globals.NumWar.Name.Timer = GetInteger(-1);
+						return;
+					}
+					break;
+
+				case 'S':
+					switch (field[11])
+					{
+					case 'A':
+						if (!strcmp(field, "GlobalShortAlfa1"))
+						{
+							vars->Globals.NumWar.Name.Alfa.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalShortAlfa2"))
+						{
+							vars->Globals.NumWar.Name.Alfa.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "GlobalShortBeta1"))
+						{
+							vars->Globals.NumWar.Name.Beta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalShortBeta2"))
+						{
+							vars->Globals.NumWar.Name.Beta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "GlobalShortDelta1"))
+						{
+							vars->Globals.NumWar.Name.Delta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						if (!strcmp(field, "GlobalShortDelta2"))
+						{
+							vars->Globals.NumWar.Name.Delta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						break;
 					}
 				}
-				break;
+			}
+
+		case 'L':
+			if (!strcmp(field, "LastInputNumber"))
+			{
+				vars->Globals.LastInputNumber = GetInteger(-1);
+				return;
+			}
+			if (!strcmp(field, "LastInputText"))
+			{
+				const char* string = GetLuaString(-1);
+				int size = strlen(string);
+				strncpy(vars->Globals.LastInputText, string, min(size, 79));
+				return;
+			}
+
+			if (length >= 11)
+			{
+				switch (field[5])
+				{
+				case 'B':
+					switch (field[9])
+					{
+					case 'A':
+						if (!strcmp(field, "LocalByteAlfa1"))
+						{
+							vars->Locals.Name.Alfa.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteAlfa2"))
+						{
+							vars->Locals.Name.Alfa.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteAlfa3"))
+						{
+							vars->Locals.Name.Alfa.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteAlfa4"))
+						{
+							vars->Locals.Name.Alfa.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "LocalByteBeta1"))
+						{
+							vars->Locals.Name.Beta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteBeta2"))
+						{
+							vars->Locals.Name.Beta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteBeta3"))
+						{
+							vars->Locals.Name.Beta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteBeta4"))
+						{
+							vars->Locals.Name.Beta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "LocalByteDelta1"))
+						{
+							vars->Locals.Name.Delta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteDelta2"))
+						{
+							vars->Locals.Name.Delta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteDelta3"))
+						{
+							vars->Locals.Name.Delta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						if (!strcmp(field, "LocalByteDelta4"))
+						{
+							vars->Locals.Name.Delta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							return;
+						}
+						break;
+					}
+
+				case 'L':
+					if (!strcmp(field, "LocalLongAlfa"))
+					{
+						vars->Locals.Name.Alfa.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "LocalLongBeta"))
+					{
+						vars->Locals.Name.Beta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "LocalLongDelta"))
+					{
+						vars->Locals.Name.Delta.Long = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "LocalLongTimer"))
+					{
+						vars->Locals.Name.Timer = GetInteger(-1);
+						return;
+					}
+					break;
+
+				case 'S':
+					switch (field[10])
+					{
+					case 'A':
+						if (!strcmp(field, "LocalShortAlfa1"))
+						{
+							vars->Locals.Name.Alfa.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						if (!strcmp(field, "LocalShortAlfa2"))
+						{
+							vars->Locals.Name.Alfa.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						break;
+
+					case 'B':
+						if (!strcmp(field, "LocalShortBeta1"))
+						{
+							vars->Locals.Name.Beta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						if (!strcmp(field, "LocalShortBeta2"))
+						{
+							vars->Locals.Name.Beta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						break;
+
+					case 'D':
+						if (!strcmp(field, "LocalShortDelta1"))
+						{
+							vars->Locals.Name.Delta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						if (!strcmp(field, "LocalShortDelta2"))
+						{
+							vars->Locals.Name.Delta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							return;
+						}
+						break;
+					}
+					break;
+				}
+			}
+
+		case 'S':
+			if (length >= 6)
+			{
+				switch (field[5])
+				{
+				case 'B':
+					if (length >= 10)
+					{
+						switch (field[9])
+						{
+						case 'A':
+							if (!strcmp(field, "StoreByteA1"))
+							{
+								vars->Globals.VetStoreByte[0] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteA2"))
+							{
+								vars->Globals.VetStoreByte[1] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteA3"))
+							{
+								vars->Globals.VetStoreByte[2] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteA4"))
+							{
+								vars->Globals.VetStoreByte[3] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'B':
+							if (!strcmp(field, "StoreByteB1"))
+							{
+								vars->Globals.VetStoreByte[4] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteB2"))
+							{
+								vars->Globals.VetStoreByte[5] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteB3"))
+							{
+								vars->Globals.VetStoreByte[6] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteB4"))
+							{
+								vars->Globals.VetStoreByte[7] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'C':
+							if (!strcmp(field, "StoreByteC1"))
+							{
+								vars->Globals.VetStoreByte[8] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteC2"))
+							{
+								vars->Globals.VetStoreByte[9] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteC3"))
+							{
+								vars->Globals.VetStoreByte[10] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteC4"))
+							{
+								vars->Globals.VetStoreByte[11] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'D':
+							if (!strcmp(field, "StoreByteD1"))
+							{
+								vars->Globals.VetStoreByte[12] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteD2"))
+							{
+								vars->Globals.VetStoreByte[13] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteD3"))
+							{
+								vars->Globals.VetStoreByte[14] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteD4"))
+							{
+								vars->Globals.VetStoreByte[15] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'E':
+							if (!strcmp(field, "StoreByteE1"))
+							{
+								vars->Globals.VetStoreByte[16] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteE2"))
+							{
+								vars->Globals.VetStoreByte[17] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteE3"))
+							{
+								vars->Globals.VetStoreByte[18] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteE4"))
+							{
+								vars->Globals.VetStoreByte[19] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'F':
+							if (!strcmp(field, "StoreByteF1"))
+							{
+								vars->Globals.VetStoreByte[20] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteF2"))
+							{
+								vars->Globals.VetStoreByte[21] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteF3"))
+							{
+								vars->Globals.VetStoreByte[22] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteF4"))
+							{
+								vars->Globals.VetStoreByte[23] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'G':
+							if (!strcmp(field, "StoreByteG1"))
+							{
+								vars->Globals.VetStoreByte[24] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteG2"))
+							{
+								vars->Globals.VetStoreByte[25] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteG3"))
+							{
+								vars->Globals.VetStoreByte[26] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteG4"))
+							{
+								vars->Globals.VetStoreByte[27] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'H':
+							if (!strcmp(field, "StoreByteH1"))
+							{
+								vars->Globals.VetStoreByte[28] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteH2"))
+							{
+								vars->Globals.VetStoreByte[29] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteH3"))
+							{
+								vars->Globals.VetStoreByte[30] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteH4"))
+							{
+								vars->Globals.VetStoreByte[31] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'I':
+							if (!strcmp(field, "StoreByteI1"))
+							{
+								vars->Globals.VetStoreByte[32] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteI2"))
+							{
+								vars->Globals.VetStoreByte[33] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteI3"))
+							{
+								vars->Globals.VetStoreByte[34] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteI4"))
+							{
+								vars->Globals.VetStoreByte[35] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'J':
+							if (!strcmp(field, "StoreByteJ1"))
+							{
+								vars->Globals.VetStoreByte[36] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteJ2"))
+							{
+								vars->Globals.VetStoreByte[37] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteJ3"))
+							{
+								vars->Globals.VetStoreByte[38] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteJ4"))
+							{
+								vars->Globals.VetStoreByte[39] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'K':
+							if (!strcmp(field, "StoreByteK1"))
+							{
+								vars->Globals.VetStoreByte[40] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteK2"))
+							{
+								vars->Globals.VetStoreByte[41] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteK3"))
+							{
+								vars->Globals.VetStoreByte[42] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteK4"))
+							{
+								vars->Globals.VetStoreByte[43] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'L':
+							if (!strcmp(field, "StoreByteL1"))
+							{
+								vars->Globals.VetStoreByte[44] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteL2"))
+							{
+								vars->Globals.VetStoreByte[45] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteL3"))
+							{
+								vars->Globals.VetStoreByte[46] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteL4"))
+							{
+								vars->Globals.VetStoreByte[47] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'M':
+							if (!strcmp(field, "StoreByteM1"))
+							{
+								vars->Globals.VetStoreByte[48] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteM2"))
+							{
+								vars->Globals.VetStoreByte[49] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteM3"))
+							{
+								vars->Globals.VetStoreByte[50] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteM4"))
+							{
+								vars->Globals.VetStoreByte[51] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'N':
+							if (!strcmp(field, "StoreByteN1"))
+							{
+								vars->Globals.VetStoreByte[52] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteN2"))
+							{
+								vars->Globals.VetStoreByte[53] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteN3"))
+							{
+								vars->Globals.VetStoreByte[54] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteN4"))
+							{
+								vars->Globals.VetStoreByte[55] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'O':
+							if (!strcmp(field, "StoreByteO1"))
+							{
+								vars->Globals.VetStoreByte[56] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteO2"))
+							{
+								vars->Globals.VetStoreByte[57] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteO3"))
+							{
+								vars->Globals.VetStoreByte[58] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteO4"))
+							{
+								vars->Globals.VetStoreByte[59] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						case 'P':
+							if (!strcmp(field, "StoreByteP1"))
+							{
+								vars->Globals.VetStoreByte[60] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteP2"))
+							{
+								vars->Globals.VetStoreByte[61] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteP3"))
+							{
+								vars->Globals.VetStoreByte[62] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							if (!strcmp(field, "StoreByteP4"))
+							{
+								vars->Globals.VetStoreByte[63] = GetClampedInteger(-1, 0, 255, false);
+								return;
+							}
+							break;
+						}
+					}
+
+				case 'L':
+					if (!strcmp(field, "StoreLongA"))
+					{
+						vars->Globals.VetStoreLong[0] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongB"))
+					{
+						vars->Globals.VetStoreLong[1] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongC"))
+					{
+						vars->Globals.VetStoreLong[2] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongD"))
+					{
+						vars->Globals.VetStoreLong[3] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongE"))
+					{
+						vars->Globals.VetStoreLong[4] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongF"))
+					{
+						vars->Globals.VetStoreLong[5] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongG"))
+					{
+						vars->Globals.VetStoreLong[6] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongH"))
+					{
+						vars->Globals.VetStoreLong[7] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongI"))
+					{
+						vars->Globals.VetStoreLong[8] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongJ"))
+					{
+						vars->Globals.VetStoreLong[9] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongK"))
+					{
+						vars->Globals.VetStoreLong[10] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongL"))
+					{
+						vars->Globals.VetStoreLong[11] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongM"))
+					{
+						vars->Globals.VetStoreLong[12] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongN"))
+					{
+						vars->Globals.VetStoreLong[13] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongO"))
+					{
+						vars->Globals.VetStoreLong[14] = GetInteger(-1);
+						return;
+					}
+					if (!strcmp(field, "StoreLongP"))
+					{
+						vars->Globals.VetStoreLong[15] = GetInteger(-1);
+						return;
+					}
+					break;
+
+				case 'S':
+					if (length >= 11)
+					{
+						switch (field[10])
+						{
+						case 'A':
+							if (!strcmp(field, "StoreShortA1"))
+							{
+								vars->Globals.VetStoreShort[0] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortA2"))
+							{
+								vars->Globals.VetStoreShort[1] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'B':
+							if (!strcmp(field, "StoreShortB1"))
+							{
+								vars->Globals.VetStoreShort[2] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortB2"))
+							{
+								vars->Globals.VetStoreShort[3] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'C':
+							if (!strcmp(field, "StoreShortC1"))
+							{
+								vars->Globals.VetStoreShort[4] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortC2"))
+							{
+								vars->Globals.VetStoreShort[5] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'D':
+							if (!strcmp(field, "StoreShortD1"))
+							{
+								vars->Globals.VetStoreShort[6] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortD2"))
+							{
+								vars->Globals.VetStoreShort[7] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'E':
+							if (!strcmp(field, "StoreShortE1"))
+							{
+								vars->Globals.VetStoreShort[8] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortE2"))
+							{
+								vars->Globals.VetStoreShort[9] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'F':
+							if (!strcmp(field, "StoreShortF1"))
+							{
+								vars->Globals.VetStoreShort[10] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortF2"))
+							{
+								vars->Globals.VetStoreShort[11] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'G':
+							if (!strcmp(field, "StoreShortG1"))
+							{
+								vars->Globals.VetStoreShort[12] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortG2"))
+							{
+								vars->Globals.VetStoreShort[13] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'H':
+							if (!strcmp(field, "StoreShortH1"))
+							{
+								vars->Globals.VetStoreShort[14] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortH2"))
+							{
+								vars->Globals.VetStoreShort[15] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'I':
+							if (!strcmp(field, "StoreShortI1"))
+							{
+								vars->Globals.VetStoreShort[16] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortI2"))
+							{
+								vars->Globals.VetStoreShort[17] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'J':
+							if (!strcmp(field, "StoreShortJ1"))
+							{
+								vars->Globals.VetStoreShort[18] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortJ2"))
+							{
+								vars->Globals.VetStoreShort[19] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'K':
+							if (!strcmp(field, "StoreShortK1"))
+							{
+								vars->Globals.VetStoreShort[20] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortK2"))
+							{
+								vars->Globals.VetStoreShort[21] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'L':
+							if (!strcmp(field, "StoreShortL1"))
+							{
+								vars->Globals.VetStoreShort[22] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortL2"))
+							{
+								vars->Globals.VetStoreShort[23] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'M':
+							if (!strcmp(field, "StoreShortM1"))
+							{
+								vars->Globals.VetStoreShort[24] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortM2"))
+							{
+								vars->Globals.VetStoreShort[25] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'N':
+							if (!strcmp(field, "StoreShortN1"))
+							{
+								vars->Globals.VetStoreShort[26] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortN2"))
+							{
+								vars->Globals.VetStoreShort[27] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'O':
+							if (!strcmp(field, "StoreShortO1"))
+							{
+								vars->Globals.VetStoreShort[28] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortO2"))
+							{
+								vars->Globals.VetStoreShort[29] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						case 'P':
+							if (!strcmp(field, "StoreShortP1"))
+							{
+								vars->Globals.VetStoreShort[30] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							if (!strcmp(field, "StoreShortP2"))
+							{
+								vars->Globals.VetStoreShort[31] = GetClampedInteger(-1, -32768, 32767, false);
+								return;
+							}
+							break;
+						}
+					}
+				}
+			}
+
+		case 'T':
+			if (!strcmp(field, "TextBig"))
+			{
+				const char* string = GetLuaString(-1);
+				int size = strlen(string);
+				strncpy(vars->Globals.TextBig, string, min(size, 319));
+				return;
+			}
+			if (!strcmp(field, "Text1"))
+			{
+				const char* string = GetLuaString(-1);
+				int size = strlen(string);
+				strncpy(vars->Globals.VetTextVar[0].Text , string, min(size, 79));
+				return;
+			}
+			if (!strcmp(field, "Text2"))
+			{
+				const char* string = GetLuaString(-1);
+				int size = strlen(string);
+				strncpy(vars->Globals.VetTextVar[1].Text, string, min(size, 79));
+				return;
+			}
+			if (!strcmp(field, "Text3"))
+			{
+				const char* string = GetLuaString(-1);
+				int size = strlen(string);
+				strncpy(vars->Globals.VetTextVar[2].Text, string, min(size, 79));
+				return;
+			}
+			if (!strcmp(field, "Text4"))
+			{
+				const char* string = GetLuaString(-1);
+				int size = strlen(string);
+				strncpy(vars->Globals.VetTextVar[3].Text, string, min(size, 79));
+				return;
 			}
 			break;
 		}
