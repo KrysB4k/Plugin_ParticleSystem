@@ -1,76 +1,5 @@
 #include "..\definitions\includes.h"
 
-namespace Diagnostics
-{
-	double performanceMultiplier;
-	int activeSpriteParticles;
-	int activeMeshParticles;
-	double initTime;
-	double updateTime;
-	double drawTime;
-	double initTimePeak;
-	double updateTimePeak;
-	double drawTimePeak;
-}
-
-double Diagnostics::Time(void (*targetFunction)())
-{
-	LARGE_INTEGER startTime, endTime;
-
-	QueryPerformanceCounter(&startTime);
-	targetFunction();
-	QueryPerformanceCounter(&endTime);
-	return performanceMultiplier * (endTime.QuadPart - startTime.QuadPart);
-}
-
-void Diagnostics::SetPeaks()
-{
-	if (initTime > initTimePeak)
-		initTimePeak = initTime;
-	if (updateTime > updateTimePeak)
-		updateTimePeak = updateTime;
-	if (drawTime > drawTimePeak)
-		drawTimePeak = drawTime;
-}
-
-void Diagnostics::Print()
-{
-	PrintString(8, 2 * font_height, 6, (char*)FormatString("Init: %.1f", initTime), 0);
-	PrintString(8, 3 * font_height, 6, (char*)FormatString("    peak: %.1f", initTimePeak), 0);
-	PrintString(8, 4 * font_height, 6, (char*)FormatString("Update: %.1f", updateTime), 0);
-	PrintString(8, 5 * font_height, 6, (char*)FormatString("    peak: %.1f", updateTimePeak), 0);
-	PrintString(8, 6 * font_height, 6, (char*)FormatString("Draw: %.1f", drawTime), 0);
-	PrintString(8, 7 * font_height, 6, (char*)FormatString("    peak: %.1f", drawTimePeak), 0);
-	PrintString(8, 10 * font_height, 6, (char*)FormatString("Sprite Particles: %d", activeSpriteParticles), 0);
-	PrintString(8, 11 * font_height, 6, (char*)FormatString("Mesh Particles: %d", activeMeshParticles), 0);
-	PrintString(8, 12 * font_height, 6, (char*)FormatString("Memory: %d", Script::GarbageCount()), 0);
-}
-
-void Diagnostics::Initialise()
-{
-	LARGE_INTEGER frequency;
-
-	QueryPerformanceFrequency(&frequency);
-	Diagnostics::performanceMultiplier = (double)1000 / frequency.QuadPart;
-}
-
-void Diagnostics::ResetFrame()
-{
-	activeSpriteParticles = 0;
-	activeMeshParticles = 0;
-	initTime = 0;
-	updateTime = 0;
-	drawTime = 0;
-}
-
-void Diagnostics::ResetLevel()
-{
-	initTimePeak = 0;
-	updateTimePeak = 0;
-	drawTimePeak = 0;
-}
-
-
 // ************  namespace ParticleFactory  ****************
 
 namespace ParticleFactory
@@ -372,7 +301,7 @@ void ParticleFactory::DrawSprites()
 		if (part->lifeCounter <= 0)
 			continue;
 
-		Diagnostics::activeSpriteParticles++;
+		Diagnostics::IncrementValue(DIAGNOSTICS_SPRITE, 1);
 
 		const auto& pgroup = ParticleFactory::partGroups[part->groupIndex];
 
@@ -510,7 +439,7 @@ void ParticleFactory::DrawMeshes()
 	{
 		if (part->lifeCounter > 0)
 		{
-			Diagnostics::activeMeshParticles++;
+			Diagnostics::IncrementValue(DIAGNOSTICS_MESH, 1);
 
 			if (part->object >= 0 && objects[part->object].loaded)
 				part->DrawMeshPart();

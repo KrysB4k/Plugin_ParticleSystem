@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="definitions\DefTomb4Funct.cpp" />
     <ClCompile Include="definitions\Tomb4Discoveries_mine.cpp" />
+    <ClCompile Include="particles\diagnostics.cpp" />
     <ClCompile Include="particles\luabridge.cpp" />
     <ClCompile Include="particles\particle.cpp" />
     <ClCompile Include="particles\noise.cpp" />
@@ -104,6 +105,7 @@
     <ClInclude Include="definitions\structures_mine.h" />
     <ClInclude Include="definitions\Tomb4Discoveries_mine.h" />
     <ClInclude Include="definitions\Tomb4Globals.h" />
+    <ClInclude Include="particles\diagnostics.h" />
     <ClInclude Include="particles\luabridge.h" />
     <ClInclude Include="particles\particle.h" />
     <ClInclude Include="particles\noise.h" />

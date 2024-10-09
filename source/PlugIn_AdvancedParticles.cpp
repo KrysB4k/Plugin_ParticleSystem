@@ -37,18 +37,19 @@ StrMyData MyData;
 void Patch_00()
 {
 	UpdateLightning();
-	Diagnostics::initTime = Diagnostics::Time(ParticleFactory::InitParts);
-	Diagnostics::updateTime = Diagnostics::Time(ParticleFactory::UpdateParts);
+	Diagnostics::SetValue(DIAGNOSTICS_INIT, Diagnostics::Time(ParticleFactory::InitParts));
+	Diagnostics::SetValue(DIAGNOSTICS_UPDATE, Diagnostics::Time(ParticleFactory::UpdateParts));
 }
 
 
 void Patch_01()
 {
 	S_DrawSparks();
-	Diagnostics::drawTime = Diagnostics::Time(ParticleFactory::DrawParts);
-	Diagnostics::SetPeaks();
+	Diagnostics::SetValue(DIAGNOSTICS_DRAW, Diagnostics::Time(ParticleFactory::DrawParts));
+	Diagnostics::SetValue(DIAGNOSTICS_MEMORY, Script::GarbageCount());
+	Diagnostics::UpdatePeaks();
 	Diagnostics::Print();
-	Diagnostics::ResetFrame();
+	Diagnostics::ResetValues();
 }
 
 
@@ -118,6 +119,12 @@ void cbInitGame(void)
 	ParticleFactory::ClearParts();
 	ParticleFactory::ClearPartGroups();
 	ParticleFactory::InitPartGroups();
+	Diagnostics::SetLabel(DIAGNOSTICS_INIT, "Init");
+	Diagnostics::SetLabel(DIAGNOSTICS_UPDATE, "Update");
+	Diagnostics::SetLabel(DIAGNOSTICS_DRAW, "Draw");
+	Diagnostics::SetLabel(DIAGNOSTICS_SPRITE, "Sprite Particles");
+	Diagnostics::SetLabel(DIAGNOSTICS_MESH, "Mesh Particles");
+	Diagnostics::SetLabel(DIAGNOSTICS_MEMORY, "Memory");
 }
 
 
@@ -127,8 +134,8 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
 
-	Diagnostics::ResetFrame();
-	Diagnostics::ResetLevel();
+	Diagnostics::ResetValues();
+	Diagnostics::ResetPeaks();
 	ParticleFactory::ClearParts();
 }
 

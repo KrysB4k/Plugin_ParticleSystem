@@ -8,25 +8,15 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
 
-namespace Diagnostics
+enum DiagnosticsOrder
 {
-	extern double performanceMultiplier;
-	extern int activeSpriteParticles;
-	extern int activeMeshParticles;
-	extern double initTime;
-	extern double updateTime;
-	extern double drawTime;
-	extern double initTimePeak;
-	extern double updateTimePeak;
-	extern double drawTimePeak;
-
-	double Time(void (*targetFunction)());
-	void SetPeaks();
-	void Print();
-	void Initialise();
-	void ResetFrame();
-	void ResetLevel();
-}
+	DIAGNOSTICS_INIT,
+	DIAGNOSTICS_UPDATE,
+	DIAGNOSTICS_DRAW,
+	DIAGNOSTICS_SPRITE,
+	DIAGNOSTICS_MESH,
+	DIAGNOSTICS_MEMORY
+};
 
 // ************  Particle-related structs  ****************
 

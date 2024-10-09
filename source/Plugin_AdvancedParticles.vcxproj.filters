@@ -63,6 +63,9 @@
     <ClCompile Include="particles\noise.cpp">
       <Filter>Source Files\particles</Filter>
     </ClCompile>
+    <ClCompile Include="particles\diagnostics.cpp">
+      <Filter>Source Files\particles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
@@ -120,6 +123,9 @@
       <Filter>Header Files\particles</Filter>
     </ClInclude>
     <ClInclude Include="particles\luabridge.h">
+      <Filter>Header Files\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\diagnostics.h">
       <Filter>Header Files\particles</Filter>
     </ClInclude>
   </ItemGroup>

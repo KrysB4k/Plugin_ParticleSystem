@@ -21,3 +21,4 @@
 #include "..\particles\noise.h"
 #include "..\particles\particle.h"
 #include "..\particles\utilities.h"
+#include "..\particles\diagnostics.h"
