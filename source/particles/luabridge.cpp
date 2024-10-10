@@ -50,6 +50,14 @@ namespace
 		return Script::ToString(argument);
 	}
 
+	template<size_t size>
+	void CopyString(char(&destination)[size], const char* source)
+	{
+		int count = min(size - 1, strlen(source));
+		memcpy(destination, source, count);
+		destination[count] = '\0';
+	}
+
 	int GetArgCount(int minimum, int maximum)
 	{
 		int count;
@@ -2891,7 +2899,8 @@ void LuaItemInfoWrapper::NewIndex(const char* field)
 		case 'a':
 			if (!strcmp(field, "animNumber"))
 			{
-				int anim = GetClampedInteger(-1, 0, 1000, false) + objects[itemptr->object_number].anim_index;
+				int maxAnim = objects[itemptr->object_number + 1].anim_index - 1;
+				int anim = GetClampedInteger(-1, 0, maxAnim, false) + objects[itemptr->object_number].anim_index;
 				itemptr->anim_number = anim;
 				itemptr->frame_number = anims[itemptr->anim_number].frame_base;
 				return;
@@ -3016,12 +3025,22 @@ void LuaItemInfoWrapper::NewIndex(const char* field)
 void TrngVarWrapper::Index(const char* field)
 {
 	auto vars = Trng.pGlobTomb4->pBaseVariableTRNG;
-	int length = strlen(field);
+	int length;
 
 	if (field)
 	{
+		length = strlen(field);
+
 		switch (field[0])
 		{
+		case 'B':
+			if (!strcmp(field, "BigText"))
+			{
+				Script::PushString(vars->Globals.TextBig);
+				return;
+			}
+			break;
+
 		case 'C':
 			if (!strcmp(field, "CurrentValue"))
 			{
@@ -3986,11 +4005,6 @@ void TrngVarWrapper::Index(const char* field)
 			}
 
 		case 'T':
-			if (!strcmp(field, "TextBig"))
-			{
-				Script::PushString(vars->Globals.TextBig);
-				return;
-			}
 			if (!strcmp(field, "Text1"))
 			{
 				Script::PushString(vars->Globals.VetTextVar[0].Text);
@@ -4014,19 +4028,28 @@ void TrngVarWrapper::Index(const char* field)
 			break;
 		}
 	}
-
-	Script::ThrowError(FormatString("TRNG variable %s is not recognized", field));
+	LuaObjectClass::Index(field);
 }
 
 void TrngVarWrapper::NewIndex(const char* field)
 {
 	auto vars = Trng.pGlobTomb4->pBaseVariableTRNG;
-	int length = strlen(field);
+	int length;
 
 	if (field)
 	{
+		length = strlen(field);
+
 		switch (field[0])
 		{
+		case 'B':
+			if (!strcmp(field, "BigText"))
+			{
+				CopyString(vars->Globals.TextBig, GetLuaString(-1));
+				return;
+			}
+			break;
+
 		case 'C':
 			if (!strcmp(field, "CurrentValue"))
 			{
@@ -4189,9 +4212,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 			}
 			if (!strcmp(field, "LastInputText"))
 			{
-				const char* string = GetLuaString(-1);
-				int size = strlen(string);
-				strncpy(vars->Globals.LastInputText, string, min(size, 79));
+				CopyString(vars->Globals.LastInputText, GetLuaString(-1));
 				return;
 			}
 
@@ -4992,46 +5013,30 @@ void TrngVarWrapper::NewIndex(const char* field)
 			}
 
 		case 'T':
-			if (!strcmp(field, "TextBig"))
-			{
-				const char* string = GetLuaString(-1);
-				int size = strlen(string);
-				strncpy(vars->Globals.TextBig, string, min(size, 319));
-				return;
-			}
 			if (!strcmp(field, "Text1"))
 			{
-				const char* string = GetLuaString(-1);
-				int size = strlen(string);
-				strncpy(vars->Globals.VetTextVar[0].Text , string, min(size, 79));
+				CopyString(vars->Globals.VetTextVar[0].Text, GetLuaString(-1));
 				return;
 			}
 			if (!strcmp(field, "Text2"))
 			{
-				const char* string = GetLuaString(-1);
-				int size = strlen(string);
-				strncpy(vars->Globals.VetTextVar[1].Text, string, min(size, 79));
+				CopyString(vars->Globals.VetTextVar[1].Text, GetLuaString(-1));
 				return;
 			}
 			if (!strcmp(field, "Text3"))
 			{
-				const char* string = GetLuaString(-1);
-				int size = strlen(string);
-				strncpy(vars->Globals.VetTextVar[2].Text, string, min(size, 79));
+				CopyString(vars->Globals.VetTextVar[2].Text, GetLuaString(-1));
 				return;
 			}
 			if (!strcmp(field, "Text4"))
 			{
-				const char* string = GetLuaString(-1);
-				int size = strlen(string);
-				strncpy(vars->Globals.VetTextVar[3].Text, string, min(size, 79));
+				CopyString(vars->Globals.VetTextVar[3].Text, GetLuaString(-1));
 				return;
 			}
 			break;
 		}
 	}
-
-	Script::ThrowError(FormatString("TRNG variable %s is not recognized", field));
+	LuaObjectClass::NewIndex(field);
 }
 
 const char* Noise::Name()
