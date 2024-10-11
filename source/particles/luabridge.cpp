@@ -3060,22 +3060,22 @@ void TrngVarWrapper::Index(const char* field)
 					case 'A':
 						if (!strcmp(field, "GlobalByteAlfa1"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte1);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[0]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa2"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte2);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[1]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa3"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte3);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[2]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa4"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Byte4);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[3]);
 							return;
 						}
 						break;
@@ -3083,22 +3083,22 @@ void TrngVarWrapper::Index(const char* field)
 					case 'B':
 						if (!strcmp(field, "GlobalByteBeta1"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte1);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[4]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta2"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte2);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[5]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta3"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte3);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[6]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta4"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Byte4);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[7]);
 							return;
 						}
 						break;
@@ -3106,22 +3106,22 @@ void TrngVarWrapper::Index(const char* field)
 					case 'D':
 						if (!strcmp(field, "GlobalByteDelta1"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte1);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[8]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta2"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte2);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[9]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta3"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte3);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[10]);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta4"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Byte4);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriByte[11]);
 							return;
 						}
 						break;
@@ -3130,22 +3130,22 @@ void TrngVarWrapper::Index(const char* field)
 				case 'L':
 					if (!strcmp(field, "GlobalLongAlfa"))
 					{
-						Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Long);
+						Script::PushInteger(vars->Globals.NumWar.VetNumeriLong[0]);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongBeta"))
 					{
-						Script::PushInteger(vars->Globals.NumWar.Name.Beta.Long);
+						Script::PushInteger(vars->Globals.NumWar.VetNumeriLong[1]);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongDelta"))
 					{
-						Script::PushInteger(vars->Globals.NumWar.Name.Delta.Long);
+						Script::PushInteger(vars->Globals.NumWar.VetNumeriLong[2]);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongTimer"))
 					{
-						Script::PushInteger(vars->Globals.NumWar.Name.Timer);
+						Script::PushInteger(vars->Globals.NumWar.VetNumeriLong[3]);
 						return;
 					}
 					break;
@@ -3156,12 +3156,12 @@ void TrngVarWrapper::Index(const char* field)
 					case 'A':
 						if (!strcmp(field, "GlobalShortAlfa1"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Short1);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriShort[0]);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortAlfa2"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Alfa.Short2);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriShort[1]);
 							return;
 						}
 						break;
@@ -3169,12 +3169,12 @@ void TrngVarWrapper::Index(const char* field)
 					case 'B':
 						if (!strcmp(field, "GlobalShortBeta1"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Short1);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriShort[2]);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortBeta2"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Beta.Short2);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriShort[3]);
 							return;
 						}
 						break;
@@ -3182,12 +3182,12 @@ void TrngVarWrapper::Index(const char* field)
 					case 'D':
 						if (!strcmp(field, "GlobalShortDelta1"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Short1);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriShort[4]);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortDelta2"))
 						{
-							Script::PushInteger(vars->Globals.NumWar.Name.Delta.Short2);
+							Script::PushInteger(vars->Globals.NumWar.VetNumeriShort[5]);
 							return;
 						}
 						break;
@@ -3211,29 +3211,28 @@ void TrngVarWrapper::Index(const char* field)
 			{
 				switch (field[5])
 				{
-
 				case 'B':
 					switch (field[9])
 					{
 					case 'A':
 						if (!strcmp(field, "LocalByteAlfa1"))
 						{
-							Script::PushInteger(vars->Locals.Name.Alfa.Byte1);
+							Script::PushInteger(vars->Locals.VetNumeriByte[0]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa2"))
 						{
-							Script::PushInteger(vars->Locals.Name.Alfa.Byte2);
+							Script::PushInteger(vars->Locals.VetNumeriByte[1]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa3"))
 						{
-							Script::PushInteger(vars->Locals.Name.Alfa.Byte3);
+							Script::PushInteger(vars->Locals.VetNumeriByte[2]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa4"))
 						{
-							Script::PushInteger(vars->Locals.Name.Alfa.Byte4);
+							Script::PushInteger(vars->Locals.VetNumeriByte[3]);
 							return;
 						}
 						break;
@@ -3241,22 +3240,22 @@ void TrngVarWrapper::Index(const char* field)
 					case 'B':
 						if (!strcmp(field, "LocalByteBeta1"))
 						{
-							Script::PushInteger(vars->Locals.Name.Beta.Byte1);
+							Script::PushInteger(vars->Locals.VetNumeriByte[4]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta2"))
 						{
-							Script::PushInteger(vars->Locals.Name.Beta.Byte2);
+							Script::PushInteger(vars->Locals.VetNumeriByte[5]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta3"))
 						{
-							Script::PushInteger(vars->Locals.Name.Beta.Byte3);
+							Script::PushInteger(vars->Locals.VetNumeriByte[6]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta4"))
 						{
-							Script::PushInteger(vars->Locals.Name.Beta.Byte4);
+							Script::PushInteger(vars->Locals.VetNumeriByte[7]);
 							return;
 						}
 						break;
@@ -3264,22 +3263,22 @@ void TrngVarWrapper::Index(const char* field)
 					case 'D':
 						if (!strcmp(field, "LocalByteDelta1"))
 						{
-							Script::PushInteger(vars->Locals.Name.Delta.Byte1);
+							Script::PushInteger(vars->Locals.VetNumeriByte[8]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta2"))
 						{
-							Script::PushInteger(vars->Locals.Name.Delta.Byte2);
+							Script::PushInteger(vars->Locals.VetNumeriByte[9]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta3"))
 						{
-							Script::PushInteger(vars->Locals.Name.Delta.Byte3);
+							Script::PushInteger(vars->Locals.VetNumeriByte[10]);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta4"))
 						{
-							Script::PushInteger(vars->Locals.Name.Delta.Byte4);
+							Script::PushInteger(vars->Locals.VetNumeriByte[11]);
 							return;
 						}
 						break;
@@ -3288,22 +3287,22 @@ void TrngVarWrapper::Index(const char* field)
 				case 'L':
 					if (!strcmp(field, "LocalLongAlfa"))
 					{
-						Script::PushInteger(vars->Locals.Name.Alfa.Long);
+						Script::PushInteger(vars->Locals.VetNumeriLong[0]);
 						return;
 					}
 					if (!strcmp(field, "LocalLongBeta"))
 					{
-						Script::PushInteger(vars->Locals.Name.Beta.Long);
+						Script::PushInteger(vars->Locals.VetNumeriLong[1]);
 						return;
 					}
 					if (!strcmp(field, "LocalLongDelta"))
 					{
-						Script::PushInteger(vars->Locals.Name.Delta.Long);
+						Script::PushInteger(vars->Locals.VetNumeriLong[2]);
 						return;
 					}
 					if (!strcmp(field, "LocalLongTimer"))
 					{
-						Script::PushInteger(vars->Locals.Name.Timer);
+						Script::PushInteger(vars->Locals.VetNumeriLong[3]);
 						return;
 					}
 					break;
@@ -3314,12 +3313,12 @@ void TrngVarWrapper::Index(const char* field)
 					case 'A':
 						if (!strcmp(field, "LocalShortAlfa1"))
 						{
-							Script::PushInteger(vars->Locals.Name.Alfa.Short1);
+							Script::PushInteger(vars->Locals.VetNumeriShort[0]);
 							return;
 						}
 						if (!strcmp(field, "LocalShortAlfa2"))
 						{
-							Script::PushInteger(vars->Locals.Name.Alfa.Short2);
+							Script::PushInteger(vars->Locals.VetNumeriShort[1]);
 							return;
 						}
 						break;
@@ -3327,12 +3326,12 @@ void TrngVarWrapper::Index(const char* field)
 					case 'B':
 						if (!strcmp(field, "LocalShortBeta1"))
 						{
-							Script::PushInteger(vars->Locals.Name.Beta.Short1);
+							Script::PushInteger(vars->Locals.VetNumeriShort[2]);
 							return;
 						}
 						if (!strcmp(field, "LocalShortBeta2"))
 						{
-							Script::PushInteger(vars->Locals.Name.Beta.Short2);
+							Script::PushInteger(vars->Locals.VetNumeriShort[3]);
 							return;
 						}
 						break;
@@ -3340,12 +3339,12 @@ void TrngVarWrapper::Index(const char* field)
 					case 'D':
 						if (!strcmp(field, "LocalShortDelta1"))
 						{
-							Script::PushInteger(vars->Locals.Name.Delta.Short1);
+							Script::PushInteger(vars->Locals.VetNumeriShort[4]);
 							return;
 						}
 						if (!strcmp(field, "LocalShortDelta2"))
 						{
-							Script::PushInteger(vars->Locals.Name.Delta.Short2);
+							Script::PushInteger(vars->Locals.VetNumeriShort[5]);
 							return;
 						}
 						break;
@@ -3353,7 +3352,7 @@ void TrngVarWrapper::Index(const char* field)
 					break;
 				}
 			}
-			
+
 		case 'S':
 			if (length >= 6)
 			{
@@ -3386,6 +3385,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'B':
 							if (!strcmp(field, "StoreByteB1"))
 							{
@@ -3408,6 +3408,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'C':
 							if (!strcmp(field, "StoreByteC1"))
 							{
@@ -3430,6 +3431,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'D':
 							if (!strcmp(field, "StoreByteD1"))
 							{
@@ -3452,6 +3454,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'E':
 							if (!strcmp(field, "StoreByteE1"))
 							{
@@ -3474,6 +3477,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'F':
 							if (!strcmp(field, "StoreByteF1"))
 							{
@@ -3496,6 +3500,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'G':
 							if (!strcmp(field, "StoreByteG1"))
 							{
@@ -3518,6 +3523,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'H':
 							if (!strcmp(field, "StoreByteH1"))
 							{
@@ -3540,6 +3546,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'I':
 							if (!strcmp(field, "StoreByteI1"))
 							{
@@ -3562,6 +3569,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'J':
 							if (!strcmp(field, "StoreByteJ1"))
 							{
@@ -3584,6 +3592,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'K':
 							if (!strcmp(field, "StoreByteK1"))
 							{
@@ -3606,6 +3615,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'L':
 							if (!strcmp(field, "StoreByteL1"))
 							{
@@ -3628,6 +3638,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'M':
 							if (!strcmp(field, "StoreByteM1"))
 							{
@@ -3650,6 +3661,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'N':
 							if (!strcmp(field, "StoreByteN1"))
 							{
@@ -3672,6 +3684,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'O':
 							if (!strcmp(field, "StoreByteO1"))
 							{
@@ -3694,6 +3707,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'P':
 							if (!strcmp(field, "StoreByteP1"))
 							{
@@ -3819,6 +3833,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'B':
 							if (!strcmp(field, "StoreShortB1"))
 							{
@@ -3831,6 +3846,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'C':
 							if (!strcmp(field, "StoreShortC1"))
 							{
@@ -3843,6 +3859,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'D':
 							if (!strcmp(field, "StoreShortD1"))
 							{
@@ -3855,6 +3872,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'E':
 							if (!strcmp(field, "StoreShortE1"))
 							{
@@ -3867,6 +3885,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'F':
 							if (!strcmp(field, "StoreShortF1"))
 							{
@@ -3879,6 +3898,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'G':
 							if (!strcmp(field, "StoreShortG1"))
 							{
@@ -3891,6 +3911,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'H':
 							if (!strcmp(field, "StoreShortH1"))
 							{
@@ -3903,6 +3924,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'I':
 							if (!strcmp(field, "StoreShortI1"))
 							{
@@ -3915,6 +3937,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'J':
 							if (!strcmp(field, "StoreShortJ1"))
 							{
@@ -3927,6 +3950,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'K':
 							if (!strcmp(field, "StoreShortK1"))
 							{
@@ -3939,6 +3963,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'L':
 							if (!strcmp(field, "StoreShortL1"))
 							{
@@ -3951,6 +3976,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'M':
 							if (!strcmp(field, "StoreShortM1"))
 							{
@@ -3963,6 +3989,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'N':
 							if (!strcmp(field, "StoreShortN1"))
 							{
@@ -3975,6 +4002,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'O':
 							if (!strcmp(field, "StoreShortO1"))
 							{
@@ -3987,6 +4015,7 @@ void TrngVarWrapper::Index(const char* field)
 								return;
 							}
 							break;
+
 						case 'P':
 							if (!strcmp(field, "StoreShortP1"))
 							{
@@ -4069,22 +4098,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'A':
 						if (!strcmp(field, "GlobalByteAlfa1"))
 						{
-							vars->Globals.NumWar.Name.Alfa.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[0] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa2"))
 						{
-							vars->Globals.NumWar.Name.Alfa.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[1] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa3"))
 						{
-							vars->Globals.NumWar.Name.Alfa.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[2] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteAlfa4"))
 						{
-							vars->Globals.NumWar.Name.Alfa.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[3] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						break;
@@ -4092,22 +4121,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "GlobalByteBeta1"))
 						{
-							vars->Globals.NumWar.Name.Beta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[4] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta2"))
 						{
-							vars->Globals.NumWar.Name.Beta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[5] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta3"))
 						{
-							vars->Globals.NumWar.Name.Beta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[6] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteBeta4"))
 						{
-							vars->Globals.NumWar.Name.Beta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[7] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						break;
@@ -4115,22 +4144,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "GlobalByteDelta1"))
 						{
-							vars->Globals.NumWar.Name.Delta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[8] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta2"))
 						{
-							vars->Globals.NumWar.Name.Delta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[9] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta3"))
 						{
-							vars->Globals.NumWar.Name.Delta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[10] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalByteDelta4"))
 						{
-							vars->Globals.NumWar.Name.Delta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							vars->Globals.NumWar.VetNumeriByte[11] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						break;
@@ -4139,22 +4168,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 				case 'L':
 					if (!strcmp(field, "GlobalLongAlfa"))
 					{
-						vars->Globals.NumWar.Name.Alfa.Long = GetInteger(-1);
+						vars->Globals.NumWar.VetNumeriLong[0] = GetInteger(-1);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongBeta"))
 					{
-						vars->Globals.NumWar.Name.Beta.Long = GetInteger(-1);
+						vars->Globals.NumWar.VetNumeriLong[1] = GetInteger(-1);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongDelta"))
 					{
-						vars->Globals.NumWar.Name.Delta.Long = GetInteger(-1);
+						vars->Globals.NumWar.VetNumeriLong[2] = GetInteger(-1);
 						return;
 					}
 					if (!strcmp(field, "GlobalLongTimer"))
 					{
-						vars->Globals.NumWar.Name.Timer = GetInteger(-1);
+						vars->Globals.NumWar.VetNumeriLong[3] = GetInteger(-1);
 						return;
 					}
 					break;
@@ -4165,12 +4194,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'A':
 						if (!strcmp(field, "GlobalShortAlfa1"))
 						{
-							vars->Globals.NumWar.Name.Alfa.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Globals.NumWar.VetNumeriShort[0] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortAlfa2"))
 						{
-							vars->Globals.NumWar.Name.Alfa.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Globals.NumWar.VetNumeriShort[1] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						break;
@@ -4178,12 +4207,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "GlobalShortBeta1"))
 						{
-							vars->Globals.NumWar.Name.Beta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Globals.NumWar.VetNumeriShort[2] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortBeta2"))
 						{
-							vars->Globals.NumWar.Name.Beta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Globals.NumWar.VetNumeriShort[3] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						break;
@@ -4191,12 +4220,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "GlobalShortDelta1"))
 						{
-							vars->Globals.NumWar.Name.Delta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Globals.NumWar.VetNumeriShort[4] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						if (!strcmp(field, "GlobalShortDelta2"))
 						{
-							vars->Globals.NumWar.Name.Delta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Globals.NumWar.VetNumeriShort[5] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						break;
@@ -4226,22 +4255,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'A':
 						if (!strcmp(field, "LocalByteAlfa1"))
 						{
-							vars->Locals.Name.Alfa.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[0] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa2"))
 						{
-							vars->Locals.Name.Alfa.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[1] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa3"))
 						{
-							vars->Locals.Name.Alfa.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[2] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteAlfa4"))
 						{
-							vars->Locals.Name.Alfa.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[3] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						break;
@@ -4249,22 +4278,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "LocalByteBeta1"))
 						{
-							vars->Locals.Name.Beta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[4] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta2"))
 						{
-							vars->Locals.Name.Beta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[5] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta3"))
 						{
-							vars->Locals.Name.Beta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[6] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteBeta4"))
 						{
-							vars->Locals.Name.Beta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[7] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						break;
@@ -4272,22 +4301,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "LocalByteDelta1"))
 						{
-							vars->Locals.Name.Delta.Byte1 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[8] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta2"))
 						{
-							vars->Locals.Name.Delta.Byte2 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[9] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta3"))
 						{
-							vars->Locals.Name.Delta.Byte3 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[10] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						if (!strcmp(field, "LocalByteDelta4"))
 						{
-							vars->Locals.Name.Delta.Byte4 = GetClampedInteger(-1, 0, 255, false);
+							vars->Locals.VetNumeriByte[11] = GetClampedInteger(-1, 0, 255, false);
 							return;
 						}
 						break;
@@ -4296,22 +4325,22 @@ void TrngVarWrapper::NewIndex(const char* field)
 				case 'L':
 					if (!strcmp(field, "LocalLongAlfa"))
 					{
-						vars->Locals.Name.Alfa.Long = GetInteger(-1);
+						vars->Locals.VetNumeriLong[0] = GetInteger(-1);
 						return;
 					}
 					if (!strcmp(field, "LocalLongBeta"))
 					{
-						vars->Locals.Name.Beta.Long = GetInteger(-1);
+						vars->Locals.VetNumeriLong[1] = GetInteger(-1);
 						return;
 					}
 					if (!strcmp(field, "LocalLongDelta"))
 					{
-						vars->Locals.Name.Delta.Long = GetInteger(-1);
+						vars->Locals.VetNumeriLong[2] = GetInteger(-1);
 						return;
 					}
 					if (!strcmp(field, "LocalLongTimer"))
 					{
-						vars->Locals.Name.Timer = GetInteger(-1);
+						vars->Locals.VetNumeriLong[3] = GetInteger(-1);
 						return;
 					}
 					break;
@@ -4322,12 +4351,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'A':
 						if (!strcmp(field, "LocalShortAlfa1"))
 						{
-							vars->Locals.Name.Alfa.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Locals.VetNumeriShort[0] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						if (!strcmp(field, "LocalShortAlfa2"))
 						{
-							vars->Locals.Name.Alfa.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Locals.VetNumeriShort[1] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						break;
@@ -4335,12 +4364,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'B':
 						if (!strcmp(field, "LocalShortBeta1"))
 						{
-							vars->Locals.Name.Beta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Locals.VetNumeriShort[2] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						if (!strcmp(field, "LocalShortBeta2"))
 						{
-							vars->Locals.Name.Beta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Locals.VetNumeriShort[3] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						break;
@@ -4348,12 +4377,12 @@ void TrngVarWrapper::NewIndex(const char* field)
 					case 'D':
 						if (!strcmp(field, "LocalShortDelta1"))
 						{
-							vars->Locals.Name.Delta.Short1 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Locals.VetNumeriShort[4] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						if (!strcmp(field, "LocalShortDelta2"))
 						{
-							vars->Locals.Name.Delta.Short2 = GetClampedInteger(-1, -32768, 32767, false);
+							vars->Locals.VetNumeriShort[5] = GetClampedInteger(-1, -32768, 32767, false);
 							return;
 						}
 						break;
@@ -4394,6 +4423,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'B':
 							if (!strcmp(field, "StoreByteB1"))
 							{
@@ -4416,6 +4446,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'C':
 							if (!strcmp(field, "StoreByteC1"))
 							{
@@ -4438,6 +4469,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'D':
 							if (!strcmp(field, "StoreByteD1"))
 							{
@@ -4460,6 +4492,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'E':
 							if (!strcmp(field, "StoreByteE1"))
 							{
@@ -4482,6 +4515,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'F':
 							if (!strcmp(field, "StoreByteF1"))
 							{
@@ -4504,6 +4538,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'G':
 							if (!strcmp(field, "StoreByteG1"))
 							{
@@ -4548,6 +4583,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'I':
 							if (!strcmp(field, "StoreByteI1"))
 							{
@@ -4570,6 +4606,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'J':
 							if (!strcmp(field, "StoreByteJ1"))
 							{
@@ -4592,6 +4629,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'K':
 							if (!strcmp(field, "StoreByteK1"))
 							{
@@ -4614,6 +4652,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'L':
 							if (!strcmp(field, "StoreByteL1"))
 							{
@@ -4636,6 +4675,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'M':
 							if (!strcmp(field, "StoreByteM1"))
 							{
@@ -4658,6 +4698,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'N':
 							if (!strcmp(field, "StoreByteN1"))
 							{
@@ -4680,6 +4721,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'O':
 							if (!strcmp(field, "StoreByteO1"))
 							{
@@ -4702,6 +4744,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'P':
 							if (!strcmp(field, "StoreByteP1"))
 							{
@@ -4827,6 +4870,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'B':
 							if (!strcmp(field, "StoreShortB1"))
 							{
@@ -4839,6 +4883,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'C':
 							if (!strcmp(field, "StoreShortC1"))
 							{
@@ -4851,6 +4896,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'D':
 							if (!strcmp(field, "StoreShortD1"))
 							{
@@ -4863,6 +4909,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'E':
 							if (!strcmp(field, "StoreShortE1"))
 							{
@@ -4875,6 +4922,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'F':
 							if (!strcmp(field, "StoreShortF1"))
 							{
@@ -4887,6 +4935,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'G':
 							if (!strcmp(field, "StoreShortG1"))
 							{
@@ -4899,6 +4948,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'H':
 							if (!strcmp(field, "StoreShortH1"))
 							{
@@ -4911,6 +4961,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'I':
 							if (!strcmp(field, "StoreShortI1"))
 							{
@@ -4923,6 +4974,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'J':
 							if (!strcmp(field, "StoreShortJ1"))
 							{
@@ -4935,6 +4987,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'K':
 							if (!strcmp(field, "StoreShortK1"))
 							{
@@ -4947,6 +5000,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'L':
 							if (!strcmp(field, "StoreShortL1"))
 							{
@@ -4959,6 +5013,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'M':
 							if (!strcmp(field, "StoreShortM1"))
 							{
@@ -4971,6 +5026,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'N':
 							if (!strcmp(field, "StoreShortN1"))
 							{
@@ -4983,6 +5039,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'O':
 							if (!strcmp(field, "StoreShortO1"))
 							{
@@ -4995,6 +5052,7 @@ void TrngVarWrapper::NewIndex(const char* field)
 								return;
 							}
 							break;
+
 						case 'P':
 							if (!strcmp(field, "StoreShortP1"))
 							{
