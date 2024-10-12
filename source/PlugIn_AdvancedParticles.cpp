@@ -348,6 +348,7 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 {
 	int RetValue;
 	WORD TimerFull;
+	ParticleGroup* group;
 
 	RetValue = enumTRET.PERFORM_ONCE_AND_GO;
 	// if the flip has no Extra paremeter you can handle a Timer value with values upto 32767
@@ -358,8 +359,11 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 	switch (FlipIndex) {
 		// here type the "case Number:" for each flipeffect number. At end of the code you'll use the "break;" instruction to signal the code ending
 		// Note: when you'll add your first "case Number:" then you can remove the following "case -1: and break;" instructions
-	case -1: 
+	case 1: 
+		group = ParticleFactory::GetGroupByID(TimerFull);
+		ParticleFactory::ExecuteInit(group);
 		break;
+
 	default:
 		SendToLog("WARNING: Flipeffect trigger number %d has not been handled in cbFlipEffectMine() function", FlipIndex);
 		break;

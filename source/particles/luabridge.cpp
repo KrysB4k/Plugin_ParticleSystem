@@ -226,6 +226,16 @@ namespace
 		auto item = &items[GetItemIndex(argument)];
 		return Vector3f(item->pos.xPos, item->pos.yPos, item->pos.zPos);
 	}
+
+	void AssignGroupID(ParticleGroup* group, int id)
+	{
+		if (!group)
+			return;
+		if (ParticleFactory::groupIds[id])
+			Script::ThrowError(FormatString("ID = %d is already assigned to a different group", id));
+
+		ParticleFactory::groupIds[id] = group;
+	}
 }
 
 namespace LuaGlobals
@@ -2214,9 +2224,9 @@ void ParticleGroup::Index(const char* field)
 			}
 			break;
 		case 'b':
-			if (!strcmp(field, "blendingMode"))
+			if (!strcmp(field, "blendMode"))
 			{
-				Script::PushInteger(blendingMode);
+				Script::PushInteger(blendMode);
 				return;
 			}
 			break;
@@ -2230,19 +2240,19 @@ void ParticleGroup::Index(const char* field)
 		case 'l':
 			if (!strcmp(field, "lineIgnoreVel"))
 			{
-				Script::PushBoolean(LineIgnoreVel);
+				Script::PushBoolean(lineIgnoreVel);
 				return;
 			}
 			break;
 		case 's':
 			if (!strcmp(field, "saved"))
 			{
-				Script::PushBoolean(Saved);
+				Script::PushBoolean(saved);
 				return;
 			}
 			if (!strcmp(field, "screenSpace"))
 			{
-				Script::PushBoolean(ScreenSpace);
+				Script::PushBoolean(screenSpace);
 				return;
 			}
 			if (!strcmp(field, "spriteSlot"))
@@ -2271,9 +2281,9 @@ void ParticleGroup::NewIndex(const char* field)
 			}
 			break;
 		case 'b':
-			if (!strcmp(field, "blendingMode"))
+			if (!strcmp(field, "blendMode"))
 			{
-				blendingMode = GetClampedInteger(-1, BlendMode::BLEND_TEXTURE, BlendMode::BLEND_CUSTOM_13, false);
+				blendMode = static_cast<BlendMode>(GetClampedInteger(-1, BlendMode::BLEND_TEXTURE, BlendMode::BLEND_CUSTOM_13, false));
 				return;
 			}
 			break;
@@ -2287,19 +2297,19 @@ void ParticleGroup::NewIndex(const char* field)
 		case 'l':
 			if (!strcmp(field, "lineIgnoreVel"))
 			{
-				LineIgnoreVel = GetBoolean(-1);
+				lineIgnoreVel = GetBoolean(-1);
 				return;
 			}
 			break;
 		case 's':
 			if (!strcmp(field, "saved"))
 			{
-				Saved = GetBoolean(-1);
+				saved = GetBoolean(-1);
 				return;
 			}
 			if (!strcmp(field, "screenSpace"))
 			{
-				ScreenSpace = GetBoolean(-1);
+				screenSpace = GetBoolean(-1);
 				return;
 			}
 			if (!strcmp(field, "spriteSlot"))
@@ -5220,11 +5230,22 @@ int CreateColorFunction::Call()
 int CreateGroupFunction::Call()
 {
 	CheckCaller(FUNCTION_LIBRARY, "createGroup");
+
+	int argcount = GetArgCount(2, 3);
 	int init = GetFunction(1);
 	int update = GetFunction(2);
+
 	int i = ParticleFactory::GetFreeParticleGroup();
 	if (i == -1)
 		return 0;
+
+	if (argcount > 2)
+	{
+		int id = GetClampedInteger(3, 1, MAX_PARTGROUPS - 1, true);
+		AssignGroupID(&ParticleFactory::partGroups[i], id);
+		ParticleFactory::partGroups[i].triggered = true;
+	}
+
 	ParticleFactory::partGroups[i].initIndex = init;
 	ParticleFactory::partGroups[i].updateIndex = update;
 	Script::PushData(&ParticleFactory::partGroups[i]);

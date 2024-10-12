@@ -83,6 +83,7 @@ namespace ParticleFactory
 	MeshParticle meshParts[MAX_MESHPARTS];
 	int nextPartGroup;
 	ParticleGroup partGroups[MAX_PARTGROUPS];
+	ParticleGroup* groupIds[MAX_PARTGROUPS];
 
 	FunctionType caller;
 };
@@ -200,7 +201,7 @@ int ParticleFactory::GetFreeParticleGroup()
 		nextPartGroup++;
 		partGroups[free] = ParticleGroup();
 		partGroups[free].groupIndex = free;
-		partGroups[free].blendingMode = 2;
+		partGroups[free].blendMode = BlendMode::BLEND_COLORADD;
 		partGroups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
 		return free;
 	}
@@ -216,6 +217,23 @@ void ParticleFactory::ClearParts()
 	for (int i = 0; i < MAX_MESHPARTS; i++)
 		meshParts[i] = MeshParticle();
 	nextMeshPart = 0;
+}
+
+void ParticleFactory::ClearGroupParts(ParticleGroup* group)
+{
+	if (group)
+	{
+		for (int i = 0; i < MAX_SPRITEPARTS; i++)
+		{
+			if (spriteParts[i].groupIndex == group->groupIndex)
+				spriteParts[i] = SpriteParticle();
+		}
+		for (int i = 0; i < MAX_MESHPARTS; i++)
+		{
+			if (meshParts[i].groupIndex == group->groupIndex)
+				meshParts[i] = MeshParticle();
+		}
+	}
 }
 
 void ParticleFactory::ClearPartGroups()
@@ -253,7 +271,7 @@ void ParticleFactory::UpdateSprites()
 
 		auto& pgroup = partGroups[part->groupIndex];
 
-		if (part->emitterIndex >= 0 && !pgroup.ScreenSpace)
+		if (part->emitterIndex >= 0 && !pgroup.screenSpace)
 		{
 			int cutoff = -1;
 
@@ -291,7 +309,7 @@ void ParticleFactory::UpdateSprites()
 		if (!Script::ExecuteFunction(pgroup.updateIndex, part))
 			Script::DeleteFunction(&pgroup.updateIndex);
 
-		if (pgroup.ScreenSpace)
+		if (pgroup.screenSpace)
 			part->vel.z = part->accel.z = 0;
 
 		part->vel += part->accel;
@@ -318,7 +336,7 @@ void ParticleFactory::UpdateMeshes()
 
 		auto& pgroup = partGroups[part->groupIndex];
 
-		if (part->emitterIndex >= 0 && !pgroup.ScreenSpace)
+		if (part->emitterIndex >= 0 && !pgroup.screenSpace)
 		{
 			int cutoff = -1;
 
@@ -336,7 +354,7 @@ void ParticleFactory::UpdateMeshes()
 		if (!Script::ExecuteFunction(pgroup.updateIndex, part))
 			Script::DeleteFunction(&pgroup.updateIndex);
 
-		if (pgroup.ScreenSpace)
+		if (pgroup.screenSpace)
 			part->vel.z = part->accel.z = 0;
 
 		part->vel += part->accel;
@@ -381,7 +399,7 @@ void ParticleFactory::DrawSprites()
 
 		long viewCoords[6] = { 0,0,0,0,0,0 };
 
-		if (pgroup.ScreenSpace)
+		if (pgroup.screenSpace)
 		{
 			if (part->pos.x < -1.0f || part->pos.x > 2.0f || part->pos.y < -1.0f || part->pos.y > 2.0f)
 			{
@@ -400,7 +418,7 @@ void ParticleFactory::DrawSprites()
 
 				size *= (1.0f / 32.0f);
 
-				if (pgroup.LineIgnoreVel)
+				if (pgroup.lineIgnoreVel)
 					vel = vel.normalized() * (1.0f / 32.0f);
 
 				vel *= size;
@@ -451,7 +469,7 @@ void ParticleFactory::DrawSprites()
 				float size = part->sizeCust;
 				auto vel = part->vel;
 
-				if (pgroup.LineIgnoreVel)
+				if (pgroup.lineIgnoreVel)
 					vel = vel.normalized(); // ignore speed contribution to particle's size
 				else
 					size *= (1.0f / 32.0f); // else scale down size
@@ -525,7 +543,7 @@ void ParticleFactory::InitParts()
 	Script::PreFunctionLoop();
 	for (int i = 0; i < nextPartGroup; i++)
 	{
-		if (!Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
+		if (!partGroups[i].triggered && !Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
 			Script::DeleteFunction(&partGroups[i].initIndex);
 	}
 	Script::PostFunctionLoop();
@@ -538,6 +556,22 @@ void ParticleFactory::InitPartGroups()
 	Script::PreFunctionLoop();
 	Script::LoadFunctions("EffectsLibrary.lua");
 	Script::PostFunctionLoop();
+}
+
+
+ParticleGroup* ParticleFactory::GetGroupByID(int id)
+{
+	if (id >= 1 && id < MAX_PARTGROUPS)
+		return groupIds[id];
+
+	return nullptr;
+}
+
+
+void ParticleFactory::ExecuteInit(ParticleGroup* group)
+{
+	if (group && !Script::ExecuteFunction(group->initIndex, nullptr))
+		Script::DeleteFunction(&group->initIndex);
 }
 
 
@@ -1085,7 +1119,7 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 	{
 		float size;
 
-		if (pgroup.ScreenSpace)
+		if (pgroup.screenSpace)
 			size = sizeCust;
 		else
 		{
@@ -1168,7 +1202,7 @@ void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const vie
 			v[3].specular = 0xFF000000;
 
 			TextureStruct tex;
-			tex.drawtype = pgroup.blendingMode;
+			tex.drawtype = pgroup.blendMode;
 
 			if (!pgroup.drawMode)
 			{
