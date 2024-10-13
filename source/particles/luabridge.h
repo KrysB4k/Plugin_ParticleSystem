@@ -235,6 +235,11 @@ struct GetTombIndexFunction final : public LuaObjectFunction
 	virtual int Call() override;
 };
 
+struct KillPartsOfGroupFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
 struct LerpFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
@@ -457,6 +462,7 @@ namespace LuaGlobals
 	extern GetLaraIndexFunction GetLaraIndexFunc;
 	extern GetSelectedItemFunction GetSelectedItemFunc;
 	extern GetTombIndexFunction GetTombIndexFunc;
+	extern KillPartsOfGroupFunction KillPartsOfGroupFunc;
 	extern LerpFunction LerpFunc;
 	extern LerpInverseFunction LerpInverseFunc;
 	extern MeshAlignVelocityFunction MeshAlignVelocityFunc;
@@ -496,10 +502,10 @@ namespace LuaGlobals
 	extern TriggerDynamicFunction TriggerDynamicFunc;
 	extern TriggerShockwaveFunction TriggerShockwaveFunc;
 	extern TrngVarWrapper TrngVars;
+	extern LuaItemInfoWrapper LuaItemArray[];
 
 	LuaObject* RetrieveFunction(const char* field);
-	LuaObject* RetrieveTrngVars(const char* field);
-	LuaObject* RetrieveLaraItem(const char* field);
+	LuaObject* RetrieveGlobals(const char* field);
 	std::optional<int> RetrieveIntegerConstant(const char* field);
 	std::optional<float> RetrieveFloatConstant(const char* field);
 }

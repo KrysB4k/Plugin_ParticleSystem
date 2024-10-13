@@ -270,6 +270,7 @@ namespace LuaGlobals
 	GetLaraIndexFunction GetLaraIndexFunc;
 	GetSelectedItemFunction GetSelectedItemFunc;
 	GetTombIndexFunction GetTombIndexFunc;
+	KillPartsOfGroupFunction KillPartsOfGroupFunc;
 	LerpFunction LerpFunc;
 	LerpInverseFunction LerpInverseFunc;
 	MeshAlignVelocityFunction MeshAlignVelocityFunc;
@@ -309,8 +310,7 @@ namespace LuaGlobals
 	TriggerDynamicFunction TriggerDynamicFunc;
 	TriggerShockwaveFunction TriggerShockwaveFunc;
 	TrngVarWrapper TrngVars;
-
-	static LuaItemInfoWrapper LuaItemArray[1024];
+	LuaItemInfoWrapper LuaItemArray[1024];
 }
 
 LuaObject* LuaGlobals::RetrieveFunction(const char* field)
@@ -386,6 +386,10 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &GetSelectedItemFunc;
 		if (!strcmp(field, "getTombIndex"))
 			return &GetTombIndexFunc;
+		break;
+	case 'k':
+		if (!strcmp(field, "killPartsOfGroup"))
+			return &KillPartsOfGroupFunc;
 		break;
 	case 'l':
 		if (!strcmp(field, "lerp"))
@@ -481,17 +485,10 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 	return nullptr;
 }
 
-
-LuaObject* LuaGlobals::RetrieveLaraItem(const char* field)
+LuaObject* LuaGlobals::RetrieveGlobals(const char* field)
 {
 	if (!strcmp(field, "Lara"))
 		return &LuaGlobals::LuaItemArray[lara_info.item_number];
-
-	return nullptr;
-}
-
-LuaObject* LuaGlobals::RetrieveTrngVars(const char* field)
-{
 	if (!strcmp(field, "Vars"))
 		return &TrngVars;
 
@@ -5405,7 +5402,7 @@ int GetItemRoomFunction::Call()
 
 int GetLaraIndexFunction::Call()
 {
-	Script::PushInteger(*Trng.pGlobTomb4->pAdr->pLaraIndex);
+	Script::PushInteger(lara_info.item_number);
 	return 1;
 }
 
@@ -5419,6 +5416,13 @@ int GetTombIndexFunction::Call()
 {
 	Script::PushInteger(GetTombIndexByNGLEIndex(1));
 	return 1;
+}
+
+int KillPartsOfGroupFunction::Call()
+{
+	auto group = GetData<ParticleGroup>(1);
+	ParticleFactory::ClearGroupParts(group);
+	return 0;
 }
 
 int LerpFunction::Call()
@@ -5902,13 +5906,7 @@ void LuaBridge::GlobalIndex(const char* field)
 
 	if (field)
 	{
-		object = LuaGlobals::RetrieveLaraItem(field);
-		if (object)
-		{
-			Script::PushData(object);
-			return;
-		}
-		object = LuaGlobals::RetrieveTrngVars(field);
+		object = LuaGlobals::RetrieveGlobals(field);
 		if (object)
 		{
 			Script::PushData(object);
@@ -5941,10 +5939,8 @@ void LuaBridge::GlobalNewIndex(const char* field)
 {
 	if (field)
 	{
-		if (LuaGlobals::RetrieveLaraItem(field))
-			Script::ThrowError("illegal assigment operation to LARA item");
-		if (LuaGlobals::RetrieveTrngVars(field))
-			Script::ThrowError("illegal assigment operation to TRNG vars");
+		if (LuaGlobals::RetrieveGlobals(field))
+			Script::ThrowError("attempt to assign to a built-in object");
 		if (LuaGlobals::RetrieveFunction(field))
 			Script::ThrowError("attempt to assign to a built-in function");
 		if (LuaGlobals::RetrieveIntegerConstant(field))
