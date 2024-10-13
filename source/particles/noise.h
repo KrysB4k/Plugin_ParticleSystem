@@ -1,7 +1,5 @@
 #pragma once
 
-typedef unsigned char uchar;
-
 class Noise : public LuaObjectClass
 {
 public:

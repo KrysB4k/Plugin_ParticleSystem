@@ -268,6 +268,7 @@ namespace LuaGlobals
 	GetItemJointPosFunction GetItemJointPosFunc;
 	GetItemRoomFunction GetItemRoomFunc;
 	GetLaraIndexFunction GetLaraIndexFunc;
+	GetSelectedItemFunction GetSelectedItemFunc;
 	GetTombIndexFunction GetTombIndexFunc;
 	LerpFunction LerpFunc;
 	LerpInverseFunction LerpInverseFunc;
@@ -308,6 +309,8 @@ namespace LuaGlobals
 	TriggerDynamicFunction TriggerDynamicFunc;
 	TriggerShockwaveFunction TriggerShockwaveFunc;
 	TrngVarWrapper TrngVars;
+
+	static LuaItemInfoWrapper LuaItemArray[1024];
 }
 
 LuaObject* LuaGlobals::RetrieveFunction(const char* field)
@@ -379,6 +382,8 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &GetItemRoomFunc;
 		if (!strcmp(field, "getLaraIndex"))
 			return &GetLaraIndexFunc;
+		if (!strcmp(field, "getSelectedItemIndex"))
+			return &GetSelectedItemFunc;
 		if (!strcmp(field, "getTombIndex"))
 			return &GetTombIndexFunc;
 		break;
@@ -473,6 +478,15 @@ LuaObject* LuaGlobals::RetrieveFunction(const char* field)
 			return &TriggerShockwaveFunc;
 		break;
 	}
+	return nullptr;
+}
+
+
+LuaObject* LuaGlobals::RetrieveLaraItem(const char* field)
+{
+	if (!strcmp(field, "Lara"))
+		return &LuaGlobals::LuaItemArray[lara_info.item_number];
+
 	return nullptr;
 }
 
@@ -2771,8 +2785,14 @@ const char* LuaItemInfoWrapper::Name()
 
 void LuaItemInfoWrapper::Index(const char* field)
 {
-	if (field && itemptr)
+	int itemIndex;
+	Tr4ItemInfo* itemptr {nullptr};
+
+	if (field)
 	{
+		itemIndex = this - LuaGlobals::LuaItemArray;
+		itemptr = &items[itemIndex];
+
 		switch (field[0])
 		{
 		case 'a':
@@ -2902,8 +2922,14 @@ void LuaItemInfoWrapper::Index(const char* field)
 
 void LuaItemInfoWrapper::NewIndex(const char* field)
 {
-	if (field && itemptr)
+	int itemIndex;
+	Tr4ItemInfo* itemptr{ nullptr };
+
+	if (field)
 	{
+		itemIndex = this - LuaGlobals::LuaItemArray;
+		itemptr = &items[itemIndex];
+
 		switch (field[0])
 		{
 		case 'a':
@@ -5354,7 +5380,7 @@ int GetGameTickFunction::Call()
 
 int GetItemInfoFunction::Call()
 {
-	ConstructManagedData<LuaItemInfoWrapper>(&items[GetItemIndex(1)]);
+	Script::PushData(&LuaGlobals::LuaItemArray[GetItemIndex(1)]);
 	return 1;
 }
 
@@ -5380,6 +5406,12 @@ int GetItemRoomFunction::Call()
 int GetLaraIndexFunction::Call()
 {
 	Script::PushInteger(*Trng.pGlobTomb4->pAdr->pLaraIndex);
+	return 1;
+}
+
+int GetSelectedItemFunction::Call()
+{
+	Script::PushInteger(Trng.pGlobTomb4->ItemIndexSelected);
 	return 1;
 }
 
@@ -5870,6 +5902,12 @@ void LuaBridge::GlobalIndex(const char* field)
 
 	if (field)
 	{
+		object = LuaGlobals::RetrieveLaraItem(field);
+		if (object)
+		{
+			Script::PushData(object);
+			return;
+		}
 		object = LuaGlobals::RetrieveTrngVars(field);
 		if (object)
 		{
@@ -5903,6 +5941,8 @@ void LuaBridge::GlobalNewIndex(const char* field)
 {
 	if (field)
 	{
+		if (LuaGlobals::RetrieveLaraItem(field))
+			Script::ThrowError("illegal assigment operation to LARA item");
 		if (LuaGlobals::RetrieveTrngVars(field))
 			Script::ThrowError("illegal assigment operation to TRNG vars");
 		if (LuaGlobals::RetrieveFunction(field))

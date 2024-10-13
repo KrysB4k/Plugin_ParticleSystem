@@ -307,6 +307,7 @@ void FreeLevelResources(void)
 	FreeMemoryParameters();
 	MyData.BaseAssignSlotMine.TotAssign=0;
 
+	ClearMemory(ParticleFactory::groupIds, MAX_PARTGROUPS * sizeof(ParticleGroup*));
 }
 // it will be called before beginning the loading for a new level.
 // you can type here code to initialise all variables used for level (to clear old values changed by previous level)

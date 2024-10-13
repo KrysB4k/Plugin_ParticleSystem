@@ -68,15 +68,9 @@ private:
 
 struct LuaItemInfoWrapper final : public LuaObjectClass
 {
-	LuaItemInfoWrapper(Tr4ItemInfo* item) : itemptr(item) {}
-
 	static const char* Name();
 	virtual void Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
-
-private:
-
-	Tr4ItemInfo* const itemptr;
 };
 
 struct TrngVarWrapper final : public LuaObjectClass
@@ -227,6 +221,11 @@ struct GetItemRoomFunction final : public LuaObjectFunction
 };
 
 struct GetLaraIndexFunction final : public LuaObjectFunction
+{
+	virtual int Call() override;
+};
+
+struct GetSelectedItemFunction final : public LuaObjectFunction
 {
 	virtual int Call() override;
 };
@@ -455,8 +454,9 @@ namespace LuaGlobals
 	extern GetItemInfoFunction GetItemInfoFunc;
 	extern GetItemJointPosFunction GetItemJointPosFunc;
 	extern GetItemRoomFunction GetItemRoomFunc;
-	extern GetTombIndexFunction GetTombIndexFunc;
 	extern GetLaraIndexFunction GetLaraIndexFunc;
+	extern GetSelectedItemFunction GetSelectedItemFunc;
+	extern GetTombIndexFunction GetTombIndexFunc;
 	extern LerpFunction LerpFunc;
 	extern LerpInverseFunction LerpInverseFunc;
 	extern MeshAlignVelocityFunction MeshAlignVelocityFunc;
@@ -499,6 +499,7 @@ namespace LuaGlobals
 
 	LuaObject* RetrieveFunction(const char* field);
 	LuaObject* RetrieveTrngVars(const char* field);
+	LuaObject* RetrieveLaraItem(const char* field);
 	std::optional<int> RetrieveIntegerConstant(const char* field);
 	std::optional<float> RetrieveFloatConstant(const char* field);
 }
