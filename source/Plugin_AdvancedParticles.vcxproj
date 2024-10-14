@@ -86,6 +86,10 @@
     <ClCompile Include="definitions\DefTomb4Funct.cpp" />
     <ClCompile Include="definitions\Tomb4Discoveries_mine.cpp" />
     <ClCompile Include="particles\luabridge.cpp" />
+    <ClCompile Include="particles\luafunctions.cpp" />
+    <ClCompile Include="particles\luaglobals.cpp" />
+    <ClCompile Include="particles\luahelpers.cpp" />
+    <ClCompile Include="particles\luaparticles.cpp" />
     <ClCompile Include="particles\particle.cpp" />
     <ClCompile Include="particles\noise.cpp" />
     <ClCompile Include="particles\utilities.cpp" />

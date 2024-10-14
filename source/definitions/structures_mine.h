@@ -716,5 +716,7 @@ struct Tr4MeshData
 	float* Normals;
 };
 
+
+
 // let below pragma directive at bottom of this source
 #pragma pack(2)

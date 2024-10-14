@@ -63,6 +63,18 @@
     <ClCompile Include="particles\noise.cpp">
       <Filter>Source Files\particles</Filter>
     </ClCompile>
+    <ClCompile Include="particles\luafunctions.cpp">
+      <Filter>Source Files\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\luaglobals.cpp">
+      <Filter>Source Files\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\luaparticles.cpp">
+      <Filter>Source Files\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\luahelpers.cpp">
+      <Filter>Source Files\particles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
