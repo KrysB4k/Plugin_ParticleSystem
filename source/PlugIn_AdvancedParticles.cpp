@@ -37,15 +37,15 @@ StrMyData MyData;
 void Patch_00()
 {
 	UpdateLightning();
-	Diagnostics::initTime = Diagnostics::Time(ParticleFactory::InitParts);
-	Diagnostics::updateTime = Diagnostics::Time(ParticleFactory::UpdateParts);
+	Diagnostics::initTime = Diagnostics::Time(Particles::InitParts);
+	Diagnostics::updateTime = Diagnostics::Time(Particles::UpdateParts);
 }
 
 
 void Patch_01()
 {
 	S_DrawSparks();
-	Diagnostics::drawTime = Diagnostics::Time(ParticleFactory::DrawParts);
+	Diagnostics::drawTime = Diagnostics::Time(Particles::DrawParts);
 	Diagnostics::SetPeaks();
 	Diagnostics::Print();
 	Diagnostics::ResetFrame();
@@ -115,9 +115,9 @@ void cbInitGame(void)
 	// here you can initialize your global data for whole adventure
 	// this procedure will be called only once, before loading title level
 
-	ParticleFactory::ClearParts();
-	ParticleFactory::ClearPartGroups();
-	ParticleFactory::InitPartGroups();
+	Particles::ClearParts();
+	Particles::ClearPartGroups();
+	Particles::InitPartGroups();
 }
 
 
@@ -129,7 +129,7 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
-	ParticleFactory::ClearParts();
+	Particles::ClearParts();
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
@@ -307,7 +307,7 @@ void FreeLevelResources(void)
 	FreeMemoryParameters();
 	MyData.BaseAssignSlotMine.TotAssign=0;
 
-	ClearMemory(ParticleFactory::groupIds, MAX_PARTGROUPS * sizeof(ParticleGroup*));
+	ClearMemory(Particles::groupIds, MAX_PARTGROUPS * sizeof(Particles::ParticleGroup*));
 }
 // it will be called before beginning the loading for a new level.
 // you can type here code to initialise all variables used for level (to clear old values changed by previous level)
@@ -349,7 +349,7 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 {
 	int RetValue;
 	WORD TimerFull;
-	ParticleGroup* group;
+	Particles::ParticleGroup* group;
 
 	RetValue = enumTRET.PERFORM_ONCE_AND_GO;
 	// if the flip has no Extra paremeter you can handle a Timer value with values upto 32767
@@ -361,8 +361,8 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 		// here type the "case Number:" for each flipeffect number. At end of the code you'll use the "break;" instruction to signal the code ending
 		// Note: when you'll add your first "case Number:" then you can remove the following "case -1: and break;" instructions
 	case 1: 
-		group = ParticleFactory::GetGroupByID(TimerFull);
-		ParticleFactory::ExecuteInit(group);
+		group = Particles::GetGroupByID(TimerFull);
+		Particles::ExecuteInit(group);
 		break;
 
 	default:
