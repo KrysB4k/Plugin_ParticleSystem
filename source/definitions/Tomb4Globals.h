@@ -31,6 +31,7 @@
 #define input (*(DWORD*)(0x5355D8))
 #define rooms (*(Tr4RoomInfo**)(0x533934))
 
+#define lara_info (*(Tr4LaraInfo*)(0x80DEC0))
 #define lara_item (*(Tr4ItemInfo**)(0x80E01C))
 #define ShatterItem (*(Tr4ShatterItem*)(0x7FE840))
 #define laraspheres ((MeshSphere*)(0x7F7000))

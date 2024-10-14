@@ -22,15 +22,18 @@ namespace Script
 	void PushBoolean(bool value);
 	void PushNumber(float value);
 	void PushData(LuaObject* value);
+	void PushString(const char* string);
 	int ToInteger(int argument);
 	bool ToBoolean(int argument);
 	float ToNumber(int argument);
 	LuaObject* ToData(int argument);
+	const char* ToString(int argument);
 	int ArgCount();
 	bool IsInteger(int argument);
 	bool IsBoolean(int argument);
 	bool IsNumber(int argument);
 	bool IsData(int argument);
+	bool IsString(int argument);
 	int StoreFunction(int argument);
 	bool ExecuteFunction(int reference, void* value);
 	bool IsFunction(int argument);

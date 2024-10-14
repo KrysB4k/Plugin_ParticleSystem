@@ -7,13 +7,13 @@ std::mt19937 mt;
 
 int Round(float x)
 {
-	return (x > 0.0f) ? int(x+0.5f) : int(x-0.5f);
+	return lroundf(x);
 }
 
 
 phd_vector Round(const Vector3f& v)
 {
-	return phd_vector(Round(v.x), Round(v.y), Round(v.z));
+	return phd_vector(lroundf(v.x), lroundf(v.y), lroundf(v.z));
 }
 
 

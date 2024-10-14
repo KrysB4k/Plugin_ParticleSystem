@@ -1,13 +1,5 @@
 #pragma once
 
-#define RAD(a) ((a) * float(M_PI) / HALF_ANGLE)
-#define ANG(a) Round((a) * HALF_ANGLE / float(M_PI))
-#define RGBA(r, g, b, a) (b | (g << 8) | (r << 16) | (a << 24))
-
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned long ulong;
-
 namespace Diagnostics
 {
 	extern double performanceMultiplier;
@@ -135,11 +127,12 @@ struct ParticleGroup final : public LuaObjectClass
 	mutable int partCount;
 
 	DrawMode drawMode;
+	BlendMode blendMode;
 
-	uchar blendingMode;
-	bool Saved;
-	bool ScreenSpace;
-	bool LineIgnoreVel;
+	bool triggered;
+	bool saved;
+	bool screenSpace;
+	bool lineIgnoreVel;
 
 	static const char* Name();
 	virtual void Index(const char* field) override;
@@ -285,15 +278,17 @@ namespace ParticleFactory
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
+	extern ParticleGroup* groupIds[];
 
 	extern FunctionType caller;
 
 	void ClearParts();
+	void ClearGroupParts(ParticleGroup* group);
 	void ClearPartGroups();
 
 	void InitParts();
 	void InitPartGroups();
-	
+
 	void UpdateParts();
 	void UpdateSprites();
 	void UpdateMeshes();
@@ -305,4 +300,7 @@ namespace ParticleFactory
 	int GetFreeSpritePart();
 	int GetFreeMeshPart();
 	int GetFreeParticleGroup();
+
+	ParticleGroup* GetGroupByID(int id);
+	void ExecuteInit(ParticleGroup* group);
 };
