@@ -1,4 +1,6 @@
-#include "..\definitions\includes.h"
+#include "../definitions/structures_mine.h"
+#include "particle.h"
+#include "utilities.h"
 
 using namespace Utilities;
 using namespace LuaHelpers;
@@ -223,7 +225,6 @@ LuaItemInfoRot::operator Vector3s()
 {
 	return Vector3s(pos->xRot, pos->yRot, pos->zRot);
 }
-
 
 void LuaBridge::GlobalIndex(const char* field)
 {

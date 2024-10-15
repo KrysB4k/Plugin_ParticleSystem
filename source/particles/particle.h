@@ -1,16 +1,5 @@
 #pragma once
-
-struct Vector3s;
-
-struct LuaObjectClassRotation : public LuaObjectClass
-{
-	static const char* Name();
-
-	virtual short GetX() = 0;
-	virtual short GetY() = 0;
-	virtual short GetZ() = 0;
-	virtual explicit operator Vector3s() = 0;
-};
+#include "vector3f.h"
 
 namespace Diagnostics
 {
@@ -198,7 +187,6 @@ namespace Particles
 		virtual void NewIndex(const char* field) override;
 	};
 
-
 	struct SpriteParticle final : public BaseParticle
 	{
 		// fields
@@ -236,7 +224,6 @@ namespace Particles
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
 	};
-
 
 	struct MeshParticle final : public BaseParticle
 	{

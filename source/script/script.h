@@ -7,19 +7,6 @@ struct LuaObject
 	virtual int Call() = 0;
 };
 
-struct LuaObjectClass : public LuaObject
-{
-	virtual int Call() final override;
-	virtual void Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
-};
-
-struct LuaObjectFunction : public LuaObject
-{
-	virtual void Index(const char* field) final override;
-	virtual void NewIndex(const char* field) final override;
-};
-
 namespace LuaBridge
 {
 	void GlobalIndex(const char* field);

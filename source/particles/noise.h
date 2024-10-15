@@ -1,4 +1,6 @@
 #pragma once
+#include "../definitions/structures_mine.h"
+#include "vector3f.h"
 
 class Noise : public LuaObjectClass
 {
@@ -289,10 +291,47 @@ private:
 	Vector3f Gradient3D(float x, float y, float z) const;
 	Vector3f Gradient4D(float x, float y, float z, float w) const;
 
-	static const float grad2lut[8][2]; // 2D gradient lookup table
-	static const float grad3lut[16][3]; // 3D gradient lookup table
-	static const float grad4lut[32][4]; // 4D gradient lookup table
-	static const uchar simplexlut[64][4]; // 4D simplex traversal table
+	// 2D gradient lookup table
+	static constexpr float grad2lut[8][2] = {
+	{ -1.0f, -1.0f }, { 1.0f, 0.0f }, { -1.0f, 0.0f }, { 1.0f, 1.0f },
+	{ -1.0f, 1.0f }, { 0.0f, -1.0f }, { 0.0f, 1.0f }, { 1.0f, -1.0f }
+	};
+
+	// 3D gradient lookup table
+	static constexpr float grad3lut[16][3] = {
+	{ 1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 1.0f },
+	{ -1.0f, 0.0f, 1.0f }, { 0.0f, -1.0f, 1.0f },
+	{ 1.0f, 0.0f, -1.0f }, { 0.0f, 1.0f, -1.0f },
+	{ -1.0f, 0.0f, -1.0f }, { 0.0f, -1.0f, -1.0f },
+	{ 1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 0.0f },
+	{ -1.0f, 1.0f, 0.0f }, { -1.0f, -1.0f, 0.0f },
+	{ 1.0f, 0.0f, 1.0f }, { -1.0f, 0.0f, 1.0f },
+	{ 0.0f, 1.0f, -1.0f }, { 0.0f, -1.0f, -1.0f }
+	};
+
+	// 4D gradient lookup table
+	static constexpr float grad4lut[32][4] = {
+	{ 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f, 1.0f, -1.0f }, { 0.0f, 1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f, -1.0f, -1.0f },
+	{ 0.0f, -1.0f, 1.0f, 1.0f }, { 0.0f, -1.0f, 1.0f, -1.0f }, { 0.0f, -1.0f, -1.0f, 1.0f }, { 0.0f, -1.0f, -1.0f, -1.0f },
+	{ 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 1.0f, -1.0f }, { 1.0f, 0.0f, -1.0f, 1.0f }, { 1.0f, 0.0f, -1.0f, -1.0f },
+	{ -1.0f, 0.0f, 1.0f, 1.0f }, { -1.0f, 0.0f, 1.0f, -1.0f }, { -1.0f, 0.0f, -1.0f, 1.0f }, { -1.0f, 0.0f, -1.0f, -1.0f },
+	{ 1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 0.0f, -1.0f }, { 1.0f, -1.0f, 0.0f, 1.0f }, { 1.0f, -1.0f, 0.0f, -1.0f },
+	{ -1.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, 0.0f, -1.0f }, { -1.0f, -1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, 0.0f, -1.0f },
+	{ 1.0f, 1.0f, 1.0f, 0.0f }, { 1.0f, 1.0f, -1.0f, 0.0f }, { 1.0f, -1.0f, 1.0f, 0.0f }, { 1.0f, -1.0f, -1.0f, 0.0f },
+	{ -1.0f, 1.0f, 1.0f, 0.0f }, { -1.0f, 1.0f, -1.0f, 0.0f }, { -1.0f, -1.0f, 1.0f, 0.0f }, { -1.0f, -1.0f, -1.0f, 0.0f }
+	};
+
+	// 4D simplex traversal table
+	static constexpr uchar simplexlut[64][4] = {
+	{0,1,2,3},{0,1,3,2},{0,0,0,0},{0,2,3,1},{0,0,0,0},{0,0,0,0},{0,0,0,0},{1,2,3,0},
+	{0,2,1,3},{0,0,0,0},{0,3,1,2},{0,3,2,1},{0,0,0,0},{0,0,0,0},{0,0,0,0},{1,3,2,0},
+	{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+	{1,2,0,3},{0,0,0,0},{1,3,0,2},{0,0,0,0},{0,0,0,0},{0,0,0,0},{2,3,0,1},{2,3,1,0},
+	{1,0,2,3},{1,0,3,2},{0,0,0,0},{0,0,0,0},{0,0,0,0},{2,0,3,1},{0,0,0,0},{2,1,3,0},
+	{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+	{2,0,1,3},{0,0,0,0},{0,0,0,0},{0,0,0,0},{3,0,1,2},{3,0,2,1},{0,0,0,0},{3,1,2,0},
+	{2,1,0,3},{0,0,0,0},{0,0,0,0},{0,0,0,0},{3,1,0,2},{0,0,0,0},{3,2,0,1},{3,2,1,0}
+	};
 
 	static constexpr float F2 = 0.366025403f; // 2D skew factor
 	static constexpr float G2 = 0.211324865f; // 2D unskew factor

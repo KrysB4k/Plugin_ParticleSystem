@@ -2,9 +2,15 @@
 #include "Stdafx.h"
 #include <string.h>
 #include <stdio.h>
-
-
-#include "definitions\includes.h"
+#include "trng/bass.h"
+#include "trng/trng.h"
+#include "trng/Tomb_NextGeneration.h"
+#include "definitions/constants_mine.h"
+#include "definitions/DefTomb4Funct.h"
+#include "definitions/macros.h"
+#include "definitions/Tomb4Discoveries_mine.h"
+#include "definitions/Tomb4Globals.h"
+#include "particles/particle.h"
 
 
 #pragma warning( error : 4706 )
@@ -20,7 +26,6 @@ HINSTANCE MyDllInstance=NULL;  // the instance handle of your dll
 extern char BufferLog[4096]; // temporary global buffer to host error and warning messages
 
 DWORD MyTomb4PatcherAddress = 0x0;
-								
 char TexMyPluginName[80];  
 
 StrMyData MyData;
@@ -63,7 +68,6 @@ int Patch_UpdateParts(void)
 int Patch_DrawParts(void)
 {
 	static DWORD VetOffset[]={0x44E863};
-
 	return ApplyCallPatch(VetOffset, 1, (DWORD)Patch_01);
 }
 

@@ -1,8 +1,4 @@
-
-// FOR_YOU: IMPORTANT WARNING: don't change or add text to this source because it will be
-// replaced after new updates and in this way you could lose your adding.
-// Use the "macros_mine.h" file to add your macros
-
+#pragma once
 // -------------- LEVEL BUILDERS: C++ MACROS ------------------------
 
 // read help file "Plugin for level builders" to have a description of these macros

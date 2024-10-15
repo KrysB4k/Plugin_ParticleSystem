@@ -1,14 +1,6 @@
-// FOR_YOU: IMPORTANT WARNING: don't change or add text to this source because it will be
-// replaced after new update and in this way you should lose your adding.
-// Use the "Tomb4Discoveries_mine.h" file to add the tomb4 functions you discovered.
+#pragma once
 
-// don't remove following line: it's a way to keep memory about current release of 
-// your DefTomb4Funct.h source
-// #VERSION_UPDATE_INFO#=PU-5
-
-// ============ DECLARATION OF TOMB4 FUNCTIONS  ==============================
-// to include first of "functions.h" file, where below definitions will be
-// used to assign to them the effective offset address
+#include "structures.h"
 
 
 typedef void (__cdecl* TYPE_InviaMessaggioLog) (int Numero, char Messaggio[]);

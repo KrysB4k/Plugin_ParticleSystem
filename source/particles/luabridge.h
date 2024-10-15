@@ -1,11 +1,47 @@
 #pragma once
+#include "../StdAfx.h"
+#include "script.h"
 
+struct Vector3f;
+struct Vector3s;
+struct phd_3dpos;
 
+namespace Particles
+{
+	struct ParticleGroup;
+}
+
+struct LuaObjectClass : public LuaObject
+{
+	virtual int Call() final override;
+	virtual void Index(const char* field) override;
+	virtual void NewIndex(const char* field) override;
+};
+
+struct LuaObjectClassPosition : public LuaObjectClass
+{
+	static const char* Name();
+
+	virtual float GetX() = 0;
+	virtual float GetY() = 0;
+	virtual float GetZ() = 0;
+	virtual explicit operator Vector3f() = 0;
+};
+
+struct LuaObjectClassRotation : public LuaObjectClass
+{
+	static const char* Name();
+
+	virtual short GetX() = 0;
+	virtual short GetY() = 0;
+	virtual short GetZ() = 0;
+	virtual explicit operator Vector3s() = 0;
+};
 
 struct LuaItemInfoPos final : public LuaObjectClassPosition
 {
 	LuaItemInfoPos(phd_3dpos* position) : pos(position) {}
-	
+
 	static const char* Name();
 	virtual void Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
@@ -36,6 +72,12 @@ struct LuaItemInfoRot final : public LuaObjectClassRotation
 private:
 
 	phd_3dpos* const pos;
+};
+
+struct LuaObjectFunction : public LuaObject
+{
+	virtual void Index(const char* field) final override;
+	virtual void NewIndex(const char* field) final override;
 };
 
 

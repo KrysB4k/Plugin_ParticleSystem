@@ -1,3 +1,5 @@
+#pragma once
+#include "../definitions/structures.h"
 // FOR_YOU: IMPORTANT WARNING: don't change or add text to this source because it will be
 // replaced after new update and in this way you should lose your adding.
 // Use the "Constants_mine.h" file to add your constants or macros, 
@@ -10,6 +12,8 @@
 // this is a list of available functions.
 // Some of them are shortcuts for trng services, while others are utilities 
 // typed in "trng.cpp" source to help you
+
+
 int AbsDiff(DWORD First, DWORD Second);
 int AbsDiffY(int First, int Second);
 void GetTrngInfo(void);  // called byself in warm up, don't use it ever more

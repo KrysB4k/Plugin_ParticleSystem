@@ -1,4 +1,4 @@
-#include "..\definitions\includes.h"
+#include "vector3f.h"
 
 Vector3f Vector3f::operator- () const
 {

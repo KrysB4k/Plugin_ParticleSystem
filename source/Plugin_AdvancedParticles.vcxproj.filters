@@ -95,9 +95,6 @@
     <ClInclude Include="definitions\DefTomb4Funct.h">
       <Filter>Header Files\definitions</Filter>
     </ClInclude>
-    <ClInclude Include="definitions\includes.h">
-      <Filter>Header Files\definitions</Filter>
-    </ClInclude>
     <ClInclude Include="definitions\macros.h">
       <Filter>Header Files\definitions</Filter>
     </ClInclude>

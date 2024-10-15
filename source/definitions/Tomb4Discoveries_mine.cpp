@@ -1,4 +1,4 @@
-#include "..\definitions\includes.h"
+#include "Tomb4Discoveries_mine.h"
 
 TYPE_GetRandomDraw GetRandomDraw = (TYPE_GetRandomDraw) 0x48EB70;
 TYPE_GetSpheres GetSpheres = (TYPE_GetSpheres) 0x45EE70;

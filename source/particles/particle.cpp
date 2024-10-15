@@ -1,4 +1,9 @@
-#include "..\definitions\includes.h"
+#include "../definitions/macros_mine.h"
+#include "../definitions/DefTomb4Funct.h"
+#include "../definitions/Tomb4Discoveries_mine.h"
+#include "../definitions/Tomb4Globals.h"
+#include "particle.h"
+#include "utilities.h"
 
 using namespace Utilities;
 
@@ -275,15 +280,13 @@ namespace Particles
 
 			if (part->emitterIndex >= 0 && !pgroup.screenSpace)
 			{
-				int cutoff = -1;
+				int cutoff = 0;
 
 				if (pgroup.attach.cutoff > 0)
-				{
 					cutoff = pgroup.attach.cutoff;
-					if (pgroup.attach.random > 1)
-						cutoff += (randomHashInt(1725364589 + i) % pgroup.attach.random);
-				}
-
+				if (pgroup.attach.random > 1)
+					cutoff += (randomHashInt(825364519 + i) % pgroup.attach.random);
+					
 				if ((part->lifeSpan - part->lifeCounter) > cutoff)
 					part->Detach();
 			}
@@ -340,14 +343,12 @@ namespace Particles
 
 			if (part->emitterIndex >= 0 && !pgroup.screenSpace)
 			{
-				int cutoff = -1;
+				int cutoff = 0;
 
 				if (pgroup.attach.cutoff > 0)
-				{
 					cutoff = pgroup.attach.cutoff;
-					if (pgroup.attach.random > 1)
-						cutoff += (randomHashInt(1725364589 + i) % pgroup.attach.random);
-				}
+				if (pgroup.attach.random > 1)
+					cutoff += (randomHashInt(825364519 + i) % pgroup.attach.random);
 
 				if ((part->lifeSpan - part->lifeCounter) > cutoff)
 					part->Detach();

@@ -1,4 +1,8 @@
-#include "..\definitions\includes.h"
+#include "../definitions/DefTomb4Funct.h"
+#include "../definitions/Tomb4Discoveries_mine.h"
+#include "../definitions/Tomb4Globals.h"
+#include "particle.h"
+#include "utilities.h"
 #include <random>
 
 // ************  Utility functions ************ //

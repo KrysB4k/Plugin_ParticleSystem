@@ -1,4 +1,7 @@
-#include "..\definitions\includes.h"
+#include "../definitions/Tomb4Globals.h"
+#include "particle.h"
+#include "noise.h"
+#include "utilities.h"
 
 using namespace LuaHelpers;
 using namespace Utilities;

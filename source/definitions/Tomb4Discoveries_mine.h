@@ -9,6 +9,8 @@
 // TYPE_HERE: prototype (c++ language), mnemonic constants for 
 // addresses (assembly)
 
+#include "structures_mine.h"
+
 typedef long (__cdecl *TYPE_GetRandomDraw) (void);
 typedef int (__cdecl *TYPE_GetSpheres)(Tr4ItemInfo* item, MeshSphere* ptr, int flags);
 typedef int (__cdecl *TYPE_GetLaraJointPos) (phd_vector *pPos, int joint);

@@ -1,16 +1,5 @@
 #pragma once
-
-struct Vector3f;
-
-struct LuaObjectClassPosition : public LuaObjectClass
-{
-	static const char* Name();
-
-	virtual float GetX() = 0;
-	virtual float GetY() = 0;
-	virtual float GetZ() = 0;
-	virtual explicit operator Vector3f() = 0;
-};
+#include "luabridge.h"
 
 struct Vector3f final : public LuaObjectClassPosition
 {

@@ -1,9 +1,12 @@
-// let below pragma directive at top of this source
-#pragma pack(1)
+#pragma once
+#include "structures.h"
+#include "constants_mine.h"
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
+
+#pragma pack(1)
 
 // TYPE_HERE: here you can type your structure definitions like it has been done
 // in the "structures.h" file for trng dll

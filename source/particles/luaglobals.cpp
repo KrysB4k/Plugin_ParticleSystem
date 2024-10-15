@@ -1,4 +1,9 @@
-#include "..\definitions\includes.h"
+#include "../definitions/DefTomb4Funct.h"
+#include "../definitions/structures_mine.h"
+#include "../definitions/Tomb4Globals.h"
+#include "../trng/trng.h"
+#include "particle.h"
+#include "utilities.h"
 
 using namespace LuaHelpers;
 using namespace Utilities;

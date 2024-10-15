@@ -1,4 +1,7 @@
-#include "..\definitions\includes.h"
+#include "../definitions/Tomb4Globals.h"
+#include "../trng/trng.h"
+#include "particle.h"
+#include "utilities.h"
 
 using namespace Utilities;
 

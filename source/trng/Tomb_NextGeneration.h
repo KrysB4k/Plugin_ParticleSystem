@@ -1,4 +1,4 @@
-
+#pragma once
 // IMPORTANT WARNING: don't change or add text to this source because it will be
 // replaced after new update and in this way you should lose your adding.
 // Use the "Constants_mine.h" file to add your constants.

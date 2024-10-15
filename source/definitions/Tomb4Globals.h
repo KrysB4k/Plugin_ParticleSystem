@@ -1,4 +1,5 @@
-// tomb4 globals
+#pragma once
+#include "structures_mine.h"
 
 #define phd_winxmin (*(short*)(0x753C04))
 #define phd_winxmax (*(short*)(0x753BEC))

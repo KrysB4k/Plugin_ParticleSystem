@@ -101,7 +101,6 @@
   <ItemGroup>
     <ClInclude Include="definitions\constants_mine.h" />
     <ClInclude Include="definitions\DefTomb4Funct.h" />
-    <ClInclude Include="definitions\includes.h" />
     <ClInclude Include="definitions\macros.h" />
     <ClInclude Include="definitions\macros_mine.h" />
     <ClInclude Include="definitions\structures.h" />

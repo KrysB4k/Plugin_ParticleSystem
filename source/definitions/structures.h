@@ -1,19 +1,8 @@
-
-
-// FOR_YOU: IMPORTANT WARNING: don't change or add text to this source because it will be
-// replaced after new update and in this way you should lose your adding.
-// Use the "structures_mine.h" file to add your structures
-
-
-// don't remove following line: it's a way to keep memory about current release of 
-// your structures.h source
-// #VERSION_UPDATE_INFO#=PU-8
-
-// =========== STRUTTURE PRAGMA ALLINEATE BYTE ============================
+#pragma once
+#include "../trng/bass.h"
+#include "../trng/Tomb_NextGeneration.h"
 
 #pragma pack(1)
-
-
 
 
 typedef struct StrProcBassDll {
@@ -6825,4 +6814,3 @@ typedef struct StrEnumMEMT {
 // #TAG_END_AUTO_ENUM_STUFF#
 
 #pragma pack(2)
-

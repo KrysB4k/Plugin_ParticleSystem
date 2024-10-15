@@ -1,3 +1,5 @@
+#pragma once;
+
 // ************  Utility functions ************ //
 
 struct Vector3f;
