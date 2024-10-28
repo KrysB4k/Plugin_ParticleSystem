@@ -287,7 +287,7 @@ namespace Particles
 				if (pgroup.attach.random > 1)
 					cutoff += (randomHashInt(825364519 + i) % pgroup.attach.random);
 					
-				if ((part->lifeSpan - part->lifeCounter) > cutoff)
+				if ((part->lifeSpan - part->lifeCounter) >= cutoff)
 					part->Detach();
 			}
 
@@ -350,7 +350,7 @@ namespace Particles
 				if (pgroup.attach.random > 1)
 					cutoff += (randomHashInt(825364519 + i) % pgroup.attach.random);
 
-				if ((part->lifeSpan - part->lifeCounter) > cutoff)
+				if ((part->lifeSpan - part->lifeCounter) >= cutoff)
 					part->Detach();
 			}
 
