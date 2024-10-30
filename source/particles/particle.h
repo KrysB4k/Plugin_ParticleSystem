@@ -261,6 +261,67 @@ namespace Particles
 	};
 
 
+	struct SpriteParticleSave
+	{
+		float		posX, posY, posZ;
+		float		velX, velY, velZ;
+		float		accelX, accelY, accelZ;
+
+		ushort		groupIndex;
+
+		short		roomIndex;
+		short		lifeSpan;
+		short		lifeCounter;
+
+		short		emitterIndex;
+		char		emitterNode;
+
+		ushort		spriteIndex;
+
+		ushort		sizeStart;
+		ushort		sizeEnd;
+		ushort		sizeCust;
+		short		sizeRatio;
+
+		short		rot;
+		short		rotVel;
+
+		short		fadeIn;
+		short		fadeOut;
+
+		short		colorFadeTime;
+
+		uchar	colStartR, colStartG, colStartB;
+		uchar	colEndR, colEndG, colEndB;
+		uchar	colCustR, colCustG, colCustB;
+	};
+
+	struct MeshParticleSave
+	{
+		float		posX, posY, posZ;
+		float		velX, velY, velZ;
+		float		accelX, accelY, accelZ;
+
+		ushort		groupIndex;
+
+		short		roomIndex;
+		short		lifeSpan;
+		short		lifeCounter;
+
+		short		emitterIndex;
+		char		emitterNode;
+
+		short		rotx, roty, rotz;
+		short		rotVelx, rotVely, rotVelz;
+		int			scalex, scaley, scalez;
+
+		short		object;
+		uchar		mesh;
+		uchar		transparency;
+		uchar		tintR, tintG, tintB;
+	};
+
+
 	// ************  Global declarations ************ //
 
 	extern ulong gameTick;
