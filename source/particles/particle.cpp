@@ -1231,6 +1231,47 @@ namespace Particles
 		}
 	}
 
+	void SpriteParticle::LoadParticle(const SpriteParticleSave& s)
+	{
+		pos.x = s.posX;
+		pos.y = s.posY;
+		pos.z = s.posZ;
+
+		vel.x = s.velX;
+		vel.y = s.velY;
+		vel.z = s.velZ;
+
+		accel.x = s.accelX;
+		accel.y = s.accelY;
+		accel.z = s.accelZ;
+
+		groupIndex = s.groupIndex;
+		roomIndex = s.roomIndex;
+		lifeSpan = s.lifeSpan;
+		lifeCounter = s.lifeCounter;
+		emitterIndex = s.emitterIndex;
+		emitterNode = s.emitterNode;
+
+		spriteIndex = s.spriteIndex;
+		sizeStart = s.sizeStart;
+		sizeEnd = s.sizeEnd;
+		sizeRatio = s.sizeRatio;
+
+		rot = s.rot;
+		rotVel = s.rotVel;
+		fadeIn = s.fadeIn;
+		fadeOut = s.fadeOut;
+		colorFadeTime = s.colorFadeTime;
+
+		colStart.R = s.colStartR;
+		colStart.G = s.colStartG;
+		colStart.B = s.colStartB;
+
+		colEnd.R = s.colEndR;
+		colEnd.G = s.colEndG;
+		colEnd.B = s.colEndB;
+	}
+
 
 	// ************ MeshParticle methods ************ //
 
@@ -1478,5 +1519,139 @@ namespace Particles
 		}
 
 		phd_PopMatrix();
+	}
+
+	void MeshParticle::LoadParticle(const MeshParticleSave& m)
+	{
+		pos.x = m.posX;
+		pos.y = m.posY;
+		pos.z = m.posZ;
+
+		vel.x = m.velX;
+		vel.y = m.velY;
+		vel.z = m.velZ;
+
+		accel.x = m.accelX;
+		accel.y = m.accelY;
+		accel.z = m.accelZ;
+
+		groupIndex = m.groupIndex;
+		roomIndex = m.roomIndex;
+		lifeSpan = m.lifeSpan;
+		lifeCounter = m.lifeCounter;
+		emitterIndex = m.emitterIndex;
+		emitterNode = m.emitterNode;
+
+		rot.x = m.rotX;
+		rot.y = m.rotY;
+		rot.z = m.rotZ;
+		rotVel.x = m.rotVelX;
+		rotVel.y = m.rotVelY;
+		rotVel.z = m.rotVelZ;
+
+		scale.x = m.scaleX;
+		scale.y = m.scaleY;
+		scale.z = m.scaleZ;
+
+		object = m.object;
+		mesh = m.mesh;
+
+		transparency = m.transparency;
+
+		tint.R = m.tintR;
+		tint.G = m.tintG;
+		tint.B = m.tintB;
+
+		item.il.fcnt = -1;
+		item.il.room_number = -1;
+		item.il.RoomChange = 0;
+		item.il.nCurrentLights = 0;
+		item.il.nPrevLights = 0;
+		item.il.ambient = -1;
+		item.il.pCurrentLights = item.il.CurrentLights;
+		item.il.pPrevLights = item.il.PrevLights;
+	}
+
+	SpriteParticleSave::SpriteParticleSave(const SpriteParticle& s)
+	{
+		posX = s.pos.x;
+		posY = s.pos.y;
+		posZ = s.pos.z;
+
+		velX = s.vel.x;
+		velY = s.vel.y;
+		velZ = s.vel.z;
+
+		accelX = s.accel.x;
+		accelY = s.accel.y;
+		accelZ = s.accel.z;
+
+		groupIndex = s.groupIndex;
+		roomIndex = s.roomIndex;
+		lifeSpan = s.lifeSpan;
+		lifeCounter = s.lifeCounter;
+		emitterIndex = s.emitterIndex;
+		emitterNode = s.emitterNode;
+
+		spriteIndex = s.spriteIndex;
+		sizeStart = s.sizeStart;
+		sizeEnd = s.sizeEnd;
+		sizeRatio = s.sizeRatio;
+
+		rot = s.rot;
+		rotVel = s.rotVel;
+		fadeIn = s.fadeIn;
+		fadeOut = s.fadeOut;
+		colorFadeTime = s.colorFadeTime;
+
+		colStartR = s.colStart.R;
+		colStartG = s.colStart.G;
+		colStartB = s.colStart.B;
+
+		colEndR = s.colEnd.R;
+		colEndG = s.colEnd.G;
+		colEndB = s.colEnd.B;
+	}
+
+	MeshParticleSave::MeshParticleSave(const MeshParticle& m)
+	{
+		posX = m.pos.x;
+		posY = m.pos.y;
+		posZ = m.pos.z;
+
+		velX = m.vel.x;
+		velY = m.vel.y;
+		velZ = m.vel.z;
+
+		accelX = m.accel.x;
+		accelY = m.accel.y;
+		accelZ = m.accel.z;
+
+		groupIndex = m.groupIndex;
+		roomIndex = m.roomIndex;
+		lifeSpan = m.lifeSpan;
+		lifeCounter = m.lifeCounter;
+		emitterIndex = m.emitterIndex;
+		emitterNode = m.emitterNode;
+
+		rotX = m.rot.x;
+		rotY = m.rot.y;
+		rotZ = m.rot.z;
+		rotVelX = m.rotVel.x;
+		rotVelY = m.rotVel.y;
+		rotVelZ = m.rotVel.z;
+
+		scaleX = m.scale.x;
+		scaleY = m.scale.y;
+		scaleZ = m.scale.z;
+
+		object = m.object;
+		mesh = m.mesh;
+
+		transparency = m.transparency;
+
+		tintR = m.tint.R;
+		tintG = m.tint.G;
+		tintB = m.tint.B;
 	}
 }

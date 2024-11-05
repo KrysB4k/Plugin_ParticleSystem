@@ -90,6 +90,9 @@ enum FunctionType
 
 namespace Particles
 {
+	struct SpriteParticleSave;
+	struct MeshParticleSave;
+
 	enum TetherType
 	{
 		TETHER_ROTATING,
@@ -223,6 +226,8 @@ namespace Particles
 		static const char* Name();
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
+
+		void LoadParticle(const SpriteParticleSave& s);
 	};
 
 	struct MeshParticle final : public BaseParticle
@@ -258,11 +263,16 @@ namespace Particles
 		static const char* Name();
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
+
+		void LoadParticle(const MeshParticleSave& m);
 	};
 
 
 	struct SpriteParticleSave
 	{
+		SpriteParticleSave() = default;
+		SpriteParticleSave(const SpriteParticle& s);
+
 		float		posX, posY, posZ;
 		float		velX, velY, velZ;
 		float		accelX, accelY, accelZ;
@@ -298,6 +308,9 @@ namespace Particles
 
 	struct MeshParticleSave
 	{
+		MeshParticleSave() = default;
+		MeshParticleSave(const MeshParticle& m);
+
 		float		posX, posY, posZ;
 		float		velX, velY, velZ;
 		float		accelX, accelY, accelZ;
@@ -311,9 +324,9 @@ namespace Particles
 		short		emitterIndex;
 		char		emitterNode;
 
-		short		rotx, roty, rotz;
-		short		rotVelx, rotVely, rotVelz;
-		int			scalex, scaley, scalez;
+		short		rotX, rotY, rotZ;
+		short		rotVelX, rotVelY, rotVelZ;
+		int			scaleX, scaleY, scaleZ;
 
 		short		object;
 		uchar		mesh;
