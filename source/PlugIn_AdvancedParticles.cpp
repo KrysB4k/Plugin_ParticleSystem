@@ -300,7 +300,7 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 			{
 				auto pLoadedMeshes = new Particles::MeshParticleSave[TotParts];
 
-				memcpy(pLoadedMeshes, &pVetExtras[i], sizeof(Particles::SpriteParticleSave) * TotParts);
+				memcpy(pLoadedMeshes, &pVetExtras[i], sizeof(Particles::MeshParticleSave) * TotParts);
 
 				for (int j = 0; j < TotParts; j++)
 					Particles::meshParts[j].LoadParticle(pLoadedMeshes[j]);
