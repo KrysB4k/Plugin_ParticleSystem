@@ -227,7 +227,7 @@ namespace Particles
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
 
-		void LoadParticle(const SpriteParticleSave& s);
+		void LoadParticle(const SpriteParticleSave* s);
 	};
 
 	struct MeshParticle final : public BaseParticle
@@ -264,7 +264,7 @@ namespace Particles
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
 
-		void LoadParticle(const MeshParticleSave& m);
+		void LoadParticle(const MeshParticleSave* m);
 	};
 
 

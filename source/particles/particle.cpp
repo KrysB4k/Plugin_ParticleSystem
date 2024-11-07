@@ -1231,45 +1231,45 @@ namespace Particles
 		}
 	}
 
-	void SpriteParticle::LoadParticle(const SpriteParticleSave& s)
+	void SpriteParticle::LoadParticle(const SpriteParticleSave* s)
 	{
-		pos.x = s.posX;
-		pos.y = s.posY;
-		pos.z = s.posZ;
+		pos.x = s->posX;
+		pos.y = s->posY;
+		pos.z = s->posZ;
 
-		vel.x = s.velX;
-		vel.y = s.velY;
-		vel.z = s.velZ;
+		vel.x = s->velX;
+		vel.y = s->velY;
+		vel.z = s->velZ;
 
-		accel.x = s.accelX;
-		accel.y = s.accelY;
-		accel.z = s.accelZ;
+		accel.x = s->accelX;
+		accel.y = s->accelY;
+		accel.z = s->accelZ;
 
-		groupIndex = s.groupIndex;
-		roomIndex = s.roomIndex;
-		lifeSpan = s.lifeSpan;
-		lifeCounter = s.lifeCounter;
-		emitterIndex = s.emitterIndex;
-		emitterNode = s.emitterNode;
+		groupIndex = s->groupIndex;
+		roomIndex = s->roomIndex;
+		lifeSpan = s->lifeSpan;
+		lifeCounter = s->lifeCounter;
+		emitterIndex = s->emitterIndex;
+		emitterNode = s->emitterNode;
 
-		spriteIndex = s.spriteIndex;
-		sizeStart = s.sizeStart;
-		sizeEnd = s.sizeEnd;
-		sizeRatio = s.sizeRatio;
+		spriteIndex = s->spriteIndex;
+		sizeStart = s->sizeStart;
+		sizeEnd = s->sizeEnd;
+		sizeRatio = s->sizeRatio;
 
-		rot = s.rot;
-		rotVel = s.rotVel;
-		fadeIn = s.fadeIn;
-		fadeOut = s.fadeOut;
-		colorFadeTime = s.colorFadeTime;
+		rot = s->rot;
+		rotVel = s->rotVel;
+		fadeIn = s->fadeIn;
+		fadeOut = s->fadeOut;
+		colorFadeTime = s->colorFadeTime;
 
-		colStart.R = s.colStartR;
-		colStart.G = s.colStartG;
-		colStart.B = s.colStartB;
+		colStart.R = s->colStartR;
+		colStart.G = s->colStartG;
+		colStart.B = s->colStartB;
 
-		colEnd.R = s.colEndR;
-		colEnd.G = s.colEndG;
-		colEnd.B = s.colEndB;
+		colEnd.R = s->colEndR;
+		colEnd.G = s->colEndG;
+		colEnd.B = s->colEndB;
 	}
 
 
@@ -1521,46 +1521,46 @@ namespace Particles
 		phd_PopMatrix();
 	}
 
-	void MeshParticle::LoadParticle(const MeshParticleSave& m)
+	void MeshParticle::LoadParticle(const MeshParticleSave* m)
 	{
-		pos.x = m.posX;
-		pos.y = m.posY;
-		pos.z = m.posZ;
+		pos.x = m->posX;
+		pos.y = m->posY;
+		pos.z = m->posZ;
 
-		vel.x = m.velX;
-		vel.y = m.velY;
-		vel.z = m.velZ;
+		vel.x = m->velX;
+		vel.y = m->velY;
+		vel.z = m->velZ;
 
-		accel.x = m.accelX;
-		accel.y = m.accelY;
-		accel.z = m.accelZ;
+		accel.x = m->accelX;
+		accel.y = m->accelY;
+		accel.z = m->accelZ;
 
-		groupIndex = m.groupIndex;
-		roomIndex = m.roomIndex;
-		lifeSpan = m.lifeSpan;
-		lifeCounter = m.lifeCounter;
-		emitterIndex = m.emitterIndex;
-		emitterNode = m.emitterNode;
+		groupIndex = m->groupIndex;
+		roomIndex = m->roomIndex;
+		lifeSpan = m->lifeSpan;
+		lifeCounter = m->lifeCounter;
+		emitterIndex = m->emitterIndex;
+		emitterNode = m->emitterNode;
 
-		rot.x = m.rotX;
-		rot.y = m.rotY;
-		rot.z = m.rotZ;
-		rotVel.x = m.rotVelX;
-		rotVel.y = m.rotVelY;
-		rotVel.z = m.rotVelZ;
+		rot.x = m->rotX;
+		rot.y = m->rotY;
+		rot.z = m->rotZ;
+		rotVel.x = m->rotVelX;
+		rotVel.y = m->rotVelY;
+		rotVel.z = m->rotVelZ;
 
-		scale.x = m.scaleX;
-		scale.y = m.scaleY;
-		scale.z = m.scaleZ;
+		scale.x = m->scaleX;
+		scale.y = m->scaleY;
+		scale.z = m->scaleZ;
 
-		object = m.object;
-		mesh = m.mesh;
+		object = m->object;
+		mesh = m->mesh;
 
-		transparency = m.transparency;
+		transparency = m->transparency;
 
-		tint.R = m.tintR;
-		tint.G = m.tintG;
-		tint.B = m.tintB;
+		tint.R = m->tintR;
+		tint.G = m->tintG;
+		tint.B = m->tintB;
 
 		item.il.fcnt = -1;
 		item.il.room_number = -1;

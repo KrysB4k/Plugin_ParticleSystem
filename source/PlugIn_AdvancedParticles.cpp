@@ -282,14 +282,9 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 			TotParts = pVetExtras[i++];
 			if (TotParts > 0)
 			{
-				auto pLoadedSprites = new Particles::SpriteParticleSave[TotParts];
-
-				memcpy(pLoadedSprites, &pVetExtras[i], sizeof(Particles::SpriteParticleSave) * TotParts);
-
+				auto ptr = reinterpret_cast<Particles::SpriteParticleSave*>(&pVetExtras[i]);
 				for (int j = 0; j < TotParts; j++)
-					Particles::spriteParts[j].LoadParticle(pLoadedSprites[j]);
-
-				delete[] pLoadedSprites;
+					Particles::spriteParts[j].LoadParticle(ptr++);
 			}
 			break;
 
@@ -298,14 +293,9 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 			TotParts = pVetExtras[i++];
 			if (TotParts > 0)
 			{
-				auto pLoadedMeshes = new Particles::MeshParticleSave[TotParts];
-
-				memcpy(pLoadedMeshes, &pVetExtras[i], sizeof(Particles::MeshParticleSave) * TotParts);
-
+				auto ptr = reinterpret_cast<Particles::MeshParticleSave*>(&pVetExtras[i]);
 				for (int j = 0; j < TotParts; j++)
-					Particles::meshParts[j].LoadParticle(pLoadedMeshes[j]);
-
-				delete[] pLoadedMeshes;
+					Particles::meshParts[j].LoadParticle(ptr++);
 			}
 			break;
 		}
