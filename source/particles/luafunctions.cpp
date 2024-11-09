@@ -151,9 +151,9 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
-			uchar r = (uchar)(255 * GetClampedNumber(1, 0.0f, 1.0f, false));
-			uchar g = (uchar)(255 * GetClampedNumber(2, 0.0f, 1.0f, false));
-			uchar b = (uchar)(255 * GetClampedNumber(3, 0.0f, 1.0f, false));
+			uchar r = (uchar)GetClampedInteger(1, 0, 255, false);
+			uchar g = (uchar)GetClampedInteger(2, 0, 255, false);
+			uchar b = (uchar)GetClampedInteger(3, 0, 255, false);
 			ConstructManagedData<ColorRGB>(r, g, b);
 			return 1;
 		}
@@ -187,7 +187,7 @@ namespace LuaFunctions
 			return 1;
 		}
 	};
-
+	
 	struct CreateMeshPartFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
@@ -973,9 +973,9 @@ namespace LuaFunctions
 			int y = GetInteger(2);
 			int z = GetInteger(3);
 			int intensity = GetInteger(4);
-			int red = Round(GetClampedNumber(5, 0, 1, false) * 255);
-			int green = Round(GetClampedNumber(6, 0, 1, false) * 255);
-			int blue = Round(GetClampedNumber(7, 0, 1, false) * 255);
+			int red = GetClampedInteger(5, 0, 255, false);
+			int green = GetClampedInteger(6, 0, 255, false);
+			int blue = GetClampedInteger(7, 0, 255, false);
 			TriggerDynamic(x, y, z, intensity, red, green, blue);
 			return 0;
 		}
@@ -992,9 +992,9 @@ namespace LuaFunctions
 			int outerRad = GetClampedInteger(5, -32768, 32767, false);
 			int speed = GetInteger(6);
 			int life = GetClampedInteger(7, 0, 255, false);
-			int red = Round(GetClampedNumber(8, 0, 1, false) * 255);
-			int green = Round(GetClampedNumber(9, 0, 1, false) * 255);
-			int blue = Round(GetClampedNumber(10, 0, 1, false) * 255);
+			int red = GetClampedInteger(8, 0, 255, false);
+			int green = GetClampedInteger(9, 0, 255, false);
+			int blue = GetClampedInteger(10, 0, 255, false);
 			int xRot = RadToShort(GetNumber(11));
 			int flags = GetInteger(12);
 			auto vec = phd_vector(x, y, z);

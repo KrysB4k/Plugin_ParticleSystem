@@ -262,21 +262,21 @@ void ColorRGB::Index(const char* field)
 		case 'b':
 			if (!strcmp(field, "b"))
 			{
-				Script::PushNumber((float)B / 255);
+				Script::PushInteger(B);
 				return;
 			}
 			break;
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
-				Script::PushNumber((float)G / 255);
+				Script::PushInteger(G);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
-				Script::PushNumber((float)R / 255);
+				Script::PushInteger(R);
 				return;
 			}
 			break;
@@ -294,21 +294,21 @@ void ColorRGB::NewIndex(const char* field)
 		case 'b':
 			if (!strcmp(field, "b"))
 			{
-				B = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
+				B = GetClampedInteger(-1, 0, 255, false);
 				return;
 			}
 			break;
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
-				G = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
+				G = GetClampedInteger(-1, 0, 255, false);
 				return;
 			}
 			break;
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
-				R = 255 * GetClampedNumber(-1, 0.0f, 1.0f, false);
+				R = GetClampedInteger(-1, 0, 255, false);
 				return;
 			}
 			break;
