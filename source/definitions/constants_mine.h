@@ -6,7 +6,8 @@
 #define NGTAG_PROGRESSIVE_ACTIONS  1
 #define NGTAG_LOCAL_DATA           2
 #define NGTAG_GLOBAL_DATA          3
-#define NGTAG_PARTICLES			   4
+#define NGTAG_SPRITE_PARTS		   4
+#define NGTAG_MESH_PARTS		   5
 #define AXN_FREE  0  // this record is to free an action record. You type this value in ActionType to free a action progress record
 // --------- END PRESET CONSTANTS ---------------------------------
 // type here the constant name for new progressive action you create

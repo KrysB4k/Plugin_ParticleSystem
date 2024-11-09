@@ -130,10 +130,6 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// here you can initialize specific items of currnet level.
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
-
-	Diagnostics::ResetFrame();
-	Diagnostics::ResetLevel();
-	Particles::ClearParts();
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
@@ -198,8 +194,29 @@ DWORD cbSaveMyData(BYTE **pAdrZone, int SavingType)
 		AddNGToken(NGTAG_PROGRESSIVE_ACTIONS, MyData.TotProgrActions, sizeof(StrProgressiveAction), 
 				&MyData.VetProgrActions[0], &pVetExtras, &TotNWords);
 
-
-
+		std::vector<Particles::SpriteParticleSave> spriteSave;
+		for (int i = 0; i < MAX_SPRITEPARTS; i++)
+		{
+			if (Particles::spriteParts[i].lifeCounter > 0 && Particles::partGroups[Particles::spriteParts[i].groupIndex].saved)
+				spriteSave.emplace_back(Particles::spriteParts[i]);
+		}
+		if (spriteSave.size() > 0)
+		{
+			AddNGToken(NGTAG_SPRITE_PARTS, spriteSave.size(), sizeof(Particles::SpriteParticleSave),
+				spriteSave.data(), &pVetExtras, &TotNWords);
+		}
+			
+		std::vector<Particles::MeshParticleSave> meshSave;
+		for (int i = 0; i < MAX_MESHPARTS; i++)
+		{
+			if (Particles::meshParts[i].lifeCounter > 0 && Particles::partGroups[Particles::meshParts[i].groupIndex].saved)
+				meshSave.emplace_back(Particles::meshParts[i]);
+		}
+		if (meshSave.size() > 0)
+		{
+			AddNGToken(NGTAG_MESH_PARTS, meshSave.size(), sizeof(Particles::MeshParticleSave),
+				meshSave.data(), &pVetExtras, &TotNWords);
+		}
 	}
 
 	if (SavingType & SAVT_GLOBAL_DATA) {
@@ -230,8 +247,7 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 	StrParseNGField  ParseField;
 	int Indice;
 	int i;
-	WORD TotActions;
-
+	WORD TotActions, TotParts;
 	
 	pVetExtras = (WORD*) pAdrZone;
 
@@ -250,15 +266,37 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 			// global data
 			memcpy(&MyData.Save.Global, ParseField.pData, sizeof(StrSavegameGlobalData));
 			break;
-			
+
 		case NGTAG_PROGRESSIVE_ACTIONS:
 			// progressive actions
-			i= ParseField.StartDataIndex;
+			i = ParseField.StartDataIndex;
 			// read tot actions value
 			TotActions = pVetExtras[i++];
 			// copy all tot records
 			memcpy(&MyData.VetProgrActions[0], &pVetExtras[i], sizeof(StrProgressiveAction) * TotActions);
 			MyData.TotProgrActions = TotActions;
+			break;
+
+		case NGTAG_SPRITE_PARTS:
+			i = ParseField.StartDataIndex;
+			TotParts = pVetExtras[i++];
+			if (TotParts > 0)
+			{
+				auto ptr = reinterpret_cast<Particles::SpriteParticleSave*>(&pVetExtras[i]);
+				for (int j = 0; j < TotParts; j++)
+					Particles::spriteParts[j].LoadParticle(ptr++);
+			}
+			break;
+
+		case NGTAG_MESH_PARTS:
+			i = ParseField.StartDataIndex;
+			TotParts = pVetExtras[i++];
+			if (TotParts > 0)
+			{
+				auto ptr = reinterpret_cast<Particles::MeshParticleSave*>(&pVetExtras[i]);
+				for (int j = 0; j < TotParts; j++)
+					Particles::meshParts[j].LoadParticle(ptr++);
+			}
 			break;
 		}
 		Indice= ParseField.NextIndex; 
@@ -343,6 +381,10 @@ void cbInitLoadNewLevel(void)
 	// here you can initialise other variables of MyData different than Local and progressive actions
 	// free resources allocate in previous level
 	FreeLevelResources();
+
+	Diagnostics::ResetFrame();
+	Diagnostics::ResetLevel();
+	Particles::ClearParts();
 }
 
 

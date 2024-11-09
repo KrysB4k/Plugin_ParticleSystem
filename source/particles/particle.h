@@ -90,6 +90,9 @@ enum FunctionType
 
 namespace Particles
 {
+	struct SpriteParticleSave;
+	struct MeshParticleSave;
+
 	enum TetherType
 	{
 		TETHER_ROTATING,
@@ -223,6 +226,8 @@ namespace Particles
 		static const char* Name();
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
+
+		void LoadParticle(const SpriteParticleSave* s);
 	};
 
 	struct MeshParticle final : public BaseParticle
@@ -258,6 +263,75 @@ namespace Particles
 		static const char* Name();
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
+
+		void LoadParticle(const MeshParticleSave* m);
+	};
+
+
+	struct SpriteParticleSave
+	{
+		SpriteParticleSave() = default;
+		SpriteParticleSave(const SpriteParticle& s);
+
+		float		posX, posY, posZ;
+		float		velX, velY, velZ;
+		float		accelX, accelY, accelZ;
+
+		ushort		groupIndex;
+
+		short		roomIndex;
+		short		lifeSpan;
+		short		lifeCounter;
+
+		short		emitterIndex;
+		char		emitterNode;
+
+		ushort		spriteIndex;
+
+		ushort		sizeStart;
+		ushort		sizeEnd;
+		ushort		sizeCust;
+		short		sizeRatio;
+
+		short		rot;
+		short		rotVel;
+
+		short		fadeIn;
+		short		fadeOut;
+
+		short		colorFadeTime;
+
+		uchar	colStartR, colStartG, colStartB;
+		uchar	colEndR, colEndG, colEndB;
+		uchar	colCustR, colCustG, colCustB;
+	};
+
+	struct MeshParticleSave
+	{
+		MeshParticleSave() = default;
+		MeshParticleSave(const MeshParticle& m);
+
+		float		posX, posY, posZ;
+		float		velX, velY, velZ;
+		float		accelX, accelY, accelZ;
+
+		ushort		groupIndex;
+
+		short		roomIndex;
+		short		lifeSpan;
+		short		lifeCounter;
+
+		short		emitterIndex;
+		char		emitterNode;
+
+		short		rotX, rotY, rotZ;
+		short		rotVelX, rotVelY, rotVelZ;
+		int			scaleX, scaleY, scaleZ;
+
+		short		object;
+		uchar		mesh;
+		uchar		transparency;
+		uchar		tintR, tintG, tintB;
 	};
 
 
