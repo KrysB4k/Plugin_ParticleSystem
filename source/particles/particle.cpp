@@ -273,7 +273,7 @@ namespace Particles
 		Script::PreFunctionLoop();
 		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
 		{
-			if (part->lifeCounter <= 0)
+			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
 
 			auto& pgroup = partGroups[part->groupIndex];
@@ -336,7 +336,7 @@ namespace Particles
 		Script::PreFunctionLoop();
 		for (int i = 0; i < MAX_MESHPARTS; ++i, ++part)
 		{
-			if (part->lifeCounter <= 0)
+			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
 
 			auto& pgroup = partGroups[part->groupIndex];
@@ -394,6 +394,8 @@ namespace Particles
 				continue;
 
 			Diagnostics::activeSpriteParticles++;
+
+			part->createdInCurrentLoop = false;
 
 			const auto& pgroup = partGroups[part->groupIndex];
 
@@ -532,6 +534,8 @@ namespace Particles
 			if (part->lifeCounter > 0)
 			{
 				Diagnostics::activeMeshParticles++;
+
+				part->createdInCurrentLoop = false;
 
 				if (part->object >= 0 && objects[part->object].loaded)
 					part->DrawMeshPart();

@@ -162,6 +162,7 @@ namespace Particles
 
 		short		emitterIndex;
 		char		emitterNode;
+		bool		createdInCurrentLoop;
 
 		// methods
 		float		Parameter();

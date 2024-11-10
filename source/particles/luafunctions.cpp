@@ -197,6 +197,7 @@ namespace LuaFunctions
 			auto group = GetData<Particles::ParticleGroup>(1);
 			int i = Particles::GetFreeMeshPart();
 			Particles::meshParts[i].groupIndex = group->groupIndex;
+			Particles::meshParts[i].createdInCurrentLoop = true;
 
 			Tr4ItemInfo* item = &Particles::meshParts[i].item;
 			item->il.fcnt = -1;
@@ -255,6 +256,7 @@ namespace LuaFunctions
 			auto group = GetData<Particles::ParticleGroup>(1);
 			int i = Particles::GetFreeSpritePart();
 			Particles::spriteParts[i].groupIndex = group->groupIndex;
+			Particles::spriteParts[i].createdInCurrentLoop = true;
 			Script::PushData(&Particles::spriteParts[i]);
 			return 1;
 		}
