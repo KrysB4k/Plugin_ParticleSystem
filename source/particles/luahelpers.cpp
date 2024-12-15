@@ -184,13 +184,13 @@ namespace LuaHelpers
 
 	void CheckCaller(int callers, const char* function)
 	{
-		if (!(Particles::caller & callers))
+		if (!(Particles::GetCaller() & callers))
 			Script::ThrowError(FormatString("calling function \"%s\" is forbidden in this phase", function));
 	}
 
 	void CheckFieldCaller(int callers, const char* field)
 	{
-		if (!(Particles::caller & callers))
+		if (!(Particles::GetCaller() & callers))
 			Script::ThrowError(FormatString("assignment to field \"%s\" is forbidden in this phase", field));
 	}
 
@@ -213,5 +213,13 @@ namespace LuaHelpers
 			Script::ThrowError(FormatString("ID = %d is already assigned to a different group", id));
 
 		Particles::groupIds[id] = group;
+	}
+
+	const char* GetBoundedLuaString(int argument, int length)
+	{
+		auto string = GetLuaString(argument);
+		if (strlen(string) > length)
+			Script::ThrowError(FormatString("string %s contains more than %d characters", string, length));
+		return string;
 	}
 }

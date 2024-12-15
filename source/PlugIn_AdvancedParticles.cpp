@@ -11,6 +11,7 @@
 #include "definitions/Tomb4Discoveries_mine.h"
 #include "definitions/Tomb4Globals.h"
 #include "particles/particle.h"
+#include "logger.h"
 
 
 #pragma warning( error : 4706 )
@@ -36,24 +37,125 @@ StrMyData MyData;
 
 // ************  Utilities section  ****************
 
+void ControlParticles()
+{
+	Diagnostics::initTime = Diagnostics::Time(Particles::InitParts);
+	Diagnostics::updateTime = Diagnostics::Time(Particles::UpdateParts);
+}
+
+void DrawParticles()
+{
+	Diagnostics::drawTime = Diagnostics::Time(Particles::DrawParts);
+	Diagnostics::SetPeaks();
+	Diagnostics::Print();
+	Diagnostics::ResetFrame();
+}
+
+void InitialiseGame()
+{
+	Logger::Create();
+	Logger::Debug("InitialiseGame");
+	Diagnostics::Initialise();
+}
+
+void CloseGame()
+{
+	Logger::Debug("CloseGame");
+	Logger::Close();
+}
+
+void InitialiseLevel()
+{
+	Logger::Debug("InitialiseLevel");
+	Script::NewState();
+	Particles::ClearParts();
+	Particles::ClearPartGroups();
+	Particles::InitPartGroups();
+	Diagnostics::ResetFrame();
+	Diagnostics::ResetLevel();
+}
+
+void CloseLevel()
+{
+	Logger::Debug("CloseLevel");
+	Script::Close();
+}
+
+void SaveSpriteParticles(WORD** p2VetExtra, int* pNWords)
+{
+	std::vector<Particles::SpriteParticleSave> spriteSave;
+
+	Logger::Debug("SaveSpriteParticles");
+	for (int i = 0; i < MAX_SPRITEPARTS; i++)
+	{
+		if (Particles::spriteParts[i].lifeCounter > 0 && Particles::partGroups[Particles::spriteParts[i].groupIndex].saved)
+			spriteSave.emplace_back(Particles::spriteParts[i]);
+	}
+	if (spriteSave.size() > 0)
+	{
+		AddNGToken(NGTAG_SPRITE_PARTS, spriteSave.size(), sizeof(Particles::SpriteParticleSave),
+			spriteSave.data(), p2VetExtra, pNWords);
+	}
+}
+
+void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
+{
+	std::vector<Particles::MeshParticleSave> meshSave;
+
+	Logger::Debug("SaveMeshParticles");
+	for (int i = 0; i < MAX_MESHPARTS; i++)
+	{
+		if (Particles::meshParts[i].lifeCounter > 0 && Particles::partGroups[Particles::meshParts[i].groupIndex].saved)
+			meshSave.emplace_back(Particles::meshParts[i]);
+	}
+	if (meshSave.size() > 0)
+	{
+		AddNGToken(NGTAG_MESH_PARTS, meshSave.size(), sizeof(Particles::MeshParticleSave),
+			meshSave.data(), p2VetExtra, pNWords);
+	}
+}
+
+void LoadSpriteParticles(WORD* pData)
+{
+	WORD TotParts;
+
+	Logger::Debug("LoadSpriteParticles");
+	TotParts = pData[0];
+	if (TotParts > 0)
+	{
+		auto ptr = reinterpret_cast<Particles::SpriteParticleSave*>(&pData[1]);
+		for (int i = 0; i < TotParts; i++)
+			Particles::spriteParts[i].LoadParticle(ptr++);
+	}
+}
+
+void LoadMeshParticles(WORD* pData)
+{
+	WORD TotParts;
+
+	Logger::Debug("LoadMeshParticles");
+	TotParts = pData[0];
+	if (TotParts > 0)
+	{
+		auto ptr = reinterpret_cast<Particles::MeshParticleSave*>(&pData[1]);
+		for (int i = 0; i < TotParts; i++)
+			Particles::meshParts[i].LoadParticle(ptr++);
+	}
+}
 
 // ************  Patcher Functions section  ***************
 
 void Patch_00()
 {
 	UpdateLightning();
-	Diagnostics::initTime = Diagnostics::Time(Particles::InitParts);
-	Diagnostics::updateTime = Diagnostics::Time(Particles::UpdateParts);
+	ControlParticles();
 }
 
 
 void Patch_01()
 {
 	S_DrawSparks();
-	Diagnostics::drawTime = Diagnostics::Time(Particles::DrawParts);
-	Diagnostics::SetPeaks();
-	Diagnostics::Print();
-	Diagnostics::ResetFrame();
+	DrawParticles();
 }
 
 
@@ -119,9 +221,7 @@ void cbInitGame(void)
 	// here you can initialize your global data for whole adventure
 	// this procedure will be called only once, before loading title level
 
-	Particles::ClearParts();
-	Particles::ClearPartGroups();
-	Particles::InitPartGroups();
+	InitialiseGame();
 }
 
 
@@ -194,29 +294,8 @@ DWORD cbSaveMyData(BYTE **pAdrZone, int SavingType)
 		AddNGToken(NGTAG_PROGRESSIVE_ACTIONS, MyData.TotProgrActions, sizeof(StrProgressiveAction), 
 				&MyData.VetProgrActions[0], &pVetExtras, &TotNWords);
 
-		std::vector<Particles::SpriteParticleSave> spriteSave;
-		for (int i = 0; i < MAX_SPRITEPARTS; i++)
-		{
-			if (Particles::spriteParts[i].lifeCounter > 0 && Particles::partGroups[Particles::spriteParts[i].groupIndex].saved)
-				spriteSave.emplace_back(Particles::spriteParts[i]);
-		}
-		if (spriteSave.size() > 0)
-		{
-			AddNGToken(NGTAG_SPRITE_PARTS, spriteSave.size(), sizeof(Particles::SpriteParticleSave),
-				spriteSave.data(), &pVetExtras, &TotNWords);
-		}
-			
-		std::vector<Particles::MeshParticleSave> meshSave;
-		for (int i = 0; i < MAX_MESHPARTS; i++)
-		{
-			if (Particles::meshParts[i].lifeCounter > 0 && Particles::partGroups[Particles::meshParts[i].groupIndex].saved)
-				meshSave.emplace_back(Particles::meshParts[i]);
-		}
-		if (meshSave.size() > 0)
-		{
-			AddNGToken(NGTAG_MESH_PARTS, meshSave.size(), sizeof(Particles::MeshParticleSave),
-				meshSave.data(), &pVetExtras, &TotNWords);
-		}
+		SaveSpriteParticles(&pVetExtras, &TotNWords);
+		SaveMeshParticles(&pVetExtras, &TotNWords);
 	}
 
 	if (SavingType & SAVT_GLOBAL_DATA) {
@@ -247,7 +326,7 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 	StrParseNGField  ParseField;
 	int Indice;
 	int i;
-	WORD TotActions, TotParts;
+	WORD TotActions;
 	
 	pVetExtras = (WORD*) pAdrZone;
 
@@ -278,25 +357,11 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 			break;
 
 		case NGTAG_SPRITE_PARTS:
-			i = ParseField.StartDataIndex;
-			TotParts = pVetExtras[i++];
-			if (TotParts > 0)
-			{
-				auto ptr = reinterpret_cast<Particles::SpriteParticleSave*>(&pVetExtras[i]);
-				for (int j = 0; j < TotParts; j++)
-					Particles::spriteParts[j].LoadParticle(ptr++);
-			}
+			LoadSpriteParticles(ParseField.pData);
 			break;
 
 		case NGTAG_MESH_PARTS:
-			i = ParseField.StartDataIndex;
-			TotParts = pVetExtras[i++];
-			if (TotParts > 0)
-			{
-				auto ptr = reinterpret_cast<Particles::MeshParticleSave*>(&pVetExtras[i]);
-				for (int j = 0; j < TotParts; j++)
-					Particles::meshParts[j].LoadParticle(ptr++);
-			}
+			LoadMeshParticles(ParseField.pData);
 			break;
 		}
 		Indice= ParseField.NextIndex; 
@@ -349,7 +414,6 @@ void FreeLevelResources(void)
 	FreeMemoryParameters();
 	MyData.BaseAssignSlotMine.TotAssign=0;
 
-	ClearMemory(Particles::groupIds, MAX_PARTGROUPS * sizeof(Particles::ParticleGroup*));
 }
 // it will be called before beginning the loading for a new level.
 // you can type here code to initialise all variables used for level (to clear old values changed by previous level)
@@ -382,9 +446,14 @@ void cbInitLoadNewLevel(void)
 	// free resources allocate in previous level
 	FreeLevelResources();
 
-	Diagnostics::ResetFrame();
-	Diagnostics::ResetLevel();
-	Particles::ClearParts();
+	static bool FirstInit = true;
+
+	if (FirstInit)
+		FirstInit = false;
+	else
+		CloseLevel();
+
+	InitialiseLevel();
 }
 
 
@@ -623,6 +692,12 @@ void cbInitObjects(void)
 
 }
 
+void* cbCloseGame(WORD PatchIndex, WORD CBT_Flags, bool TestFromJump, StrRegisters* pRegisters)
+{
+	CloseLevel();
+	CloseGame();
+	return nullptr;
+}
 
 // FOR_YOU:
 // in this function RequireMyCallBacks() you'll type
@@ -651,6 +726,8 @@ bool RequireMyCallBacks(void)
 	GET_CALLBACK(CB_CYCLE_BEGIN, 0, 0, cbCycleBegin)
 	GET_CALLBACK(CB_PROGR_ACTION_MINE, 0, 0, cbProgrActionMine)
 	
+	GET_CALLBACK(CB_NUMERIC_TRNG_PATCH, CBT_FIRST, 0x71, cbCloseGame)
+
 	return true;
 }
 // FOR_YOU:
@@ -672,10 +749,6 @@ bool InitializeAll(void)
 
 	// TYPE_HERE: code to allocate global resource to use in the whole game
 
-	srand(GetCurrentProcessId());
-	Diagnostics::Initialise();
-	Script::NewState();
-
 	return true;
 }
 
@@ -686,8 +759,6 @@ void ReleaseAll(void)
 {
 // ************  ReleaseAll() function  ******************
 	FreeLevelResources();
-
-	Script::Close();
 }
 
 

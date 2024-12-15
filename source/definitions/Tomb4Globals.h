@@ -55,3 +55,7 @@
 #define number_rooms (*(short*)(0x53392C))
 
 #define font_height (*(long*)(0x7F4F30))
+
+#define gfFilenameOffset (*(short**)(0x7FD1CC))
+#define gfFilenameWad (*(char**)(0x7FD16C))
+#define gfCurrentLevel (*(char*)(0x7FD170))

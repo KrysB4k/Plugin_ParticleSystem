@@ -466,7 +466,7 @@ namespace Particles
 
 	void ParticleGroup::NewIndex(const char* field)
 	{
-		CheckFieldCaller(FUNCTION_LIBRARY, field);
+		CheckFieldCaller(FUNCTION_LEVEL, field);
 		if (field)
 		{
 			switch (field[0])
