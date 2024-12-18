@@ -5,7 +5,7 @@
 namespace
 {
 	lua_State* lua;
-	int metatable;
+	int metatable, parameters;
 
 	void BuildErrorMessage(const char* msg)
 	{
@@ -119,12 +119,23 @@ namespace
 			return argument + 1;
 		return argument;
 	}
+
+	int ErrorMetaIndex(lua_State* L)
+	{
+		BuildErrorMessage("module has no parameter with the given name");
+		return lua_error(lua);
+	}
+
+	int ErrorMetaNewIndex(lua_State* L)
+	{
+		BuildErrorMessage("module has no parameter with the given name");
+		return lua_error(lua);
+	}
 }
 
 void Script::NewState()
 {
 	lua = luaL_newstate();
-	Logger::Create();
 	lua_gc(lua, LUA_GCSTOP);
 	lua_pushlightuserdata(lua, nullptr);
 	lua_createtable(lua, 0, 3);
@@ -141,12 +152,19 @@ void Script::NewState()
 	metatable = luaL_ref(lua, LUA_REGISTRYINDEX);
 	lua_setmetatable(lua, -2);
 	lua_pop(lua, 1);
+	lua_createtable(lua, 0, 1);
+	lua_pushliteral(lua, "__index");
+	lua_pushcfunction(lua, ErrorMetaIndex);
+	lua_rawset(lua, -3);
+	lua_pushliteral(lua, "__newindex");
+	lua_pushcfunction(lua, ErrorMetaNewIndex);
+	lua_rawset(lua, -3);
+	parameters = luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
 void Script::Close()
 {
 	luaL_unref(lua, LUA_REGISTRYINDEX, metatable);
-	Logger::Close();
 	lua_close(lua);
 }
 
@@ -329,7 +347,29 @@ void Script::Print()
 	lua_pop(lua, 1);
 }
 
-void Script::LoadFunctions(const char* filename)
+void Script::Require(const char* filename)
+{
+	char name[100];
+
+	strcpy_s(name, "effects\\");
+	strcat_s(name, filename);
+	PreFunctionLoop();
+	LoadFunctions(name, 1);
+	lua_insert(lua, -2);
+	PostFunctionLoop();
+	if (lua_istable(lua, -1))
+	{
+		lua_rawgeti(lua, LUA_REGISTRYINDEX, parameters);
+		lua_setmetatable(lua, -2);
+	}
+	else
+	{
+		lua_pop(lua, 1);
+		lua_pushnil(lua);
+	}
+}
+
+void Script::LoadFunctions(const char* filename, int results)
 {
 	int status;
 
@@ -338,12 +378,13 @@ void Script::LoadFunctions(const char* filename)
 	{
 		lua_pushlightuserdata(lua, nullptr);
 		lua_setupvalue(lua, -2, 1);
-		status = lua_pcall(lua, 0, 0, -2);
+		status = lua_pcall(lua, 0, results, -2);
 	}
 	if (status != LUA_OK)
 	{
 		Logger::Error(lua_tostring(lua, -1));
 		lua_pop(lua, 1);
+		lua_settop(lua, lua_gettop(lua) + results);
 	}
 }
 
@@ -390,4 +431,9 @@ void* Script::CreateManagedData(unsigned int size)
 	lua_rawgeti(lua, LUA_REGISTRYINDEX, metatable);
 	lua_setmetatable(lua, -2);
 	return object;
+}
+
+void* Script::GetExtraSpace()
+{
+	return lua_getextraspace(lua);
 }

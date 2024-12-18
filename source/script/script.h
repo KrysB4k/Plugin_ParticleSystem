@@ -42,7 +42,8 @@ namespace Script
 	int ExplodeTable(int argument);
 	bool IsTable(int argument);
 	void Print();
-	void LoadFunctions(const char* filename);
+	void Require(const char* filename);
+	void LoadFunctions(const char* filename, int results);
 	[[noreturn]] void ThrowError(const char* msg);
 	void EmitWarning(const char* msg);
 	void AddInformation(const char* msg);
@@ -50,4 +51,5 @@ namespace Script
 	void PreFunctionLoop();
 	void PostFunctionLoop();
 	void* CreateManagedData(unsigned int size);
+	void* GetExtraSpace();
 }

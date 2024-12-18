@@ -92,8 +92,17 @@ namespace Particles
 	ParticleGroup partGroups[MAX_PARTGROUPS];
 	ParticleGroup* groupIds[MAX_PARTGROUPS];
 
-	FunctionType caller;
+	FunctionType GetCaller()
+	{
+		auto ptr = reinterpret_cast<FunctionType*>(Script::GetExtraSpace());
+		return *ptr;
+	}
 
+	void SetCaller(FunctionType caller)
+	{
+		auto ptr = reinterpret_cast<FunctionType*>(Script::GetExtraSpace());
+		*ptr = caller;
+	}
 
 	int GetFreeSpritePart()
 	{
@@ -268,7 +277,7 @@ namespace Particles
 	{
 		SpriteParticle* part = &spriteParts[0];
 
-		caller = FUNCTION_UPDATE;
+		SetCaller(FUNCTION_UPDATE);
 
 		Script::PreFunctionLoop();
 		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
@@ -332,7 +341,7 @@ namespace Particles
 	{
 		auto part = &meshParts[0];
 
-		caller = FUNCTION_UPDATE;
+		SetCaller(FUNCTION_UPDATE);
 		Script::PreFunctionLoop();
 		for (int i = 0; i < MAX_MESHPARTS; ++i, ++part)
 		{
@@ -546,7 +555,7 @@ namespace Particles
 
 	void InitParts()
 	{
-		caller = FUNCTION_INIT;
+		SetCaller(FUNCTION_INIT);
 		Script::PreFunctionLoop();
 		for (int i = 0; i < nextPartGroup; i++)
 		{
@@ -559,9 +568,13 @@ namespace Particles
 
 	void InitPartGroups()
 	{
-		caller = FUNCTION_LIBRARY;
+		char name[100];
+
+		SetCaller(FUNCTION_LEVEL);
 		Script::PreFunctionLoop();
-		Script::LoadFunctions("EffectsLibrary.lua");
+		strcpy_s(name, &gfFilenameWad[gfFilenameOffset[gfCurrentLevel]]);
+		strcat_s(name, ".lua");
+		Script::LoadFunctions(name, 0);
 		Script::PostFunctionLoop();
 	}
 

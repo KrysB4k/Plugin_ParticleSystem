@@ -163,7 +163,7 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
-			CheckCaller(FunctionType::FUNCTION_LIBRARY, "createGroup");
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "createGroup");
 
 			int argcount = GetArgCount(2, 3);
 			int init = GetFunction(1);
@@ -218,7 +218,7 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
-			CheckCaller(FunctionType::FUNCTION_LIBRARY, "createPerlinNoise");
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "createPerlinNoise");
 
 			int args = GetArgCount(0, 1);
 
@@ -235,7 +235,7 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
-			CheckCaller(FunctionType::FUNCTION_LIBRARY, "createSimplexNoise");
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "createSimplexNoise");
 
 			int args = GetArgCount(0, 1);
 
@@ -836,6 +836,16 @@ namespace LuaFunctions
 		}
 	};
 
+	struct RequireFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "require");
+			Script::Require(GetBoundedLuaString(1, 50));
+			return 1;
+		}
+	};
+
 	struct RoundFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
@@ -1068,6 +1078,7 @@ namespace LuaFunctions
 	RandfloatFunction RandfloatFunc;
 	RandintFunction RandintFunc;
 	RandomNegateFunction RandomNegateFunc;
+	RequireFunction RequireFunc;
 	RoundFunction RoundFunc;
 	SelectItemFunction SelectItemFunc;
 	SinFunction SinFunc;
@@ -1223,6 +1234,8 @@ namespace LuaFunctions
 				return &RandintFunc;
 			if (!strcmp(field, "randomNegate"))
 				return &RandomNegateFunc;
+			if (!strcmp(field, "require"))
+				return &RequireFunc;
 			if (!strcmp(field, "round"))
 				return &RoundFunc;
 			break;

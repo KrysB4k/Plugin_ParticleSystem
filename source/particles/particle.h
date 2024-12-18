@@ -83,7 +83,7 @@ enum BlendMode
 
 enum FunctionType
 {
-	FUNCTION_LIBRARY = 0x1,
+	FUNCTION_LEVEL = 0x1,
 	FUNCTION_INIT = 0x2,
 	FUNCTION_UPDATE = 0x4
 };
@@ -345,8 +345,8 @@ namespace Particles
 	extern ParticleGroup partGroups[];
 	extern ParticleGroup* groupIds[];
 
-	extern FunctionType caller;
-
+	FunctionType GetCaller();
+	void SetCaller(FunctionType caller);
 
 	// ************  Particles functions ************ //
 
