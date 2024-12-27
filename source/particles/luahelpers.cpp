@@ -222,4 +222,13 @@ namespace LuaHelpers
 			Script::ThrowError(FormatString("string %s contains more than %d characters", string, length));
 		return string;
 	}
+
+	void RequireModule(int argument)
+	{
+		auto string = GetBoundedLuaString(argument, 50);
+		Script::PreFunctionLoop();
+		if (!Script::Require(string))
+			Script::EmitWarning(FormatString("cannot load \"%s\" module", string));
+		Script::PostFunctionLoop(1);
+	}
 }

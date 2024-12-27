@@ -159,4 +159,5 @@ namespace LuaHelpers
 	Vector3f GetItemPos(int argument);
 	void AssignGroupID(Particles::ParticleGroup*, int id);
 	const char* GetBoundedLuaString(int argument, int length);
+	void RequireModule(int argument);
 }

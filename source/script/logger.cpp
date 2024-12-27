@@ -63,6 +63,7 @@ void Logger::Create()
 	{
 	case LOG_CONSOLE:
 		AllocConsole();
+		SetConsoleTitle("Plugin_AdvancedParticles log");
 		logger = CreateConsoleScreenBuffer(GENERIC_WRITE, 0, nullptr, CONSOLE_TEXTMODE_BUFFER, nullptr);
 		if (logger != INVALID_HANDLE_VALUE)
 			SetConsoleActiveScreenBuffer(logger);

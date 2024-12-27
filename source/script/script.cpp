@@ -131,6 +131,19 @@ namespace
 		BuildErrorMessage("module has no parameter with the given name");
 		return lua_error(lua);
 	}
+
+	const char* FindModule(const char* name, char* filename, int size)
+	{
+		strcpy_s(filename, size, name);
+		_strlwr_s(filename, size);
+		strcat_s(filename, size, ".lua");
+		if (GetFileAttributes(filename) != INVALID_FILE_ATTRIBUTES)
+			return "t";
+		strcat_s(filename, size, "c");
+		if (GetFileAttributes(filename) != INVALID_FILE_ATTRIBUTES)
+			return "b";
+		return nullptr;
+	}
 }
 
 void Script::NewState()
@@ -347,44 +360,74 @@ void Script::Print()
 	lua_pop(lua, 1);
 }
 
-void Script::Require(const char* filename)
+bool Script::Require(const char* base)
 {
-	char name[100];
+	char name[100], filename[100];
+	const char* mode;
+	int status;
 
 	strcpy_s(name, "effects\\");
-	strcat_s(name, filename);
-	PreFunctionLoop();
-	LoadFunctions(name, 1);
-	lua_insert(lua, -2);
-	PostFunctionLoop();
+	strcat_s(name, base);
+	mode = FindModule(name, filename, 100);
+	if (!mode)
+		return false;
+	status = luaL_loadfilex(lua, filename, mode);
+	if (status == LUA_OK)
+	{
+		lua_pushlightuserdata(lua, nullptr);
+		lua_setupvalue(lua, -2, 1);
+		status = lua_pcall(lua, 0, 1, -2);
+		if (status != LUA_OK)
+		{
+			Logger::Error(lua_tostring(lua, -1));
+			lua_pop(lua, 1);
+			lua_pushnil(lua);
+		}
+	}
+	else
+	{
+		EmitWarning(lua_tostring(lua, -1));
+		lua_pop(lua, 1);
+		lua_pushnil(lua);
+	}
 	if (lua_istable(lua, -1))
 	{
 		lua_rawgeti(lua, LUA_REGISTRYINDEX, parameters);
 		lua_setmetatable(lua, -2);
 	}
-	else
+	else if (!lua_isnil(lua, -1))
 	{
 		lua_pop(lua, 1);
 		lua_pushnil(lua);
 	}
+	return true;
 }
 
-void Script::LoadFunctions(const char* filename, int results)
+void Script::LoadFunctions(const char* name)
 {
 	int status;
+	char filename[100];
+	const char* mode;
 
-	status = luaL_loadfile(lua, filename);
+	mode = FindModule(name, filename, 100);
+	if (!mode)
+		return;
+	status = luaL_loadfilex(lua, filename, mode);
 	if (status == LUA_OK)
 	{
 		lua_pushlightuserdata(lua, nullptr);
 		lua_setupvalue(lua, -2, 1);
-		status = lua_pcall(lua, 0, results, -2);
+		status = lua_pcall(lua, 0, 0, -2);
+		if (status != LUA_OK)
+		{
+			Logger::Error(lua_tostring(lua, -1));
+			lua_pop(lua, 1);
+		}
 	}
-	if (status != LUA_OK)
+	else
 	{
-		Logger::Error(lua_tostring(lua, -1));
+		EmitWarning(lua_tostring(lua, -1));
 		lua_pop(lua, 1);
-		lua_settop(lua, lua_gettop(lua) + results);
 	}
 }
 
@@ -417,9 +460,9 @@ void Script::PreFunctionLoop()
 	lua_pushcfunction(lua, ExceptionHandler);
 }
 
-void Script::PostFunctionLoop()
+void Script::PostFunctionLoop(int results)
 {
-	lua_pop(lua, 1);
+	lua_remove(lua, -results - 1);
 	lua_gc(lua, LUA_GCCOLLECT);
 }
 

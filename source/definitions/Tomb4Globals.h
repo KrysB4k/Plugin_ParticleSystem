@@ -59,3 +59,6 @@
 #define gfFilenameOffset (*(short**)(0x7FD1CC))
 #define gfFilenameWad (*(char**)(0x7FD16C))
 #define gfCurrentLevel (*(char*)(0x7FD170))
+#define gfLevelNames ((char*)(0x7FD1A0))
+#define gfStringOffset (*(ushort**)(0x7FD154))
+#define gfStringWad (*(char**)(0x7FD198))

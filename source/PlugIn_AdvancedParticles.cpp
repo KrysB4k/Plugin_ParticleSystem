@@ -12,7 +12,7 @@
 #include "definitions/Tomb4Globals.h"
 #include "particles/particle.h"
 #include "logger.h"
-
+#include "particles/utilities.h"
 
 #pragma warning( error : 4706 )
 #pragma warning( disable : 4996)
@@ -70,6 +70,7 @@ void InitialiseLevel()
 	Script::NewState();
 	Particles::ClearParts();
 	Particles::ClearPartGroups();
+	Logger::Information(Utilities::FormatString("Loading functions of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
 	Particles::InitPartGroups();
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
