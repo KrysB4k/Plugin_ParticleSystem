@@ -568,8 +568,6 @@ namespace Particles
 
 	void InitPartGroups()
 	{
-		char msg[100];
-
 		SetCaller(FUNCTION_LEVEL);
 		Script::PreFunctionLoop();
 		Script::LoadFunctions(&gfFilenameWad[gfFilenameOffset[gfCurrentLevel]]);
