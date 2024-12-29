@@ -122,7 +122,7 @@
 /*
 @@ LUA_32BITS enables Lua with 32-bit integers and 32-bit floats.
 */
-#define LUA_32BITS	1
+#define LUA_32BITS	0
 
 
 /*
@@ -256,6 +256,15 @@
 #endif
 
 #endif
+
+
+/*
+** LUA_IGMARK is a mark to ignore all after it when building the
+** module name (e.g., used to build the luaopen_ function name).
+** Typically, the suffix after the mark is the module version,
+** as in "mod-v1.2.so".
+*/
+#define LUA_IGMARK		"-"
 
 /* }================================================================== */
 
@@ -705,8 +714,8 @@
 ** numbers to strings. Define LUA_NOCVTS2N to turn off automatic
 ** coercion from strings to numbers.
 */
-#define LUA_NOCVTN2S
-#define LUA_NOCVTS2N
+/* #define LUA_NOCVTN2S */
+/* #define LUA_NOCVTS2N */
 
 
 /*
