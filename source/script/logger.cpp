@@ -66,7 +66,6 @@ void Logger::Create(LoggerType type)
 		if (logger != INVALID_HANDLE_VALUE)
 		{
 			SetConsoleActiveScreenBuffer(logger);
-			memset(&font, 0, sizeof(font));
 			font.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 			font.nFont = 0;
 			font.dwFontSize.X = 0;
@@ -202,7 +201,7 @@ void Logger::Fatal(const char* string)
 	case LOG_FILE:
 		if (logger != INVALID_HANDLE_VALUE)
 		{
-			WriteFile(logger, LEVEL_FATAL, strlen(LEVEL_ERROR), &bytes, nullptr);
+			WriteFile(logger, LEVEL_FATAL, strlen(LEVEL_FATAL), &bytes, nullptr);
 			WriteFile(logger, string, strlen(string), &bytes, nullptr);
 			WriteFile(logger, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
 		}
