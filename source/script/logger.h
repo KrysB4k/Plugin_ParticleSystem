@@ -1,11 +1,19 @@
 #pragma once
 
+enum LoggerType
+{
+	LOG_NONE,
+	LOG_CONSOLE,
+	LOG_FILE
+};
+
 namespace Logger
 {
-	void Create();
+	void Create(LoggerType type);
 	void Debug(const char* string);
 	void Information(const char* string);
 	void Warning(const char* string);
 	void Error(const char* string);
+	void Fatal(const char* string);
 	void Close();
 }

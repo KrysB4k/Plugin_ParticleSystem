@@ -44,8 +44,8 @@ namespace Script
 	void Print();
 	bool Require(const char* base);
 	void LoadFunctions(const char* name);
-	[[noreturn]] void ThrowError(const char* msg);
-	void EmitWarning(const char* msg);
+	[[noreturn]] void Throw(const char* msg);
+	void EmitFailure(const char* msg, void (*log)(const char*));
 	void AddInformation(const char* msg);
 	int GarbageCount();
 	void PreFunctionLoop();

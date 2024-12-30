@@ -7,35 +7,35 @@ using namespace LuaHelpers;
 
 int LuaObjectClass::Call()
 {
-	Script::ThrowError("attempt to call a data object");
+	Script::Throw("attempt to call a data object");
 }
 
 void LuaObjectClass::Index(const char* field)
 {
 	if (field)
-		Script::ThrowError(FormatString("attempt to access inexistent field \"%s\"", field));
-	Script::ThrowError("attempt to index a data object");
+		Script::Throw(FormatString("attempt to access inexistent field \"%s\"", field));
+	Script::Throw("attempt to index a data object");
 }
 
 void LuaObjectClass::NewIndex(const char* field)
 {
 	if (field)
-		Script::ThrowError(FormatString("attempt to access inexistent field \"%s\"", field));
-	Script::ThrowError("attempt to index a data object");
+		Script::Throw(FormatString("attempt to access inexistent field \"%s\"", field));
+	Script::Throw("attempt to index a data object");
 }
 
 void LuaObjectFunction::Index(const char* field)
 {
 	if (field)
-		Script::ThrowError("attempt to access a field of a function object");
-	Script::ThrowError("attempt to index a function object");
+		Script::Throw("attempt to access a field of a function object");
+	Script::Throw("attempt to index a function object");
 }
 
 void LuaObjectFunction::NewIndex(const char* field)
 {
 	if (field)
-		Script::ThrowError("attempt to access a field of a function object");
-	Script::ThrowError("attempt to index a function object");
+		Script::Throw("attempt to access a field of a function object");
+	Script::Throw("attempt to index a function object");
 }
 
 const char* LuaObjectClassPosition::Name()
@@ -258,9 +258,9 @@ void LuaBridge::GlobalIndex(const char* field)
 			Script::PushNumber(*opt_float);
 			return;
 		}
-		Script::ThrowError("attempt to read from a global variable");
+		Script::Throw("attempt to read from a global variable");
 	}
-	Script::ThrowError("attempt to index the global environment");
+	Script::Throw("attempt to index the global environment");
 }
 
 void LuaBridge::GlobalNewIndex(const char* field)
@@ -268,19 +268,19 @@ void LuaBridge::GlobalNewIndex(const char* field)
 	if (field)
 	{
 		if (LuaGlobals::RetrieveGlobals(field))
-			Script::ThrowError("attempt to assign to a built-in object");
+			Script::Throw("attempt to assign to a built-in object");
 		if (LuaFunctions::RetrieveFunction(field))
-			Script::ThrowError("attempt to assign to a built-in function");
+			Script::Throw("attempt to assign to a built-in function");
 		if (LuaGlobals::RetrieveIntegerConstant(field))
-			Script::ThrowError("attempt to assign to a built-in constant");
+			Script::Throw("attempt to assign to a built-in constant");
 		if (LuaGlobals::RetrieveFloatConstant(field))
-			Script::ThrowError("attempt to assign to a built-in constant");
-		Script::ThrowError("attempt to write to a global variable");
+			Script::Throw("attempt to assign to a built-in constant");
+		Script::Throw("attempt to write to a global variable");
 	}
-	Script::ThrowError("attempt to index the global environment");
+	Script::Throw("attempt to index the global environment");
 }
 
 int LuaBridge::GlobalCall()
 {
-	Script::ThrowError("attempt to call the global environment");
+	Script::Throw("attempt to call the global environment");
 }

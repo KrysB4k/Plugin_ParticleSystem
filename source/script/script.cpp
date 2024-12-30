@@ -7,7 +7,7 @@ namespace
 	lua_State* lua;
 	int metatable, parameters;
 
-	void BuildErrorMessage(const char* msg)
+	void BuildFailureMessage(const char* msg)
 	{
 		luaL_where(lua, 1);
 		lua_pushstring(lua, msg);
@@ -122,13 +122,13 @@ namespace
 
 	int ErrorMetaIndex(lua_State* L)
 	{
-		BuildErrorMessage("module has no parameter with the given name");
+		BuildFailureMessage("module has no parameter with the given name");
 		return lua_error(lua);
 	}
 
 	int ErrorMetaNewIndex(lua_State* L)
 	{
-		BuildErrorMessage("module has no parameter with the given name");
+		BuildFailureMessage("module has no parameter with the given name");
 		return lua_error(lua);
 	}
 
@@ -290,7 +290,7 @@ bool Script::ExecuteFunction(int reference, void* value)
 		}
 		if (status != LUA_OK)
 		{
-			Logger::Error(lua_tostring(lua, -1));
+			Logger::Fatal(lua_tostring(lua, -1));
 			lua_pop(lua, 1);
 			return false;
 		}
@@ -379,14 +379,14 @@ bool Script::Require(const char* base)
 		status = lua_pcall(lua, 0, 1, -2);
 		if (status != LUA_OK)
 		{
-			Logger::Error(lua_tostring(lua, -1));
+			Logger::Fatal(lua_tostring(lua, -1));
 			lua_pop(lua, 1);
 			lua_pushnil(lua);
 		}
 	}
 	else
 	{
-		EmitWarning(lua_tostring(lua, -1));
+		EmitFailure(lua_tostring(lua, -1), Logger::Error);
 		lua_pop(lua, 1);
 		lua_pushnil(lua);
 	}
@@ -420,28 +420,28 @@ void Script::LoadFunctions(const char* name)
 		status = lua_pcall(lua, 0, 0, -2);
 		if (status != LUA_OK)
 		{
-			Logger::Error(lua_tostring(lua, -1));
+			Logger::Fatal(lua_tostring(lua, -1));
 			lua_pop(lua, 1);
 		}
 	}
 	else
 	{
-		EmitWarning(lua_tostring(lua, -1));
+		EmitFailure(lua_tostring(lua, -1), Logger::Fatal);
 		lua_pop(lua, 1);
 	}
 }
 
-[[noreturn]] void Script::ThrowError(const char* msg)
+[[noreturn]] void Script::Throw(const char* msg)
 {
-	BuildErrorMessage(msg);
+	BuildFailureMessage(msg);
 	throw std::exception();
 }
 
-void Script::EmitWarning(const char* msg)
+void Script::EmitFailure(const char* msg, void (*log)(const char*))
 {
-	BuildErrorMessage(msg);
+	BuildFailureMessage(msg);
 	luaL_traceback(lua, lua, lua_tostring(lua, -1), 1);
-	Logger::Warning(lua_tostring(lua, -1));
+	log(lua_tostring(lua, -1));
 	lua_pop(lua, 2);
 }
 

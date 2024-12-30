@@ -53,7 +53,7 @@ void DrawParticles()
 
 void InitialiseGame()
 {
-	Logger::Create();
+	Logger::Create(LoggerType::LOG_CONSOLE);
 	Logger::Debug("InitialiseGame");
 	Diagnostics::Initialise();
 }

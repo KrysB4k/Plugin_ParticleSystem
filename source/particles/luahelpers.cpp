@@ -2,6 +2,7 @@
 #include "../trng/trng.h"
 #include "particle.h"
 #include "utilities.h"
+#include "logger.h"
 
 using namespace Utilities;
 
@@ -10,45 +11,45 @@ namespace LuaHelpers
 	int GetInteger(int argument)
 	{
 		if (!Script::IsInteger(argument))
-			Script::ThrowError("integer expected");
+			Script::Throw("integer expected");
 		return Script::ToInteger(argument);
 	}
 
 	bool GetBoolean(int argument)
 	{
 		if (!Script::IsBoolean(argument))
-			Script::ThrowError("boolean expected");
+			Script::Throw("boolean expected");
 		return Script::ToBoolean(argument);
 	}
 
 	float GetNumber(int argument)
 	{
 		if (!Script::IsNumber(argument))
-			Script::ThrowError("number expected");
+			Script::Throw("number expected");
 		return Script::ToNumber(argument);
 	}
 
 	int GetFunction(int argument)
 	{
 		if (!Script::IsFunction(argument))
-			Script::ThrowError("function or nil expected");
+			Script::Throw("function or nil expected");
 		return Script::StoreFunction(argument);
 	}
 
 	const char* GetLuaString(int argument)
 	{
 		if (!Script::IsString(argument))
-			Script::ThrowError("string expected");
+			Script::Throw("string expected");
 		return Script::ToString(argument);
 	}
 
 	int GetTable(int argument)
 	{
 		if (!Script::IsTable(argument))
-			Script::ThrowError("table expected");
+			Script::Throw("table expected");
 		int length = Script::ExplodeTable(argument);
 		if (!length)
-			Script::ThrowError("table is empty");
+			Script::Throw("table is empty");
 		return length;
 	}
 
@@ -58,9 +59,9 @@ namespace LuaHelpers
 
 		count = Script::ArgCount();
 		if (count < minimum)
-			Script::ThrowError(FormatString("at least %d arguments expected", minimum));
+			Script::Throw(FormatString("at least %d arguments expected", minimum));
 		if (count > maximum)
-			Script::ThrowError(FormatString("at most %d arguments expected", maximum));
+			Script::Throw(FormatString("at most %d arguments expected", maximum));
 		return count;
 	}
 
@@ -69,7 +70,7 @@ namespace LuaHelpers
 		int index;
 		index = GetInteger(argument);
 		if (index < 0 || index >= level_items)
-			Script::ThrowError(FormatString("%d does not correspond to a valid Tomb index", index));
+			Script::Throw(FormatString("%d does not correspond to a valid Tomb index", index));
 		return index;
 	}
 
@@ -84,7 +85,7 @@ namespace LuaHelpers
 			if (index != -1)
 				return index;
 		}
-		Script::EmitWarning(FormatString("%d does not correspond to a valid NGLE index", ngindex));
+		Script::EmitFailure(FormatString("%d does not correspond to a valid NGLE index", ngindex), Logger::Warning);
 		return -1;
 	}
 
@@ -95,7 +96,7 @@ namespace LuaHelpers
 		x = GetNumber(argument);
 		result = operation(x);
 		if (!isnan(x) && isnan(result))
-			Script::EmitWarning("the operation resulted in a NaN");
+			Script::EmitFailure("the operation resulted in a NaN", Logger::Warning);
 		return result;
 	}
 
@@ -107,7 +108,7 @@ namespace LuaHelpers
 		y = GetNumber(secondArgument);
 		result = operation(x, y);
 		if (!isnan(x) && !isnan(y) && isnan(result))
-			Script::EmitWarning("the operation resulted in a NaN");
+			Script::EmitFailure("the operation resulted in a NaN", Logger::Warning);
 		return result;
 	}
 
@@ -119,15 +120,15 @@ namespace LuaHelpers
 		if (x < min)
 		{
 			if (throwBoundsError)
-				Script::ThrowError(FormatString("%d is less than the minimum of %d, aborting", x, min));
-			Script::EmitWarning(FormatString("%d is less than the minimum of %d, clamping to minimum", x, min));
+				Script::Throw(FormatString("%d is less than the minimum of %d, aborting", x, min));
+			Script::EmitFailure(FormatString("%d is less than the minimum of %d, clamping to minimum", x, min), Logger::Warning);
 			return min;
 		}
 		if (x > max)
 		{
 			if (throwBoundsError)
-				Script::ThrowError(FormatString("%d is greater than the maximum of %d, aborting", x, max));
-			Script::EmitWarning(FormatString("%d is greater than the maximum of %d, clamping to maximum", x, max));
+				Script::Throw(FormatString("%d is greater than the maximum of %d, aborting", x, max));
+			Script::EmitFailure(FormatString("%d is greater than the maximum of %d, clamping to maximum", x, max), Logger::Warning);
 			return max;
 		}
 		return x;
@@ -141,15 +142,15 @@ namespace LuaHelpers
 		if (x < min)
 		{
 			if (throwBoundsError)
-				Script::ThrowError(FormatString("%f is less than the minimum of %f, aborting", x, min));
-			Script::EmitWarning(FormatString("%f is less than the minimum of %f, clamping to minimum", x, min));
+				Script::Throw(FormatString("%f is less than the minimum of %f, aborting", x, min));
+			Script::EmitFailure(FormatString("%f is less than the minimum of %f, clamping to minimum", x, min), Logger::Warning);
 			return min;
 		}
 		if (x > max)
 		{
 			if (throwBoundsError)
-				Script::ThrowError(FormatString("%f is greater than the maximum of %f, aborting", x, max));
-			Script::EmitWarning(FormatString("%f is greater than the maximum of %f, clamping to maximum", x, max));
+				Script::Throw(FormatString("%f is greater than the maximum of %f, aborting", x, max));
+			Script::EmitFailure(FormatString("%f is greater than the maximum of %f, clamping to maximum", x, max), Logger::Warning);
 
 			return max;
 		}
@@ -176,7 +177,7 @@ namespace LuaHelpers
 		va_end(args);
 		if (!present)
 		{
-			Script::EmitWarning(FormatString("%d is not in the list of allowed values", x));
+			Script::EmitFailure(FormatString("%d is not in the list of allowed values", x), Logger::Warning);
 			return defaultValue;
 		}
 		return x;
@@ -185,18 +186,18 @@ namespace LuaHelpers
 	void CheckCaller(int callers, const char* function)
 	{
 		if (!(Particles::GetCaller() & callers))
-			Script::ThrowError(FormatString("calling function \"%s\" is forbidden in this phase", function));
+			Script::Throw(FormatString("calling function \"%s\" is forbidden in this phase", function));
 	}
 
 	void CheckFieldCaller(int callers, const char* field)
 	{
 		if (!(Particles::GetCaller() & callers))
-			Script::ThrowError(FormatString("assignment to field \"%s\" is forbidden in this phase", field));
+			Script::Throw(FormatString("assignment to field \"%s\" is forbidden in this phase", field));
 	}
 
 	void ReadOnlyFieldError(const char* field)
 	{
-		Script::ThrowError(FormatString("field \"%s\" is read-only and cannot be assigned to", field));
+		Script::Throw(FormatString("field \"%s\" is read-only and cannot be assigned to", field));
 	}
 
 	Vector3f GetItemPos(int argument)
@@ -210,7 +211,7 @@ namespace LuaHelpers
 		if (!group)
 			return;
 		if (Particles::groupIds[id])
-			Script::ThrowError(FormatString("ID = %d is already assigned to a different group", id));
+			Script::Throw(FormatString("ID = %d is already assigned to a different group", id));
 
 		Particles::groupIds[id] = group;
 	}
@@ -219,7 +220,7 @@ namespace LuaHelpers
 	{
 		auto string = GetLuaString(argument);
 		if (strlen(string) > length)
-			Script::ThrowError(FormatString("string %s contains more than %d characters", string, length));
+			Script::Throw(FormatString("string %s contains more than %d characters", string, length));
 		return string;
 	}
 
@@ -228,7 +229,7 @@ namespace LuaHelpers
 		auto string = GetBoundedLuaString(argument, 50);
 		Script::PreFunctionLoop();
 		if (!Script::Require(string))
-			Script::EmitWarning(FormatString("cannot load \"%s\" module", string));
+			Script::EmitFailure(FormatString("cannot load \"%s\" module", string), Logger::Warning);
 		Script::PostFunctionLoop(1);
 	}
 }
