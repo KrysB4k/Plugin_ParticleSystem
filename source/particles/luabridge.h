@@ -118,10 +118,10 @@ namespace LuaHelpers
 	{
 		T* object;
 		if (!Script::IsData(argument))
-			Script::ThrowError(FormatString("%s expected", T::Name()));
+			Script::Throw(FormatString("%s expected", T::Name()));
 		object = dynamic_cast<T*>(Script::ToData(argument));
 		if (!object)
-			Script::ThrowError(FormatString("%s expected", T::Name()));
+			Script::Throw(FormatString("%s expected", T::Name()));
 		return object;
 	}
 
@@ -159,4 +159,5 @@ namespace LuaHelpers
 	Vector3f GetItemPos(int argument);
 	void AssignGroupID(Particles::ParticleGroup*, int id);
 	const char* GetBoundedLuaString(int argument, int length);
+	void RequireModule(int argument);
 }

@@ -333,7 +333,7 @@ namespace Particles
 			--part->lifeCounter;
 		}
 
-		Script::PostFunctionLoop();
+		Script::PostFunctionLoop(0);
 	}
 
 
@@ -378,7 +378,7 @@ namespace Particles
 			--part->lifeCounter;
 		}
 
-		Script::PostFunctionLoop();
+		Script::PostFunctionLoop(0);
 	}
 
 
@@ -562,20 +562,16 @@ namespace Particles
 			if (!partGroups[i].triggered && !Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
 				Script::DeleteFunction(&partGroups[i].initIndex);
 		}
-		Script::PostFunctionLoop();
+		Script::PostFunctionLoop(0);
 	}
 
 
 	void InitPartGroups()
 	{
-		char name[100];
-
 		SetCaller(FUNCTION_LEVEL);
 		Script::PreFunctionLoop();
-		strcpy_s(name, &gfFilenameWad[gfFilenameOffset[gfCurrentLevel]]);
-		strcat_s(name, ".lua");
-		Script::LoadFunctions(name, 0);
-		Script::PostFunctionLoop();
+		Script::LoadFunctions(&gfFilenameWad[gfFilenameOffset[gfCurrentLevel]]);
+		Script::PostFunctionLoop(0);
 	}
 
 

@@ -12,7 +12,7 @@
 #include "definitions/Tomb4Globals.h"
 #include "particles/particle.h"
 #include "logger.h"
-
+#include "particles/utilities.h"
 
 #pragma warning( error : 4706 )
 #pragma warning( disable : 4996)
@@ -53,23 +53,24 @@ void DrawParticles()
 
 void InitialiseGame()
 {
-	Logger::Create();
-	Logger::Debug("InitialiseGame");
+	Logger::Create(LoggerType::LOG_CONSOLE);
+	Logger::Trace("InitialiseGame");
 	Diagnostics::Initialise();
 }
 
 void CloseGame()
 {
-	Logger::Debug("CloseGame");
+	Logger::Trace("CloseGame");
 	Logger::Close();
 }
 
 void InitialiseLevel()
 {
-	Logger::Debug("InitialiseLevel");
+	Logger::Trace("InitialiseLevel");
 	Script::NewState();
 	Particles::ClearParts();
 	Particles::ClearPartGroups();
+	Logger::Information(Utilities::FormatString("Loading functions of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
 	Particles::InitPartGroups();
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
@@ -77,7 +78,7 @@ void InitialiseLevel()
 
 void CloseLevel()
 {
-	Logger::Debug("CloseLevel");
+	Logger::Trace("CloseLevel");
 	Script::Close();
 }
 
@@ -85,7 +86,7 @@ void SaveSpriteParticles(WORD** p2VetExtra, int* pNWords)
 {
 	std::vector<Particles::SpriteParticleSave> spriteSave;
 
-	Logger::Debug("SaveSpriteParticles");
+	Logger::Trace("SaveSpriteParticles");
 	for (int i = 0; i < MAX_SPRITEPARTS; i++)
 	{
 		if (Particles::spriteParts[i].lifeCounter > 0 && Particles::partGroups[Particles::spriteParts[i].groupIndex].saved)
@@ -102,7 +103,7 @@ void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
 {
 	std::vector<Particles::MeshParticleSave> meshSave;
 
-	Logger::Debug("SaveMeshParticles");
+	Logger::Trace("SaveMeshParticles");
 	for (int i = 0; i < MAX_MESHPARTS; i++)
 	{
 		if (Particles::meshParts[i].lifeCounter > 0 && Particles::partGroups[Particles::meshParts[i].groupIndex].saved)
@@ -119,7 +120,7 @@ void LoadSpriteParticles(WORD* pData)
 {
 	WORD TotParts;
 
-	Logger::Debug("LoadSpriteParticles");
+	Logger::Trace("LoadSpriteParticles");
 	TotParts = pData[0];
 	if (TotParts > 0)
 	{
@@ -133,7 +134,7 @@ void LoadMeshParticles(WORD* pData)
 {
 	WORD TotParts;
 
-	Logger::Debug("LoadMeshParticles");
+	Logger::Trace("LoadMeshParticles");
 	TotParts = pData[0];
 	if (TotParts > 0)
 	{

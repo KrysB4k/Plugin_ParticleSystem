@@ -42,14 +42,14 @@ namespace Script
 	int ExplodeTable(int argument);
 	bool IsTable(int argument);
 	void Print();
-	void Require(const char* filename);
-	void LoadFunctions(const char* filename, int results);
-	[[noreturn]] void ThrowError(const char* msg);
-	void EmitWarning(const char* msg);
+	bool Require(const char* base);
+	void LoadFunctions(const char* name);
+	[[noreturn]] void Throw(const char* msg);
+	void EmitFailure(const char* msg, void (*log)(const char*));
 	void AddInformation(const char* msg);
 	int GarbageCount();
 	void PreFunctionLoop();
-	void PostFunctionLoop();
+	void PostFunctionLoop(int results);
 	void* CreateManagedData(unsigned int size);
 	void* GetExtraSpace();
 }

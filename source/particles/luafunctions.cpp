@@ -841,7 +841,7 @@ namespace LuaFunctions
 		virtual int Call() override
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "require");
-			Script::Require(GetBoundedLuaString(1, 50));
+			RequireModule(1);
 			return 1;
 		}
 	};
