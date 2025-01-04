@@ -14,6 +14,10 @@ namespace Particles
 struct LuaObjectClass : public LuaObject
 {
 	virtual int Call() final override;
+	virtual int Add() override;
+	virtual int Subtract() override;
+	virtual int Negate() override;
+	virtual int Multiply() override;
 	virtual void Index(const char* field) override;
 	virtual void NewIndex(const char* field) override;
 };
@@ -22,9 +26,20 @@ struct LuaObjectClassPosition : public LuaObjectClass
 {
 	static const char* Name();
 
+	virtual int Add() final override;
+	virtual int Negate() final override;
+	virtual int Subtract() final override;
+	virtual int Multiply() final override;
+
+	virtual void Index(const char* field) final override;
+	virtual void NewIndex(const char* field) final override;
+
 	virtual float GetX() = 0;
 	virtual float GetY() = 0;
 	virtual float GetZ() = 0;
+	virtual void SetX(float x) = 0;
+	virtual void SetY(float y) = 0;
+	virtual void SetZ(float z) = 0;
 	virtual explicit operator Vector3f() = 0;
 };
 
@@ -32,9 +47,15 @@ struct LuaObjectClassRotation : public LuaObjectClass
 {
 	static const char* Name();
 
+	virtual void Index(const char* field) final override;
+	virtual void NewIndex(const char* field) final override;
+
 	virtual short GetX() = 0;
 	virtual short GetY() = 0;
 	virtual short GetZ() = 0;
+	virtual void SetX(short x) = 0;
+	virtual void SetY(short y) = 0;
+	virtual void SetZ(short z) = 0;
 	virtual explicit operator Vector3s() = 0;
 };
 
@@ -43,12 +64,13 @@ struct LuaItemInfoPos final : public LuaObjectClassPosition
 	LuaItemInfoPos(phd_3dpos* position) : pos(position) {}
 
 	static const char* Name();
-	virtual void Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
 
 	virtual float GetX() override;
 	virtual float GetY() override;
 	virtual float GetZ() override;
+	virtual void SetX(float x) override;
+	virtual void SetY(float y) override;
+	virtual void SetZ(float z) override;
 	virtual explicit operator Vector3f() override;
 
 private:
@@ -61,12 +83,13 @@ struct LuaItemInfoRot final : public LuaObjectClassRotation
 	LuaItemInfoRot(phd_3dpos* position) : pos(position) {}
 
 	static const char* Name();
-	virtual void Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
 
 	virtual short GetX() override;
 	virtual short GetY() override;
 	virtual short GetZ() override;
+	virtual void SetX(short x) override;
+	virtual void SetY(short y) override;
+	virtual void SetZ(short z) override;
 	virtual explicit operator Vector3s() override;
 
 private:
@@ -76,6 +99,10 @@ private:
 
 struct LuaObjectFunction : public LuaObject
 {
+	virtual int Add() final override;
+	virtual int Negate() final override;
+	virtual int Subtract() final override;
+	virtual int Multiply() final override;
 	virtual void Index(const char* field) final override;
 	virtual void NewIndex(const char* field) final override;
 };

@@ -5,6 +5,10 @@ struct LuaObject
 	virtual void Index(const char* field) = 0;
 	virtual void NewIndex(const char* field) = 0;
 	virtual int Call() = 0;
+	virtual int Add() = 0;
+	virtual int Subtract() = 0;
+	virtual int Negate() = 0;
+	virtual int Multiply() = 0;
 };
 
 namespace LuaBridge
@@ -12,6 +16,7 @@ namespace LuaBridge
 	void GlobalIndex(const char* field);
 	void GlobalNewIndex(const char* field);
 	int GlobalCall();
+	int GlobalArithmetic();
 }
 
 namespace Script

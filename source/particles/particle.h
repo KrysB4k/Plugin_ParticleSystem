@@ -43,12 +43,14 @@ struct Vector3s final : public LuaObjectClassRotation
 	Vector3s(short xrot, short yrot, short zrot) : x(xrot), y(yrot), z(zrot) {}
 
 	static const char* Name();
-	virtual void Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
 
 	virtual short GetX() override;
 	virtual short GetY() override;
 	virtual short GetZ() override;
+	virtual void SetX(short x) override;
+	virtual void SetY(short y) override;
+	virtual void SetZ(short z) override;
+
 	virtual explicit operator Vector3s() override;
 };
 

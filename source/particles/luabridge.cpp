@@ -10,6 +10,26 @@ int LuaObjectClass::Call()
 	Script::Throw("attempt to call a data object");
 }
 
+int LuaObjectClass::Add()
+{
+	Script::Throw("attempt to perform arithmetic on an unsupported object");
+}
+
+int LuaObjectClass::Subtract()
+{
+	return Add();
+}
+
+int LuaObjectClass::Negate()
+{
+	return Add();
+}
+
+int LuaObjectClass::Multiply()
+{
+	return Add();
+}
+
 void LuaObjectClass::Index(const char* field)
 {
 	if (field)
@@ -22,6 +42,26 @@ void LuaObjectClass::NewIndex(const char* field)
 	if (field)
 		Script::Throw(FormatString("attempt to access inexistent field \"%s\"", field));
 	Script::Throw("attempt to index a data object");
+}
+
+int LuaObjectFunction::Add()
+{
+	Script::Throw("attempt to perform arithmetic on a function object");
+}
+
+int LuaObjectFunction::Subtract()
+{
+	return Add();
+}
+
+int LuaObjectFunction::Negate()
+{
+	return Add();
+}
+
+int LuaObjectFunction::Multiply()
+{
+	return Add();
 }
 
 void LuaObjectFunction::Index(const char* field)
@@ -43,17 +83,40 @@ const char* LuaObjectClassPosition::Name()
 	return Vector3f::Name();
 }
 
-const char* LuaObjectClassRotation::Name()
+int LuaObjectClassPosition::Add()
 {
-	return Vector3s::Name();
+	auto pos = GetData<LuaObjectClassPosition>(1);
+	float x = this->GetX() + pos->GetX();
+	float y = this->GetY() + pos->GetY();
+	float z = this->GetZ() + pos->GetZ();
+	ConstructManagedData<Vector3f>(x, y, z);
+	return 1;
 }
 
-const char* LuaItemInfoPos::Name()
+int LuaObjectClassPosition::Subtract()
 {
-	return Vector3f::Name();
+	auto pos = GetData<LuaObjectClassPosition>(1);
+	float x = this->GetX() - pos->GetX();
+	float y = this->GetY() - pos->GetY();
+	float z = this->GetZ() - pos->GetZ();
+	ConstructManagedData<Vector3f>(x, y, z);
+	return 1;
 }
 
-void LuaItemInfoPos::Index(const char* field)
+int LuaObjectClassPosition::Negate()
+{
+	ConstructManagedData<Vector3f>(-GetX(), -GetY(), -GetZ());
+	return 1;
+}
+
+int LuaObjectClassPosition::Multiply()
+{
+	float n = GetNumber(1);
+	ConstructManagedData<Vector3f>(n * GetX(), n * GetY(), n * GetZ());
+	return 1;
+}
+
+void LuaObjectClassPosition::Index(const char* field)
 {
 	if (field)
 	{
@@ -62,21 +125,21 @@ void LuaItemInfoPos::Index(const char* field)
 		case 'x':
 			if (!strcmp(field, "x"))
 			{
-				Script::PushNumber(pos->xPos);
+				Script::PushNumber(GetX());
 				return;
 			}
 			break;
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
-				Script::PushNumber(pos->yPos);
+				Script::PushNumber(GetY());
 				return;
 			}
 			break;
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
-				Script::PushNumber(pos->zPos);
+				Script::PushNumber(GetZ());
 				return;
 			}
 			break;
@@ -85,7 +148,7 @@ void LuaItemInfoPos::Index(const char* field)
 	LuaObjectClass::Index(field);
 }
 
-void LuaItemInfoPos::NewIndex(const char* field)
+void LuaObjectClassPosition::NewIndex(const char* field)
 {
 	if (field)
 	{
@@ -94,27 +157,101 @@ void LuaItemInfoPos::NewIndex(const char* field)
 		case 'x':
 			if (!strcmp(field, "x"))
 			{
-				pos->xPos = GetNumber(-1);
+				SetX(GetNumber(-1));
 				return;
 			}
 			break;
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
-				pos->yPos = GetNumber(-1);
+				SetY(GetNumber(-1));
 				return;
 			}
 			break;
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
-				pos->zPos = GetNumber(-1);
+				SetZ(GetNumber(-1));
 				return;
 			}
 			break;
 		}
 	}
 	LuaObjectClass::NewIndex(field);
+}
+
+const char* LuaObjectClassRotation::Name()
+{
+	return Vector3s::Name();
+}
+
+void LuaObjectClassRotation::Index(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'x':
+			if (!strcmp(field, "x"))
+			{
+				Script::PushNumber(ShortToRad(GetX()));
+				return;
+			}
+			break;
+		case 'y':
+			if (!strcmp(field, "y"))
+			{
+				Script::PushNumber(ShortToRad(GetY()));
+				return;
+			}
+			break;
+		case 'z':
+			if (!strcmp(field, "z"))
+			{
+				Script::PushNumber(ShortToRad(GetZ()));
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::Index(field);
+}
+
+void LuaObjectClassRotation::NewIndex(const char* field)
+{
+	if (field)
+	{
+		switch (field[0])
+		{
+		case 'x':
+			if (!strcmp(field, "x"))
+			{
+				SetX(RadToShort(GetNumber(-1)));
+				return;
+			}
+			break;
+		case 'y':
+			if (!strcmp(field, "y"))
+			{
+				SetY(RadToShort(GetNumber(-1)));
+				return;
+			}
+			break;
+		case 'z':
+			if (!strcmp(field, "z"))
+			{
+				SetZ(RadToShort(GetNumber(-1)));
+				return;
+			}
+			break;
+		}
+	}
+	LuaObjectClass::NewIndex(field);
+}
+
+const char* LuaItemInfoPos::Name()
+{
+	return Vector3f::Name();
 }
 
 float LuaItemInfoPos::GetX()
@@ -132,6 +269,21 @@ float LuaItemInfoPos::GetZ()
 	return pos->zPos;
 }
 
+void LuaItemInfoPos::SetX(float x)
+{
+	pos->xPos = lround(x);
+}
+
+void LuaItemInfoPos::SetY(float y)
+{
+	pos->yPos = lround(y);
+}
+
+void LuaItemInfoPos::SetZ(float z)
+{
+	pos->zPos = lround(z);
+}
+
 LuaItemInfoPos::operator Vector3f()
 {
 	return Vector3f(pos->xPos, pos->yPos, pos->zPos);
@@ -140,70 +292,6 @@ LuaItemInfoPos::operator Vector3f()
 const char* LuaItemInfoRot::Name()
 {
 	return Vector3s::Name();
-}
-
-void LuaItemInfoRot::Index(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'x':
-			if (!strcmp(field, "x"))
-			{
-				Script::PushNumber(ShortToRad(pos->xRot));
-				return;
-			}
-			break;
-		case 'y':
-			if (!strcmp(field, "y"))
-			{
-				Script::PushNumber(ShortToRad(pos->yRot));
-				return;
-			}
-			break;
-		case 'z':
-			if (!strcmp(field, "z"))
-			{
-				Script::PushNumber(ShortToRad(pos->zRot));
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::Index(field);
-}
-
-void LuaItemInfoRot::NewIndex(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'x':
-			if (!strcmp(field, "x"))
-			{
-				pos->xRot = RadToShort(GetNumber(-1));
-				return;
-			}
-			break;
-		case 'y':
-			if (!strcmp(field, "y"))
-			{
-				pos->yRot = RadToShort(GetNumber(-1));
-				return;
-			}
-			break;
-		case 'z':
-			if (!strcmp(field, "z"))
-			{
-				pos->zRot = RadToShort(GetNumber(-1));
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::NewIndex(field);
 }
 
 short LuaItemInfoRot::GetX()
@@ -219,6 +307,21 @@ short LuaItemInfoRot::GetY()
 short LuaItemInfoRot::GetZ()
 {
 	return pos->zRot;
+}
+
+void LuaItemInfoRot::SetX(short x)
+{
+	pos->xRot = x;
+}
+
+void LuaItemInfoRot::SetY(short y)
+{
+	pos->yRot = y;
+}
+
+void LuaItemInfoRot::SetZ(short z)
+{
+	pos->zRot = z;
 }
 
 LuaItemInfoRot::operator Vector3s()
@@ -283,4 +386,9 @@ void LuaBridge::GlobalNewIndex(const char* field)
 int LuaBridge::GlobalCall()
 {
 	Script::Throw("attempt to call the global environment");
+}
+
+int LuaBridge::GlobalArithmetic()
+{
+	Script::Throw("attempt to perform arithmetic on the global environment");
 }

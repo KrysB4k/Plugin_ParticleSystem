@@ -1,5 +1,40 @@
 #include "vector3f.h"
 
+const char* Vector3f::Name()
+{
+	return "Vector3f";
+}
+
+float Vector3f::GetX()
+{
+	return x;
+}
+
+float Vector3f::GetY()
+{
+	return y;
+}
+
+float Vector3f::GetZ()
+{
+	return z;
+}
+
+void Vector3f::SetX(float x)
+{
+	this->x = x;
+}
+
+void Vector3f::SetY(float y)
+{
+	this->y = y;
+}
+
+void Vector3f::SetZ(float z)
+{
+	this->z = z;
+}
+
 Vector3f Vector3f::operator- () const
 {
 	return Vector3f(-x, -y, -z);
