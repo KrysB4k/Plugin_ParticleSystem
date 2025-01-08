@@ -93,6 +93,15 @@ namespace LuaFunctions
 		}
 	};
 
+	struct CeilFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			Script::PushNumber(GetMathResult(1, ceilf));
+			return 1;
+		}
+	};
+
 	struct CbrtFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
@@ -102,19 +111,7 @@ namespace LuaFunctions
 		}
 	};
 
-	struct CheckDistFastFunction final : public LuaObjectFunction
-	{
-		virtual int Call() override
-		{
-			Vector3f vec1 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
-			Vector3f vec2 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
-			float dist = GetNumber(3);
-			Script::PushInteger(CheckDistFast(vec1, vec2, dist));
-			return 1;
-		}
-	};
-
-	struct ClampFloatFunction final : public LuaObjectFunction
+	struct ClampFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
 		{
@@ -126,23 +123,23 @@ namespace LuaFunctions
 		}
 	};
 
-	struct ClampIntFunction final : public LuaObjectFunction
-	{
-		virtual int Call() override
-		{
-			int x = GetInteger(1);
-			int min = GetInteger(2);
-			int max = GetInteger(3);
-			Script::PushInteger(Clamp(x, min, max));
-			return 1;
-		}
-	};
-
 	struct CosFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
 		{
 			Script::PushNumber(GetMathResult(1, cosf));
+			return 1;
+		}
+	};
+
+	struct CreateColorHSVFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			float h = GetNumber(1);
+			float s = GetClampedNumber(2, 0.0f, 1.0f, false);
+			float v = GetClampedNumber(3, 0.0f, 1.0f, false);
+			ConstructManagedData<ColorRGB>(HSVtoRGB(h, s, v));
 			return 1;
 		}
 	};
@@ -183,6 +180,7 @@ namespace LuaFunctions
 
 			Particles::partGroups[i].initIndex = init;
 			Particles::partGroups[i].updateIndex = update;
+			Particles::partGroups[i].partLimit = MAX_SPRITEPARTS;
 			Script::PushData(&Particles::partGroups[i]);
 			return 1;
 		}
@@ -219,14 +217,11 @@ namespace LuaFunctions
 		virtual int Call() override
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "createPerlinNoise");
-
 			int args = GetArgCount(0, 1);
-
 			if (args)
 				ConstructManagedData<PerlinNoise>(GetInteger(1));
 			else
 				ConstructManagedData<PerlinNoise>();
-
 			return 1;
 		}
 	};
@@ -236,14 +231,11 @@ namespace LuaFunctions
 		virtual int Call() override
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "createSimplexNoise");
-
 			int args = GetArgCount(0, 1);
-
 			if (args)
 				ConstructManagedData<SimplexNoise>(GetInteger(1));
 			else
 				ConstructManagedData<SimplexNoise>();
-
 			return 1;
 		}
 	};
@@ -283,6 +275,51 @@ namespace LuaFunctions
 		}
 	};
 
+	struct DistanceFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			auto vec1 = GetData<LuaObjectClassPosition>(1);
+			auto vec2 = GetData<LuaObjectClassPosition>(2);
+			float x = vec2->GetX() - vec1->GetX();
+			float y = vec2->GetY() - vec1->GetY();
+			float z = vec2->GetZ() - vec1->GetZ();
+			Script::PushNumber(sqrtf(x * x + y * y + z * z));
+			return 1;
+		}
+	};
+
+	struct DistCompareFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			auto vec1 = GetData<LuaObjectClassPosition>(1);
+			auto vec2 = GetData<LuaObjectClassPosition>(2);
+			float dist = GetNumber(3);
+			float x = vec2->GetX() - vec1->GetX();
+			float y = vec2->GetY() - vec1->GetY();
+			float z = vec2->GetZ() - vec1->GetZ();
+			float difsqr = x * x + y * y + z * z;
+			dist *= dist;
+			int res = 0;
+			if (difsqr > dist)
+				res = 1;
+			else if (difsqr < dist)
+				res = -1;
+			Script::PushInteger(res);
+			return 1;
+		}
+	};
+
+	struct ExpFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			Script::PushNumber(GetMathResult(1, expf));
+			return 1;
+		}
+	};
+
 	struct FindNearestTargetFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
@@ -297,25 +334,20 @@ namespace LuaFunctions
 		}
 	};
 
-	struct GetColorFromHSVFunction final : public LuaObjectFunction
+	struct FloorFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
 		{
-			float h = GetNumber(1);
-			float s = GetClampedNumber(2, 0.0f, 1.0f, false);
-			float v = GetClampedNumber(3, 0.0f, 1.0f, false);
-			ConstructManagedData<ColorRGB>(HSVtoRGB(h, s, v));
+			Script::PushNumber(GetMathResult(1, floorf));
 			return 1;
 		}
 	};
 
-	struct GetDistanceFunction final : public LuaObjectFunction
+	struct FmodFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
 		{
-			Vector3f vec1 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
-			Vector3f vec2 = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
-			Script::PushNumber(RealDist(vec1, vec2));
+			Script::PushNumber(GetMathResult(1, 2, fmodf));
 			return 1;
 		}
 	};
@@ -347,7 +379,6 @@ namespace LuaFunctions
 			int offX = GetInteger(3);
 			int offY = GetInteger(4);
 			int offZ = GetInteger(5);
-
 			ConstructManagedData<Vector3f>(GetJointPos(item, joint, offX, offY, offZ));
 			return 1;
 		}
@@ -420,6 +451,15 @@ namespace LuaFunctions
 			float val2 = GetNumber(2);
 			float x = GetNumber(3);
 			Script::PushNumber(InverseLerp(val1, val2, x));
+			return 1;
+		}
+	};
+
+	struct LogFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			Script::PushNumber(GetMathResult(1, logf));
 			return 1;
 		}
 	};
@@ -673,7 +713,6 @@ namespace LuaFunctions
 			int floorMargin = GetInteger(3);
 			float factor = GetNumber(4);
 			part->vel += part->AvoidRoomGeometry(wallMargin, floorMargin, factor);
-
 			return 0;
 		}
 	};
@@ -850,7 +889,7 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
-			Script::PushInteger(Round(GetNumber(1)));
+			Script::PushInteger(lroundf(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -869,6 +908,15 @@ namespace LuaFunctions
 		virtual int Call() override
 		{
 			Script::PushNumber(GetMathResult(1, sinf));
+			return 1;
+		}
+	};
+
+	struct SmoothStepFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			Script::PushNumber(SmoothStep(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -965,6 +1013,15 @@ namespace LuaFunctions
 		}
 	};
 
+	struct TanFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			Script::PushNumber(GetMathResult(1, tanf));
+			return 1;
+		}
+	};
+
 	struct TestCollisionSpheresFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
@@ -1015,6 +1072,63 @@ namespace LuaFunctions
 		}
 	};
 
+	struct VectorCrossFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			auto vec1 = GetData<LuaObjectClassPosition>(1);
+			auto vec2 = GetData<LuaObjectClassPosition>(2);
+			float x1 = vec1->GetX(), y1 = vec1->GetY(), z1 = vec1->GetZ();
+			float x2 = vec2->GetX(), y2 = vec2->GetY(), z2 = vec2->GetZ();
+			float x = y1 * z2 - z1 * y2;
+			float y = z1 * x2 - x1 * z2;
+			float z = x1 * y2 - y1 * x2;
+			ConstructManagedData<Vector3f>(x, y, z);
+			return 1;
+		}
+	};
+
+	struct VectorDotFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			auto vec1 = GetData<LuaObjectClassPosition>(1);
+			auto vec2 = GetData<LuaObjectClassPosition>(2);
+			float dot = vec1->GetX() * vec2->GetX() + vec1->GetY() * vec2->GetY() + vec1->GetZ() * vec2->GetZ();
+			Script::PushNumber(dot);
+			return 1;
+		}
+	};
+
+	struct VectorLengthFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			auto vec = GetData<LuaObjectClassPosition>(1);
+			float x = vec->GetX(), y = vec->GetY(), z = vec->GetZ();
+			float length = sqrtf(x * x + y * y + z * z);
+			Script::PushNumber(length);
+			return 1;
+		}
+	};
+
+	struct VectorNormalizeFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			auto vec = GetData<LuaObjectClassPosition>(1);
+			float x = vec->GetX(), y = vec->GetY(), z = vec->GetZ();
+			if (x || y || z)
+			{
+				float norm = 1.0f / sqrtf(x * x + y * y + z * z);
+				ConstructManagedData<Vector3f>(x * norm, y * norm, z * norm);
+			}	
+			else
+				ConstructManagedData<Vector3f>(); // return zero-vector
+			return 1;
+		}
+	};
+
 	AbsFunction AbsFunc;
 	AcosFunction AcosFunc;
 	AsinFunction AsinFunc;
@@ -1024,21 +1138,24 @@ namespace LuaFunctions
 	BoidCohesionFunction BoidCohesionFunc;
 	BoidSeparationFunction BoidSeparationFunc;
 	CbrtFunction CbrtFunc;
-	CheckDistFastFunction CheckDistFastFunc;
-	ClampFloatFunction ClampFloatFunc;
-	ClampIntFunction ClampIntFunc;
+	CeilFunction CeilFunc;
+	ClampFunction ClampFunc;
 	CosFunction CosFunc;
 	CreateColorFunction CreateColorFunc;
+	CreateColorHSVFunction CreateColorHSVFunc;
 	CreateGroupFunction CreateGroupFunc;
 	CreateMeshPartFunction CreateMeshPartFunc;
 	CreatePerlinNoiseFunction CreatePerlinNoiseFunc;
 	CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
 	CreateSpritePartFunction CreateSpritePartFunc;
 	CreateVectorFunction CreateVectorFunc;
+	DistanceFunction DistanceFunc;
+	DistCompareFunction DistCompareFunc;
 	DegToRadFunction DegToRadFunc;
+	ExpFunction ExpFunc;
 	FindNearestTargetFunction FindNearestTargetFunc;
-	GetColorFromHSVFunction GetColorFromHSVFunc;
-	GetDistanceFunction GetDistanceFunc;
+	FloorFunction FloorFunc;
+	FmodFunction FmodFunc;
 	GetGameTickFunction GetGameTickFunc;
 	GetItemInfoFunction GetItemInfoFunc;
 	GetItemJointPosFunction GetItemJointPosFunc;
@@ -1049,6 +1166,7 @@ namespace LuaFunctions
 	KillPartsOfGroupFunction KillPartsOfGroupFunc;
 	LerpFunction LerpFunc;
 	LerpInverseFunction LerpInverseFunc;
+	LogFunction LogFunc;
 	MeshAlignVelocityFunction MeshAlignVelocityFunc;
 	MeshLookAtTargetFunction MeshLookAtTargetFunc;
 	MeshShatterFunction MeshShatterFunc;
@@ -1082,12 +1200,18 @@ namespace LuaFunctions
 	RoundFunction RoundFunc;
 	SelectItemFunction SelectItemFunc;
 	SinFunction SinFunc;
+	SmoothStepFunction SmoothStepFunc;
 	SoundEffectFunction SoundEffectFunc;
 	SphericalToCartesianFunction SphericalToCartesianFunc;
 	SqrtFunction SqrtFunc;
+	TanFunction TanFunc;
 	TestCollisionSpheresFunction TestCollisionSpheresFunc;
 	TriggerDynamicFunction TriggerDynamicFunc;
 	TriggerShockwaveFunction TriggerShockwaveFunc;
+	VectorCrossFunction VectorCrossFunc;
+	VectorDotFunction VectorDotFunc;
+	VectorLengthFunction VectorLengthFunc;
+	VectorNormalizeFunction VectorNormalizeFunc;
 
 	LuaObject* RetrieveFunction(const char* field)
 	{
@@ -1116,16 +1240,16 @@ namespace LuaFunctions
 		case 'c':
 			if (!strcmp(field, "cbrt"))
 				return &CbrtFunc;
-			if (!strcmp(field, "checkDistFast"))
-				return &CheckDistFastFunc;
-			if (!strcmp(field, "clampfloat"))
-				return &ClampFloatFunc;
-			if (!strcmp(field, "clampint"))
-				return &ClampIntFunc;
+			if (!strcmp(field, "ceil"))
+				return &CeilFunc;
+			if (!strcmp(field, "clamp"))
+				return &ClampFunc;
 			if (!strcmp(field, "cos"))
 				return &CosFunc;
 			if (!strcmp(field, "createColor"))
 				return &CreateColorFunc;
+			if (!strcmp(field, "createColorHSV"))
+				return &CreateColorHSVFunc;
 			if (!strcmp(field, "createGroup"))
 				return &CreateGroupFunc;
 			if (!strcmp(field, "createMeshPart"))
@@ -1142,16 +1266,22 @@ namespace LuaFunctions
 		case 'd':
 			if (!strcmp(field, "degToRad"))
 				return &DegToRadFunc;
+			if (!strcmp(field, "distance"))
+				return &DistanceFunc;
+			if (!strcmp(field, "distCompare"))
+				return &DistCompareFunc;
+			break;
+		case 'e':
+			if (!strcmp(field, "exp"))
+				return &ExpFunc;
 			break;
 		case 'f':
 			if (!strcmp(field, "findNearestTarget"))
 				return &FindNearestTargetFunc;
+			if (!strcmp(field, "floor"))
+				return &FindNearestTargetFunc;
 			break;
 		case 'g':
-			if (!strcmp(field, "getColorFromHSV"))
-				return &GetColorFromHSVFunc;
-			if (!strcmp(field, "getDistance"))
-				return &GetDistanceFunc;
 			if (!strcmp(field, "getGameTick"))
 				return &GetGameTickFunc;
 			if (!strcmp(field, "getItemJointPosition"))
@@ -1176,6 +1306,8 @@ namespace LuaFunctions
 				return &LerpFunc;
 			if (!strcmp(field, "lerpInverse"))
 				return &LerpInverseFunc;
+			if (!strcmp(field, "log"))
+				return &LogFunc;
 			break;
 		case 'm':
 			if (!strcmp(field, "meshAlignVelocity"))
@@ -1244,6 +1376,8 @@ namespace LuaFunctions
 				return &SelectItemFunc;
 			if (!strcmp(field, "sin"))
 				return &SinFunc;
+			if (!strcmp(field, "smoothStep"))
+				return &SmoothStepFunc;
 			if (!strcmp(field, "soundEffect"))
 				return &SoundEffectFunc;
 			if (!strcmp(field, "sphericalToCartesian"))
@@ -1260,12 +1394,24 @@ namespace LuaFunctions
 				return &SqrtFunc;
 			break;
 		case 't':
+			if (!strcmp(field, "tan"))
+				return &TanFunc;
 			if (!strcmp(field, "testCollisionSpheres"))
 				return &TestCollisionSpheresFunc;
 			if (!strcmp(field, "triggerDynamicLight"))
 				return &TriggerDynamicFunc;
 			if (!strcmp(field, "triggerShockwave"))
 				return &TriggerShockwaveFunc;
+			break;
+		case 'v':
+			if (!strcmp(field, "vectorCross"))
+				return &VectorCrossFunc;
+			if (!strcmp(field, "vectorDot"))
+				return &VectorDotFunc;
+			if (!strcmp(field, "vectorLength"))
+				return &VectorLengthFunc;
+			if (!strcmp(field, "vectorNormalize"))
+				return &VectorNormalizeFunc;
 			break;
 		}
 		return nullptr;

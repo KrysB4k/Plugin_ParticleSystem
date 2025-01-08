@@ -8,10 +8,11 @@ struct ColorRGB;
 namespace Utilities
 {
 	int Round(float x);
-	phd_vector Round(const Vector3f& v);
+	phd_vector RoundPos(const Vector3f& v);
 	short GetOrientDiff(short sourceOrient, short targetOrient);
 	float Lerp(float a, float b, float t);
 	float InverseLerp(float val1, float val2, float x);
+	float SmoothStep(float x);
 	float SimpleDist(const Vector3f& v1, const Vector3f& v2);
 	int CheckDistFast(const Vector3f& v1, const Vector3f& v2, float dist);
 	float RealDist(const Vector3f& v1, const Vector3f& v2);
