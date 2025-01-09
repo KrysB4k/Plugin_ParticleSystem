@@ -12,22 +12,22 @@ int LuaObjectClass::Call()
 
 int LuaObjectClass::Add()
 {
-	Script::Throw("attempt to perform arithmetic on an unsupported object");
+	return ThrowArithmetic();
 }
 
 int LuaObjectClass::Subtract()
 {
-	return Add();
+	return ThrowArithmetic();
 }
 
 int LuaObjectClass::Negate()
 {
-	return Add();
+	return ThrowArithmetic();
 }
 
 int LuaObjectClass::Multiply()
 {
-	return Add();
+	return ThrowArithmetic();
 }
 
 void LuaObjectClass::Index(const char* field)
@@ -46,22 +46,22 @@ void LuaObjectClass::NewIndex(const char* field)
 
 int LuaObjectFunction::Add()
 {
-	Script::Throw("attempt to perform arithmetic on a function object");
+	return ThrowArithmetic();
 }
 
 int LuaObjectFunction::Subtract()
 {
-	return Add();
+	return ThrowArithmetic();
 }
 
 int LuaObjectFunction::Negate()
 {
-	return Add();
+	return ThrowArithmetic();
 }
 
 int LuaObjectFunction::Multiply()
 {
-	return Add();
+	return ThrowArithmetic();
 }
 
 void LuaObjectFunction::Index(const char* field)
@@ -105,14 +105,20 @@ int LuaObjectClassPosition::Subtract()
 
 int LuaObjectClassPosition::Negate()
 {
-	ConstructManagedData<Vector3f>(-GetX(), -GetY(), -GetZ());
+	float x = -this->GetX();
+	float y = -this->GetY();
+	float z = -this->GetZ();
+	ConstructManagedData<Vector3f>(x, y, z);
 	return 1;
 }
 
 int LuaObjectClassPosition::Multiply()
 {
 	float n = GetNumber(1);
-	ConstructManagedData<Vector3f>(n * GetX(), n * GetY(), n * GetZ());
+	float x = this->GetX() * n;
+	float y = this->GetY() * n;
+	float z = this->GetZ() * n;
+	ConstructManagedData<Vector3f>(x, y, z);
 	return 1;
 }
 

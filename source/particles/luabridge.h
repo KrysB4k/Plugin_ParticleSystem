@@ -65,13 +65,13 @@ struct LuaItemInfoPos final : public LuaObjectClassPosition
 
 	static const char* Name();
 
-	virtual float GetX() final override;
-	virtual float GetY() final override;
-	virtual float GetZ() final override;
-	virtual void SetX(float x) final override;
-	virtual void SetY(float y) final override;
-	virtual void SetZ(float z) final override;
-	virtual explicit operator Vector3f() final override;
+	virtual float GetX() override;
+	virtual float GetY() override;
+	virtual float GetZ() override;
+	virtual void SetX(float x) override;
+	virtual void SetY(float y) override;
+	virtual void SetZ(float z) override;
+	virtual explicit operator Vector3f() override;
 
 private:
 
@@ -84,13 +84,13 @@ struct LuaItemInfoRot final : public LuaObjectClassRotation
 
 	static const char* Name();
 
-	virtual short GetX() final override;
-	virtual short GetY() final override;
-	virtual short GetZ() final override;
-	virtual void SetX(short x) final override;
-	virtual void SetY(short y) final override;
-	virtual void SetZ(short z) final override;
-	virtual explicit operator Vector3s() final override;
+	virtual short GetX() override;
+	virtual short GetY() override;
+	virtual short GetZ() override;
+	virtual void SetX(short x) override;
+	virtual void SetY(short y) override;
+	virtual void SetZ(short z) override;
+	virtual explicit operator Vector3s() override;
 
 private:
 
@@ -183,6 +183,7 @@ namespace LuaHelpers
 	void CheckCaller(int callers, const char* function);
 	void CheckFieldCaller(int callers, const char* field);
 	void ReadOnlyFieldError(const char* field);
+	int ThrowArithmetic();
 	Vector3f GetItemPos(int argument);
 	void AssignGroupID(Particles::ParticleGroup*, int id);
 	const char* GetBoundedLuaString(int argument, int length);
