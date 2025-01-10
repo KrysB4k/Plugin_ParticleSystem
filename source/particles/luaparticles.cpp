@@ -6,157 +6,9 @@
 using namespace LuaHelpers;
 using namespace Utilities;
 
-const char* Vector3f::Name()
-{
-	return "Vector3f";
-}
-
-void Vector3f::Index(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'x':
-			if (!strcmp(field, "x"))
-			{
-				Script::PushNumber(x);
-				return;
-			}
-			break;
-		case 'y':
-			if (!strcmp(field, "y"))
-			{
-				Script::PushNumber(y);
-				return;
-			}
-			break;
-		case 'z':
-			if (!strcmp(field, "z"))
-			{
-				Script::PushNumber(z);
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::Index(field);
-}
-
-void Vector3f::NewIndex(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'x':
-			if (!strcmp(field, "x"))
-			{
-				x = GetNumber(-1);
-				return;
-			}
-			break;
-		case 'y':
-			if (!strcmp(field, "y"))
-			{
-				y = GetNumber(-1);
-				return;
-			}
-			break;
-		case 'z':
-			if (!strcmp(field, "z"))
-			{
-				z = GetNumber(-1);
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::NewIndex(field);
-}
-
-float Vector3f::GetX()
-{
-	return x;
-}
-
-float Vector3f::GetY()
-{
-	return y;
-}
-
-float Vector3f::GetZ()
-{
-	return z;
-}
-
 const char* Vector3s::Name()
 {
 	return "Vector3s";
-}
-
-void Vector3s::Index(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'x':
-			if (!strcmp(field, "x"))
-			{
-				Script::PushNumber(ShortToRad(x));
-				return;
-			}
-			break;
-		case 'y':
-			if (!strcmp(field, "y"))
-			{
-				Script::PushNumber(ShortToRad(y));
-				return;
-			}
-			break;
-		case 'z':
-			if (!strcmp(field, "z"))
-			{
-				Script::PushNumber(ShortToRad(z));
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::Index(field);
-}
-
-void Vector3s::NewIndex(const char* field)
-{
-	if (field)
-	{
-		switch (field[0])
-		{
-		case 'x':
-			if (!strcmp(field, "x"))
-			{
-				x = RadToShort(GetNumber(-1));
-				return;
-			}
-			break;
-		case 'y':
-			if (!strcmp(field, "y"))
-			{
-				y = RadToShort(GetNumber(-1));
-				return;
-			}
-			break;
-		case 'z':
-			if (!strcmp(field, "z"))
-			{
-				z = RadToShort(GetNumber(-1));
-				return;
-			}
-			break;
-		}
-	}
-	LuaObjectClass::NewIndex(field);
 }
 
 short Vector3s::GetX()
@@ -172,6 +24,21 @@ short Vector3s::GetY()
 short Vector3s::GetZ()
 {
 	return z;
+}
+
+void Vector3s::SetX(short x)
+{
+	this->x = x; 
+}
+
+void Vector3s::SetY(short y)
+{
+	this->y = y;
+}
+
+void Vector3s::SetZ(short z)
+{
+	this->z = z;
 }
 
 Vector3s::operator Vector3s()

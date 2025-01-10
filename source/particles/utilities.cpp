@@ -16,7 +16,7 @@ namespace Utilities
 		return lroundf(x);
 	}
 
-	phd_vector Round(const Vector3f& v)
+	phd_vector RoundPos(const Vector3f& v)
 	{
 		return phd_vector(lroundf(v.x), lroundf(v.y), lroundf(v.z));
 	}
@@ -40,6 +40,13 @@ namespace Utilities
 		float t = (x - val1) / (val2 - val1);
 
 		return Clamp(t, 0.0f, 1.0f);
+	}
+
+	float SmoothStep(float x)
+	{
+		x = Clamp(x, 0.0f, 1.0f);
+
+		return x * x * (3.0f - 2.0f * x);
 	}
 
 	float SimpleDist(const Vector3f& v1, const Vector3f& v2)

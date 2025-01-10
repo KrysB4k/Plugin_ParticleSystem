@@ -200,6 +200,11 @@ namespace LuaHelpers
 		Script::Throw(FormatString("field \"%s\" is read-only and cannot be assigned to", field));
 	}
 
+	int ThrowArithmetic()
+	{
+		Script::Throw("attempt to perform arithmetic on an unsupported object");
+	}
+
 	Vector3f GetItemPos(int argument)
 	{
 		auto item = &items[VerifyItemIndex(argument)];

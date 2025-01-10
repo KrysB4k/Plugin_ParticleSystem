@@ -107,6 +107,118 @@ namespace
 		return lua_error(lua);
 	}
 
+	int MetaAdd(lua_State* L)
+	{
+		LuaObject* object;
+
+		object = (LuaObject*)lua_touserdata(lua, 1);
+		if (!object)
+		{
+			try
+			{
+				return LuaBridge::GlobalArithmetic();
+			}
+			catch (const std::exception&)
+			{
+
+			}
+			return lua_error(lua);
+		}
+		try
+		{
+			return object->Add();
+		}
+		catch (const std::exception&)
+		{
+
+		}
+		return lua_error(lua);
+	}
+
+	int MetaSubtract(lua_State* L)
+	{
+		LuaObject* object;
+
+		object = (LuaObject*)lua_touserdata(lua, 1);
+		if (!object)
+		{
+			try
+			{
+				return LuaBridge::GlobalArithmetic();
+			}
+			catch (const std::exception&)
+			{
+
+			}
+			return lua_error(lua);
+		}
+		try
+		{
+			return object->Subtract();
+		}
+		catch (const std::exception&)
+		{
+
+		}
+		return lua_error(lua);
+	}
+
+	int MetaNegate(lua_State* L)
+	{
+		LuaObject* object;
+
+		object = (LuaObject*)lua_touserdata(lua, 1);
+		if (!object)
+		{
+			try
+			{
+				return LuaBridge::GlobalArithmetic();
+			}
+			catch (const std::exception&)
+			{
+
+			}
+			return lua_error(lua);
+		}
+		try
+		{
+			return object->Negate();
+		}
+		catch (const std::exception&)
+		{
+
+		}
+		return lua_error(lua);
+	}
+
+	int MetaMultiply(lua_State* L)
+	{
+		LuaObject* object;
+
+		object = (LuaObject*)lua_touserdata(lua, 1);
+		if (!object)
+		{
+			try
+			{
+				return LuaBridge::GlobalArithmetic();
+			}
+			catch (const std::exception&)
+			{
+
+			}
+			return lua_error(lua);
+		}
+		try
+		{
+			return object->Multiply();
+		}
+		catch (const std::exception&)
+		{
+
+		}
+		return lua_error(lua);
+	}
+
 	int ExceptionHandler(lua_State* L)
 	{
 		luaL_traceback(lua, lua, StringRepresentation(1), 1);
@@ -151,7 +263,7 @@ void Script::NewState()
 	lua = luaL_newstate();
 	lua_gc(lua, LUA_GCSTOP);
 	lua_pushlightuserdata(lua, nullptr);
-	lua_createtable(lua, 0, 3);
+	lua_createtable(lua, 0, 7);
 	lua_pushliteral(lua, "__index");
 	lua_pushcfunction(lua, MetaIndex);
 	lua_rawset(lua, -3);
@@ -160,6 +272,18 @@ void Script::NewState()
 	lua_rawset(lua, -3);
 	lua_pushliteral(lua, "__call");
 	lua_pushcfunction(lua, MetaCall);
+	lua_rawset(lua, -3);
+	lua_pushliteral(lua, "__add");
+	lua_pushcfunction(lua, MetaAdd);
+	lua_rawset(lua, -3);
+	lua_pushliteral(lua, "__sub");
+	lua_pushcfunction(lua, MetaSubtract);
+	lua_rawset(lua, -3);
+	lua_pushliteral(lua, "__unm");
+	lua_pushcfunction(lua, MetaNegate);
+	lua_rawset(lua, -3);
+	lua_pushliteral(lua, "__mul");
+	lua_pushcfunction(lua, MetaMultiply);
 	lua_rawset(lua, -3);
 	lua_pushvalue(lua, -1);
 	metatable = luaL_ref(lua, LUA_REGISTRYINDEX);

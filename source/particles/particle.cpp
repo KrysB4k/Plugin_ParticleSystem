@@ -694,8 +694,8 @@ namespace Particles
 
 		if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 		{
-			auto testp = Round(pos + vel);
-			auto p = Round(pos);
+			auto testp = RoundPos(pos + vel);
+			auto p = RoundPos(pos);
 
 			if ((p.x >> 10) != (testp.x >> 10) || (p.z >> 10) != (testp.z >> 10))
 			{
@@ -738,7 +738,7 @@ namespace Particles
 			if (minBounce < 0)
 				minBounce = 0.0f;
 
-			auto testp = Round(pos + vel);
+			auto testp = RoundPos(pos + vel);
 			short tRoom = roomIndex;
 
 			Tr4FloorInfo* floor = (Tr4FloorInfo*)GetFloor(testp.x, testp.y, testp.z, &tRoom);
@@ -791,7 +791,7 @@ namespace Particles
 		if (item)
 		{
 			StrBoxCollisione* bounds = GetBoundsAccurate((StrItemTr4*)item);
-			auto p = Round(AbsPos());
+			auto p = RoundPos(AbsPos());
 
 			int y = p.y - item->pos.yPos;
 			if (y >= bounds->MinY - radius && y <= bounds->MaxY + radius)
@@ -816,17 +816,16 @@ namespace Particles
 
 	Vector3f BaseParticle::FollowTarget(const Vector3f& v, float maxSpeed, float distInner, float distOuter)
 	{
+		Vector3f vec;
+
 		auto dirVect = v - pos;
 
 		float dist = dirVect.magnitude();
 
-		if (dist <= distInner)
-			return Vector3f();
+		if (dist && dist > distInner)
+			vec = dirVect * (InverseLerp(distInner, distOuter, dist) * maxSpeed / dist);
 
-		if (dist > maxSpeed)
-			dirVect *= maxSpeed / dist;
-
-		return dirVect * InverseLerp(distInner, distOuter, dist);
+		return vec;
 	}
 
 
@@ -875,7 +874,7 @@ namespace Particles
 	Vector3f BaseParticle::AvoidRoomGeometry(int wallMargin, int floorMargin, float factor)
 	{
 		Vector3f v;
-		auto p = Round(pos);
+		auto p = RoundPos(pos);
 
 		short room = roomIndex;
 
@@ -1362,7 +1361,7 @@ namespace Particles
 		short** meshpp = &meshes[meshindex];
 		shatter.meshp = *meshpp;
 
-		auto p = Round(pos);
+		auto p = RoundPos(pos);
 		shatter.sphere.x = p.x;
 		shatter.sphere.y = p.y;
 		shatter.sphere.z = p.z;
@@ -1470,7 +1469,7 @@ namespace Particles
 
 	void MeshParticle::DrawMeshPart()
 	{
-		phd_vector projPos = Round(AbsPos());
+		phd_vector projPos = RoundPos(AbsPos());
 
 		const auto& pgroup = partGroups[groupIndex];
 
