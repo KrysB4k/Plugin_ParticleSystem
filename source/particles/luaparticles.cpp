@@ -92,21 +92,21 @@ void Vector3i::NewIndex(const char* field)
 		case 'x':
 			if (!strcmp(field, "x"))
 			{
-				x = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
+				x = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
-				y = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
+				y = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
-				z = 16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false);
+				z = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
@@ -696,7 +696,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "sizeRatio"))
 				{
-					sizeRatio = 32767 * GetClampedNumber(-1, -1.0f, 1.0f, false);
+					sizeRatio = (short)lroundf(32767 * GetClampedNumber(-1, -1.0f, 1.0f, false));
 					return;
 				}
 				if (!strcmp(field, "spriteIndex"))

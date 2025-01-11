@@ -318,7 +318,7 @@ namespace Particles
 			part->colCust = Lerp(part->colStart, part->colEnd, t);
 
 			t = part->Parameter();
-			part->sizeCust = Round(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
+			part->sizeCust = (ushort)lroundf(Lerp(float(part->sizeStart), float(part->sizeEnd), t));
 
 			if (!Script::ExecuteFunction(pgroup.updateIndex, part))
 				Script::DeleteFunction(&pgroup.updateIndex);
@@ -421,9 +421,9 @@ namespace Particles
 					continue;
 				}
 
-				viewCoords[0] = Round(part->pos.x * phd_winxmax);
-				viewCoords[1] = Round(part->pos.y * phd_winxmax);
-				viewCoords[2] = Round(part->pos.z + f_mznear);
+				viewCoords[0] = lroundf(part->pos.x * phd_winxmax);
+				viewCoords[1] = lroundf(part->pos.y * phd_winxmax);
+				viewCoords[2] = lroundf(part->pos.z + f_mznear);
 
 				if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
 				{
@@ -440,8 +440,8 @@ namespace Particles
 					float xf = (part->pos.x - vel.x) * phd_winxmax;
 					float yf = (part->pos.y - vel.y) * phd_winxmax;
 
-					viewCoords[3] = Round(xf);
-					viewCoords[4] = Round(yf);
+					viewCoords[3] = lroundf(xf);
+					viewCoords[4] = lroundf(yf);
 					viewCoords[5] = viewCoords[2];
 				}
 			}
@@ -449,9 +449,9 @@ namespace Particles
 			{
 				auto partPos = part->AbsPos();
 
-				x1 = Round(partPos.x);
-				y1 = Round(partPos.y);
-				z1 = Round(partPos.z);
+				x1 = lroundf(partPos.x);
+				y1 = lroundf(partPos.y);
+				z1 = lroundf(partPos.z);
 
 				x1 -= lara_item->pos.xPos;
 				y1 -= lara_item->pos.yPos;
@@ -473,8 +473,8 @@ namespace Particles
 				result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
 
 				float zv = f_persp / float(result[2]);
-				viewCoords[0] = Round(result[0] * zv + f_centerx);
-				viewCoords[1] = Round(result[1] * zv + f_centery);
+				viewCoords[0] = lroundf(result[0] * zv + f_centerx);
+				viewCoords[1] = lroundf(result[1] * zv + f_centery);
 				viewCoords[2] = result[2] >> 14;
 
 				// if particle is a line do world to screen transform for second vertex
@@ -500,7 +500,7 @@ namespace Particles
 
 							if (part->emitterNode >= 0) // if attached to specific mesh node of item
 							{
-								vel = GetJointPos(item, part->emitterNode, Round(vel.x), Round(vel.y), Round(vel.z)) - GetJointPos(item, part->emitterNode, 0, 0, 0);
+								vel = GetJointPos(item, part->emitterNode, lroundf(vel.x), lroundf(vel.y), lroundf(vel.z)) - GetJointPos(item, part->emitterNode, 0, 0, 0);
 							}
 							else // no mesh node, use item's pos
 							{
@@ -509,17 +509,17 @@ namespace Particles
 						}
 					}
 
-					x1 = Round(x1 - vel.x);
-					y1 = Round(y1 - vel.y);
-					z1 = Round(z1 - vel.z);
+					x1 = lroundf(x1 - vel.x);
+					y1 = lroundf(y1 - vel.y);
+					z1 = lroundf(z1 - vel.z);
 
 					result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
 					result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
 					result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
 
 					zv = f_persp / float(result[2]);
-					viewCoords[3] = Round(result[0] * zv + f_centerx);
-					viewCoords[4] = Round(result[1] * zv + f_centery);
+					viewCoords[3] = lroundf(result[0] * zv + f_centerx);
+					viewCoords[4] = lroundf(result[1] * zv + f_centery);
 					viewCoords[5] = result[2] >> 14;
 				}
 			}
@@ -621,7 +621,7 @@ namespace Particles
 			if (emitterNode >= 0) // if attached to specific mesh node of item
 			{
 				if (tether == TetherType::TETHER_ROTATING)
-					relPos = GetJointPos(item, emitterNode, Round(relPos.x), Round(relPos.y), Round(relPos.z));
+					relPos = GetJointPos(item, emitterNode, lroundf(relPos.x), lroundf(relPos.y), lroundf(relPos.z));
 				else
 					relPos += GetJointPos(item, emitterNode, 0, 0, 0);
 			}
@@ -656,7 +656,7 @@ namespace Particles
 			if (node >= 0)
 			{
 				if (tether == TetherType::TETHER_ROTATING)
-					relPos = GetJointPos(item, node, Round(relPos.x), Round(relPos.y), Round(relPos.z));
+					relPos = GetJointPos(item, node, lroundf(relPos.x), lroundf(relPos.y), lroundf(relPos.z));
 				else
 					relPos += GetJointPos(item, node, 0, 0, 0);
 			}
@@ -768,15 +768,15 @@ namespace Particles
 				}
 				else if (testp.y >= fh)
 				{
-					pos.y = fh;
+					pos.y = (float)fh;
 					vel.y = 0;
 				}
 				
 
 				if (pos.y > fh)
-					pos.y = fh;
+					pos.y = (float)fh;
 				else if (pos.y < ch)
-					pos.y = ch;
+					pos.y = (float)ch;
 
 				return true;
 			}
@@ -798,8 +798,8 @@ namespace Particles
 			{
 				int dx = p.x - item->pos.xPos;
 				int dz = p.z - item->pos.zPos;
-				float s = sin(RAD(item->pos.yRot));
-				float c = cos(RAD(item->pos.yRot));
+				float s = sin(ShortToRad(item->pos.yRot));
+				float c = cos(ShortToRad(item->pos.yRot));
 				int x = int(dx * c - dz * s);
 				int z = int(dx * s + dz * c);
 
@@ -846,8 +846,8 @@ namespace Particles
 
 		if (predict)
 		{
-			float s = sin(RAD(item->pos.yRot));
-			float c = cos(RAD(item->pos.yRot));
+			float s = sin(ShortToRad(item->pos.yRot));
+			float c = cos(ShortToRad(item->pos.yRot));
 
 			Vector3f heading(item->speed * s, item->fallspeed, item->speed * c);
 
@@ -908,7 +908,7 @@ namespace Particles
 	{
 		Vector3f v;
 
-		Vector3f ipos(item->pos.xPos, item->pos.yPos, item->pos.zPos);
+		Vector3f ipos((float)item->pos.xPos, (float)item->pos.yPos, (float)item->pos.zPos);
 
 		if (SimpleDist(ipos, pos) < radius)
 		{
@@ -1056,9 +1056,9 @@ namespace Particles
 			if (lifeDif < fadeIn)
 			{
 				float s = lifeDif / float(fadeIn);
-				cR = Round(Lerp(0, cR, s));
-				cG = Round(Lerp(0, cG, s));
-				cB = Round(Lerp(0, cB, s));
+				cR = lroundf(Lerp(0.0f, (float)cR, s));
+				cG = lroundf(Lerp(0.0f, (float)cG, s));
+				cB = lroundf(Lerp(0.0f, (float)cB, s));
 			}
 		}
 
@@ -1067,9 +1067,9 @@ namespace Particles
 			if (lifeCounter < fadeOut)
 			{
 				float s = lifeCounter / float(fadeOut);
-				cR = Round(Lerp(0, cR, s));
-				cG = Round(Lerp(0, cG, s));
-				cB = Round(Lerp(0, cB, s));
+				cR = lroundf(Lerp(0.0f, (float)cR, s));
+				cG = lroundf(Lerp(0.0f, (float)cG, s));
+				cB = lroundf(Lerp(0.0f, (float)cB, s));
 			}
 		}
 
@@ -1141,7 +1141,7 @@ namespace Particles
 				size = phd_persp * sizeCust / float(z1);
 
 				if (size < smallest_size)
-					size = smallest_size;
+					size = (float)smallest_size;
 			}
 
 			float xsize = 0.5f, ysize = 0.5f;
@@ -1167,8 +1167,8 @@ namespace Particles
 
 				if (rot)
 				{
-					float s = sin(RAD(rot));
-					float c = cos(RAD(rot));
+					float s = sin(ShortToRad(rot));
+					float c = cos(ShortToRad(rot));
 
 					float sx1 = (-s1h * s);
 					float sx2 = (s1h * s);
@@ -1182,25 +1182,25 @@ namespace Particles
 					float cy1 = (-s2h * c);
 					float cy2 = (s2h * c);
 
-					x1 = Round(sx1 - cy1 + view[0]);
-					x2 = Round(sx2 - cy1 + view[0]);
-					x3 = Round(sx2 - cy2 + view[0]);
-					x4 = Round(sx1 - cy2 + view[0]);
+					x1 = lroundf(sx1 - cy1 + view[0]);
+					x2 = lroundf(sx2 - cy1 + view[0]);
+					x3 = lroundf(sx2 - cy2 + view[0]);
+					x4 = lroundf(sx1 - cy2 + view[0]);
 
-					y1 = Round(cx1 + sy1 + view[1]);
-					y2 = Round(cx2 + sy1 + view[1]);
-					y3 = Round(cx2 + sy2 + view[1]);
-					y4 = Round(cx1 + sy2 + view[1]);
+					y1 = lroundf(cx1 + sy1 + view[1]);
+					y2 = lroundf(cx2 + sy1 + view[1]);
+					y3 = lroundf(cx2 + sy2 + view[1]);
+					y4 = lroundf(cx1 + sy2 + view[1]);
 
 					setXY4(v, x1, y1, x2, y2, x3, y3, x4, y4, z1, clipflags);
 				}
 				else
 				{
-					x1 = view[0] - s1h;
-					x2 = view[0] + s1h;
+					x1 = view[0] - lroundf(s1h);
+					x2 = view[0] + lroundf(s1h);
 
-					y1 = view[1] - s2h;
-					y2 = view[1] + s2h;
+					y1 = view[1] - lroundf(s2h);
+					y2 = view[1] + lroundf(s2h);
 
 					setXY4(v, x1, y1, x2, y1, x2, y2, x1, y2, z1, clipflags);
 				}
@@ -1321,11 +1321,11 @@ namespace Particles
 			phi += float(M_PI);
 		}
 
-		int dy = GetOrientDiff(rot.y, ANG(phi));
-		int dx = GetOrientDiff(rot.x, ANG(theta));
+		int dy = GetOrientDiff(rot.y, RadToShort(phi));
+		int dx = GetOrientDiff(rot.x, RadToShort(theta));
 
-		rotVel.y = Round(dy * factor);
-		rotVel.x = Round(dx * factor);
+		rotVel.y = (short)lroundf(dy * factor);
+		rotVel.x = (short)lroundf(dx * factor);
 	}
 
 
@@ -1343,13 +1343,13 @@ namespace Particles
 			phi += float(M_PI);
 		}
 
-		int dy = GetOrientDiff(rot.y, ANG(phi));
-		int dx = GetOrientDiff(rot.x, ANG(theta));
+		int dy = GetOrientDiff(rot.y, RadToShort(phi));
+		int dx = GetOrientDiff(rot.x, RadToShort(theta));
 
 		factor = Clamp(factor, 0.0f, 1.0f);
 
-		rotVel.y = Round(dy * factor);
-		rotVel.x = Round(dx * factor);
+		rotVel.y = (short)lroundf(dy * factor);
+		rotVel.x = (short)lroundf(dx * factor);
 	}
 
 
@@ -1507,9 +1507,9 @@ namespace Particles
 			if (transparency)
 				GlobalAlpha = (255 - transparency) << 24;
 
-			item.pos.xPos = pos.x;
-			item.pos.yPos = pos.y;
-			item.pos.zPos = pos.z;
+			item.pos.xPos = lroundf(pos.x);
+			item.pos.yPos = lroundf(pos.y);
+			item.pos.zPos = lroundf(pos.z);
 			item.pos.xRot = rot.x;
 			item.pos.yRot = rot.y;
 			item.pos.zRot = rot.z;

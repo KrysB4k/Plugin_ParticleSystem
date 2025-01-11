@@ -186,6 +186,6 @@ namespace LuaHelpers
 	int ThrowArithmetic();
 	Vector3f GetItemPos(int argument);
 	void AssignGroupID(Particles::ParticleGroup*, int id);
-	const char* GetBoundedLuaString(int argument, int length);
+	const char* GetBoundedLuaString(int argument, unsigned int length);
 	void RequireModule(int argument);
 }

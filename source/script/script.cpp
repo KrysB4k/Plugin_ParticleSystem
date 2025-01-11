@@ -332,7 +332,7 @@ void Script::PushString(const char* string)
 
 int Script::ToInteger(int argument)
 {
-	return lroundf(lua_tonumber(lua, ArgumentToStack(argument)));
+	return lroundf((float)lua_tonumber(lua, ArgumentToStack(argument)));
 }
 
 bool Script::ToBoolean(int argument)
@@ -342,7 +342,7 @@ bool Script::ToBoolean(int argument)
 
 float Script::ToNumber(int argument)
 {
-	return lua_tonumber(lua, ArgumentToStack(argument));
+	return (float)lua_tonumber(lua, ArgumentToStack(argument));
 }
 
 LuaObject* Script::ToData(int argument)
@@ -454,7 +454,7 @@ int Script::ExplodeTable(int argument)
 	int length, stack;
 
 	stack = ArgumentToStack(argument);
-	length = lua_rawlen(lua, stack);
+	length = (int)lua_rawlen(lua, stack);
 	for (int i = 0; i < length; i++)
 		lua_rawgeti(lua, stack, i + 1);
 	return length;

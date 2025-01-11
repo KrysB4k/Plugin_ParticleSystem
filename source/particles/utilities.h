@@ -7,7 +7,6 @@ struct ColorRGB;
 
 namespace Utilities
 {
-	int Round(float x);
 	phd_vector RoundPos(const Vector3f& v);
 	short GetOrientDiff(short sourceOrient, short targetOrient);
 	float Lerp(float a, float b, float t);

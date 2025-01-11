@@ -11,11 +11,6 @@ namespace Utilities
 {
 	std::mt19937 mt;
 
-	int Round(float x)
-	{
-		return lroundf(x);
-	}
-
 	phd_vector RoundPos(const Vector3f& v)
 	{
 		return phd_vector(lroundf(v.x), lroundf(v.y), lroundf(v.z));
@@ -87,9 +82,9 @@ namespace Utilities
 	ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t)
 	{
 		return ColorRGB(
-			(uchar)Round(C1.R + (C2.R - C1.R) * t),
-			(uchar)Round(C1.G + (C2.G - C1.G) * t),
-			(uchar)Round(C1.B + (C2.B - C1.B) * t)
+			(uchar)lroundf(C1.R + (C2.R - C1.R) * t),
+			(uchar)lroundf(C1.G + (C2.G - C1.G) * t),
+			(uchar)lroundf(C1.B + (C2.B - C1.B) * t)
 		);
 	}
 
@@ -101,7 +96,7 @@ namespace Utilities
 
 		if (sat <= 0.0f)
 		{
-			uchar v = Round(val * 255);
+			uchar v = (uchar)lroundf(val * 255);
 			return ColorRGB(v, v, v);
 		}
 
@@ -147,9 +142,9 @@ namespace Utilities
 			b = xval;
 		}
 
-		ColorRGB c((uchar)Round((r + m) * 255),
-			(uchar)Round((g + m) * 255),
-			(uchar)Round((b + m) * 255));
+		ColorRGB c((uchar)lroundf((r + m) * 255),
+			(uchar)lroundf((g + m) * 255),
+			(uchar)lroundf((b + m) * 255));
 
 		return c;
 	}
@@ -167,12 +162,12 @@ namespace Utilities
 			for (int i = 0; i < num; ++i)
 			{
 				auto sph = &SphereList[i];
-				int r = sph->r + radius;
+				int r = lroundf(sph->r + radius);
 				if (r > 0)
 				{
-					int x = Round(posTest.x - sph->x);
-					int y = Round(posTest.y - sph->y);
-					int z = Round(posTest.z - sph->z);
+					int x = lroundf(posTest.x - sph->x);
+					int y = lroundf(posTest.y - sph->y);
+					int z = lroundf(posTest.z - sph->z);
 
 					if ((x * x + y * y + z * z) < r * r)
 						flags |= (1 << i);
@@ -207,7 +202,7 @@ namespace Utilities
 				if (objects[item->object_number].intelligent && item->hit_points <= 0)
 					continue;
 
-				Vector3f target(item->pos.xPos, item->pos.yPos, item->pos.zPos);
+				Vector3f target((float)item->pos.xPos, (float)item->pos.yPos, (float)item->pos.zPos);
 
 				if (CheckDistFast(posTest, target, radius) < 0)
 				{
@@ -231,7 +226,7 @@ namespace Utilities
 		else
 			GetJointAbsPosition((StrItemTr4*)item, (StrMovePosition*)&v, joint);
 
-		return Vector3f(v.x, v.y, v.z);
+		return Vector3f((float)v.x, (float)v.y, (float)v.z);
 	}
 
 	Vector3f RotatePoint3D(const Vector3f& point, short xrot, short yrot, short zrot)
@@ -414,22 +409,22 @@ namespace Utilities
 
 	float ShortToRad(short rotation)
 	{
-		return M_PI * rotation / 32768;
+		return (float)M_PI * rotation / 32768;
 	}
 
 	short RadToShort(float angle)
 	{
-		return 32768 * angle / M_PI;
+		return (short)lroundf(32768 * angle / (float)M_PI);
 	}
 
 	float DegToRad(float deg)
 	{
-		return M_PI * deg / 180.0f;
+		return (float)M_PI * deg / 180.0f;
 	}
 
 	float RadToDeg(float rad)
 	{
-		return rad * 180.0f / M_PI;
+		return rad * 180.0f / (float)M_PI;
 	}
 
 	float GetRandom()

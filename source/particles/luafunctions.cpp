@@ -942,7 +942,7 @@ namespace LuaFunctions
 		{
 			float r = GetNumber(1);
 			float theta = GetNumber(2);
-			float phi = GetClampedNumber(3, -M_PI_2, M_PI_2, false);
+			float phi = GetClampedNumber(3, -(float)M_PI_2, (float)M_PI_2, false);
 			ConstructManagedData<Vector3f>(SphericalToCartesian(r, theta, phi));
 			return 1;
 		}

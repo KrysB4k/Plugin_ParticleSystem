@@ -255,9 +255,9 @@ namespace LuaGlobals
 				if (!strcmp(field, "pos"))
 				{
 					auto position = GetData<LuaObjectClassPosition>(-1);
-					itemptr->pos.xPos = Round(position->GetX());
-					itemptr->pos.yPos = Round(position->GetY());
-					itemptr->pos.zPos = Round(position->GetZ());
+					itemptr->pos.xPos = lroundf(position->GetX());
+					itemptr->pos.yPos = lroundf(position->GetY());
+					itemptr->pos.zPos = lroundf(position->GetZ());
 					return;
 				}
 				break;
@@ -1410,13 +1410,13 @@ namespace LuaGlobals
 		{
 		case 'P':
 			if (!strcmp(field, "PI"))
-				return std::optional(M_PI);
+				return std::optional((float)M_PI);
 			if (!strcmp(field, "PI_HALF"))
-				return std::optional(M_PI_2);
+				return std::optional((float)M_PI_2);
 			if (!strcmp(field, "PI_QUART"))
-				return std::optional(M_PI_4);
+				return std::optional((float)M_PI_4);
 			if (!strcmp(field, "PI_TWO"))
-				return std::optional(M_PI * 2);
+				return std::optional((float)M_PI * 2.0f);
 			break;
 		}
 

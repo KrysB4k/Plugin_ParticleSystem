@@ -208,7 +208,7 @@ namespace LuaHelpers
 	Vector3f GetItemPos(int argument)
 	{
 		auto item = &items[VerifyItemIndex(argument)];
-		return Vector3f(item->pos.xPos, item->pos.yPos, item->pos.zPos);
+		return Vector3f((float)item->pos.xPos, (float)item->pos.yPos, (float)item->pos.zPos);
 	}
 
 	void AssignGroupID(Particles::ParticleGroup* group, int id)
@@ -221,7 +221,7 @@ namespace LuaHelpers
 		Particles::groupIds[id] = group;
 	}
 
-	const char* GetBoundedLuaString(int argument, int length)
+	const char* GetBoundedLuaString(int argument, unsigned int length)
 	{
 		auto string = GetLuaString(argument);
 		if (strlen(string) > length)

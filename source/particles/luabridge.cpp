@@ -262,17 +262,17 @@ const char* LuaItemInfoPos::Name()
 
 float LuaItemInfoPos::GetX()
 {
-	return pos->xPos;
+	return (float)pos->xPos;
 }
 
 float LuaItemInfoPos::GetY()
 {
-	return pos->yPos;
+	return (float)pos->yPos;
 }
 
 float LuaItemInfoPos::GetZ()
 {
-	return pos->zPos;
+	return (float)pos->zPos;
 }
 
 void LuaItemInfoPos::SetX(float x)
@@ -292,7 +292,7 @@ void LuaItemInfoPos::SetZ(float z)
 
 LuaItemInfoPos::operator Vector3f()
 {
-	return Vector3f(pos->xPos, pos->yPos, pos->zPos);
+	return Vector3f((float)pos->xPos, (float)pos->yPos, (float)pos->zPos);
 }
 
 const char* LuaItemInfoRot::Name()
