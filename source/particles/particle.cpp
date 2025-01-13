@@ -586,7 +586,10 @@ namespace Particles
 
 	void ExecuteInit(ParticleGroup* group)
 	{
-		if (group && !Script::ExecuteFunction(group->initIndex, nullptr))
+		if (!group)
+			return;
+
+		if (!Script::ExecuteFunction(group->initIndex, nullptr))
 			Script::DeleteFunction(&group->initIndex);
 	}
 

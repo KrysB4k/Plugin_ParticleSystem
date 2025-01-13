@@ -4,6 +4,7 @@
 #include "../trng/trng.h"
 #include "particle.h"
 #include "utilities.h"
+#include "logger.h"
 
 using namespace LuaHelpers;
 using namespace Utilities;
@@ -347,6 +348,15 @@ namespace LuaGlobals
 				return std::optional(Particles::DrawMode::DRAW_ARROW);
 			if (!strcmp(field, "DRAW_NONE"))
 				return std::optional(Particles::DrawMode::DRAW_NONE);
+			break;
+
+		case 'L':
+			if (!strcmp(field, "LOG_NONE"))
+				return std::optional(LoggerType::LOG_NONE);
+			if (!strcmp(field, "LOG_CONSOLE"))
+				return std::optional(LoggerType::LOG_CONSOLE);
+			if (!strcmp(field, "LOG_FILE"))
+				return std::optional(LoggerType::LOG_FILE);
 			break;
 
 		case 'S':

@@ -6,6 +6,7 @@
 #include "particle.h"
 #include "noise.h"
 #include "utilities.h"
+#include "logger.h"
 
 using namespace LuaHelpers;
 using namespace Utilities;
@@ -168,7 +169,7 @@ namespace LuaFunctions
 
 			int i = Particles::GetFreeParticleGroup();
 			if (i == -1)
-				return 0;
+				Script::Throw("group creation failed, exceeded available particle group maximum");
 
 			if (argcount > 2)
 			{
@@ -275,6 +276,16 @@ namespace LuaFunctions
 		}
 	};
 
+	struct DisableLoggerFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "disableLogger");
+			Logger::Close();
+			return 0;
+		}
+	};
+
 	struct DistanceFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
@@ -308,6 +319,25 @@ namespace LuaFunctions
 				res = -1;
 			Script::PushInteger(res);
 			return 1;
+		}
+	};
+
+	struct EnableLoggerFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "enableLogger");
+			LoggerType requested = static_cast<LoggerType>(GetClampedInteger(1, 0, 2, false));
+			if (requested != Logger::GetCurrentType())
+			{
+				Logger::Close();
+				if (requested != LoggerType::LOG_NONE)
+				{
+					Logger::Create(requested);
+					Logger::Trace("Logger enabled");
+				}
+			}
+			return 0;
 		}
 	};
 
@@ -1149,9 +1179,11 @@ namespace LuaFunctions
 	CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
 	CreateSpritePartFunction CreateSpritePartFunc;
 	CreateVectorFunction CreateVectorFunc;
+	DegToRadFunction DegToRadFunc;
+	DisableLoggerFunction DisableLoggerFunc;
 	DistanceFunction DistanceFunc;
 	DistCompareFunction DistCompareFunc;
-	DegToRadFunction DegToRadFunc;
+	EnableLoggerFunction EnableLoggerFunc;
 	ExpFunction ExpFunc;
 	FindNearestTargetFunction FindNearestTargetFunc;
 	FloorFunction FloorFunc;
@@ -1266,12 +1298,16 @@ namespace LuaFunctions
 		case 'd':
 			if (!strcmp(field, "degToRad"))
 				return &DegToRadFunc;
+			if (!strcmp(field, "disableLogger"))
+				return &DisableLoggerFunc;
 			if (!strcmp(field, "distance"))
 				return &DistanceFunc;
 			if (!strcmp(field, "distCompare"))
 				return &DistCompareFunc;
 			break;
 		case 'e':
+			if (!strcmp(field, "enableLogger"))
+				return &EnableLoggerFunc;
 			if (!strcmp(field, "exp"))
 				return &ExpFunc;
 			break;

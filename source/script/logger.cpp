@@ -54,6 +54,11 @@ namespace
 	}
 }
 
+LoggerType Logger::GetCurrentType()
+{
+	return current;
+}
+
 void Logger::Create(LoggerType type)
 {
 	SYSTEMTIME time;

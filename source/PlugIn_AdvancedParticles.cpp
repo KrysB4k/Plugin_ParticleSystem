@@ -31,31 +31,39 @@ char TexMyPluginName[80];
 
 StrMyData MyData;
 
-/* ParticleGroup elements should be initializable from Lua
-(e.g. at level start) but not modifiable during level runtime */
-
 
 // ************  Utilities section  ****************
 
+//#define DIAGNOSTICS
+
 void ControlParticles()
 {
+#ifdef DIAGNOSTICS
 	Diagnostics::initTime = Diagnostics::Time(Particles::InitParts);
 	Diagnostics::updateTime = Diagnostics::Time(Particles::UpdateParts);
+#else
+	Particles::InitParts();
+	Particles::UpdateParts();
+#endif
 }
 
 void DrawParticles()
 {
+#ifdef DIAGNOSTICS
 	Diagnostics::drawTime = Diagnostics::Time(Particles::DrawParts);
 	Diagnostics::SetPeaks();
 	Diagnostics::Print();
 	Diagnostics::ResetFrame();
+#else
+	Particles::DrawParts();
+#endif
 }
 
 void InitialiseGame()
 {
-	Logger::Create(LoggerType::LOG_CONSOLE);
-	Logger::Trace("InitialiseGame");
+#ifdef DIAGNOSTICS
 	Diagnostics::Initialise();
+#endif
 }
 
 void CloseGame()
@@ -72,8 +80,10 @@ void InitialiseLevel()
 	Particles::ClearPartGroups();
 	Logger::Information(Utilities::FormatString("Loading functions of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
 	Particles::InitPartGroups();
+#ifdef DIAGNOSTICS
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
+#endif
 }
 
 void CloseLevel()
@@ -465,7 +475,6 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 {
 	int RetValue;
 	WORD TimerFull;
-	Particles::ParticleGroup* group;
 
 	RetValue = enumTRET.PERFORM_ONCE_AND_GO;
 	// if the flip has no Extra paremeter you can handle a Timer value with values upto 32767
@@ -477,8 +486,7 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 		// here type the "case Number:" for each flipeffect number. At end of the code you'll use the "break;" instruction to signal the code ending
 		// Note: when you'll add your first "case Number:" then you can remove the following "case -1: and break;" instructions
 	case 1: 
-		group = Particles::GetGroupByID(TimerFull);
-		Particles::ExecuteInit(group);
+		Particles::ExecuteInit(Particles::GetGroupByID(TimerFull));
 		break;
 
 	default:

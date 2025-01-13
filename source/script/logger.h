@@ -9,6 +9,7 @@ enum LoggerType
 
 namespace Logger
 {
+	LoggerType GetCurrentType();
 	void Create(LoggerType type);
 	void Trace(const char* string);
 	void Debug(const char* string);
