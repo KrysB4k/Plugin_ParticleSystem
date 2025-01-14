@@ -287,6 +287,11 @@ namespace Particles
 					Script::PushData(&attach);
 					return;
 				}
+				if (!strcmp(field, "autoTrigger"))
+				{
+					Script::PushBoolean(autoTrigger);
+					return;
+				}
 				break;
 			case 'b':
 				if (!strcmp(field, "blendMode"))
@@ -342,6 +347,11 @@ namespace Particles
 				if (!strcmp(field, "attach"))
 				{
 					attach = *GetData<NodeAttachment>(-1);
+					return;
+				}
+				if (!strcmp(field, "autoTrigger"))
+				{
+					autoTrigger = GetBoolean(-1);
 					return;
 				}
 				break;

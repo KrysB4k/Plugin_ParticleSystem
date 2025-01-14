@@ -78,6 +78,7 @@ void InitialiseLevel()
 	Script::NewState();
 	Particles::ClearParts();
 	Particles::ClearPartGroups();
+	Particles::ClearFunctionRefs();
 	Logger::Information(Utilities::FormatString("Loading functions of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
 	Particles::InitPartGroups();
 #ifdef DIAGNOSTICS
@@ -486,7 +487,7 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 		// here type the "case Number:" for each flipeffect number. At end of the code you'll use the "break;" instruction to signal the code ending
 		// Note: when you'll add your first "case Number:" then you can remove the following "case -1: and break;" instructions
 	case 1: 
-		Particles::ExecuteInit(Particles::GetGroupByID(TimerFull));
+		Particles::ExecuteFunction(TimerFull-1);
 		break;
 
 	default:

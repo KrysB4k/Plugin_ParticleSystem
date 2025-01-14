@@ -137,7 +137,7 @@ namespace Particles
 		DrawMode drawMode;
 		BlendMode blendMode;
 
-		bool triggered;
+		bool autoTrigger;
 		bool saved;
 		bool screenSpace;
 		bool lineIgnoreVel;
@@ -344,7 +344,7 @@ namespace Particles
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
-	extern ParticleGroup* groupIds[];
+	extern int functionRefs[];
 
 	FunctionType GetCaller();
 	void SetCaller(FunctionType caller);
@@ -354,6 +354,7 @@ namespace Particles
 	void ClearParts();
 	void ClearGroupParts(ParticleGroup* group);
 	void ClearPartGroups();
+	void ClearFunctionRefs();
 
 	void InitParts();
 	void InitPartGroups();
@@ -370,6 +371,5 @@ namespace Particles
 	int GetFreeMeshPart();
 	int GetFreeParticleGroup();
 
-	ParticleGroup* GetGroupByID(int id);
-	void ExecuteInit(ParticleGroup* group);
+	void ExecuteFunction(int reference);
 };

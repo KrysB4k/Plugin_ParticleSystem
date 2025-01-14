@@ -185,7 +185,6 @@ namespace LuaHelpers
 	void ReadOnlyFieldError(const char* field);
 	int ThrowArithmetic();
 	Vector3f GetItemPos(int argument);
-	void AssignGroupID(Particles::ParticleGroup*, int id);
 	const char* GetBoundedLuaString(int argument, unsigned int length);
 	void RequireModule(int argument);
 }

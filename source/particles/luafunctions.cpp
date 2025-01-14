@@ -11,6 +11,8 @@
 using namespace LuaHelpers;
 using namespace Utilities;
 
+#define LUA_REFNIL      (-1)
+
 namespace LuaFunctions
 {
 	struct AbsFunction final : public LuaObjectFunction
@@ -55,6 +57,21 @@ namespace LuaFunctions
 		{
 			Script::PushNumber(GetMathResult(1, 2, atan2f));
 			return 1;
+		}
+	};
+
+	struct BindFunctionFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindFunction");
+
+			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
+			if (Particles::functionRefs[index] != LUA_REFNIL)
+				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
+
+			Particles::functionRefs[index] = GetFunction(2);
+			return 0;
 		}
 	};
 
@@ -163,7 +180,6 @@ namespace LuaFunctions
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "createGroup");
 
-			int argcount = GetArgCount(2, 3);
 			int init = GetFunction(1);
 			int update = GetFunction(2);
 
@@ -171,17 +187,8 @@ namespace LuaFunctions
 			if (i == -1)
 				Script::Throw("group creation failed, exceeded available particle group maximum");
 
-			if (argcount > 2)
-			{
-				int id = GetClampedInteger(3, 1, MAX_PARTGROUPS - 1, true);
-
-				LuaHelpers::AssignGroupID(&Particles::partGroups[i], id);
-				Particles::partGroups[i].triggered = true;
-			}
-
 			Particles::partGroups[i].initIndex = init;
 			Particles::partGroups[i].updateIndex = update;
-			Particles::partGroups[i].partLimit = MAX_SPRITEPARTS;
 			Script::PushData(&Particles::partGroups[i]);
 			return 1;
 		}
@@ -448,6 +455,17 @@ namespace LuaFunctions
 		{
 			Script::PushInteger(GetTombIndexByNGLEIndex(1));
 			return 1;
+		}
+	};
+
+	struct InvokeInitFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			auto group = GetData<Particles::ParticleGroup>(1);
+			if (!Script::ExecuteFunction(group->initIndex, nullptr))
+				Script::DeleteFunction(&group->initIndex);
+			return 0;
 		}
 	};
 
@@ -1164,6 +1182,7 @@ namespace LuaFunctions
 	AsinFunction AsinFunc;
 	AtanFunction AtanFunc;
 	Atan2Function Atan2Func;
+	BindFunctionFunction BindFunctionFunc;
 	BoidAlignmentFunction BoidAlignmentFunc;
 	BoidCohesionFunction BoidCohesionFunc;
 	BoidSeparationFunction BoidSeparationFunc;
@@ -1195,6 +1214,7 @@ namespace LuaFunctions
 	GetLaraIndexFunction GetLaraIndexFunc;
 	GetSelectedItemFunction GetSelectedItemFunc;
 	GetTombIndexFunction GetTombIndexFunc;
+	InvokeInitFunction InvokeInitFunc;
 	KillPartsOfGroupFunction KillPartsOfGroupFunc;
 	LerpFunction LerpFunc;
 	LerpInverseFunction LerpInverseFunc;
@@ -1262,6 +1282,8 @@ namespace LuaFunctions
 				return &Atan2Func;
 			break;
 		case 'b':
+			if (!strcmp(field, "bindFunction"))
+				return &BindFunctionFunc;
 			if (!strcmp(field, "boidAlignment"))
 				return &BoidAlignmentFunc;
 			if (!strcmp(field, "boidCohesion"))
@@ -1332,6 +1354,10 @@ namespace LuaFunctions
 				return &GetSelectedItemFunc;
 			if (!strcmp(field, "getTombIndex"))
 				return &GetTombIndexFunc;
+			break;
+		case 'i':
+			if (!strcmp(field, "invokeInit"))
+				return &InvokeInitFunc;
 			break;
 		case 'k':
 			if (!strcmp(field, "killPartsOfGroup"))

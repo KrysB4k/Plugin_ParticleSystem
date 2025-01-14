@@ -211,16 +211,6 @@ namespace LuaHelpers
 		return Vector3f((float)item->pos.xPos, (float)item->pos.yPos, (float)item->pos.zPos);
 	}
 
-	void AssignGroupID(Particles::ParticleGroup* group, int id)
-	{
-		if (!group)
-			return;
-		if (Particles::groupIds[id])
-			Script::Throw(FormatString("ID = %d is already assigned to a different group", id));
-
-		Particles::groupIds[id] = group;
-	}
-
 	const char* GetBoundedLuaString(int argument, unsigned int length)
 	{
 		auto string = GetLuaString(argument);

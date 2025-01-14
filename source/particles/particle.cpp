@@ -80,6 +80,8 @@ void Diagnostics::ResetLevel()
 
 // ************  namespace ParticleFactory  ****************
 
+#define LUA_REFNIL      (-1)
+
 namespace Particles
 {
 	ulong gameTick;
@@ -90,7 +92,8 @@ namespace Particles
 	MeshParticle meshParts[MAX_MESHPARTS];
 	int nextPartGroup;
 	ParticleGroup partGroups[MAX_PARTGROUPS];
-	ParticleGroup* groupIds[MAX_PARTGROUPS];
+	
+	int functionRefs[MAX_FUNCREFS];
 
 	FunctionType GetCaller()
 	{
@@ -218,6 +221,7 @@ namespace Particles
 			partGroups[free].groupIndex = free;
 			partGroups[free].blendMode = BlendMode::BLEND_COLORADD;
 			partGroups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
+			partGroups[free].autoTrigger = true;
 			return free;
 		}
 		return -1;
@@ -256,6 +260,12 @@ namespace Particles
 		for (int i = 0; i < MAX_PARTGROUPS; i++)
 			partGroups[i] = ParticleGroup();
 		nextPartGroup = 0;
+	}
+
+	void ClearFunctionRefs()
+	{
+		for (int i = 0; i < MAX_FUNCREFS; i++)
+			functionRefs[i] = LUA_REFNIL;
 	}
 
 	void UpdateParts()
@@ -559,7 +569,7 @@ namespace Particles
 		Script::PreFunctionLoop();
 		for (int i = 0; i < nextPartGroup; i++)
 		{
-			if (!partGroups[i].triggered && !Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
+			if (partGroups[i].autoTrigger && !Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
 				Script::DeleteFunction(&partGroups[i].initIndex);
 		}
 		Script::PostFunctionLoop(0);
@@ -575,22 +585,17 @@ namespace Particles
 	}
 
 
-	ParticleGroup* GetGroupByID(int id)
+	void ExecuteFunction(int index)
 	{
-		if (id >= 1 && id < MAX_PARTGROUPS)
-			return groupIds[id];
-
-		return nullptr;
-	}
-
-
-	void ExecuteInit(ParticleGroup* group)
-	{
-		if (!group)
+		if (index < 0 || index >= MAX_FUNCREFS)
 			return;
 
-		if (!Script::ExecuteFunction(group->initIndex, nullptr))
-			Script::DeleteFunction(&group->initIndex);
+		SetCaller(FUNCTION_INIT);
+		Script::PreFunctionLoop();
+		int ref = Particles::functionRefs[index];
+		if (!Script::ExecuteFunction(ref, nullptr))
+			Script::DeleteFunction(&ref);
+		Script::PostFunctionLoop(0);
 	}
 
 
