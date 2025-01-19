@@ -80,8 +80,6 @@ void Diagnostics::ResetLevel()
 
 // ************  namespace ParticleFactory  ****************
 
-#define LUA_REFNIL      (-1)
-
 namespace Particles
 {
 	ulong gameTick;
@@ -265,7 +263,7 @@ namespace Particles
 	void ClearFunctionRefs()
 	{
 		for (int i = 0; i < MAX_FUNCREFS; i++)
-			functionRefs[i] = LUA_REFNIL;
+			Script::DeleteFunction(&functionRefs[i]);
 	}
 
 	void UpdateParts()

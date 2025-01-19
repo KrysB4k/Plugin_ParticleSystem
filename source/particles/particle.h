@@ -371,5 +371,5 @@ namespace Particles
 	int GetFreeMeshPart();
 	int GetFreeParticleGroup();
 
-	void ExecuteFunction(int reference);
+	void ExecuteFunction(int index);
 };
