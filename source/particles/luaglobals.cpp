@@ -351,6 +351,10 @@ namespace LuaGlobals
 			break;
 
 		case 'L':
+			if (!strcmp(field, "LIGHT_STATIC"))
+				return std::optional(LightMode::LIGHT_STATIC);
+			if (!strcmp(field, "LIGHT_DYNAMIC"))
+				return std::optional(LightMode::LIGHT_DYNAMIC);
 			if (!strcmp(field, "LOG_NONE"))
 				return std::optional(LoggerType::LOG_NONE);
 			if (!strcmp(field, "LOG_CONSOLE"))

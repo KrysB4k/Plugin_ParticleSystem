@@ -82,6 +82,12 @@ enum BlendMode
 	BLEND_CUSTOM_13
 };
 
+enum LightMode
+{
+	LIGHT_STATIC,
+	LIGHT_DYNAMIC
+};
+
 enum FunctionType
 {
 	FUNCTION_LEVEL = 0x1,
@@ -136,6 +142,7 @@ namespace Particles
 
 		DrawMode drawMode;
 		BlendMode blendMode;
+		LightMode lightMode;
 
 		bool autoTrigger;
 		bool saved;

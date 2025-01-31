@@ -461,6 +461,14 @@ namespace Particles
 				y1 = lroundf(partPos.y);
 				z1 = lroundf(partPos.z);
 
+				if (pgroup.lightMode == LIGHT_DYNAMIC)
+				{
+					const auto col = CalculateVertexDynamicLighting(x1, y1, z1);
+					part->colCust.R = Clamp(part->colCust.R + col.R, 0, 255);
+					part->colCust.G = Clamp(part->colCust.G + col.G, 0, 255);
+					part->colCust.B = Clamp(part->colCust.B + col.B, 0, 255);
+				}
+
 				x1 -= lara_item->pos.xPos;
 				y1 -= lara_item->pos.yPos;
 				z1 -= lara_item->pos.zPos;

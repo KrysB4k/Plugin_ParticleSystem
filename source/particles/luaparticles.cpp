@@ -308,6 +308,11 @@ namespace Particles
 				}
 				break;
 			case 'l':
+				if (!strcmp(field, "lightMode"))
+				{
+					Script::PushInteger(lightMode);
+					return;
+				}
 				if (!strcmp(field, "lineIgnoreVel"))
 				{
 					Script::PushBoolean(lineIgnoreVel);
@@ -370,6 +375,11 @@ namespace Particles
 				}
 				break;
 			case 'l':
+				if (!strcmp(field, "lightMode"))
+				{
+					lightMode = static_cast<LightMode>(GetClampedInteger(-1, LightMode::LIGHT_STATIC, LightMode::LIGHT_DYNAMIC, false));
+					return;
+				}
 				if (!strcmp(field, "lineIgnoreVel"))
 				{
 					lineIgnoreVel = GetBoolean(-1);

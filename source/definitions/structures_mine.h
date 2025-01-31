@@ -719,7 +719,20 @@ struct Tr4MeshData
 	float* Normals;
 };
 
-
+struct DYNAMIC
+{
+	long x;
+	long y;
+	long z;
+	uchar on;
+	uchar r;
+	uchar g;
+	uchar b;
+	ushort falloff;
+	uchar used;
+	uchar pad1[1];
+	long FalloffScale;
+};
 
 // let below pragma directive at bottom of this source
 #pragma pack(2)

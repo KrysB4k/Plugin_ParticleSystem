@@ -4,6 +4,7 @@
 #include "particle.h"
 #include "utilities.h"
 #include <random>
+#include "../trng/trng.h"
 
 // ************  Utility functions ************ //
 
@@ -454,5 +455,48 @@ namespace Utilities
 		vsnprintf(buffer, 4096, format, args);
 		va_end(args);
 		return buffer;
+	}
+
+	ColorRGB CalculateVertexDynamicLighting(int x, int y, int z)
+	{
+		ulong r = 0;
+		ulong g = 0;
+		ulong b = 0;
+
+		auto dynamics = (DYNAMIC*)Trng.pGlobTomb4->BaseRemap.Old_804740.Start;
+
+		for (int i = 0; i < 127; i++)
+		{
+			const auto& dptr = dynamics[i];
+
+			if (dptr.on)
+			{
+				Vector3f d;
+
+				d.x = (float)(dptr.x - x);
+				d.y = (float)(dptr.y - y);
+				d.z = (float)(dptr.z - z);
+				float f = 256 * d.magnitude() / 150;
+
+				if (f <= dptr.falloff)
+				{
+					float scale = 1 - f / dptr.falloff;
+					r += (ulong)(scale * dptr.r);
+					g += (ulong)(scale * dptr.g);
+					b += (ulong)(scale * dptr.b);
+				}
+			}
+		}
+
+		if (r > 255)
+			r = 255;
+
+		if (g > 255)
+			g = 255;
+
+		if (b > 255)
+			b = 255;
+
+		return ColorRGB((uchar)r, (uchar)g, (uchar)b);
 	}
 }
