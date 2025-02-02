@@ -221,10 +221,42 @@ namespace LuaHelpers
 
 	void RequireModule(int argument)
 	{
+		Particles::CallerGuard guard(FUNCTION_MODULE);
 		auto string = GetBoundedLuaString(argument, 50);
 		Script::PreFunctionLoop();
 		if (!Script::Require(string))
 			Script::EmitFailure(FormatString("cannot load \"%s\" module", string), Logger::Warning);
-		Script::PostFunctionLoop(1);
+		Script::PostFunctionLoop();
+		int last = Particles::GetLastModule();
+		if (last != -1 && Particles::modules[last].createdInCurrentModule)
+		{
+			Particles::modules[last].createdInCurrentModule = false;
+			Script::PushData(&Particles::modules[last]);
+		}
+		else
+			Script::PushNil();
+	}
+
+	void CheckModuleParameter(int argument)
+	{
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsString(argument))
+			Script::Throw("boolean, number or string expected");
+	}
+
+	int GetBoundFunction(int index)
+	{
+		if (index < 1)
+		{
+			Script::EmitFailure(FormatString("%d is less than the minimum of %d, clamping to minimum", index, 1), Logger::Warning);
+			index = 1;
+		}
+		else if (index > MAX_FUNCREFS)
+		{
+			Script::EmitFailure(FormatString("%d is greater than the maximum of %d, clamping to maximum", index, MAX_FUNCREFS), Logger::Warning);
+			index = MAX_FUNCREFS;
+		}
+		if (Particles::functionRefs[index - 1].ref == LUA_REFNIL)
+			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Warning);
+		return index - 1;
 	}
 }

@@ -16,6 +16,7 @@
 #define MAX_SPRITEPARTS 4096
 #define MAX_MESHPARTS 1024
 #define MAX_PARTGROUPS 1024
+#define MAX_MODULES 1024
 #define MAX_MESHES_OBJ 32
 #define MAX_FUNCREFS 1024
 
@@ -24,6 +25,8 @@
 
 #define SIN_PI_6 0.5f
 #define COS_PI_6 0.86602540378f
+
+#define LUA_REFNIL -1
 
 // MPS_ flags
 // you should type here your MPS_ flags for plugin command.

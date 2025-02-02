@@ -187,4 +187,6 @@ namespace LuaHelpers
 	Vector3f GetItemPos(int argument);
 	const char* GetBoundedLuaString(int argument, unsigned int length);
 	void RequireModule(int argument);
+	void CheckModuleParameter(int argument);
+	int GetBoundFunction(int index);
 }

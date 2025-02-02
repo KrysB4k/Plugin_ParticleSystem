@@ -90,9 +90,12 @@ enum LightMode
 
 enum FunctionType
 {
+	FUNCTION_NONE = 0x0,
 	FUNCTION_LEVEL = 0x1,
-	FUNCTION_INIT = 0x2,
-	FUNCTION_UPDATE = 0x4
+	FUNCTION_BIND = 0x2,
+	FUNCTION_MODULE = 0x4,
+	FUNCTION_INIT = 0x8,
+	FUNCTION_UPDATE = 0x10
 };
 
 namespace Particles
@@ -150,6 +153,35 @@ namespace Particles
 		bool lineIgnoreVel;
 
 		// lua integration
+		static const char* Name();
+		virtual void Index(const char* field) override;
+		virtual void NewIndex(const char* field) override;
+	};
+
+	struct ModuleGroups final : public LuaObjectClass
+	{
+		int table;
+
+		static const char* Name();
+		virtual void Index(const char* field) override;
+		virtual void NewIndex(const char* field) override;
+	};
+
+	struct ModuleParameters final : public LuaObjectClass
+	{
+		int table;
+
+		static const char* Name();
+		virtual void Index(const char* field) override;
+		virtual void NewIndex(const char* field) override;
+	};
+
+	struct Module final : public LuaObjectClass
+	{
+		ModuleGroups groups;
+		ModuleParameters parameters;
+		bool createdInCurrentModule;
+
 		static const char* Name();
 		virtual void Index(const char* field) override;
 		virtual void NewIndex(const char* field) override;
@@ -343,6 +375,21 @@ namespace Particles
 		uchar		tintR, tintG, tintB;
 	};
 
+	struct CallerGuard
+	{
+		FunctionType previousCaller;
+
+		CallerGuard(FunctionType caller);
+		~CallerGuard();
+	};
+
+	struct BoundFunction
+	{
+		int ref;
+		FunctionType type;
+
+		BoundFunction() : ref(LUA_REFNIL), type(FUNCTION_NONE) {}
+	};
 
 	// ************  Global declarations ************ //
 
@@ -351,7 +398,8 @@ namespace Particles
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
-	extern int functionRefs[];
+	extern Module modules[];
+	extern BoundFunction functionRefs[];
 
 	FunctionType GetCaller();
 	void SetCaller(FunctionType caller);
@@ -361,6 +409,7 @@ namespace Particles
 	void ClearParts();
 	void ClearGroupParts(ParticleGroup* group);
 	void ClearPartGroups();
+	void ClearModules();
 	void ClearFunctionRefs();
 
 	void InitParts();
@@ -377,6 +426,8 @@ namespace Particles
 	int GetFreeSpritePart();
 	int GetFreeMeshPart();
 	int GetFreeParticleGroup();
+	int GetFreeModule();
+	int GetLastModule();
 
-	void ExecuteFunction(int index);
+	void ExecuteBoundFunction(int index);
 };

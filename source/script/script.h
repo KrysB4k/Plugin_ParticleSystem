@@ -28,6 +28,7 @@ namespace Script
 	void PushNumber(float value);
 	void PushData(LuaObject* value);
 	void PushString(const char* string);
+	void PushNil();
 	int ToInteger(int argument);
 	bool ToBoolean(int argument);
 	float ToNumber(int argument);
@@ -48,13 +49,16 @@ namespace Script
 	bool IsTable(int argument);
 	void Print();
 	bool Require(const char* base);
-	void LoadFunctions(const char* name);
+	bool LoadFunctions(const char* name);
 	[[noreturn]] void Throw(const char* msg);
 	void EmitFailure(const char* msg, void (*log)(const char*));
 	void AddInformation(const char* msg);
 	int GarbageCount();
 	void PreFunctionLoop();
-	void PostFunctionLoop(int results);
+	void PostFunctionLoop();
 	void* CreateManagedData(unsigned int size);
 	void* GetExtraSpace();
+	void PushTableValue(int reference, const char* key);
+	void AssignTableValue(int reference, const char* key, int argument);
+	int StoreNewTable();
 }

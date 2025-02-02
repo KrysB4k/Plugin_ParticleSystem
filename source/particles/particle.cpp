@@ -90,8 +90,10 @@ namespace Particles
 	MeshParticle meshParts[MAX_MESHPARTS];
 	int nextPartGroup;
 	ParticleGroup partGroups[MAX_PARTGROUPS];
+	int nextModule;
+	Module modules[MAX_MODULES];
 	
-	int functionRefs[MAX_FUNCREFS];
+	BoundFunction functionRefs[MAX_FUNCREFS];
 
 	FunctionType GetCaller()
 	{
@@ -103,6 +105,17 @@ namespace Particles
 	{
 		auto ptr = reinterpret_cast<FunctionType*>(Script::GetExtraSpace());
 		*ptr = caller;
+	}
+
+	CallerGuard::CallerGuard(FunctionType caller)
+	{
+		previousCaller = GetCaller();
+		SetCaller(caller);
+	}
+
+	CallerGuard::~CallerGuard()
+	{
+		SetCaller(previousCaller);
 	}
 
 	int GetFreeSpritePart()
@@ -225,6 +238,27 @@ namespace Particles
 		return -1;
 	}
 
+	int GetFreeModule()
+	{
+		int free;
+
+		free = nextModule;
+		if (free < MAX_MODULES)
+		{
+			nextModule++;
+			modules[free] = Module();
+			modules[free].groups.table = Script::StoreNewTable();
+			modules[free].parameters.table = Script::StoreNewTable();
+			return free;
+		}
+		return -1;
+	}
+
+	int GetLastModule()
+	{
+		return nextModule - 1;
+	}
+
 	void ClearParts()
 	{
 		for (int i = 0; i < MAX_SPRITEPARTS; i++)
@@ -260,10 +294,17 @@ namespace Particles
 		nextPartGroup = 0;
 	}
 
+	void ClearModules()
+	{
+		for (int i = 0; i < MAX_MODULES; i++)
+			modules[i] = Module();
+		nextModule = 0;
+	}
+
 	void ClearFunctionRefs()
 	{
 		for (int i = 0; i < MAX_FUNCREFS; i++)
-			Script::DeleteFunction(&functionRefs[i]);
+			functionRefs[i] = BoundFunction();
 	}
 
 	void UpdateParts()
@@ -285,7 +326,7 @@ namespace Particles
 	{
 		SpriteParticle* part = &spriteParts[0];
 
-		SetCaller(FUNCTION_UPDATE);
+		Particles::CallerGuard guard(FUNCTION_UPDATE);
 
 		Script::PreFunctionLoop();
 		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
@@ -341,7 +382,7 @@ namespace Particles
 			--part->lifeCounter;
 		}
 
-		Script::PostFunctionLoop(0);
+		Script::PostFunctionLoop();
 	}
 
 
@@ -349,7 +390,7 @@ namespace Particles
 	{
 		auto part = &meshParts[0];
 
-		SetCaller(FUNCTION_UPDATE);
+		Particles::CallerGuard guard(FUNCTION_UPDATE);
 		Script::PreFunctionLoop();
 		for (int i = 0; i < MAX_MESHPARTS; ++i, ++part)
 		{
@@ -386,7 +427,7 @@ namespace Particles
 			--part->lifeCounter;
 		}
 
-		Script::PostFunctionLoop(0);
+		Script::PostFunctionLoop();
 	}
 
 
@@ -571,37 +612,36 @@ namespace Particles
 
 	void InitParts()
 	{
-		SetCaller(FUNCTION_INIT);
+		Particles::CallerGuard guard(FUNCTION_INIT);
 		Script::PreFunctionLoop();
 		for (int i = 0; i < nextPartGroup; i++)
 		{
 			if (partGroups[i].autoTrigger && !Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
 				Script::DeleteFunction(&partGroups[i].initIndex);
 		}
-		Script::PostFunctionLoop(0);
+		Script::PostFunctionLoop();
 	}
 
 
 	void InitPartGroups()
 	{
-		SetCaller(FUNCTION_LEVEL);
+		Particles::CallerGuard guard(FUNCTION_LEVEL);
 		Script::PreFunctionLoop();
 		Script::LoadFunctions(&gfFilenameWad[gfFilenameOffset[gfCurrentLevel]]);
-		Script::PostFunctionLoop(0);
+		Script::PostFunctionLoop();
 	}
 
 
-	void ExecuteFunction(int index)
+	void ExecuteBoundFunction(int index)
 	{
-		if (index < 0 || index >= MAX_FUNCREFS)
-			return;
+		index = LuaHelpers::GetBoundFunction(index);
 
-		SetCaller(FUNCTION_INIT);
+		Particles::CallerGuard guard(Particles::functionRefs[index].type);
 		Script::PreFunctionLoop();
-		int ref = Particles::functionRefs[index];
+		int ref = Particles::functionRefs[index].ref;
 		if (!Script::ExecuteFunction(ref, nullptr))
 			Script::DeleteFunction(&ref);
-		Script::PostFunctionLoop(0);
+		Script::PostFunctionLoop();
 	}
 
 

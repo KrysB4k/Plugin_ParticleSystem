@@ -277,7 +277,7 @@ namespace Particles
 
 	void ParticleGroup::Index(const char* field)
 	{
-		if (field)
+		if (Particles::GetCaller() & FUNCTION_MODULE && field)
 		{
 			switch (field[0])
 			{
@@ -343,8 +343,7 @@ namespace Particles
 
 	void ParticleGroup::NewIndex(const char* field)
 	{
-		CheckFieldCaller(FUNCTION_LEVEL, field);
-		if (field)
+		if (Particles::GetCaller() & FUNCTION_MODULE && field)
 		{
 			switch (field[0])
 			{
@@ -401,6 +400,112 @@ namespace Particles
 				{
 					spriteSlot = GetConstrainedInteger(-1, SLOT_DEFAULT_SPRITES, 3, SLOT_DEFAULT_SPRITES, SLOT_MISC_SPRITES, SLOT_CUSTOM_SPRITES);
 					return;
+				}
+				break;
+			}
+		}
+		LuaObjectClass::NewIndex(field);
+	}
+
+	const char* ModuleGroups::Name()
+	{
+		return "Groups";
+	}
+
+	void ModuleGroups::Index(const char* field)
+	{
+		if (field)
+		{
+			Script::PushTableValue(table, field);
+			return;
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void ModuleGroups::NewIndex(const char* field)
+	{
+		CheckFieldCaller(FUNCTION_MODULE, field);
+		if (field)
+		{
+			GetData<ParticleGroup>(-1);
+			Script::AssignTableValue(table, field, -1);
+			return;
+		}
+		LuaObjectClass::NewIndex(field);
+	}
+
+	const char* ModuleParameters::Name()
+	{
+		return "Parameters";
+	}
+
+	void ModuleParameters::Index(const char* field)
+	{
+		if (field)
+		{
+			Script::PushTableValue(table, field);
+			return;
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void ModuleParameters::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			CheckModuleParameter(-1);
+			Script::AssignTableValue(table, field, -1);
+			return;
+		}
+		LuaObjectClass::NewIndex(field);
+	}
+
+	const char* Module::Name()
+	{
+		return "Module";
+	}
+
+	void Module::Index(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'g':
+				if (!strcmp(field, "groups"))
+				{
+					Script::PushData(&groups);
+					return;
+				}
+				break;
+			case 'p':
+				if (!strcmp(field, "params"))
+				{
+					Script::PushData(&parameters);
+					return;
+				}
+				break;
+			}
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void Module::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'g':
+				if (!strcmp(field, "groups"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			case 'p':
+				if (!strcmp(field, "params"))
+				{
+					ReadOnlyFieldError(field);
 				}
 				break;
 			}

@@ -5,7 +5,7 @@
 namespace
 {
 	lua_State* lua;
-	int metatable, parameters;
+	int metatable;
 
 	void BuildFailureMessage(const char* msg)
 	{
@@ -229,19 +229,7 @@ namespace
 	{
 		if (argument > 0)
 			return argument + 1;
-		return argument;
-	}
-
-	int ErrorMetaIndex(lua_State* L)
-	{
-		BuildFailureMessage("module has no parameter with the given name");
-		return lua_error(lua);
-	}
-
-	int ErrorMetaNewIndex(lua_State* L)
-	{
-		BuildFailureMessage("module has no parameter with the given name");
-		return lua_error(lua);
+		return argument + lua_gettop(lua) + 1;
 	}
 
 	const char* FindModule(const char* name, char* filename, int size)
@@ -261,7 +249,7 @@ namespace
 void Script::NewState()
 {
 	lua = luaL_newstate();
-	lua_gc(lua, LUA_GCSTOP);
+	lua_gc(lua, LUA_GCGEN, 0, 0);
 	lua_pushlightuserdata(lua, nullptr);
 	lua_createtable(lua, 0, 7);
 	lua_pushliteral(lua, "__index");
@@ -289,14 +277,6 @@ void Script::NewState()
 	metatable = luaL_ref(lua, LUA_REGISTRYINDEX);
 	lua_setmetatable(lua, -2);
 	lua_pop(lua, 1);
-	lua_createtable(lua, 0, 1);
-	lua_pushliteral(lua, "__index");
-	lua_pushcfunction(lua, ErrorMetaIndex);
-	lua_rawset(lua, -3);
-	lua_pushliteral(lua, "__newindex");
-	lua_pushcfunction(lua, ErrorMetaNewIndex);
-	lua_rawset(lua, -3);
-	parameters = luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
 void Script::Close()
@@ -328,6 +308,11 @@ void Script::PushData(LuaObject* value)
 void Script::PushString(const char* string)
 {
 	lua_pushstring(lua, string);
+}
+
+void Script::PushNil()
+{
+	lua_pushnil(lua);
 }
 
 int Script::ToInteger(int argument)
@@ -486,48 +471,14 @@ void Script::Print()
 
 bool Script::Require(const char* base)
 {
-	char name[100], filename[100];
-	const char* mode;
-	int status;
+	char name[100];
 
 	strcpy_s(name, "effects\\");
 	strcat_s(name, base);
-	mode = FindModule(name, filename, 100);
-	if (!mode)
-		return false;
-	status = luaL_loadfilex(lua, filename, mode);
-	if (status == LUA_OK)
-	{
-		lua_pushlightuserdata(lua, nullptr);
-		lua_setupvalue(lua, -2, 1);
-		status = lua_pcall(lua, 0, 1, -2);
-		if (status != LUA_OK)
-		{
-			Logger::Fatal(lua_tostring(lua, -1));
-			lua_pop(lua, 1);
-			lua_pushnil(lua);
-		}
-	}
-	else
-	{
-		EmitFailure(lua_tostring(lua, -1), Logger::Error);
-		lua_pop(lua, 1);
-		lua_pushnil(lua);
-	}
-	if (lua_istable(lua, -1))
-	{
-		lua_rawgeti(lua, LUA_REGISTRYINDEX, parameters);
-		lua_setmetatable(lua, -2);
-	}
-	else if (!lua_isnil(lua, -1))
-	{
-		lua_pop(lua, 1);
-		lua_pushnil(lua);
-	}
-	return true;
+	return LoadFunctions(name);
 }
 
-void Script::LoadFunctions(const char* name)
+bool Script::LoadFunctions(const char* name)
 {
 	int status;
 	char filename[100];
@@ -535,7 +486,7 @@ void Script::LoadFunctions(const char* name)
 
 	mode = FindModule(name, filename, 100);
 	if (!mode)
-		return;
+		return false;
 	status = luaL_loadfilex(lua, filename, mode);
 	if (status == LUA_OK)
 	{
@@ -553,6 +504,7 @@ void Script::LoadFunctions(const char* name)
 		EmitFailure(lua_tostring(lua, -1), Logger::Fatal);
 		lua_pop(lua, 1);
 	}
+	return true;
 }
 
 [[noreturn]] void Script::Throw(const char* msg)
@@ -584,10 +536,9 @@ void Script::PreFunctionLoop()
 	lua_pushcfunction(lua, ExceptionHandler);
 }
 
-void Script::PostFunctionLoop(int results)
+void Script::PostFunctionLoop()
 {
-	lua_remove(lua, -results - 1);
-	lua_gc(lua, LUA_GCCOLLECT);
+	lua_pop(lua, 1);
 }
 
 void* Script::CreateManagedData(unsigned int size)
@@ -603,4 +554,30 @@ void* Script::CreateManagedData(unsigned int size)
 void* Script::GetExtraSpace()
 {
 	return lua_getextraspace(lua);
+}
+
+void Script::PushTableValue(int reference, const char* key)
+{
+	lua_rawgeti(lua, LUA_REGISTRYINDEX, reference);
+	lua_pushstring(lua, key);
+	lua_rawget(lua, -2);
+	lua_remove(lua, -2);
+}
+
+void Script::AssignTableValue(int reference, const char* key, int argument)
+{
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	lua_rawgeti(lua, LUA_REGISTRYINDEX, reference);
+	lua_pushstring(lua, key);
+	lua_pushvalue(lua, stack);
+	lua_rawset(lua, -3);
+	lua_pop(lua, 1);
+}
+
+int Script::StoreNewTable()
+{
+	lua_newtable(lua);
+	return luaL_ref(lua, LUA_REGISTRYINDEX);
 }

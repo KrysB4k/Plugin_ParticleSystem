@@ -11,8 +11,6 @@
 using namespace LuaHelpers;
 using namespace Utilities;
 
-#define LUA_REFNIL      (-1)
-
 namespace LuaFunctions
 {
 	struct AbsFunction final : public LuaObjectFunction
@@ -67,10 +65,33 @@ namespace LuaFunctions
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindFunction");
 
 			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
-			if (Particles::functionRefs[index] != LUA_REFNIL)
+			if (Particles::functionRefs[index].ref != LUA_REFNIL)
 				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
 
-			Particles::functionRefs[index] = GetFunction(2);
+			Particles::functionRefs[index].ref = GetFunction(2);
+			Particles::functionRefs[index].type = FUNCTION_BIND;
+			return 0;
+		}
+	};
+
+	struct BindGroupFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindGroup");
+
+			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
+			if (Particles::functionRefs[index].ref != LUA_REFNIL)
+				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
+
+			auto group = GetData<Particles::ParticleGroup>(2);
+			if (group->autoTrigger)
+			{
+				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Warning);
+				return 0;
+			}
+			Particles::functionRefs[index].ref = group->initIndex;
+			Particles::functionRefs[index].type = FUNCTION_INIT;
 			return 0;
 		}
 	};
@@ -178,7 +199,7 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
-			CheckCaller(FunctionType::FUNCTION_LEVEL, "createGroup");
+			CheckCaller(FunctionType::FUNCTION_MODULE, "createGroup");
 
 			int init = GetFunction(1);
 			int update = GetFunction(2);
@@ -220,11 +241,31 @@ namespace LuaFunctions
 		}
 	};
 
+	struct CreateModuleFunction final : public LuaObjectFunction
+	{
+		virtual int Call() override
+		{
+			CheckCaller(FunctionType::FUNCTION_MODULE, "createModule");
+
+			int last = Particles::GetLastModule();
+			if (last != -1 && Particles::modules[last].createdInCurrentModule)
+				Script::Throw("module creation failed, a module already exists");
+
+			int i = Particles::GetFreeModule();
+			if (i == -1)
+				Script::Throw("module creation failed, exceeded available module maximum");
+
+			Particles::modules[i].createdInCurrentModule = true;
+			Script::PushData(&Particles::modules[i]);
+			return 1;
+		}
+	};
+
 	struct CreatePerlinNoiseFunction final : public LuaObjectFunction
 	{
 		virtual int Call() override
 		{
-			CheckCaller(FunctionType::FUNCTION_LEVEL, "createPerlinNoise");
+			CheckCaller(FunctionType::FUNCTION_MODULE, "createPerlinNoise");
 			int args = GetArgCount(0, 1);
 			if (args)
 				ConstructManagedData<PerlinNoise>(GetInteger(1));
@@ -238,7 +279,7 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
-			CheckCaller(FunctionType::FUNCTION_LEVEL, "createSimplexNoise");
+			CheckCaller(FunctionType::FUNCTION_MODULE, "createSimplexNoise");
 			int args = GetArgCount(0, 1);
 			if (args)
 				ConstructManagedData<SimplexNoise>(GetInteger(1));
@@ -462,9 +503,18 @@ namespace LuaFunctions
 	{
 		virtual int Call() override
 		{
+			CheckCaller(FunctionType::FUNCTION_BIND, "invokeInit");
+			Particles::CallerGuard guard(FUNCTION_INIT);
 			auto group = GetData<Particles::ParticleGroup>(1);
+			if (group->autoTrigger)
+			{
+				Script::EmitFailure("this group cannot be invoked because it is auto triggered", Logger::Warning);
+				return 0;
+			}
+			Script::PreFunctionLoop();
 			if (!Script::ExecuteFunction(group->initIndex, nullptr))
 				Script::DeleteFunction(&group->initIndex);
+			Script::PostFunctionLoop();
 			return 0;
 		}
 	};
@@ -1183,6 +1233,7 @@ namespace LuaFunctions
 	AtanFunction AtanFunc;
 	Atan2Function Atan2Func;
 	BindFunctionFunction BindFunctionFunc;
+	BindGroupFunction BindGroupFunc;
 	BoidAlignmentFunction BoidAlignmentFunc;
 	BoidCohesionFunction BoidCohesionFunc;
 	BoidSeparationFunction BoidSeparationFunc;
@@ -1194,6 +1245,7 @@ namespace LuaFunctions
 	CreateColorHSVFunction CreateColorHSVFunc;
 	CreateGroupFunction CreateGroupFunc;
 	CreateMeshPartFunction CreateMeshPartFunc;
+	CreateModuleFunction CreateModuleFunc;
 	CreatePerlinNoiseFunction CreatePerlinNoiseFunc;
 	CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
 	CreateSpritePartFunction CreateSpritePartFunc;
@@ -1284,6 +1336,8 @@ namespace LuaFunctions
 		case 'b':
 			if (!strcmp(field, "bindFunction"))
 				return &BindFunctionFunc;
+			if (!strcmp(field, "bindGroup"))
+				return &BindGroupFunc;
 			if (!strcmp(field, "boidAlignment"))
 				return &BoidAlignmentFunc;
 			if (!strcmp(field, "boidCohesion"))
@@ -1308,6 +1362,8 @@ namespace LuaFunctions
 				return &CreateGroupFunc;
 			if (!strcmp(field, "createMeshPart"))
 				return &CreateMeshPartFunc;
+			if (!strcmp(field, "createModule"))
+				return &CreateModuleFunc;
 			if (!strcmp(field, "createPerlinNoise"))
 				return &CreatePerlinNoiseFunc;
 			if (!strcmp(field, "createSimplexNoise"))
