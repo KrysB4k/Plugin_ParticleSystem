@@ -61,6 +61,13 @@ void DrawParticles()
 
 void InitialiseGame()
 {
+	if (Trng.MainPluginFlags & MPS_LOGGER_CONSOLE)
+		Logger::Create(LoggerType::LOGGER_CONSOLE);
+	else if (Trng.MainPluginFlags & MPS_LOGGER_FILE)
+		Logger::Create(LoggerType::LOGGER_FILE);
+
+	Logger::SetLogLevel(LogLevel::LOG_DEBUG);
+
 #ifdef DIAGNOSTICS
 	Diagnostics::Initialise();
 #endif
@@ -81,7 +88,7 @@ void InitialiseLevel()
 	Particles::ClearModules();
 	Particles::ClearFunctionRefs();
 	Logger::Information(Utilities::FormatString("Loading functions of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
-	Particles::InitPartGroups();
+	Particles::InitLevelScript();
 #ifdef DIAGNOSTICS
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
@@ -324,8 +331,6 @@ DWORD cbSaveMyData(BYTE **pAdrZone, int SavingType)
 	SizeData = TotNWords * 2;
 
 	return SizeData;
-	
-
 }
 // called when a savegame will be loaded (but also when lara move from a level to another)
 // pAdrZone will point to memory zone with data just loaded from savegame

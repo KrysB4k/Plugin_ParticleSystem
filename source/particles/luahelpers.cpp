@@ -231,6 +231,8 @@ namespace LuaHelpers
 		Script::PreFunctionLoop();
 		if (!Script::Require(string))
 			Script::EmitFailure(FormatString("cannot load \"%s\" module", string), Logger::Warning);
+		else
+			Logger::Information(FormatString("loaded module \"%s\"", string));
 		Script::PostFunctionLoop();
 		int last = Particles::GetLastModule();
 		if (last != -1 && Particles::modules[last].createdInCurrentModule)

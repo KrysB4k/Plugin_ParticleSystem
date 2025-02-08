@@ -13,6 +13,9 @@
 // type here the constant name for new progressive action you create
 // use progressive number to have always different value for each AXN_ constant/action
 
+#define MPS_LOGGER_CONSOLE 1
+#define MPS_LOGGER_FILE 2
+
 #define MAX_SPRITEPARTS 4096
 #define MAX_MESHPARTS 1024
 #define MAX_PARTGROUPS 1024

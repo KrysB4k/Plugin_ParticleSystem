@@ -356,12 +356,18 @@ namespace LuaGlobals
 				return std::optional(LightMode::LIGHT_STATIC);
 			if (!strcmp(field, "LIGHT_DYNAMIC"))
 				return std::optional(LightMode::LIGHT_DYNAMIC);
-			if (!strcmp(field, "LOG_NONE"))
-				return std::optional(LoggerType::LOG_NONE);
-			if (!strcmp(field, "LOG_CONSOLE"))
-				return std::optional(LoggerType::LOG_CONSOLE);
-			if (!strcmp(field, "LOG_FILE"))
-				return std::optional(LoggerType::LOG_FILE);
+			if (!strcmp(field, "LOG_DEBUG"))
+				return std::optional(LogLevel::LOG_DEBUG);
+			if (!strcmp(field, "LOG_ERROR"))
+				return std::optional(LogLevel::LOG_ERROR);
+			if (!strcmp(field, "LOG_FATAL"))
+				return std::optional(LogLevel::LOG_FATAL);
+			if (!strcmp(field, "LOG_INFO"))
+				return std::optional(LogLevel::LOG_INFO);
+			if (!strcmp(field, "LOG_TRACE"))
+				return std::optional(LogLevel::LOG_TRACE);
+			if (!strcmp(field, "LOG_WARN"))
+				return std::optional(LogLevel::LOG_WARN);
 			break;
 
 		case 'S':

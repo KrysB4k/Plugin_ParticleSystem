@@ -2,14 +2,26 @@
 
 enum LoggerType
 {
-	LOG_NONE,
-	LOG_CONSOLE,
-	LOG_FILE
+	LOGGER_NONE,
+	LOGGER_CONSOLE,
+	LOGGER_FILE
+};
+
+enum LogLevel
+{
+	LOG_TRACE,
+	LOG_DEBUG,
+	LOG_INFO,
+	LOG_WARN,
+	LOG_ERROR,
+	LOG_FATAL
 };
 
 namespace Logger
 {
 	LoggerType GetCurrentType();
+	LogLevel GetCurrentLevel();
+	void SetLogLevel(LogLevel logLevel);
 	void Create(LoggerType type);
 	void Trace(const char* string);
 	void Debug(const char* string);

@@ -324,16 +324,6 @@ namespace LuaFunctions
 		}
 	};
 
-	struct DisableLoggerFunction final : public LuaObjectFunction
-	{
-		int Call() final
-		{
-			CheckCaller(FunctionType::FUNCTION_LEVEL, "disableLogger");
-			Logger::Close();
-			return 0;
-		}
-	};
-
 	struct DistanceFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -367,25 +357,6 @@ namespace LuaFunctions
 				res = -1;
 			Script::PushInteger(res);
 			return 1;
-		}
-	};
-
-	struct EnableLoggerFunction final : public LuaObjectFunction
-	{
-		int Call() final
-		{
-			CheckCaller(FunctionType::FUNCTION_LEVEL, "enableLogger");
-			LoggerType requested = static_cast<LoggerType>(GetClampedInteger(1, 0, 2, false));
-			if (requested != Logger::GetCurrentType())
-			{
-				Logger::Close();
-				if (requested != LoggerType::LOG_NONE)
-				{
-					Logger::Create(requested);
-					Logger::Trace("Logger enabled");
-				}
-			}
-			return 0;
 		}
 	};
 
@@ -1001,6 +972,17 @@ namespace LuaFunctions
 		}
 	};
 
+	struct SetLogLevelFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			CheckCaller(FunctionType::FUNCTION_LEVEL, "setLogLevel");
+			LogLevel requested = static_cast<LogLevel>(GetClampedInteger(1, LogLevel::LOG_TRACE, LogLevel::LOG_FATAL, false));
+			Logger::SetLogLevel(requested);
+			return 0;
+		}
+	};
+
 	struct SinFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1251,10 +1233,8 @@ namespace LuaFunctions
 	CreateSpritePartFunction CreateSpritePartFunc;
 	CreateVectorFunction CreateVectorFunc;
 	DegToRadFunction DegToRadFunc;
-	DisableLoggerFunction DisableLoggerFunc;
 	DistanceFunction DistanceFunc;
 	DistCompareFunction DistCompareFunc;
-	EnableLoggerFunction EnableLoggerFunc;
 	ExpFunction ExpFunc;
 	FindNearestTargetFunction FindNearestTargetFunc;
 	FloorFunction FloorFunc;
@@ -1303,6 +1283,7 @@ namespace LuaFunctions
 	RequireFunction RequireFunc;
 	RoundFunction RoundFunc;
 	SelectItemFunction SelectItemFunc;
+	SetLogLevelFunction SetLogLevelFunc;
 	SinFunction SinFunc;
 	SmoothStepFunction SmoothStepFunc;
 	SoundEffectFunction SoundEffectFunc;
@@ -1379,8 +1360,6 @@ namespace LuaFunctions
 		case 'd':
 			if (!strcmp(field, "degToRad"))
 				return &DegToRadFunc;
-			if (!strcmp(field, "disableLogger"))
-				return &DisableLoggerFunc;
 			if (!strcmp(field, "distance"))
 				return &DistanceFunc;
 			if (!strcmp(field, "distCompare"))
@@ -1388,8 +1367,6 @@ namespace LuaFunctions
 			break;
 
 		case 'e':
-			if (!strcmp(field, "enableLogger"))
-				return &EnableLoggerFunc;
 			if (!strcmp(field, "exp"))
 				return &ExpFunc;
 			break;
@@ -1504,7 +1481,9 @@ namespace LuaFunctions
 			break;
 
 		case 's':
-			if (!strcmp(field, "setActiveItem"))
+			if (!strcmp(field, "setLogLevel"))
+				return &SetLogLevelFunc;
+			if (!strcmp(field, "setSelectedItem"))
 				return &SelectItemFunc;
 			if (!strcmp(field, "sin"))
 				return &SinFunc;

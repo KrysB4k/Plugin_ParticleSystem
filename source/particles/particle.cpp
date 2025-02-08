@@ -623,7 +623,7 @@ namespace Particles
 	}
 
 
-	void InitPartGroups()
+	void InitLevelScript()
 	{
 		Particles::CallerGuard guard(FUNCTION_LEVEL);
 		Script::PreFunctionLoop();

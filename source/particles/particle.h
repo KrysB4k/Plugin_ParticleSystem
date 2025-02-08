@@ -413,7 +413,7 @@ namespace Particles
 	void ClearFunctionRefs();
 
 	void InitParts();
-	void InitPartGroups();
+	void InitLevelScript();
 
 	void UpdateParts();
 	void UpdateSprites();

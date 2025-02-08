@@ -24,10 +24,11 @@ namespace
 	HANDLE console;
 	FILE* stream;
 	LoggerType current;
+	LogLevel level;
 
 	void SetConsoleColour(ConsoleColour colour)
 	{
-		if (current == LOG_CONSOLE && console != INVALID_HANDLE_VALUE)
+		if (current == LOGGER_CONSOLE && console != INVALID_HANDLE_VALUE)
 		{
 			switch (colour)
 			{
@@ -59,20 +60,30 @@ LoggerType Logger::GetCurrentType()
 	return current;
 }
 
+LogLevel Logger::GetCurrentLevel()
+{
+	return level;
+}
+
+void Logger::SetLogLevel(LogLevel logLevel)
+{
+	level = logLevel;
+}
+
 void Logger::Create(LoggerType type)
 {
 	SYSTEMTIME time;
 	char filename[96];
 	CONSOLE_FONT_INFOEX font;
 
-	if (current != LOG_NONE)
+	if (current != LOGGER_NONE)
 		return;
 	current = type;
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		AllocConsole();
-		SetConsoleTitle("Plugin_AdvancedParticles log");
+		SetConsoleTitle("Plugin_ParticleSystem log");
 		console = CreateConsoleScreenBuffer(GENERIC_WRITE, 0, nullptr, CONSOLE_TEXTMODE_BUFFER, nullptr);
 		if (console != INVALID_HANDLE_VALUE)
 		{
@@ -87,9 +98,9 @@ void Logger::Create(LoggerType type)
 			SetCurrentConsoleFontEx(console, FALSE, &font);
 		}
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		GetLocalTime(&time);
-		snprintf(filename, 96, "Plugin_AdvancedParticles_%04d%02d%02d_%02d%02d%02d_log.txt", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond);
+		snprintf(filename, 96, "Plugin_ParticleSystem_%04d%02d%02d_%02d%02d%02d_log.txt", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond);
 		fopen_s(&stream, filename, "w");
 		break;
 	}
@@ -99,9 +110,12 @@ void Logger::Trace(const char* string)
 {
 	DWORD bytes;
 
+	if (level > LOG_TRACE)
+		return;
+
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
 			SetConsoleColour(COLOUR_AQUA);
@@ -109,7 +123,7 @@ void Logger::Trace(const char* string)
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
 		}
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		if (stream)
 		{
 			fputs(LEVEL_TRACE, stream);
@@ -124,9 +138,12 @@ void Logger::Debug(const char* string)
 {
 	DWORD bytes;
 
+	if (level > LOG_DEBUG)
+		return;
+
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
 			SetConsoleColour(COLOUR_GREEN);
@@ -134,7 +151,7 @@ void Logger::Debug(const char* string)
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
 		}
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		if (stream)
 		{
 			fputs(LEVEL_DEBUG, stream);
@@ -149,9 +166,12 @@ void Logger::Information(const char* string)
 {
 	DWORD bytes;
 
+	if (level > LOG_INFO)
+		return;
+
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
 			SetConsoleColour(COLOUR_WHITE);
@@ -159,7 +179,7 @@ void Logger::Information(const char* string)
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
 		}
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		if (stream)
 		{
 			fputs(LEVEL_INFORMATION, stream);
@@ -174,9 +194,12 @@ void Logger::Warning(const char* string)
 {
 	DWORD bytes;
 
+	if (level > LOG_WARN)
+		return;
+
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
 			SetConsoleColour(COLOUR_YELLOW);
@@ -184,7 +207,7 @@ void Logger::Warning(const char* string)
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
 		}
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		if (stream)
 		{
 			fputs(LEVEL_WARNING, stream);
@@ -199,9 +222,12 @@ void Logger::Error(const char* string)
 {
 	DWORD bytes;
 
+	if (level > LOG_ERROR)
+		return;
+
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
 			SetConsoleColour(COLOUR_PINK);
@@ -209,7 +235,7 @@ void Logger::Error(const char* string)
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
 		}
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		if (stream)
 		{
 			fputs(LEVEL_ERROR, stream);
@@ -226,7 +252,7 @@ void Logger::Fatal(const char* string)
 
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
 			SetConsoleColour(COLOUR_RED);
@@ -234,7 +260,7 @@ void Logger::Fatal(const char* string)
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
 		}
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		if (stream)
 		{
 			fputs(LEVEL_FATAL, stream);
@@ -247,19 +273,19 @@ void Logger::Fatal(const char* string)
 
 void Logger::Close()
 {
-	if (current == LOG_NONE)
+	if (current == LOGGER_NONE)
 		return;
 	switch (current)
 	{
-	case LOG_CONSOLE:
+	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 			CloseHandle(console);
 		FreeConsole();
 		break;
-	case LOG_FILE:
+	case LOGGER_FILE:
 		if (stream)
 			fclose(stream);
 		break;
 	}
-	current = LOG_NONE;
+	current = LOGGER_NONE;
 }
