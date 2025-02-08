@@ -13,26 +13,26 @@ namespace Particles
 
 struct LuaObjectClass : public LuaObject
 {
-	virtual int Call() final override;
-	virtual int Add() override;
-	virtual int Subtract() override;
-	virtual int Negate() override;
-	virtual int Multiply() override;
-	virtual void Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
+	int Call() final;
+	int Add() override;
+	int Subtract() override;
+	int Negate() override;
+	int Multiply() override;
+	void Index(const char* field) override;
+	void NewIndex(const char* field) override;
 };
 
 struct LuaObjectClassPosition : public LuaObjectClass
 {
 	static const char* Name();
 
-	virtual int Add() final override;
-	virtual int Negate() final override;
-	virtual int Subtract() final override;
-	virtual int Multiply() final override;
+	int Add() final;
+	int Negate() final;
+	int Subtract() final;
+	int Multiply() final;
 
-	virtual void Index(const char* field) final override;
-	virtual void NewIndex(const char* field) final override;
+	void Index(const char* field) final;
+	void NewIndex(const char* field) final;
 
 	virtual float GetX() = 0;
 	virtual float GetY() = 0;
@@ -47,8 +47,8 @@ struct LuaObjectClassRotation : public LuaObjectClass
 {
 	static const char* Name();
 
-	virtual void Index(const char* field) final override;
-	virtual void NewIndex(const char* field) final override;
+	void Index(const char* field) final;
+	void NewIndex(const char* field) final;
 
 	virtual short GetX() = 0;
 	virtual short GetY() = 0;
@@ -65,13 +65,13 @@ struct LuaItemInfoPos final : public LuaObjectClassPosition
 
 	static const char* Name();
 
-	virtual float GetX() override;
-	virtual float GetY() override;
-	virtual float GetZ() override;
-	virtual void SetX(float x) override;
-	virtual void SetY(float y) override;
-	virtual void SetZ(float z) override;
-	virtual explicit operator Vector3f() override;
+	float GetX() override;
+	float GetY() override;
+	float GetZ() override;
+	void SetX(float x) override;
+	void SetY(float y) override;
+	void SetZ(float z) override;
+	explicit operator Vector3f() override;
 
 private:
 
@@ -84,13 +84,13 @@ struct LuaItemInfoRot final : public LuaObjectClassRotation
 
 	static const char* Name();
 
-	virtual short GetX() override;
-	virtual short GetY() override;
-	virtual short GetZ() override;
-	virtual void SetX(short x) override;
-	virtual void SetY(short y) override;
-	virtual void SetZ(short z) override;
-	virtual explicit operator Vector3s() override;
+	short GetX() override;
+	short GetY() override;
+	short GetZ() override;
+	void SetX(short x) override;
+	void SetY(short y) override;
+	void SetZ(short z) override;
+	explicit operator Vector3s() override;
 
 private:
 
@@ -99,12 +99,12 @@ private:
 
 struct LuaObjectFunction : public LuaObject
 {
-	virtual int Add() final override;
-	virtual int Negate() final override;
-	virtual int Subtract() final override;
-	virtual int Multiply() final override;
-	virtual void Index(const char* field) final override;
-	virtual void NewIndex(const char* field) final override;
+	int Add() final;
+	int Negate() final;
+	int Subtract() final;
+	int Multiply() final;
+	void Index(const char* field) final;
+	void NewIndex(const char* field) final;
 };
 
 
@@ -118,15 +118,15 @@ namespace LuaGlobals
 {
 	struct TrngVarWrapper final : public LuaObjectClass
 	{
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 	};
 
 	struct LuaItemInfoWrapper final : public LuaObjectClass
 	{
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 	};
 
 	extern TrngVarWrapper TrngVars;
@@ -184,6 +184,7 @@ namespace LuaHelpers
 	void CheckFieldCaller(int callers, const char* field);
 	void ReadOnlyFieldError(const char* field);
 	int ThrowArithmetic();
+	int ThrowArithmeticFunction();
 	Vector3f GetItemPos(int argument);
 	const char* GetBoundedLuaString(int argument, unsigned int length);
 	void RequireModule(int argument);

@@ -205,6 +205,11 @@ namespace LuaHelpers
 		Script::Throw("attempt to perform arithmetic on an unsupported object");
 	}
 
+	int ThrowArithmeticFunction()
+	{
+		Script::Throw("attempt to perform arithmetic on a built-in function");
+	}
+
 	Vector3f GetItemPos(int argument)
 	{
 		auto item = &items[VerifyItemIndex(argument)];

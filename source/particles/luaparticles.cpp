@@ -64,6 +64,7 @@ void Vector3i::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
@@ -71,6 +72,7 @@ void Vector3i::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
@@ -96,6 +98,7 @@ void Vector3i::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
@@ -103,6 +106,7 @@ void Vector3i::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
@@ -133,6 +137,7 @@ void ColorRGB::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
@@ -140,6 +145,7 @@ void ColorRGB::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
@@ -165,6 +171,7 @@ void ColorRGB::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
@@ -172,6 +179,7 @@ void ColorRGB::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
@@ -219,6 +227,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "random"))
 				{
@@ -226,6 +235,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 't':
 				if (!strcmp(field, "tether"))
 				{
@@ -251,6 +261,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "random"))
 				{
@@ -258,6 +269,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 't':
 				if (!strcmp(field, "tether"))
 				{
@@ -293,6 +305,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'b':
 				if (!strcmp(field, "blendMode"))
 				{
@@ -300,6 +313,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'd':
 				if (!strcmp(field, "drawMode"))
 				{
@@ -307,6 +321,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'l':
 				if (!strcmp(field, "lightMode"))
 				{
@@ -319,6 +334,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 's':
 				if (!strcmp(field, "saved"))
 				{
@@ -359,6 +375,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'b':
 				if (!strcmp(field, "blendMode"))
 				{
@@ -366,6 +383,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'd':
 				if (!strcmp(field, "drawMode"))
 				{
@@ -373,6 +391,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'l':
 				if (!strcmp(field, "lightMode"))
 				{
@@ -385,6 +404,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 's':
 				if (!strcmp(field, "saved"))
 				{
@@ -478,6 +498,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'p':
 				if (!strcmp(field, "params"))
 				{
@@ -502,6 +523,7 @@ namespace Particles
 					ReadOnlyFieldError(field);
 				}
 				break;
+
 			case 'p':
 				if (!strcmp(field, "params"))
 				{
@@ -531,6 +553,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'e':
 				if (!strcmp(field, "emitterIndex"))
 				{
@@ -543,6 +566,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'l':
 				if (!strcmp(field, "lifeCounter"))
 				{
@@ -555,6 +579,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'p':
 				if (!strcmp(field, "pos"))
 				{
@@ -562,6 +587,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "roomIndex"))
 				{
@@ -569,6 +595,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 't':
 				if (!strcmp(field, "t"))
 				{
@@ -576,6 +603,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'v':
 				if (!strcmp(field, "vel"))
 				{
@@ -601,6 +629,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'e':
 				if (!strcmp(field, "emitterIndex"))
 				{
@@ -618,6 +647,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'l':
 				if (!strcmp(field, "lifeCounter"))
 				{
@@ -631,6 +661,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'p':
 				if (!strcmp(field, "pos"))
 				{
@@ -638,6 +669,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "roomIndex"))
 				{
@@ -645,10 +677,12 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 't':
 				if (!strcmp(field, "t"))
 					ReadOnlyFieldError(field);
 				break;
+
 			case 'v':
 				if (!strcmp(field, "vel"))
 				{
@@ -694,6 +728,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'f':
 				if (!strcmp(field, "fadeIn"))
 				{
@@ -706,6 +741,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "rot"))
 				{
@@ -718,6 +754,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 's':
 				if (!strcmp(field, "sizeCust"))
 				{
@@ -779,6 +816,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'f':
 				if (!strcmp(field, "fadeIn"))
 				{
@@ -791,6 +829,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "rot"))
 				{
@@ -803,6 +842,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 's':
 				if (!strcmp(field, "sizeCust"))
 				{
@@ -853,6 +893,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'o':
 				if (!strcmp(field, "object"))
 				{
@@ -860,6 +901,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "rot"))
 				{
@@ -872,6 +914,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 's':
 				if (!strcmp(field, "scale"))
 				{
@@ -879,6 +922,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 't':
 				if (!strcmp(field, "transparency"))
 				{
@@ -910,6 +954,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'o':
 				if (!strcmp(field, "object"))
 				{
@@ -918,6 +963,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 'r':
 				if (!strcmp(field, "rot"))
 				{
@@ -930,6 +976,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 's':
 				if (!strcmp(field, "scale"))
 				{
@@ -937,6 +984,7 @@ namespace Particles
 					return;
 				}
 				break;
+
 			case 't':
 				if (!strcmp(field, "transparency"))
 				{

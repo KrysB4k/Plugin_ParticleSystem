@@ -46,22 +46,22 @@ void LuaObjectClass::NewIndex(const char* field)
 
 int LuaObjectFunction::Add()
 {
-	return ThrowArithmetic();
+	return ThrowArithmeticFunction();
 }
 
 int LuaObjectFunction::Subtract()
 {
-	return ThrowArithmetic();
+	return ThrowArithmeticFunction();
 }
 
 int LuaObjectFunction::Negate()
 {
-	return ThrowArithmetic();
+	return ThrowArithmeticFunction();
 }
 
 int LuaObjectFunction::Multiply()
 {
-	return ThrowArithmetic();
+	return ThrowArithmeticFunction();
 }
 
 void LuaObjectFunction::Index(const char* field)
@@ -135,6 +135,7 @@ void LuaObjectClassPosition::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
@@ -142,6 +143,7 @@ void LuaObjectClassPosition::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
@@ -167,6 +169,7 @@ void LuaObjectClassPosition::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
@@ -174,6 +177,7 @@ void LuaObjectClassPosition::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
@@ -204,6 +208,7 @@ void LuaObjectClassRotation::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
@@ -211,6 +216,7 @@ void LuaObjectClassRotation::Index(const char* field)
 				return;
 			}
 			break;
+
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
@@ -236,6 +242,7 @@ void LuaObjectClassRotation::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
@@ -243,6 +250,7 @@ void LuaObjectClassRotation::NewIndex(const char* field)
 				return;
 			}
 			break;
+
 		case 'z':
 			if (!strcmp(field, "z"))
 			{

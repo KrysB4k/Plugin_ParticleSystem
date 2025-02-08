@@ -15,7 +15,7 @@ namespace LuaFunctions
 {
 	struct AbsFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, fabsf));
 			return 1;
@@ -24,7 +24,7 @@ namespace LuaFunctions
 
 	struct AcosFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, acosf));
 			return 1;
@@ -33,7 +33,7 @@ namespace LuaFunctions
 
 	struct AsinFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, asinf));
 			return 1;
@@ -42,7 +42,7 @@ namespace LuaFunctions
 
 	struct AtanFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, atanf));
 			return 1;
@@ -51,7 +51,7 @@ namespace LuaFunctions
 
 	struct Atan2Function final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, 2, atan2f));
 			return 1;
@@ -60,7 +60,7 @@ namespace LuaFunctions
 
 	struct BindFunctionFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindFunction");
 
@@ -76,7 +76,7 @@ namespace LuaFunctions
 
 	struct BindGroupFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindGroup");
 
@@ -98,7 +98,7 @@ namespace LuaFunctions
 
 	struct BoidAlignmentFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			float radius = GetNumber(2);
@@ -110,7 +110,7 @@ namespace LuaFunctions
 
 	struct BoidCohesionFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			float radius = GetNumber(2);
@@ -122,7 +122,7 @@ namespace LuaFunctions
 
 	struct BoidSeparationFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			float radius = GetNumber(2);
@@ -134,7 +134,7 @@ namespace LuaFunctions
 
 	struct CeilFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, ceilf));
 			return 1;
@@ -143,7 +143,7 @@ namespace LuaFunctions
 
 	struct CbrtFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, cbrtf));
 			return 1;
@@ -152,7 +152,7 @@ namespace LuaFunctions
 
 	struct ClampFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float x = GetNumber(1);
 			float min = GetNumber(2);
@@ -164,7 +164,7 @@ namespace LuaFunctions
 
 	struct CosFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, cosf));
 			return 1;
@@ -173,7 +173,7 @@ namespace LuaFunctions
 
 	struct CreateColorHSVFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float h = GetNumber(1);
 			float s = GetClampedNumber(2, 0.0f, 1.0f, false);
@@ -185,7 +185,7 @@ namespace LuaFunctions
 
 	struct CreateColorFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			uchar r = (uchar)GetClampedInteger(1, 0, 255, false);
 			uchar g = (uchar)GetClampedInteger(2, 0, 255, false);
@@ -197,7 +197,7 @@ namespace LuaFunctions
 
 	struct CreateGroupFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_MODULE, "createGroup");
 
@@ -217,7 +217,7 @@ namespace LuaFunctions
 	
 	struct CreateMeshPartFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createMeshPart");
 
@@ -243,7 +243,7 @@ namespace LuaFunctions
 
 	struct CreateModuleFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_MODULE, "createModule");
 
@@ -263,7 +263,7 @@ namespace LuaFunctions
 
 	struct CreatePerlinNoiseFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_MODULE, "createPerlinNoise");
 			int args = GetArgCount(0, 1);
@@ -277,7 +277,7 @@ namespace LuaFunctions
 
 	struct CreateSimplexNoiseFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_MODULE, "createSimplexNoise");
 			int args = GetArgCount(0, 1);
@@ -291,7 +291,7 @@ namespace LuaFunctions
 
 	struct CreateSpritePartFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createSpritePart");
 			auto group = GetData<Particles::ParticleGroup>(1);
@@ -305,7 +305,7 @@ namespace LuaFunctions
 
 	struct CreateVectorFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float x = GetNumber(1);
 			float y = GetNumber(2);
@@ -317,7 +317,7 @@ namespace LuaFunctions
 
 	struct DegToRadFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(DegToRad(GetNumber(1)));
 			return 1;
@@ -326,7 +326,7 @@ namespace LuaFunctions
 
 	struct DisableLoggerFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "disableLogger");
 			Logger::Close();
@@ -336,7 +336,7 @@ namespace LuaFunctions
 
 	struct DistanceFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto vec1 = GetData<LuaObjectClassPosition>(1);
 			auto vec2 = GetData<LuaObjectClassPosition>(2);
@@ -350,7 +350,7 @@ namespace LuaFunctions
 
 	struct DistCompareFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto vec1 = GetData<LuaObjectClassPosition>(1);
 			auto vec2 = GetData<LuaObjectClassPosition>(2);
@@ -372,7 +372,7 @@ namespace LuaFunctions
 
 	struct EnableLoggerFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "enableLogger");
 			LoggerType requested = static_cast<LoggerType>(GetClampedInteger(1, 0, 2, false));
@@ -391,7 +391,7 @@ namespace LuaFunctions
 
 	struct ExpFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, expf));
 			return 1;
@@ -400,7 +400,7 @@ namespace LuaFunctions
 
 	struct FindNearestTargetFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
 			float radius = GetNumber(2);
@@ -414,7 +414,7 @@ namespace LuaFunctions
 
 	struct FloorFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, floorf));
 			return 1;
@@ -423,7 +423,7 @@ namespace LuaFunctions
 
 	struct FmodFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, 2, fmodf));
 			return 1;
@@ -432,7 +432,7 @@ namespace LuaFunctions
 
 	struct GetGameTickFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushInteger(Particles::gameTick);
 			return 1;
@@ -441,7 +441,7 @@ namespace LuaFunctions
 
 	struct GetItemInfoFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushData(&LuaGlobals::LuaItemArray[VerifyItemIndex(1)]);
 			return 1;
@@ -450,7 +450,7 @@ namespace LuaFunctions
 
 	struct GetItemJointPosFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto item = &items[VerifyItemIndex(1)];
 			int joint = GetClampedInteger(2, 0, objects[item->object_number].nmeshes - 1, false);
@@ -464,7 +464,7 @@ namespace LuaFunctions
 
 	struct GetItemRoomFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto item = &items[VerifyItemIndex(1)];
 			Script::PushInteger(item->room_number);
@@ -474,7 +474,7 @@ namespace LuaFunctions
 
 	struct GetLaraIndexFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushInteger(lara_info.item_number);
 			return 1;
@@ -483,7 +483,7 @@ namespace LuaFunctions
 
 	struct GetSelectedItemFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushInteger(Trng.pGlobTomb4->ItemIndexSelected);
 			return 1;
@@ -492,7 +492,7 @@ namespace LuaFunctions
 
 	struct GetTombIndexFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushInteger(GetTombIndexByNGLEIndex(1));
 			return 1;
@@ -501,7 +501,7 @@ namespace LuaFunctions
 
 	struct InvokeInitFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_BIND, "invokeInit");
 			Particles::CallerGuard guard(FUNCTION_INIT);
@@ -521,7 +521,7 @@ namespace LuaFunctions
 
 	struct KillPartsOfGroupFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto group = GetData<Particles::ParticleGroup>(1);
 			Particles::ClearGroupParts(group);
@@ -531,7 +531,7 @@ namespace LuaFunctions
 
 	struct LerpFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float a = GetNumber(1);
 			float b = GetNumber(2);
@@ -543,7 +543,7 @@ namespace LuaFunctions
 
 	struct LerpInverseFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float val1 = GetNumber(1);
 			float val2 = GetNumber(2);
@@ -555,7 +555,7 @@ namespace LuaFunctions
 
 	struct LogFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, logf));
 			return 1;
@@ -564,7 +564,7 @@ namespace LuaFunctions
 
 	struct MeshAlignVelocityFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::MeshParticle>(1);
 			float factor = GetClampedNumber(2, 0.0f, 1.0f, false);
@@ -576,7 +576,7 @@ namespace LuaFunctions
 
 	struct MeshLookAtTargetFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::MeshParticle>(1);
 			Vector3f vector = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
@@ -589,7 +589,7 @@ namespace LuaFunctions
 
 	struct MeshShatterFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::MeshParticle>(1);
 			part->Shatter();
@@ -599,7 +599,7 @@ namespace LuaFunctions
 
 	struct NoiseFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float scale, x, y, z, w;
 
@@ -666,7 +666,7 @@ namespace LuaFunctions
 
 	struct NoiseCurlFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float scale, x, y, z;
 			Vector3f vector;
@@ -710,7 +710,7 @@ namespace LuaFunctions
 
 	struct NoiseCurlTimeFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float scale, time, x, y, z;
 			Vector3f vector;
@@ -756,7 +756,7 @@ namespace LuaFunctions
 
 	struct ParticleAbsPosFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			ConstructManagedData<Vector3f>(part->AbsPos());
@@ -766,7 +766,7 @@ namespace LuaFunctions
 
 	struct ParticleAnimateFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			int start = GetInteger(2);
@@ -779,7 +779,7 @@ namespace LuaFunctions
 
 	struct ParticleAttachFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			int index = VerifyItemIndex(2);
@@ -791,7 +791,7 @@ namespace LuaFunctions
 
 	struct ParticleAttractToItemFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			auto item = &items[VerifyItemIndex(2)];
@@ -804,7 +804,7 @@ namespace LuaFunctions
 
 	struct ParticleAvoidRoomGeometryFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			int wallMargin = GetInteger(2);
@@ -817,7 +817,7 @@ namespace LuaFunctions
 
 	struct ParticleCollidedItemFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			auto item = &items[VerifyItemIndex(2)];
@@ -829,7 +829,7 @@ namespace LuaFunctions
 
 	struct ParticleCollideFloorsFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
@@ -843,7 +843,7 @@ namespace LuaFunctions
 
 	struct ParticleCollideWallsFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
@@ -854,7 +854,7 @@ namespace LuaFunctions
 
 	struct ParticleDetachFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			part->Detach();
@@ -864,7 +864,7 @@ namespace LuaFunctions
 
 	struct ParticleFollowTargetFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			Vector3f vect = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
@@ -878,7 +878,7 @@ namespace LuaFunctions
 
 	struct ParticleHomingFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			auto item = &items[VerifyItemIndex(2)];
@@ -893,7 +893,7 @@ namespace LuaFunctions
 
 	struct ParticleLimitSpeedFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			float speedMax = GetNumber(2);
@@ -904,7 +904,7 @@ namespace LuaFunctions
 
 	struct ParticleWindVelocityFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			float factor = GetNumber(2);
@@ -915,7 +915,7 @@ namespace LuaFunctions
 
 	struct PerformTriggerGroupFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			int indexTG = GetClampedInteger(1, 1, 9999, true);
 			bool state = PerformTriggerGroup(indexTG) ? true : false;
@@ -926,7 +926,7 @@ namespace LuaFunctions
 
 	struct PrintFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::Print();
 			return 0;
@@ -935,7 +935,7 @@ namespace LuaFunctions
 
 	struct RadToDegFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(RadToDeg(GetNumber(1)));
 			return 1;
@@ -944,7 +944,7 @@ namespace LuaFunctions
 
 	struct RandfloatFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float lower = GetNumber(1);
 			float upper = GetNumber(2);
@@ -955,7 +955,7 @@ namespace LuaFunctions
 
 	struct RandintFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float lower = (float)GetInteger(1);
 			float upper = (float)GetInteger(2);
@@ -966,7 +966,7 @@ namespace LuaFunctions
 
 	struct RandomNegateFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(RandomNegate(GetNumber(1)));
 			return 1;
@@ -975,7 +975,7 @@ namespace LuaFunctions
 
 	struct RequireFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "require");
 			RequireModule(1);
@@ -985,7 +985,7 @@ namespace LuaFunctions
 
 	struct RoundFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushInteger(lroundf(GetNumber(1)));
 			return 1;
@@ -994,7 +994,7 @@ namespace LuaFunctions
 
 	struct SelectItemFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Trng.pGlobTomb4->ItemIndexSelected = Trng.pGlobTomb4->IndiceItemCondizione = VerifyItemIndex(1);
 			return 0;
@@ -1003,7 +1003,7 @@ namespace LuaFunctions
 
 	struct SinFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, sinf));
 			return 1;
@@ -1012,7 +1012,7 @@ namespace LuaFunctions
 
 	struct SmoothStepFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(SmoothStep(GetNumber(1)));
 			return 1;
@@ -1021,7 +1021,7 @@ namespace LuaFunctions
 
 	struct SoundEffectFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			int sfxIndex = GetInteger(1);
 			int x = GetInteger(2);
@@ -1036,7 +1036,7 @@ namespace LuaFunctions
 
 	struct SphericalToCartesianFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float r = GetNumber(1);
 			float theta = GetNumber(2);
@@ -1048,7 +1048,7 @@ namespace LuaFunctions
 
 	struct SplinePosItemsFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float t = GetNumber(1);
 			std::vector<Vector3f> vecList(GetTable(2));
@@ -1061,7 +1061,7 @@ namespace LuaFunctions
 
 	struct SplinePosVectorsFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float t = GetNumber(1);
 			std::vector<Vector3f> vecList(GetTable(2));
@@ -1075,7 +1075,7 @@ namespace LuaFunctions
 
 	struct SplineVelItemsFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float t = GetNumber(1);
 			float duration = GetNumber(2);
@@ -1089,7 +1089,7 @@ namespace LuaFunctions
 
 	struct SplineVelVectorsFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			float t = GetNumber(1);
 			float duration = GetNumber(2);
@@ -1104,7 +1104,7 @@ namespace LuaFunctions
 
 	struct SqrtFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, sqrtf));
 			return 1;
@@ -1113,7 +1113,7 @@ namespace LuaFunctions
 
 	struct TanFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			Script::PushNumber(GetMathResult(1, tanf));
 			return 1;
@@ -1122,7 +1122,7 @@ namespace LuaFunctions
 
 	struct TestCollisionSpheresFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto item = &items[VerifyItemIndex(1)];
 			Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
@@ -1134,7 +1134,7 @@ namespace LuaFunctions
 
 	struct TriggerDynamicFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			int x = GetInteger(1);
 			int y = GetInteger(2);
@@ -1150,7 +1150,7 @@ namespace LuaFunctions
 
 	struct TriggerShockwaveFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			int x = GetInteger(1);
 			int y = GetInteger(2);
@@ -1172,7 +1172,7 @@ namespace LuaFunctions
 
 	struct VectorCrossFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto vec1 = GetData<LuaObjectClassPosition>(1);
 			auto vec2 = GetData<LuaObjectClassPosition>(2);
@@ -1188,7 +1188,7 @@ namespace LuaFunctions
 
 	struct VectorDotFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto vec1 = GetData<LuaObjectClassPosition>(1);
 			auto vec2 = GetData<LuaObjectClassPosition>(2);
@@ -1200,7 +1200,7 @@ namespace LuaFunctions
 
 	struct VectorLengthFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto vec = GetData<LuaObjectClassPosition>(1);
 			float x = vec->GetX(), y = vec->GetY(), z = vec->GetZ();
@@ -1212,7 +1212,7 @@ namespace LuaFunctions
 
 	struct VectorNormalizeFunction final : public LuaObjectFunction
 	{
-		virtual int Call() override
+		int Call() final
 		{
 			auto vec = GetData<LuaObjectClassPosition>(1);
 			float x = vec->GetX(), y = vec->GetY(), z = vec->GetZ();
@@ -1333,6 +1333,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "atan2"))
 				return &Atan2Func;
 			break;
+
 		case 'b':
 			if (!strcmp(field, "bindFunction"))
 				return &BindFunctionFunc;
@@ -1345,6 +1346,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "boidSeparation"))
 				return &BoidSeparationFunc;
 			break;
+
 		case 'c':
 			if (!strcmp(field, "cbrt"))
 				return &CbrtFunc;
@@ -1373,6 +1375,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "createVector"))
 				return &CreateVectorFunc;
 			break;
+
 		case 'd':
 			if (!strcmp(field, "degToRad"))
 				return &DegToRadFunc;
@@ -1383,18 +1386,21 @@ namespace LuaFunctions
 			if (!strcmp(field, "distCompare"))
 				return &DistCompareFunc;
 			break;
+
 		case 'e':
 			if (!strcmp(field, "enableLogger"))
 				return &EnableLoggerFunc;
 			if (!strcmp(field, "exp"))
 				return &ExpFunc;
 			break;
+
 		case 'f':
 			if (!strcmp(field, "findNearestTarget"))
 				return &FindNearestTargetFunc;
 			if (!strcmp(field, "floor"))
 				return &FindNearestTargetFunc;
 			break;
+
 		case 'g':
 			if (!strcmp(field, "getGameTick"))
 				return &GetGameTickFunc;
@@ -1411,14 +1417,17 @@ namespace LuaFunctions
 			if (!strcmp(field, "getTombIndex"))
 				return &GetTombIndexFunc;
 			break;
+
 		case 'i':
 			if (!strcmp(field, "invokeInit"))
 				return &InvokeInitFunc;
 			break;
+
 		case 'k':
 			if (!strcmp(field, "killPartsOfGroup"))
 				return &KillPartsOfGroupFunc;
 			break;
+
 		case 'l':
 			if (!strcmp(field, "lerp"))
 				return &LerpFunc;
@@ -1427,6 +1436,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "log"))
 				return &LogFunc;
 			break;
+
 		case 'm':
 			if (!strcmp(field, "meshAlignVelocity"))
 				return &MeshAlignVelocityFunc;
@@ -1435,6 +1445,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "meshShatter"))
 				return &MeshShatterFunc;
 			break;
+
 		case 'n':
 			if (!strcmp(field, "noise"))
 				return &NoiseFunc;
@@ -1443,6 +1454,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "noiseCurlTime"))
 				return &NoiseCurlTimeFunc;
 			break;
+
 		case 'p':
 			if (!strcmp(field, "particleAbsPosition"))
 				return &ParticleAbsPosFunc;
@@ -1475,6 +1487,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "print"))
 				return &PrintFunc;
 			break;
+
 		case 'r':
 			if (!strcmp(field, "radToDeg"))
 				return &RadToDegFunc;
@@ -1489,6 +1502,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "round"))
 				return &RoundFunc;
 			break;
+
 		case 's':
 			if (!strcmp(field, "setActiveItem"))
 				return &SelectItemFunc;
@@ -1511,6 +1525,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "sqrt"))
 				return &SqrtFunc;
 			break;
+
 		case 't':
 			if (!strcmp(field, "tan"))
 				return &TanFunc;
@@ -1521,6 +1536,7 @@ namespace LuaFunctions
 			if (!strcmp(field, "triggerShockwave"))
 				return &TriggerShockwaveFunc;
 			break;
+
 		case 'v':
 			if (!strcmp(field, "vectorCross"))
 				return &VectorCrossFunc;

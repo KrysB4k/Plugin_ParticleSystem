@@ -9,13 +9,14 @@ struct Vector3f final : public LuaObjectClassPosition
 	Vector3f(float a, float b, float c) : x(a), y(b), z(c) {}
 
 	static const char* Name();
-	virtual float GetX() override;
-	virtual float GetY() override;
-	virtual float GetZ() override;
-	virtual void SetX(float x) override;
-	virtual void SetY(float y) override;
-	virtual void SetZ(float z) override;
-	virtual explicit operator Vector3f() override;
+
+	float GetX() final;
+	float GetY() final;
+	float GetZ() final;
+	void SetX(float x) final;
+	void SetY(float y) final;
+	void SetZ(float z) final;
+	explicit operator Vector3f() final;
 
 	Vector3f operator- () const;
 

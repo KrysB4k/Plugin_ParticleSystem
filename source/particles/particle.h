@@ -31,8 +31,8 @@ struct ColorRGB final : public LuaObjectClass
 	ColorRGB(uchar red, uchar green, uchar blue): R(red), G(green), B(blue) {}
 
 	static const char* Name();
-	virtual void Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
+	void Index(const char* field) final;
+	void NewIndex(const char* field) final;
 };
 
 struct Vector3s final : public LuaObjectClassRotation
@@ -44,13 +44,13 @@ struct Vector3s final : public LuaObjectClassRotation
 
 	static const char* Name();
 
-	virtual short GetX() override;
-	virtual short GetY() override;
-	virtual short GetZ() override;
-	virtual void SetX(short x) override;
-	virtual void SetY(short y) override;
-	virtual void SetZ(short z) override;
-	virtual explicit operator Vector3s() override;
+	short GetX() final;
+	short GetY() final;
+	short GetZ() final;
+	void SetX(short x) final;
+	void SetY(short y) final;
+	void SetZ(short z) final;
+	explicit operator Vector3s() final;
 };
 
 struct Vector3i final : public LuaObjectClass
@@ -60,8 +60,8 @@ struct Vector3i final : public LuaObjectClass
 	Vector3i() : x(16384), y(16384), z(16384) {}
 
 	static const char* Name();
-	virtual void Index(const char* field) override;
-	virtual void NewIndex(const char* field) override;
+	void Index(const char* field) final;
+	void NewIndex(const char* field) final;
 };
 
 enum BlendMode
@@ -125,8 +125,8 @@ namespace Particles
 		short cutoff, random;
 
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 	};
 
 	struct ParticleGroup final : public LuaObjectClass
@@ -154,8 +154,8 @@ namespace Particles
 
 		// lua integration
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 	};
 
 	struct ModuleGroups final : public LuaObjectClass
@@ -163,8 +163,8 @@ namespace Particles
 		int table;
 
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 	};
 
 	struct ModuleParameters final : public LuaObjectClass
@@ -172,8 +172,8 @@ namespace Particles
 		int table;
 
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 	};
 
 	struct Module final : public LuaObjectClass
@@ -183,8 +183,8 @@ namespace Particles
 		bool createdInCurrentModule;
 
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 	};
 
 	struct BaseParticle : public LuaObjectClass
@@ -227,8 +227,8 @@ namespace Particles
 
 		// lua integration
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) override;
+		void NewIndex(const char* field) override;
 	};
 
 	struct SpriteParticle final : public BaseParticle
@@ -253,20 +253,20 @@ namespace Particles
 		ColorRGB	colCust;
 
 		// methods
-		virtual void Animate(int start, int end, int frameRate) override;
+		void Animate(int start, int end, int frameRate) final;
 
 		// draw function
 		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size);
 
 		// boid-specific
-		virtual Vector3f BoidSeparationRule(float radius, float factor) override;
-		virtual Vector3f BoidCohesionRule(float radius, float factor) override;
-		virtual Vector3f BoidAlignmentRule(float radius, float factor) override;
+		Vector3f BoidSeparationRule(float radius, float factor) final;
+		Vector3f BoidCohesionRule(float radius, float factor) final;
+		Vector3f BoidAlignmentRule(float radius, float factor) final;
 
 		// lua integration
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 
 		void LoadParticle(const SpriteParticleSave* s);
 	};
@@ -286,7 +286,7 @@ namespace Particles
 		Tr4ItemInfo	item;
 
 		// methods
-		virtual void Animate(int startMesh, int endMesh, int framerate) override;
+		void Animate(int startMesh, int endMesh, int framerate) final;
 
 		void	AlignToVel(float factor, bool invert);
 		void	AlignToTarget(const Vector3f& v, float factor, bool invert);
@@ -296,14 +296,14 @@ namespace Particles
 		void	DrawMeshPart();
 
 		// boid-specific
-		virtual Vector3f BoidSeparationRule(float radius, float factor) override;
-		virtual Vector3f BoidCohesionRule(float radius, float factor) override;
-		virtual Vector3f BoidAlignmentRule(float radius, float factor) override;
+		Vector3f BoidSeparationRule(float radius, float factor) final;
+		Vector3f BoidCohesionRule(float radius, float factor) final;
+		Vector3f BoidAlignmentRule(float radius, float factor) final;
 
 		// lua integration
 		static const char* Name();
-		virtual void Index(const char* field) override;
-		virtual void NewIndex(const char* field) override;
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
 
 		void LoadParticle(const MeshParticleSave* m);
 	};

@@ -1,7 +1,7 @@
 
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Plugin_AdvancedParticles", "Plugin_AdvancedParticles.vcxproj", "{E6F60CC0-117D-9349-CE60-7FE09464005D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Plugin_ParticleSystem", "Plugin_ParticleSystem.vcxproj", "{E6F60CC0-117D-9349-CE60-7FE09464005D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "script", "script\script.vcxproj", "{72BAFA81-3674-4994-8EDF-88887A66CB34}"
 EndProject

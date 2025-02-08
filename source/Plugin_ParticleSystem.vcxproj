@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Plugin_AdvancedParticles</ProjectName>
+    <ProjectName>Plugin_ParticleSystem</ProjectName>
     <ProjectGuid>{E6F60CC0-117D-9349-CE60-7FE09464005D}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -94,7 +94,7 @@
     <ClCompile Include="particles\noise.cpp" />
     <ClCompile Include="particles\utilities.cpp" />
     <ClCompile Include="particles\vector3f.cpp" />
-    <ClCompile Include="PlugIn_AdvancedParticles.cpp" />
+    <ClCompile Include="Plugin_ParticleSystem.cpp" />
     <ClCompile Include="StdAfx.cpp" />
     <ClCompile Include="trng\trng.cpp" />
   </ItemGroup>

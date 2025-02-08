@@ -120,6 +120,7 @@ namespace LuaGlobals
 					ConstructManagedData<LuaItemInfoPos>(&itemptr->pos);
 					return;
 				}
+				break;
 			case 'r':
 				if (!strcmp(field, "roomNumber"))
 				{
@@ -1541,6 +1542,7 @@ namespace LuaGlobals
 							}
 							break;
 						}
+						break;
 
 					case 'L':
 						if (!strcmp(field, "GlobalLongAlfa"))
@@ -1609,6 +1611,7 @@ namespace LuaGlobals
 						}
 					}
 				}
+				break;
 
 			case 'L':
 				if (!strcmp(field, "LastInputNumber"))
@@ -1698,6 +1701,7 @@ namespace LuaGlobals
 							}
 							break;
 						}
+						break;
 
 					case 'L':
 						if (!strcmp(field, "LocalLongAlfa"))
@@ -1767,6 +1771,7 @@ namespace LuaGlobals
 						break;
 					}
 				}
+				break;
 
 			case 'S':
 				if (length >= 6)
@@ -2147,6 +2152,7 @@ namespace LuaGlobals
 								break;
 							}
 						}
+						break;
 
 					case 'L':
 						if (!strcmp(field, "StoreLongA"))
@@ -2447,6 +2453,7 @@ namespace LuaGlobals
 						}
 					}
 				}
+				break;
 
 			case 'T':
 				if (!strcmp(field, "Text1"))
@@ -2579,6 +2586,7 @@ namespace LuaGlobals
 							}
 							break;
 						}
+						break;
 
 					case 'L':
 						if (!strcmp(field, "GlobalLongAlfa"))
@@ -2647,6 +2655,7 @@ namespace LuaGlobals
 						}
 					}
 				}
+				break;
 
 			case 'L':
 				if (!strcmp(field, "LastInputNumber"))
@@ -2736,6 +2745,7 @@ namespace LuaGlobals
 							}
 							break;
 						}
+						break;
 
 					case 'L':
 						if (!strcmp(field, "LocalLongAlfa"))
@@ -2805,6 +2815,7 @@ namespace LuaGlobals
 						break;
 					}
 				}
+				break;
 
 			case 'S':
 				if (length >= 6)
@@ -3184,6 +3195,7 @@ namespace LuaGlobals
 								break;
 							}
 						}
+						break;
 
 					case 'L':
 						if (!strcmp(field, "StoreLongA"))
@@ -3484,6 +3496,7 @@ namespace LuaGlobals
 						}
 					}
 				}
+				break;
 
 			case 'T':
 				if (!strcmp(field, "Text1"))
