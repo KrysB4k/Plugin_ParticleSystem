@@ -186,18 +186,18 @@ namespace LuaHelpers
 	void CheckCaller(int callers, const char* function)
 	{
 		if (!(Particles::GetCaller() & callers))
-			Script::Throw(FormatString("calling function \"%s\" is forbidden in this phase", function));
+			Script::Throw(FormatString("calling function '%s' is forbidden in this phase", function));
 	}
 
 	void CheckFieldCaller(int callers, const char* field)
 	{
 		if (!(Particles::GetCaller() & callers))
-			Script::Throw(FormatString("assignment to field \"%s\" is forbidden in this phase", field));
+			Script::Throw(FormatString("assignment to field '%s' is forbidden in this phase", field));
 	}
 
 	void ReadOnlyFieldError(const char* field)
 	{
-		Script::Throw(FormatString("field \"%s\" is read-only and cannot be assigned to", field));
+		Script::Throw(FormatString("field '%s' is read-only and cannot be assigned to", field));
 	}
 
 	int ThrowArithmetic()
@@ -230,9 +230,9 @@ namespace LuaHelpers
 		auto string = GetBoundedLuaString(argument, 50);
 		Script::PreFunctionLoop();
 		if (!Script::Require(string))
-			Script::EmitFailure(FormatString("cannot load \"%s\" module", string), Logger::Warning);
+			Script::EmitFailure(FormatString("cannot load '%s' module", string), Logger::Warning);
 		else
-			Logger::Information(FormatString("loaded module \"%s\"", string));
+			Logger::Information(FormatString("loaded module '%s'", string));
 		Script::PostFunctionLoop();
 		int last = Particles::GetLastModule();
 		if (last != -1 && Particles::modules[last].createdInCurrentModule)

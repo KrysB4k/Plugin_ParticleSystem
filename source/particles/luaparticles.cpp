@@ -434,7 +434,7 @@ namespace Particles
 
 	void ModuleGroups::Index(const char* field)
 	{
-		if (field)
+		if (field && strcmp(Script::TableValueTypeName(table, field), "nil"))
 		{
 			Script::PushTableValue(table, field);
 			return;
@@ -461,7 +461,7 @@ namespace Particles
 
 	void ModuleParameters::Index(const char* field)
 	{
-		if (field)
+		if (field && strcmp(Script::TableValueTypeName(table, field), "nil"))
 		{
 			Script::PushTableValue(table, field);
 			return;
@@ -473,9 +473,21 @@ namespace Particles
 	{
 		if (field)
 		{
-			CheckModuleParameter(-1);
-			Script::AssignTableValue(table, field, -1);
-			return;
+			if (Particles::GetCaller() & FUNCTION_MODULE)
+			{
+				CheckModuleParameter(-1);
+				Script::AssignTableValue(table, field, -1);
+				return;
+			}
+			const auto parameterType = Script::TableValueTypeName(table, field);
+			if (strcmp(parameterType, "nil"))
+			{
+				const auto valueType = Script::TypeName(-1);
+				if (strcmp(parameterType, valueType))
+					Script::Throw(FormatString("attempt to assign value of type %s to parameter of type %s", valueType, parameterType));
+				Script::AssignTableValue(table, field, -1);
+				return;
+			}
 		}
 		LuaObjectClass::NewIndex(field);
 	}

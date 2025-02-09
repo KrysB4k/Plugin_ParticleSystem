@@ -61,9 +61,9 @@ void DrawParticles()
 
 void InitialiseGame()
 {
-	if (Trng.MainPluginFlags & MPS_LOGGER_CONSOLE)
+	if (Trng.MainPluginFlags == MPS_LOGGER_CONSOLE)
 		Logger::Create(LoggerType::LOGGER_CONSOLE);
-	else if (Trng.MainPluginFlags & MPS_LOGGER_FILE)
+	else if (Trng.MainPluginFlags == MPS_LOGGER_FILE)
 		Logger::Create(LoggerType::LOGGER_FILE);
 
 	Logger::SetLogLevel(LogLevel::LOG_DEBUG);

@@ -370,6 +370,11 @@ bool Script::IsString(int argument)
 	return lua_isstring(lua, ArgumentToStack(argument));
 }
 
+const char* Script::TypeName(int argument)
+{
+	return luaL_typename(lua, ArgumentToStack(argument));
+}
+
 int Script::StoreFunction(int argument)
 {
 	int stack;
@@ -574,6 +579,18 @@ void Script::AssignTableValue(int reference, const char* key, int argument)
 	lua_pushvalue(lua, stack);
 	lua_rawset(lua, -3);
 	lua_pop(lua, 1);
+}
+
+const char* Script::TableValueTypeName(int reference, const char* key)
+{
+	const char* type;
+
+	lua_rawgeti(lua, LUA_REGISTRYINDEX, reference);
+	lua_pushstring(lua, key);
+	lua_rawget(lua, -2);
+	type = luaL_typename(lua, -1);
+	lua_pop(lua, 2);
+	return type;
 }
 
 int Script::StoreNewTable()

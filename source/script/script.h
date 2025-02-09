@@ -40,6 +40,7 @@ namespace Script
 	bool IsNumber(int argument);
 	bool IsData(int argument);
 	bool IsString(int argument);
+	const char* TypeName(int argument);
 	int StoreFunction(int argument);
 	bool ExecuteFunction(int reference, void* value);
 	bool IsFunction(int argument);
@@ -60,5 +61,6 @@ namespace Script
 	void* GetExtraSpace();
 	void PushTableValue(int reference, const char* key);
 	void AssignTableValue(int reference, const char* key, int argument);
+	const char* TableValueTypeName(int reference, const char* key);
 	int StoreNewTable();
 }

@@ -33,14 +33,14 @@ int LuaObjectClass::Multiply()
 void LuaObjectClass::Index(const char* field)
 {
 	if (field)
-		Script::Throw(FormatString("attempt to access inexistent field \"%s\"", field));
+		Script::Throw(FormatString("attempt to access inexistent field '%s'", field));
 	Script::Throw("attempt to index a data object");
 }
 
 void LuaObjectClass::NewIndex(const char* field)
 {
 	if (field)
-		Script::Throw(FormatString("attempt to access inexistent field \"%s\"", field));
+		Script::Throw(FormatString("attempt to access inexistent field '%s'", field));
 	Script::Throw("attempt to index a data object");
 }
 
