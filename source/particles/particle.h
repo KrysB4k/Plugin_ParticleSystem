@@ -148,6 +148,7 @@ namespace Particles
 		LightMode lightMode;
 
 		bool autoTrigger;
+		bool immortal;
 		bool saved;
 		bool screenSpace;
 		bool lineIgnoreVel;
@@ -210,8 +211,8 @@ namespace Particles
 		void		Attach(int itemIndex, int node);
 		void		Detach();
 		void		LimitSpeed(float maxSpeed);
-		bool		CollideWalls(float rebound);
-		bool		CollideFloors(float rebound, float minBounce, int collMargin, bool accurate);
+		bool		CollideWalls(bool bounce, float rebound);
+		bool		CollideFloors(bool bounce, float rebound, float minBounce, int collMargin, bool accurate);
 		bool		CollidedWithItem(Tr4ItemInfo* item, int radius);
 		bool		TargetHoming(Tr4ItemInfo* item, int targetNode, float homingFactor, float homingAccel, bool predict);
 		Vector3f	FollowTarget(const Vector3f& v, float maxSpeed, float distInner, float distOuter);
@@ -393,8 +394,6 @@ namespace Particles
 
 	// ************  Global declarations ************ //
 
-	extern ulong gameTick;
-
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
 	extern ParticleGroup partGroups[];
@@ -418,6 +417,7 @@ namespace Particles
 	void UpdateParts();
 	void UpdateSprites();
 	void UpdateMeshes();
+	void PostUpdateLoop();
 
 	void DrawParts();
 	void DrawSprites();

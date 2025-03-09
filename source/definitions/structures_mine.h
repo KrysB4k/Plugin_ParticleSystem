@@ -22,6 +22,7 @@ typedef struct StrSavegameGlobalData {
 	// note: the size of this structure should be always even (if you add BYTE variable, remember to compensate that 
 	//       with another BYTE vairable or placefolder)
 
+	ulong gameTick;
 	
 }SavegameGlobalDataFields;
 
@@ -44,12 +45,6 @@ typedef struct StrBaseAssignSlotMine {
 	StrRecordAssSlot VetAssignSlot[MAX_ASSIGN_SLOT_MINE];
 }BaseAssignSlotMineFields;
 
-/*
-typedef struct control_list
-{
-	int size;
-	Tr4ItemInfo* nodes[CTRLPOINTS_MAX];
-}control_list;*/
 
 typedef struct StrMyData {
 	StrSavegameData Save;  // variable that it will be saved and restored to/from savegame
@@ -63,10 +58,7 @@ typedef struct StrMyData {
 	// if (MyData.Alfa == 5) .
 	int TotProgrActions;
 	int LastProgrActionIndex; // used in case of overloading
-	//int wp;
-	//Tr4ItemInfo* waypoints[32];
-	//control_list pointlist[SEQUENCE_MAX];
-	//StrGenericParameters* params[SEQUENCE_MAX];
+
 	StrProgressiveAction VetProgrActions[MAX_MYPROGR_ACTIONS];
 	StrBaseGenericCustomize BaseCustomizeMine;  // stored all your customize script commands for current level
 	StrBaseGenericParameters BaseParametersMine; // store of all your parameters= script commands of current level
@@ -516,6 +508,64 @@ struct Tr4AnimStruct
 }; // 28
 
 
+enum CameraType
+{
+	CHASE_CAMERA,
+	FIXED_CAMERA,
+	LOOK_CAMERA,
+	COMBAT_CAMERA,
+	CINEMATIC_CAMERA,
+	HEAVY_CAMERA,
+};
+
+
+struct GameVector
+{
+	long x;
+	long y;
+	long z;
+	short room_number;
+	short box_number;
+};
+
+struct ObjectVector
+{
+	long x;
+	long y;
+	long z;
+	short data;
+	short flags;
+};
+
+struct Tr4CameraInfo
+{
+	GameVector pos;
+	GameVector target;
+	CameraType type;
+	CameraType old_type;
+	long shift;
+	long flags;
+	long fixed_camera;
+	long number_frames;
+	long bounce;
+	long underwater;
+	long target_distance;
+	short target_angle;
+	short target_elevation;
+	short actual_elevation;
+	short actual_angle;
+	short number;
+	short last;
+	short timer;
+	short speed;
+	Tr4ItemInfo* item;
+	Tr4ItemInfo* last_item;
+	ObjectVector* fixed;
+	long mike_at_lara;
+	phd_vector mike_pos;
+};
+
+
 struct MeshSphere
 {
 	int x, y, z;
@@ -736,3 +786,5 @@ struct DYNAMIC
 
 // let below pragma directive at bottom of this source
 #pragma pack(2)
+
+extern StrMyData MyData;

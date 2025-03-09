@@ -81,6 +81,8 @@ void CloseGame()
 
 void InitialiseLevel()
 {
+	MyData.Save.Global.gameTick = 0;
+
 	Logger::Trace("InitialiseLevel");
 	Script::NewState();
 	Particles::ClearParts();

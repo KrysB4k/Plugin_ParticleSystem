@@ -2,6 +2,7 @@
 #include "particle.h"
 #include "noise.h"
 #include "utilities.h"
+#include "logger.h"
 
 using namespace LuaHelpers;
 using namespace Utilities;
@@ -322,6 +323,14 @@ namespace Particles
 				}
 				break;
 
+			case 'i':
+				if (!strcmp(field, "immortal"))
+				{
+					Script::PushBoolean(immortal);
+					return;
+				}
+				break;
+
 			case 'l':
 				if (!strcmp(field, "lightMode"))
 				{
@@ -388,6 +397,14 @@ namespace Particles
 				if (!strcmp(field, "drawMode"))
 				{
 					drawMode = static_cast<DrawMode>(GetClampedInteger(-1, DrawMode::DRAW_SPRITE, DrawMode::DRAW_NONE, false));
+					return;
+				}
+				break;
+
+			case 'i':
+				if (!strcmp(field, "immortal"))
+				{
+					immortal = GetBoolean(-1);
 					return;
 				}
 				break;
@@ -649,7 +666,7 @@ namespace Particles
 					if (emitterIndex != -1)
 						emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
 					else
-						emitterNode = -1;
+						emitterNode = NO_MESH;
 					return;
 				}
 				if (!strcmp(field, "emitterNode"))
@@ -971,6 +988,11 @@ namespace Particles
 				if (!strcmp(field, "object"))
 				{
 					object = GetClampedInteger(-1, 0, SLOT_NUMBER_OBJECTS - 1, false);
+					if (!objects[object].loaded)
+					{
+						Script::EmitFailure(FormatString("slot %d not present in level, defaulting to SLOT_LARA(0)", object), Logger::Warning);
+						object = SLOT_LARA;
+					}
 					mesh = Clamp(mesh, 0, objects[object].nmeshes - 1);
 					return;
 				}

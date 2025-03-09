@@ -82,7 +82,6 @@ void Diagnostics::ResetLevel()
 
 namespace Particles
 {
-	ulong gameTick;
 
 	int nextSpritePart;
 	SpriteParticle spriteParts[MAX_SPRITEPARTS];
@@ -130,12 +129,12 @@ namespace Particles
 				nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
 
 				spriteParts[free] = SpriteParticle();
-				spriteParts[free].emitterIndex = -1;
-				spriteParts[free].emitterNode = -1;
+				spriteParts[free].emitterIndex = NO_ITEM;
+				spriteParts[free].emitterNode = NO_MESH;
 				return free;
 			}
 
-			if (free == MAX_SPRITEPARTS-1)
+			if (free == MAX_SPRITEPARTS - 1)
 			{
 				part = &spriteParts[0];
 				free = 0;
@@ -163,8 +162,8 @@ namespace Particles
 		nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
 
 		spriteParts[free] = SpriteParticle();
-		spriteParts[free].emitterIndex = -1;
-		spriteParts[free].emitterNode = -1;
+		spriteParts[free].emitterIndex = NO_ITEM;
+		spriteParts[free].emitterNode = NO_MESH;
 		return free;
 	}
 
@@ -181,8 +180,8 @@ namespace Particles
 				nextMeshPart = (free + 1) % MAX_MESHPARTS;
 
 				meshParts[free] = MeshParticle();
-				meshParts[free].emitterIndex = -1;
-				meshParts[free].emitterNode = -1;
+				meshParts[free].emitterIndex = NO_ITEM;
+				meshParts[free].emitterNode = NO_MESH;
 				return free;
 			}
 
@@ -214,8 +213,8 @@ namespace Particles
 		nextMeshPart = (free + 1) % MAX_MESHPARTS;
 
 		meshParts[free] = MeshParticle();
-		meshParts[free].emitterIndex = -1;
-		meshParts[free].emitterNode = -1;
+		meshParts[free].emitterIndex = NO_ITEM;
+		meshParts[free].emitterNode = NO_MESH;
 		return free;
 	}
 
@@ -311,7 +310,9 @@ namespace Particles
 	{
 		UpdateSprites();
 		UpdateMeshes();
-		gameTick++;
+		PostUpdateLoop();
+
+		MyData.Save.Global.gameTick++;
 	}
 
 	static ulong randomHashInt(ulong i0)
@@ -380,6 +381,8 @@ namespace Particles
 			part->rot += part->rotVel;
 
 			--part->lifeCounter;
+			if (!part->lifeCounter && pgroup.immortal)
+				part->lifeCounter = part->lifeSpan;
 		}
 
 		Script::PostFunctionLoop();
@@ -425,9 +428,23 @@ namespace Particles
 			part->rot.z += part->rotVel.z;
 
 			--part->lifeCounter;
+			if (!part->lifeCounter && pgroup.immortal)
+				part->lifeCounter = part->lifeSpan;
 		}
 
 		Script::PostFunctionLoop();
+	}
+
+
+	void PostUpdateLoop()
+	{
+		SpriteParticle* sprite = &spriteParts[0];
+		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++sprite)
+			sprite->createdInCurrentLoop = false;
+
+		MeshParticle* mesh = &meshParts[0];
+		for (int i = 0; i < MAX_MESHPARTS; ++i, ++mesh)
+			mesh->createdInCurrentLoop = false;
 	}
 
 
@@ -723,12 +740,12 @@ namespace Particles
 				relPos.y += item->pos.yPos;
 				relPos.z += item->pos.zPos;
 
-				node = -1;
+				node = NO_MESH;
 			}
 		}
 
 		pos = (AbsPos() - relPos);
-		emitterIndex = itemIndex;
+		emitterIndex = (short)itemIndex;
 		emitterNode = (char)node;
 	}
 
@@ -737,12 +754,12 @@ namespace Particles
 	{
 		pos = AbsPos();
 
-		emitterIndex = -1;
-		emitterNode = -1;
+		emitterIndex = NO_ITEM;
+		emitterNode = NO_MESH;
 	}
 
 
-	bool BaseParticle::CollideWalls(float rebound)
+	bool BaseParticle::CollideWalls(bool bounce, float rebound)
 	{
 		const auto& tether = partGroups[groupIndex].attach.tether;
 
@@ -765,12 +782,14 @@ namespace Particles
 
 					if (TestForWall(p.x, p.y, testp.z, &tRoom))
 					{
-						vel.z = -(vel.z * rebound);
+						if (bounce)
+							vel.z = -(vel.z * rebound);
 						wallCollision = true;
 					}
 					if (TestForWall(testp.x, p.y, p.z, &tRoom))
 					{
-						vel.x = -(vel.x * rebound);
+						if (bounce)
+							vel.x = -(vel.x * rebound);
 						wallCollision = true;
 					}
 
@@ -783,7 +802,7 @@ namespace Particles
 	}
 
 
-	bool BaseParticle::CollideFloors(float rebound, float minBounce, int collMargin, bool accurate)
+	bool BaseParticle::CollideFloors(bool bounce, float rebound, float minBounce, int collMargin, bool accurate)
 	{
 		const auto& tether = partGroups[groupIndex].attach.tether;
 
@@ -804,33 +823,36 @@ namespace Particles
 			int fh = height - collMargin;
 			int ch = GetCeiling(floor, testp.x, testp.y, testp.z);
 
-			if (height != (-0x7F00) && (testp.y >= fh || testp.y <= ch))
+			if (height != NO_HEIGHT && (testp.y >= fh || testp.y <= ch))
 			{
-				if (abs(vel.y) > minBounce)
+				if (bounce)
 				{
-					if (testp.y > fh && accurate)
+					if (abs(vel.y) > minBounce)
 					{
-						auto n = GetSlopeNormal(floor, testp.x, testp.y, testp.z);
+						if (testp.y > fh && accurate)
+						{
+							auto n = GetSlopeNormal(floor, testp.x, testp.y, testp.z);
 
-						// get reflection vector off slope surface
-						auto reflected = vel - (n * vel.dot(n) * 2);
-						vel = reflected * rebound;
+							// get reflection vector off slope surface
+							auto reflected = vel - (n * vel.dot(n) * 2);
+							vel = reflected * rebound;
+						}
+						else
+							vel.y = -(vel.y * rebound);
+
 					}
-					else
-						vel.y = -(vel.y * rebound);
-
-				}
-				else if (testp.y >= fh)
-				{
-					pos.y = (float)fh;
-					vel.y = 0;
-				}
+					else if (testp.y >= fh)
+					{
+						pos.y = (float)fh;
+						vel.y = 0;
+					}
 				
 
-				if (pos.y > fh)
-					pos.y = (float)fh;
-				else if (pos.y < ch)
-					pos.y = (float)ch;
+					if (pos.y > fh)
+						pos.y = (float)fh;
+					else if (pos.y < ch)
+						pos.y = (float)ch;
+				}
 
 				return true;
 			}
@@ -1378,8 +1400,8 @@ namespace Particles
 		int dy = GetOrientDiff(rot.y, RadToShort(phi));
 		int dx = GetOrientDiff(rot.x, RadToShort(theta));
 
-		rotVel.y = (short)lroundf(dy * factor);
-		rotVel.x = (short)lroundf(dx * factor);
+		rot.y += (short)lroundf(dy * factor);
+		rot.x += (short)lroundf(dx * factor);
 	}
 
 
@@ -1402,8 +1424,8 @@ namespace Particles
 
 		factor = Clamp(factor, 0.0f, 1.0f);
 
-		rotVel.y = (short)lroundf(dy * factor);
-		rotVel.x = (short)lroundf(dx * factor);
+		rot.y += (short)lroundf(dy * factor);
+		rot.x += (short)lroundf(dx * factor);
 	}
 
 

@@ -405,7 +405,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushInteger(Particles::gameTick);
+			Script::PushInteger(MyData.Save.Global.gameTick);
 			return 1;
 		}
 	};
@@ -803,11 +803,12 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
-			float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
-			float minbounce = GetNumber(3);
-			int margin = GetInteger(4);
-			bool accurate = GetBoolean(5);
-			Script::PushBoolean(part->CollideFloors(rebound, minbounce, margin, accurate));
+			bool bounce = GetBoolean(2);
+			float rebound = GetClampedNumber(3, 0.0f, 1.0f, false);
+			float minbounce = GetNumber(4);
+			int margin = GetInteger(5);
+			bool accurate = GetBoolean(6);
+			Script::PushBoolean(part->CollideFloors(bounce, rebound, minbounce, margin, accurate));
 			return 1;
 		}
 	};
@@ -817,8 +818,9 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
-			float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
-			Script::PushBoolean(part->CollideWalls(rebound));
+			bool bounce = GetBoolean(2);
+			float rebound = GetClampedNumber(3, 0.0f, 1.0f, false);
+			Script::PushBoolean(part->CollideWalls(bounce, rebound));
 			return 1;
 		}
 	};
@@ -858,6 +860,16 @@ namespace LuaFunctions
 			float accel = GetNumber(5);
 			bool predict = GetBoolean(6);
 			part->TargetHoming(item, node, factor, accel, predict);
+			return 0;
+		}
+	};
+
+	struct ParticleKillFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto part = GetData<Particles::BaseParticle>(1);
+			part->lifeCounter = 0;
 			return 0;
 		}
 	};
@@ -1268,6 +1280,7 @@ namespace LuaFunctions
 	ParticleDetachFunction ParticleDetachFunc;
 	ParticleFollowTargetFunction ParticleFollowTargetFunc;
 	ParticleHomingFunction ParticleHomingFunc;
+	ParticleKillFunction ParticleKillFunc;
 	ParticleLimitSpeedFunction ParticleLimitSpeedFunc;
 	SplinePosItemsFunction SplinePosItemsFunc;
 	SplinePosVectorsFunction SplinePosVectorsFunc;
@@ -1455,6 +1468,8 @@ namespace LuaFunctions
 				return &ParticleFollowTargetFunc;
 			if (!strcmp(field, "particleHoming"))
 				return &ParticleHomingFunc;
+			if (!strcmp(field, "particleKill"))
+				return &ParticleKillFunc;
 			if (!strcmp(field, "particleLimitSpeed"))
 				return &ParticleLimitSpeedFunc;
 			if (!strcmp(field, "particleWind"))

@@ -181,7 +181,7 @@ namespace Utilities
 
 	int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count)
 	{
-		int itemIndex = -1;
+		int itemIndex = NO_ITEM;
 
 		for (int i = 0; i < level_items; ++i)
 		{
@@ -262,7 +262,7 @@ namespace Utilities
 		int fh = GetHeight(floor, x, y, z);
 		int ch = GetCeiling(floor, x, y, z);
 
-		if (fh != (-0x7F00))
+		if (fh != NO_HEIGHT)
 		{
 			if ((fh - y) > 0 && (ch - y) < 0)
 				return 0; // No wall

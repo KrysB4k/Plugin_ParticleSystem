@@ -29,6 +29,11 @@
 #define SIN_PI_6 0.5f
 #define COS_PI_6 0.86602540378f
 
+#define NO_HEIGHT (-32512)
+
+#define NO_ITEM -1
+#define NO_MESH (char(-1))
+
 #define LUA_REFNIL -1
 
 // MPS_ flags
