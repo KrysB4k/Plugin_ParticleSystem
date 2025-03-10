@@ -124,7 +124,7 @@ namespace Particles
 	
 		for (part = &spriteParts[nextSpritePart], free = nextSpritePart, i = 0; i < MAX_SPRITEPARTS; ++i)
 		{
-			if (!part->lifeCounter)
+			if (part->lifeCounter <= 0)
 			{
 				nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
 
@@ -175,7 +175,7 @@ namespace Particles
 
 		for (part = &meshParts[nextMeshPart], free = nextMeshPart, i = 0; i < MAX_MESHPARTS; ++i)
 		{
-			if (!part->lifeCounter)
+			if (part->lifeCounter <= 0)
 			{
 				nextMeshPart = (free + 1) % MAX_MESHPARTS;
 
@@ -470,8 +470,6 @@ namespace Particles
 
 			Diagnostics::activeSpriteParticles++;
 
-			part->createdInCurrentLoop = false;
-
 			const auto& pgroup = partGroups[part->groupIndex];
 
 			if (pgroup.drawMode == DrawMode::DRAW_NONE)
@@ -617,8 +615,6 @@ namespace Particles
 			if (part->lifeCounter > 0)
 			{
 				Diagnostics::activeMeshParticles++;
-
-				part->createdInCurrentLoop = false;
 
 				if (part->object >= 0 && objects[part->object].loaded)
 					part->DrawMeshPart();
