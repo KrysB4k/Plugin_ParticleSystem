@@ -250,6 +250,12 @@ namespace LuaHelpers
 			Script::Throw("boolean, number or string expected");
 	}
 
+	void CheckParticleData(int argument)
+	{
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsNil(argument))
+			Script::Throw("boolean, number or nil expected");
+	}
+
 	int GetBoundFunction(int index)
 	{
 		if (index < 1)
@@ -262,7 +268,7 @@ namespace LuaHelpers
 			Script::EmitFailure(FormatString("%d is greater than the maximum of %d, clamping to maximum", index, MAX_FUNCREFS), Logger::Warning);
 			index = MAX_FUNCREFS;
 		}
-		if (Particles::functionRefs[index - 1].ref == LUA_REFNIL)
+		if (Particles::functionRefs[index - 1].ref == SCRIPT_REFNIL)
 			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Warning);
 		return index - 1;
 	}

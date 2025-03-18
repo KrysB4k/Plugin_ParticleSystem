@@ -65,7 +65,7 @@ namespace LuaFunctions
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindFunction");
 
 			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
-			if (Particles::functionRefs[index].ref != LUA_REFNIL)
+			if (Particles::functionRefs[index].ref != SCRIPT_REFNIL)
 				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
 
 			Particles::functionRefs[index].ref = GetFunction(2);
@@ -81,7 +81,7 @@ namespace LuaFunctions
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindGroup");
 
 			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
-			if (Particles::functionRefs[index].ref != LUA_REFNIL)
+			if (Particles::functionRefs[index].ref != SCRIPT_REFNIL)
 				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
 
 			auto group = GetData<Particles::ParticleGroup>(2);

@@ -16,7 +16,7 @@ namespace
 
 	const char* StringRepresentation(int idx)
 	{
-		return lua_isstring(lua, idx) ? lua_tostring(lua, idx) : nullptr;
+		return lua_type(lua, idx) == LUA_TSTRING ? lua_tostring(lua, idx) : nullptr;
 	}
 
 	int MetaIndex(lua_State* L)
@@ -370,6 +370,11 @@ bool Script::IsString(int argument)
 	return lua_isstring(lua, ArgumentToStack(argument));
 }
 
+bool Script::IsNil(int argument)
+{
+	return lua_isnil(lua, ArgumentToStack(argument));
+}
+
 const char* Script::TypeName(int argument)
 {
 	return luaL_typename(lua, ArgumentToStack(argument));
@@ -597,4 +602,51 @@ int Script::StoreNewTable()
 {
 	lua_newtable(lua);
 	return luaL_ref(lua, LUA_REGISTRYINDEX);
+}
+
+void Script::DeleteTable(int reference)
+{
+	luaL_unref(lua, LUA_REGISTRYINDEX, reference);
+}
+
+int Script::CloneTable(int reference)
+{
+	lua_newtable(lua);
+	lua_rawgeti(lua, LUA_REGISTRYINDEX, reference);
+	lua_pushnil(lua);
+	while (lua_next(lua, -2))
+	{
+		lua_pushvalue(lua, -2);
+		lua_insert(lua, -2);
+		lua_rawset(lua, -5);
+	}
+	lua_pop(lua, 1);
+	return luaL_ref(lua, LUA_REGISTRYINDEX);
+}
+
+int Script::TraverseTable(int reference, void* opaque, void (*process)(void*, const char*))
+{
+	int count;
+
+	count = 0;
+
+	if (reference != LUA_REFNIL)
+	{
+		lua_rawgeti(lua, LUA_REGISTRYINDEX, reference);
+		lua_pushnil(lua);
+		while (lua_next(lua, -2))
+		{
+			process(opaque, lua_tostring(lua, -2));
+			count++;
+			lua_pop(lua, 1);
+		}
+		lua_pop(lua, 1);
+	}
+
+	return count;
+}
+
+void Script::Pop()
+{
+	lua_pop(lua, 1);
 }

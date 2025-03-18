@@ -75,6 +75,8 @@ void Logger::Create(LoggerType type)
 	SYSTEMTIME time;
 	char filename[96];
 	CONSOLE_FONT_INFOEX font;
+	COORD size;
+	SMALL_RECT rect;
 
 	if (current != LOGGER_NONE)
 		return;
@@ -96,6 +98,14 @@ void Logger::Create(LoggerType type)
 			font.FontWeight = FW_NORMAL;
 			wcscpy_s(font.FaceName, L"Consolas");
 			SetCurrentConsoleFontEx(console, FALSE, &font);
+			size.X = 100;
+			size.Y = 10000;
+			SetConsoleScreenBufferSize(console, size);
+			rect.Top = 0;
+			rect.Left = 0;
+			rect.Bottom = 24;
+			rect.Right = 99;
+			SetConsoleWindowInfo(console, TRUE, &rect);
 		}
 		break;
 	case LOGGER_FILE:

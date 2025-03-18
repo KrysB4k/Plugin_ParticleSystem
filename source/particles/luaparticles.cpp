@@ -564,6 +564,32 @@ namespace Particles
 		LuaObjectClass::NewIndex(field);
 	}
 
+	const char* ParticleData::Name()
+	{
+		return "ParticleData";
+	}
+
+	void ParticleData::Index(const char* field)
+	{
+		if (field)
+		{
+			Script::PushTableValue(table, field);
+			return;
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void ParticleData::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			CheckParticleData(-1);
+			Script::AssignTableValue(table, field, -1);
+			return;
+		}
+		LuaObjectClass::NewIndex(field);
+	}
+
 	const char* BaseParticle::Name()
 	{
 		return "SpriteParticle or MeshParticle";
@@ -579,6 +605,14 @@ namespace Particles
 				if (!strcmp(field, "accel"))
 				{
 					Script::PushData(&accel);
+					return;
+				}
+				break;
+
+			case 'd':
+				if (!strcmp(field, "data"))
+				{
+					Script::PushData(&data);
 					return;
 				}
 				break;
@@ -655,6 +689,16 @@ namespace Particles
 				if (!strcmp(field, "accel"))
 				{
 					accel = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));
+					return;
+				}
+				break;
+
+			case 'd':
+				if (!strcmp(field, "data"))
+				{
+					const auto& partData = *GetData<ParticleData>(-1);
+					Script::DeleteTable(data.table);
+					data.table = Script::CloneTable(partData.table);
 					return;
 				}
 				break;

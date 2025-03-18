@@ -103,37 +103,96 @@ void CloseLevel()
 	Script::Close();
 }
 
+void EmplaceData(void* opaque, const char* key)
+{
+	auto& dataList = *reinterpret_cast<std::list<std::vector<char>>*>(opaque);
+
+	auto dataKey = dataList.emplace_back(strlen(key) + 1).data();
+	strcpy(dataKey, key);
+
+	if (Script::IsBoolean(-1))
+	{
+		auto dataValue = dataList.emplace_back(sizeof(char) + sizeof(bool)).data();
+		*dataValue = DATA_VALUE_BOOLEAN;
+		auto& value = *reinterpret_cast<bool*>(dataValue + sizeof(char));
+		value = Script::ToBoolean(-1);
+	}
+	else if (Script::IsNumber(-1))
+	{
+		auto dataValue = dataList.emplace_back(sizeof(char) + sizeof(float)).data();
+		*dataValue = DATA_VALUE_NUMBER;
+		auto& value = *reinterpret_cast<float*>(dataValue + sizeof(char));
+		value = Script::ToNumber(-1);
+	}
+}
+
 void SaveSpriteParticles(WORD** p2VetExtra, int* pNWords)
 {
 	std::vector<Particles::SpriteParticleSave> spriteSave;
+	std::list<std::vector<char>> spriteDataList;
 
 	Logger::Trace("SaveSpriteParticles");
+
+	auto& spriteCount = *reinterpret_cast<short*>(spriteDataList.emplace_back(sizeof(short)).data());
+	spriteCount = 0;
 	for (int i = 0; i < MAX_SPRITEPARTS; i++)
 	{
 		if (Particles::spriteParts[i].lifeCounter > 0 && Particles::partGroups[Particles::spriteParts[i].groupIndex].saved)
+		{
 			spriteSave.emplace_back(Particles::spriteParts[i]);
+
+			auto& spriteDataCount = *reinterpret_cast<short*>(spriteDataList.emplace_back(sizeof(short)).data());
+			spriteDataCount = Script::TraverseTable(Particles::spriteParts[i].data.table, &spriteDataList, EmplaceData);
+			spriteCount++;
+		}
 	}
 	if (spriteSave.size() > 0)
 	{
 		AddNGToken(NGTAG_SPRITE_PARTS, spriteSave.size(), sizeof(Particles::SpriteParticleSave),
 			spriteSave.data(), p2VetExtra, pNWords);
+
+		std::vector<char> spriteData;
+
+		for (auto it = spriteDataList.begin(); it != spriteDataList.end(); it++)
+			spriteData.insert(spriteData.end(), it->begin(), it->end());
+
+		AddNGToken(NGTAG_SPRITE_PARTS_DATA, NO_ARRAY, spriteData.size(),
+			spriteData.data(), p2VetExtra, pNWords);
 	}
 }
 
 void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
 {
 	std::vector<Particles::MeshParticleSave> meshSave;
+	std::list<std::vector<char>> meshDataList;
 
 	Logger::Trace("SaveMeshParticles");
+
+	auto& meshCount = *reinterpret_cast<short*>(meshDataList.emplace_back(sizeof(short)).data());
+	meshCount = 0;
 	for (int i = 0; i < MAX_MESHPARTS; i++)
 	{
 		if (Particles::meshParts[i].lifeCounter > 0 && Particles::partGroups[Particles::meshParts[i].groupIndex].saved)
+		{
 			meshSave.emplace_back(Particles::meshParts[i]);
+
+			auto& meshDataCount = *reinterpret_cast<short*>(meshDataList.emplace_back(sizeof(short)).data());
+			meshDataCount = Script::TraverseTable(Particles::meshParts[i].data.table, &meshDataList, EmplaceData);
+			meshCount++;
+		}
 	}
 	if (meshSave.size() > 0)
 	{
 		AddNGToken(NGTAG_MESH_PARTS, meshSave.size(), sizeof(Particles::MeshParticleSave),
 			meshSave.data(), p2VetExtra, pNWords);
+
+		std::vector<char> meshData;
+
+		for (auto it = meshDataList.begin(); it != meshDataList.end(); it++)
+			meshData.insert(meshData.end(), it->begin(), it->end());
+
+		AddNGToken(NGTAG_MESH_PARTS_DATA, NO_ARRAY, meshData.size(),
+			meshData.data(), p2VetExtra, pNWords);
 	}
 }
 
@@ -162,6 +221,86 @@ void LoadMeshParticles(WORD* pData)
 		auto ptr = reinterpret_cast<Particles::MeshParticleSave*>(&pData[1]);
 		for (int i = 0; i < TotParts; i++)
 			Particles::meshParts[i].LoadParticle(ptr++);
+	}
+}
+
+void LoadSpriteParticlesData(WORD* pData)
+{
+	char* ptr;
+
+	Logger::Trace("LoadSpriteParticlesData");
+
+	ptr = reinterpret_cast<char*>(pData);
+
+	auto& spriteCount = *reinterpret_cast<short*>(ptr);
+	ptr += sizeof(short);
+	for (int i = 0; i < spriteCount; i++)
+	{
+		auto& spriteDataCount = *reinterpret_cast<short*>(ptr);
+		ptr += sizeof(short);
+		for (int j = 0; j < spriteDataCount; j++)
+		{
+			auto key = ptr;
+			ptr += strlen(key) + 1;
+
+			if (*ptr == DATA_VALUE_BOOLEAN)
+			{
+				auto& value = *reinterpret_cast<bool*>(ptr + sizeof(char));
+				ptr += sizeof(char) + sizeof(bool);
+
+				Script::PushBoolean(value);
+			}
+			else if (*ptr == DATA_VALUE_NUMBER)
+			{
+				auto& value = *reinterpret_cast<float*>(ptr + sizeof(char));
+				ptr += sizeof(char) + sizeof(float);
+
+				Script::PushNumber(value);
+			}
+
+			Script::AssignTableValue(Particles::spriteParts[i].data.table, key, -1);
+			Script::Pop();
+		}
+	}
+}
+
+void LoadMeshParticlesData(WORD* pData)
+{
+	char* ptr;
+
+	Logger::Trace("LoadMeshParticlesData");
+
+	ptr = reinterpret_cast<char*>(pData);
+
+	auto& meshCount = *reinterpret_cast<short*>(ptr);
+	ptr += sizeof(short);
+	for (int i = 0; i < meshCount; i++)
+	{
+		auto& meshDataCount = *reinterpret_cast<short*>(ptr);
+		ptr += sizeof(short);
+		for (int j = 0; j < meshDataCount; j++)
+		{
+			auto key = ptr;
+			ptr += strlen(key) + 1;
+
+			if (*ptr == DATA_VALUE_BOOLEAN)
+			{
+				auto& value = *reinterpret_cast<bool*>(ptr + sizeof(char));
+				ptr += sizeof(char) + sizeof(bool);
+
+				Script::PushBoolean(value);
+			}
+			else if (*ptr == DATA_VALUE_NUMBER)
+			{
+				auto& value = *reinterpret_cast<float*>(ptr + sizeof(char));
+				ptr += sizeof(char) + sizeof(float);
+
+				Script::PushNumber(value);
+			}
+
+			Script::AssignTableValue(Particles::meshParts[i].data.table, key, -1);
+			Script::Pop();
+		}
 	}
 }
 
@@ -382,6 +521,14 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 
 		case NGTAG_MESH_PARTS:
 			LoadMeshParticles(ParseField.pData);
+			break;
+
+		case NGTAG_SPRITE_PARTS_DATA:
+			LoadSpriteParticlesData(ParseField.pData);
+			break;
+
+		case NGTAG_MESH_PARTS_DATA:
+			LoadMeshParticlesData(ParseField.pData);
 			break;
 		}
 		Indice= ParseField.NextIndex; 

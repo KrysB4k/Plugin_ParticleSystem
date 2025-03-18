@@ -98,6 +98,12 @@ enum FunctionType
 	FUNCTION_UPDATE = 0x10
 };
 
+enum DataValueType
+{
+	DATA_VALUE_BOOLEAN,
+	DATA_VALUE_NUMBER
+};
+
 namespace Particles
 {
 	struct SpriteParticleSave;
@@ -159,19 +165,15 @@ namespace Particles
 		void NewIndex(const char* field) final;
 	};
 
-	struct ModuleGroups final : public LuaObjectClass
+	struct ModuleGroups final : public LuaTableObjectClass
 	{
-		int table;
-
 		static const char* Name();
 		void Index(const char* field) final;
 		void NewIndex(const char* field) final;
 	};
 
-	struct ModuleParameters final : public LuaObjectClass
+	struct ModuleParameters final : public LuaTableObjectClass
 	{
-		int table;
-
 		static const char* Name();
 		void Index(const char* field) final;
 		void NewIndex(const char* field) final;
@@ -183,6 +185,13 @@ namespace Particles
 		ModuleParameters parameters;
 		bool createdInCurrentModule;
 
+		static const char* Name();
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
+	};
+
+	struct ParticleData final : public LuaTableObjectClass
+	{
 		static const char* Name();
 		void Index(const char* field) final;
 		void NewIndex(const char* field) final;
@@ -204,6 +213,8 @@ namespace Particles
 		short		emitterIndex;
 		char		emitterNode;
 		bool		createdInCurrentLoop;
+
+		ParticleData data;
 
 		// methods
 		float		Parameter();
@@ -389,7 +400,7 @@ namespace Particles
 		int ref;
 		FunctionType type;
 
-		BoundFunction() : ref(LUA_REFNIL), type(FUNCTION_NONE) {}
+		BoundFunction() : ref(SCRIPT_REFNIL), type(FUNCTION_NONE) {}
 	};
 
 	// ************  Global declarations ************ //

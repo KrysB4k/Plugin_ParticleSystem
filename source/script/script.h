@@ -1,5 +1,7 @@
 #pragma once
 
+#define SCRIPT_REFNIL -1
+
 struct LuaObject
 {
 	virtual void Index(const char* field) = 0;
@@ -40,6 +42,7 @@ namespace Script
 	bool IsNumber(int argument);
 	bool IsData(int argument);
 	bool IsString(int argument);
+	bool IsNil(int argument);
 	const char* TypeName(int argument);
 	int StoreFunction(int argument);
 	bool ExecuteFunction(int reference, void* value);
@@ -63,4 +66,8 @@ namespace Script
 	void AssignTableValue(int reference, const char* key, int argument);
 	const char* TableValueTypeName(int reference, const char* key);
 	int StoreNewTable();
+	void DeleteTable(int reference);
+	int CloneTable(int reference);
+	int TraverseTable(int reference, void* opaque, void (*process)(void*, const char*));
+	void Pop();
 }

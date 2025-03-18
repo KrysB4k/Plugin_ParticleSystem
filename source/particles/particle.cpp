@@ -131,6 +131,7 @@ namespace Particles
 				spriteParts[free] = SpriteParticle();
 				spriteParts[free].emitterIndex = NO_ITEM;
 				spriteParts[free].emitterNode = NO_MESH;
+				spriteParts[free].data.table = Script::StoreNewTable();
 				return free;
 			}
 
@@ -161,9 +162,11 @@ namespace Particles
 
 		nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
 
+		Script::DeleteTable(spriteParts[free].data.table);
 		spriteParts[free] = SpriteParticle();
 		spriteParts[free].emitterIndex = NO_ITEM;
 		spriteParts[free].emitterNode = NO_MESH;
+		spriteParts[free].data.table = Script::StoreNewTable();
 		return free;
 	}
 
@@ -182,6 +185,7 @@ namespace Particles
 				meshParts[free] = MeshParticle();
 				meshParts[free].emitterIndex = NO_ITEM;
 				meshParts[free].emitterNode = NO_MESH;
+				meshParts[free].data.table = Script::StoreNewTable();
 				return free;
 			}
 
@@ -212,9 +216,11 @@ namespace Particles
 
 		nextMeshPart = (free + 1) % MAX_MESHPARTS;
 
+		Script::DeleteTable(meshParts[free].data.table);
 		meshParts[free] = MeshParticle();
 		meshParts[free].emitterIndex = NO_ITEM;
 		meshParts[free].emitterNode = NO_MESH;
+		meshParts[free].data.table = Script::StoreNewTable();
 		return free;
 	}
 
@@ -381,8 +387,13 @@ namespace Particles
 			part->rot += part->rotVel;
 
 			--part->lifeCounter;
-			if (!part->lifeCounter && pgroup.immortal)
-				part->lifeCounter = part->lifeSpan;
+			if (!part->lifeCounter)
+			{
+				if (pgroup.immortal)
+					part->lifeCounter = part->lifeSpan;
+				else
+					Script::DeleteTable(part->data.table);
+			}
 		}
 
 		Script::PostFunctionLoop();
@@ -428,8 +439,13 @@ namespace Particles
 			part->rot.z += part->rotVel.z;
 
 			--part->lifeCounter;
-			if (!part->lifeCounter && pgroup.immortal)
-				part->lifeCounter = part->lifeSpan;
+			if (!part->lifeCounter)
+			{
+				if (pgroup.immortal)
+					part->lifeCounter = part->lifeSpan;
+				else
+					Script::DeleteTable(part->data.table);
+			}
 		}
 
 		Script::PostFunctionLoop();
@@ -1354,6 +1370,8 @@ namespace Particles
 		colEnd.R = s->colEndR;
 		colEnd.G = s->colEndG;
 		colEnd.B = s->colEndB;
+
+		data.table = Script::StoreNewTable();
 	}
 
 
@@ -1654,6 +1672,8 @@ namespace Particles
 		item.il.ambient = -1;
 		item.il.pCurrentLights = item.il.CurrentLights;
 		item.il.pPrevLights = item.il.PrevLights;
+
+		data.table = Script::StoreNewTable();
 	}
 
 	SpriteParticleSave::SpriteParticleSave(const SpriteParticle& s)

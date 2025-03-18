@@ -107,6 +107,12 @@ struct LuaObjectFunction : public LuaObject
 	void NewIndex(const char* field) final;
 };
 
+struct LuaTableObjectClass : public LuaObjectClass
+{
+	int table;
+
+	LuaTableObjectClass() : table(SCRIPT_REFNIL) {};
+};
 
 namespace LuaFunctions
 {
@@ -189,5 +195,6 @@ namespace LuaHelpers
 	const char* GetBoundedLuaString(int argument, unsigned int length);
 	void RequireModule(int argument);
 	void CheckModuleParameter(int argument);
+	void CheckParticleData(int argument);
 	int GetBoundFunction(int index);
 }

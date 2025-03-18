@@ -6,8 +6,10 @@
 #define NGTAG_PROGRESSIVE_ACTIONS  1
 #define NGTAG_LOCAL_DATA           2
 #define NGTAG_GLOBAL_DATA          3
-#define NGTAG_SPRITE_PARTS		   4
-#define NGTAG_MESH_PARTS		   5
+#define NGTAG_SPRITE_PARTS         4
+#define NGTAG_MESH_PARTS           5
+#define NGTAG_SPRITE_PARTS_DATA    6
+#define NGTAG_MESH_PARTS_DATA      7
 #define AXN_FREE  0  // this record is to free an action record. You type this value in ActionType to free a action progress record
 // --------- END PRESET CONSTANTS ---------------------------------
 // type here the constant name for new progressive action you create
@@ -33,8 +35,6 @@
 
 #define NO_ITEM -1
 #define NO_MESH (char(-1))
-
-#define LUA_REFNIL -1
 
 // MPS_ flags
 // you should type here your MPS_ flags for plugin command.
