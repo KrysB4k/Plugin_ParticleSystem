@@ -1287,6 +1287,18 @@ namespace LuaFunctions
 		}
 	};
 
+	struct WrapAngleFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto angle = fmodf(GetNumber(1) + (float)M_PI, 2.0f * (float)M_PI);
+			if (angle < 0.0f)
+				angle += 2.0f * (float)M_PI;
+			Script::PushNumber(angle - (float)M_PI);
+			return 1;
+		}
+	};
+
 	AbsFunction AbsFunc;
 	AcosFunction AcosFunc;
 	AsinFunction AsinFunc;
@@ -1378,6 +1390,7 @@ namespace LuaFunctions
 	VectorDotFunction VectorDotFunc;
 	VectorLengthFunction VectorLengthFunc;
 	VectorNormalizeFunction VectorNormalizeFunc;
+	WrapAngleFunction WrapAngleFunc;
 
 	LuaObject* RetrieveFunction(const char* field)
 	{
@@ -1612,6 +1625,11 @@ namespace LuaFunctions
 				return &VectorLengthFunc;
 			if (!strcmp(field, "vectorNormalize"))
 				return &VectorNormalizeFunc;
+			break;
+
+		case 'w':
+			if (!strcmp(field, "wrapAngle"))
+				return &WrapAngleFunc;
 			break;
 		}
 		return nullptr;
