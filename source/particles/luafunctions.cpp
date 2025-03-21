@@ -470,6 +470,29 @@ namespace LuaFunctions
 		}
 	};
 
+	struct IntervalFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int count = GetArgCount(1, 2);
+
+			int interval = GetInteger(1);
+			if (interval < 1)
+				Script::Throw("interval must be a positive integer");
+
+			int remainder = 0;
+			if (count > 1)
+				remainder = GetClampedInteger(1, 0, (interval - 1), true);
+
+			bool check = true;
+			if ((MyData.Save.Global.gameTick - remainder) % interval)
+				check = false;
+
+			Script::PushBoolean(check);
+			return 1;
+		}
+	};
+
 	struct InvokeInitFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -495,7 +518,39 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto group = GetData<Particles::ParticleGroup>(1);
-			Particles::ClearGroupParts(group);
+			
+			if (group)
+			{
+				for (int i = 0; i < MAX_SPRITEPARTS; i++)
+				{
+					auto part = &Particles::spriteParts[i];
+					if (part->groupIndex == group->groupIndex && part->lifeCounter > 0)
+					{
+						Script::DeleteTable(part->data.table);
+						part->lifeCounter = 0;
+					}
+
+				}
+				for (int i = 0; i < MAX_MESHPARTS; i++)
+				{
+					auto part = &Particles::meshParts[i];
+					if (part->groupIndex == group->groupIndex && part->lifeCounter > 0)
+					{
+						Script::DeleteTable(part->data.table);
+						part->lifeCounter = 0;
+					}
+				}
+			}
+
+			return 0;
+		}
+	};
+
+	struct LaraBurnFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			LaraBurn();
 			return 0;
 		}
 	};
@@ -869,6 +924,7 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
+			Script::DeleteTable(part->data.table);
 			part->lifeCounter = 0;
 			return 0;
 		}
@@ -1017,13 +1073,23 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			phd_vector vec;
+			phd_vector* pvec = nullptr ;
+
 			int sfxIndex = GetInteger(1);
-			int x = GetInteger(2);
-			int y = GetInteger(3);
-			int z = GetInteger(4);
-			int flags = GetInteger(5);
-			auto vec = phd_vector(x, y, z);
-			SoundEffect(sfxIndex, &vec, flags);
+
+			if (!Script::IsNil(2))
+			{
+				auto pos = GetData<LuaObjectClassPosition>(2);
+				vec.x = lround(pos->GetX());
+				vec.y = lround(pos->GetY());
+				vec.z = lround(pos->GetZ());
+				pvec = &vec;
+			}
+
+			int flags = GetInteger(3);
+
+			SoundEffect(sfxIndex, pvec, flags);
 			return 0;
 		}
 	};
@@ -1034,7 +1100,7 @@ namespace LuaFunctions
 		{
 			float r = GetNumber(1);
 			float theta = GetNumber(2);
-			float phi = GetClampedNumber(3, -(float)M_PI_2, (float)M_PI_2, false);
+			float phi = GetNumber(3);
 			ConstructManagedData<Vector3f>(SphericalToCartesian(r, theta, phi));
 			return 1;
 		}
@@ -1258,8 +1324,10 @@ namespace LuaFunctions
 	GetLaraIndexFunction GetLaraIndexFunc;
 	GetSelectedItemFunction GetSelectedItemFunc;
 	GetTombIndexFunction GetTombIndexFunc;
+	IntervalFunction IntervalFunc;
 	InvokeInitFunction InvokeInitFunc;
 	KillPartsOfGroupFunction KillPartsOfGroupFunc;
+	LaraBurnFunction LaraBurnFunc;
 	LerpFunction LerpFunc;
 	LerpInverseFunction LerpInverseFunc;
 	LogFunction LogFunc;
@@ -1409,6 +1477,8 @@ namespace LuaFunctions
 			break;
 
 		case 'i':
+			if (!strcmp(field, "interval"))
+				return &IntervalFunc;
 			if (!strcmp(field, "invokeInit"))
 				return &InvokeInitFunc;
 			break;
@@ -1419,6 +1489,8 @@ namespace LuaFunctions
 			break;
 
 		case 'l':
+			if (!strcmp(field, "laraBurn"))
+				return &LaraBurnFunc;
 			if (!strcmp(field, "lerp"))
 				return &LerpFunc;
 			if (!strcmp(field, "lerpInverse"))

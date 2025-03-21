@@ -275,23 +275,6 @@ namespace Particles
 		nextMeshPart = 0;
 	}
 
-	void ClearGroupParts(ParticleGroup* group)
-	{
-		if (group)
-		{
-			for (int i = 0; i < MAX_SPRITEPARTS; i++)
-			{
-				if (spriteParts[i].groupIndex == group->groupIndex)
-					spriteParts[i] = SpriteParticle();
-			}
-			for (int i = 0; i < MAX_MESHPARTS; i++)
-			{
-				if (meshParts[i].groupIndex == group->groupIndex)
-					meshParts[i] = MeshParticle();
-			}
-		}
-	}
-
 	void ClearPartGroups()
 	{
 		for (int i = 0; i < MAX_PARTGROUPS; i++)

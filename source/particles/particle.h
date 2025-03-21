@@ -417,7 +417,6 @@ namespace Particles
 	// ************  Particles functions ************ //
 
 	void ClearParts();
-	void ClearGroupParts(ParticleGroup* group);
 	void ClearPartGroups();
 	void ClearModules();
 	void ClearFunctionRefs();
