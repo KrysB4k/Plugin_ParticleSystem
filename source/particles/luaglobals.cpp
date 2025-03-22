@@ -343,6 +343,8 @@ namespace LuaGlobals
 				return std::optional(Particles::DrawMode::DRAW_SPRITE);
 			if (!strcmp(field, "DRAW_SQUARE"))
 				return std::optional(Particles::DrawMode::DRAW_SQUARE);
+			if (!strcmp(field, "DRAW_ORIENTED_SPRITE"))
+				return std::optional(Particles::DrawMode::DRAW_ORIENTED_SPRITE);
 			if (!strcmp(field, "DRAW_LINE"))
 				return std::optional(Particles::DrawMode::DRAW_LINE);
 			if (!strcmp(field, "DRAW_ARROW"))

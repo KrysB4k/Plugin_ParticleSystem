@@ -120,6 +120,7 @@ namespace Particles
 	{
 		DRAW_SPRITE,
 		DRAW_SQUARE,
+		DRAW_ORIENTED_SPRITE,
 		DRAW_LINE,
 		DRAW_ARROW,
 		DRAW_NONE
@@ -268,7 +269,7 @@ namespace Particles
 		void Animate(int start, int end, int frameRate) final;
 
 		// draw function
-		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size);
+		void DrawSpritePart(const ParticleGroup& pgroup, float* const view, float smallest_size);
 
 		// boid-specific
 		Vector3f BoidSeparationRule(float radius, float factor) final;

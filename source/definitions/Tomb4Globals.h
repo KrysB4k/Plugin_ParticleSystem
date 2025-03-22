@@ -47,7 +47,7 @@
 
 #define rcossin_tbl ((short*)(0x4B34D0))
 
-#define camera ((Tr4CameraInfo*)(0x7FE700))
+#define camera (*(Tr4CameraInfo*)(0x7FE700))
 
 #define phd_PopMatrix() (phd_mxptr -= 12)
 

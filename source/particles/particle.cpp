@@ -461,7 +461,7 @@ namespace Particles
 
 		SpriteParticle* part = &spriteParts[0];
 
-		int x1 = 0, y1 = 0, z1 = 0;
+		float x1 = 0, y1 = 0, z1 = 0;
 		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
 		{
 			if (part->lifeCounter <= 0)
@@ -474,37 +474,40 @@ namespace Particles
 			if (pgroup.drawMode == DrawMode::DRAW_NONE)
 				continue;
 
-			long viewCoords[6] = { 0,0,0,0,0,0 };
+			float viewCoords[6] = { 0,0,0,0,0,0 };
 
 			if (pgroup.screenSpace)
 			{
 				if (part->pos.x < -1.0f || part->pos.x > 2.0f || part->pos.y < -1.0f || part->pos.y > 2.0f)
 				{
-					part->lifeCounter = 0;
 					continue;
 				}
 
-				viewCoords[0] = lroundf(part->pos.x * phd_winxmax);
-				viewCoords[1] = lroundf(part->pos.y * phd_winxmax);
-				viewCoords[2] = lroundf(part->pos.z + f_mznear);
+				viewCoords[0] = part->pos.x * phd_winxmax;
+				viewCoords[1] = part->pos.y * phd_winxmax;
+				viewCoords[2] = part->pos.z + f_mznear;
 
-				if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
+				if (pgroup.drawMode >= DrawMode::DRAW_ORIENTED_SPRITE)
 				{
-					float size = part->sizeCust;
 					auto vel = part->vel;
 
-					size *= (1.0f / 32.0f);
+					if (pgroup.drawMode > DrawMode::DRAW_ORIENTED_SPRITE)
+					{
+						float size = part->sizeCust;
 
-					if (pgroup.lineIgnoreVel)
-						vel = vel.normalized() * (1.0f / 32.0f);
+						if (pgroup.lineIgnoreVel)
+							vel = vel.normalized(); // ignore speed contribution to particle's size
+						else
+							size *= (1.0f / 32.0f); // else scale down size
 
-					vel *= size;
+						vel *= size;
+					}
 
 					float xf = (part->pos.x - vel.x) * phd_winxmax;
 					float yf = (part->pos.y - vel.y) * phd_winxmax;
 
-					viewCoords[3] = lroundf(xf);
-					viewCoords[4] = lroundf(yf);
+					viewCoords[3] = xf;
+					viewCoords[4] = yf;
 					viewCoords[5] = viewCoords[2];
 				}
 			}
@@ -512,9 +515,9 @@ namespace Particles
 			{
 				auto partPos = part->AbsPos();
 
-				x1 = lroundf(partPos.x);
-				y1 = lroundf(partPos.y);
-				z1 = lroundf(partPos.z);
+				x1 = partPos.x;
+				y1 = partPos.y;
+				z1 = partPos.z;
 
 				if (pgroup.lightMode == LIGHT_DYNAMIC)
 				{
@@ -532,34 +535,37 @@ namespace Particles
 					y1 < -MAX_DRAWDIST || y1 > MAX_DRAWDIST ||
 					z1 < -MAX_DRAWDIST || z1 > MAX_DRAWDIST)
 				{
-					part->lifeCounter = 0;
 					continue;
 				}
 
 				// convert from world coordinates to screen coordinates
-				long result[3] = { 0, 0, 0 };
+				float result[3] = { 0, 0, 0 };
 
 				result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
 				result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
 				result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
 
-				float zv = f_persp / float(result[2]);
-				viewCoords[0] = lroundf(result[0] * zv + f_centerx);
-				viewCoords[1] = lroundf(result[1] * zv + f_centery);
-				viewCoords[2] = result[2] >> 14;
+				float zv = f_persp / result[2];
+				viewCoords[0] = result[0] * zv + f_centerx;
+				viewCoords[1] = result[1] * zv + f_centery;
+				viewCoords[2] = result[2] * (1.0f / 16384.0f);
 
 				// if particle is a line do world to screen transform for second vertex
-				if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
+				if (pgroup.drawMode >= DrawMode::DRAW_ORIENTED_SPRITE)
 				{
-					float size = part->sizeCust;
 					auto vel = part->vel;
 
-					if (pgroup.lineIgnoreVel)
-						vel = vel.normalized(); // ignore speed contribution to particle's size
-					else
-						size *= (1.0f / 32.0f); // else scale down size
+					if (pgroup.drawMode > DrawMode::DRAW_ORIENTED_SPRITE)
+					{
+						float size = part->sizeCust;
 
-					vel *= size;
+						if (pgroup.lineIgnoreVel)
+							vel = vel.normalized(); // ignore speed contribution to particle's size
+						else
+							size *= (1.0f / 32.0f); // else scale down size
+
+						vel *= size;
+					}
 
 					if (part->emitterIndex >= 0)
 					{
@@ -580,22 +586,22 @@ namespace Particles
 						}
 					}
 
-					x1 = lroundf(x1 - vel.x);
-					y1 = lroundf(y1 - vel.y);
-					z1 = lroundf(z1 - vel.z);
+					x1 = x1 - vel.x;
+					y1 = y1 - vel.y;
+					z1 = z1 - vel.z;
 
 					result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
 					result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
 					result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
 
-					zv = f_persp / float(result[2]);
-					viewCoords[3] = lroundf(result[0] * zv + f_centerx);
-					viewCoords[4] = lroundf(result[1] * zv + f_centery);
-					viewCoords[5] = result[2] >> 14;
+					zv = f_persp / result[2];
+					viewCoords[3] = result[0] * zv + f_centerx;
+					viewCoords[4] = result[1] * zv + f_centery;
+					viewCoords[5] = result[2] * (1.0f / 16384.0f);
 				}
 			}
 
-			long minSize = 4;
+			float minSize = 4.0f;
 
 			// draw the particle to the given screen coordinates
 			part->DrawSpritePart(pgroup, viewCoords, minSize);
@@ -1108,9 +1114,9 @@ namespace Particles
 	}
 
 
-	void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size)
+	void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, float* const view, float smallest_size)
 	{
-		long z1 = view[2];
+		long z1 = lroundf(view[2]);
 
 		if (z1 <= 0)
 			return;
@@ -1144,7 +1150,7 @@ namespace Particles
 			}
 		}
 
-		if (pgroup.drawMode > DrawMode::DRAW_SQUARE) // line or arrow
+		if (pgroup.drawMode >= DrawMode::DRAW_LINE) // line or arrow
 		{
 			long x1 = view[0];
 			long y1 = view[1];
@@ -1160,15 +1166,15 @@ namespace Particles
 				long c1 = RGBA(cR, cG, cB, 0xFF);
 				long c2 = RGBA(cR >> 2, cG >> 2, cB >> 2, 0xFF);
 
-				v[0].sx = float(x1);
-				v[0].sy = float(y1);
+				v[0].sx = view[0];
+				v[0].sy = view[1];
 				v[0].rhw = f_mpersp / z1 * f_moneopersp;
 				v[0].sz = f_a - v[0].rhw * f_boo;
 				v[0].color = c1;
 				v[0].specular = 0xFF000000;
 
-				v[1].sx = float(x2);
-				v[1].sy = float(y2);
+				v[1].sx = view[3];
+				v[1].sy = view[4];
 				v[1].rhw = f_mpersp / z2 * f_moneopersp;
 				v[1].sz = f_a - v[1].rhw * f_boo;
 				v[1].color = c2;
@@ -1219,8 +1225,21 @@ namespace Particles
 
 			if (sizeRatio)
 			{
-				xsize = (sizeRatio + 32768.0f) / 65536.0f;
-				ysize = 1 - xsize;
+				if (pgroup.drawMode == DrawMode::DRAW_ORIENTED_SPRITE)
+				{
+					auto cam = Vector3f(pos.x - camera.pos.x, pos.y - camera.pos.y, pos.z - camera.pos.z).normalized();
+					auto cross = cam.cross(vel * 0.0625f);
+					float scale = Clamp(cross.magnitude(), 0.0f, 1.0f);
+
+					float ratio = sizeRatio / 65536.0f;
+					xsize = 0.5f + (ratio * scale);
+					ysize = 0.5f - (ratio * scale);
+				}
+				else
+				{
+					xsize = (sizeRatio + 32768.0f) / 65536.0f;
+					ysize = 1 - xsize;
+				}
 			}
 
 			float s1h = size * xsize;
@@ -1236,45 +1255,43 @@ namespace Particles
 				D3DTLVERTEX v[4];
 				long x1, y1, x2, y2, x3, y3, x4, y4;
 
-				if (rot)
+				float angle = 0.0f;
+
+				if (pgroup.drawMode == DrawMode::DRAW_ORIENTED_SPRITE)
 				{
-					float s = sin(ShortToRad(rot));
-					float c = cos(ShortToRad(rot));
-
-					float sx1 = (-s1h * s);
-					float sx2 = (s1h * s);
-
-					float sy1 = (-s2h * s);
-					float sy2 = (s2h * s);
-
-					float cx1 = (-s1h * c);
-					float cx2 = (s1h * c);
-
-					float cy1 = (-s2h * c);
-					float cy2 = (s2h * c);
-
-					x1 = lroundf(sx1 - cy1 + view[0]);
-					x2 = lroundf(sx2 - cy1 + view[0]);
-					x3 = lroundf(sx2 - cy2 + view[0]);
-					x4 = lroundf(sx1 - cy2 + view[0]);
-
-					y1 = lroundf(cx1 + sy1 + view[1]);
-					y2 = lroundf(cx2 + sy1 + view[1]);
-					y3 = lroundf(cx2 + sy2 + view[1]);
-					y4 = lroundf(cx1 + sy2 + view[1]);
-
-					setXY4(v, x1, y1, x2, y2, x3, y3, x4, y4, z1, clipflags);
+					float xd = view[3] - view[0];
+					float yd = view[4] - view[1];
+					angle = atan2(xd, yd);
 				}
-				else
-				{
-					x1 = view[0] - lroundf(s1h);
-					x2 = view[0] + lroundf(s1h);
 
-					y1 = view[1] - lroundf(s2h);
-					y2 = view[1] + lroundf(s2h);
+				angle += ShortToRad(rot);
 
-					setXY4(v, x1, y1, x2, y1, x2, y2, x1, y2, z1, clipflags);
-				}
+				float s = sin(angle);
+				float c = cos(angle);
+
+				float sx1 = (-s1h * s);
+				float sx2 = (s1h * s);
+
+				float sy1 = (-s2h * s);
+				float sy2 = (s2h * s);
+
+				float cx1 = (-s1h * c);
+				float cx2 = (s1h * c);
+
+				float cy1 = (-s2h * c);
+				float cy2 = (s2h * c);
+
+				x1 = lroundf(sx1 - cy1 + view[0]);
+				x2 = lroundf(sx2 - cy1 + view[0]);
+				x3 = lroundf(sx2 - cy2 + view[0]);
+				x4 = lroundf(sx1 - cy2 + view[0]);
+
+				y1 = lroundf(cx1 + sy1 + view[1]);
+				y2 = lroundf(cx2 + sy1 + view[1]);
+				y3 = lroundf(cx2 + sy2 + view[1]);
+				y4 = lroundf(cx1 + sy2 + view[1]);
+
+				setXY4(v, x1, y1, x2, y2, x3, y3, x4, y4, z1, clipflags);
 
 				long c1 = RGBA(cR, cG, cB, 0xFF);
 
@@ -1290,7 +1307,12 @@ namespace Particles
 				TextureStruct tex;
 				tex.drawtype = pgroup.blendMode;
 
-				if (!pgroup.drawMode)
+				if (pgroup.drawMode == DrawMode::DRAW_SQUARE)
+				{
+					tex.flag = 0;
+					tex.tpage = 0;
+				}
+				else
 				{
 					SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
 					tex.tpage = sprite->tpage;
@@ -1302,11 +1324,6 @@ namespace Particles
 					tex.v3 = sprite->y2;
 					tex.u4 = sprite->x1;
 					tex.v4 = sprite->y2;
-				}
-				else
-				{
-					tex.flag = 0;
-					tex.tpage = 0;
 				}
 
 				(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 0);
@@ -1554,7 +1571,6 @@ namespace Particles
 			testy < -MAX_DRAWDIST || testy > MAX_DRAWDIST ||
 			testz < -MAX_DRAWDIST || testz > MAX_DRAWDIST)
 		{
-			lifeCounter = 0;
 			return;
 		}
 
