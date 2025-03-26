@@ -356,6 +356,10 @@ namespace LuaGlobals
 				return std::optional(LightMode::LIGHT_STATIC);
 			if (!strcmp(field, "LIGHT_DYNAMIC"))
 				return std::optional(LightMode::LIGHT_DYNAMIC);
+			if (!strcmp(field, "LINKDRAW_LINE"))
+				return std::optional(Particles::LinkDrawMode::LINKDRAW_LINE);
+			if (!strcmp(field, "LINKDRAW_NONE"))
+				return std::optional(Particles::LinkDrawMode::LINKDRAW_NONE);
 			if (!strcmp(field, "LOG_DEBUG"))
 				return std::optional(LogLevel::LOG_DEBUG);
 			if (!strcmp(field, "LOG_ERROR"))

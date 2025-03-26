@@ -125,6 +125,12 @@ namespace Particles
 		DRAW_NONE
 	};
 
+	enum LinkDrawMode
+	{
+		LINKDRAW_NONE,
+		LINKDRAW_LINE
+	};
+
 	struct NodeAttachment final : public LuaObjectClass
 	{
 		TetherType tether;
@@ -150,6 +156,7 @@ namespace Particles
 		mutable int partCount;
 
 		DrawMode drawMode;
+		LinkDrawMode linkDrawMode;
 		BlendMode blendMode;
 		LightMode lightMode;
 
@@ -214,6 +221,8 @@ namespace Particles
 		char		emitterNode;
 		bool		createdInCurrentLoop;
 
+		BaseParticle* parent;
+
 		ParticleData data;
 
 		// methods
@@ -231,6 +240,9 @@ namespace Particles
 		Vector3f	AttractToItem(Tr4ItemInfo* item, float radius, float factor);
 		Vector3f	AvoidRoomGeometry(int wallMargin, int floorMargin, float factor);
 		virtual void Animate(int start, int end, int frameRate) = 0;
+
+		void DrawLink(const ParticleGroup& pgroup, long* const view);
+		virtual ColorRGB GetColor() = 0;
 
 		// boid-specific
 		virtual Vector3f BoidSeparationRule(float radius, float factor) = 0;
@@ -270,6 +282,8 @@ namespace Particles
 		// draw function
 		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size);
 
+		ColorRGB GetColor() final;
+
 		// boid-specific
 		Vector3f BoidSeparationRule(float radius, float factor) final;
 		Vector3f BoidCohesionRule(float radius, float factor) final;
@@ -306,6 +320,7 @@ namespace Particles
 
 		// draw function
 		void	DrawMeshPart();
+		ColorRGB GetColor() final;
 
 		// boid-specific
 		Vector3f BoidSeparationRule(float radius, float factor) final;

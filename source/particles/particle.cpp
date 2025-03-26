@@ -91,7 +91,7 @@ namespace Particles
 	ParticleGroup partGroups[MAX_PARTGROUPS];
 	int nextModule;
 	Module modules[MAX_MODULES];
-	
+
 	BoundFunction functionRefs[MAX_FUNCREFS];
 
 	FunctionType GetCaller()
@@ -121,7 +121,7 @@ namespace Particles
 	{
 		int i, free;
 		SpriteParticle* part;
-	
+
 		for (part = &spriteParts[nextSpritePart], free = nextSpritePart, i = 0; i < MAX_SPRITEPARTS; ++i)
 		{
 			if (part->lifeCounter <= 0)
@@ -146,7 +146,7 @@ namespace Particles
 				free++;
 			}
 		}
-	
+
 		int eldest = 0x7FFFFFFF;
 		free = 0;
 		part = &spriteParts[0];
@@ -334,9 +334,15 @@ namespace Particles
 					cutoff = pgroup.attach.cutoff;
 				if (pgroup.attach.random > 1)
 					cutoff += (randomHashInt(825364519 + i) % pgroup.attach.random);
-					
+
 				if ((part->lifeSpan - part->lifeCounter) >= cutoff)
 					part->Detach();
+			}
+
+			if (part->parent)
+			{
+				if (part->parent->lifeCounter <= 0)
+					part->parent = nullptr;
 			}
 
 			int fadetime = part->lifeSpan;
@@ -375,7 +381,10 @@ namespace Particles
 				if (pgroup.immortal)
 					part->lifeCounter = part->lifeSpan;
 				else
+				{
+					part->parent = nullptr;
 					Script::DeleteTable(part->data.table);
+				}
 			}
 		}
 
@@ -409,6 +418,12 @@ namespace Particles
 					part->Detach();
 			}
 
+			if (part->parent)
+			{
+				if (part->parent->lifeCounter <= 0)
+					part->parent = nullptr;
+			}
+
 			if (!Script::ExecuteFunction(pgroup.updateIndex, part))
 				Script::DeleteFunction(&pgroup.updateIndex);
 
@@ -427,7 +442,10 @@ namespace Particles
 				if (pgroup.immortal)
 					part->lifeCounter = part->lifeSpan;
 				else
+				{
+					part->parent = nullptr;
 					Script::DeleteTable(part->data.table);
+				}
 			}
 		}
 
@@ -471,9 +489,6 @@ namespace Particles
 
 			const auto& pgroup = partGroups[part->groupIndex];
 
-			if (pgroup.drawMode == DrawMode::DRAW_NONE)
-				continue;
-
 			long viewCoords[6] = { 0,0,0,0,0,0 };
 
 			if (pgroup.screenSpace)
@@ -516,14 +531,6 @@ namespace Particles
 				y1 = lroundf(partPos.y);
 				z1 = lroundf(partPos.z);
 
-				if (pgroup.lightMode == LIGHT_DYNAMIC)
-				{
-					const auto col = CalculateVertexDynamicLighting(x1, y1, z1);
-					part->colCust.R = Clamp(part->colCust.R + col.R, 0, 255);
-					part->colCust.G = Clamp(part->colCust.G + col.G, 0, 255);
-					part->colCust.B = Clamp(part->colCust.B + col.B, 0, 255);
-				}
-
 				x1 -= lara_item->pos.xPos;
 				y1 -= lara_item->pos.yPos;
 				z1 -= lara_item->pos.zPos;
@@ -547,6 +554,19 @@ namespace Particles
 				viewCoords[0] = lroundf(result[0] * zv + f_centerx);
 				viewCoords[1] = lroundf(result[1] * zv + f_centery);
 				viewCoords[2] = result[2] >> 14;
+
+				part->DrawLink(pgroup, viewCoords);
+
+				if (pgroup.drawMode == DrawMode::DRAW_NONE)
+					continue;
+
+				if (pgroup.lightMode == LIGHT_DYNAMIC)
+				{
+					const auto col = CalculateVertexDynamicLighting(lroundf(partPos.x), lroundf(partPos.y), lround(partPos.z));
+					part->colCust.R = Clamp(part->colCust.R + col.R, 0, 255);
+					part->colCust.G = Clamp(part->colCust.G + col.G, 0, 255);
+					part->colCust.B = Clamp(part->colCust.B + col.B, 0, 255);
+				}
 
 				// if particle is a line do world to screen transform for second vertex
 				if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
@@ -602,6 +622,96 @@ namespace Particles
 		}
 
 		phd_PopMatrix();
+	}
+
+
+	void BaseParticle::DrawLink(const ParticleGroup& pgroup, long* const view)
+	{
+		if (!parent || !pgroup.linkDrawMode || pgroup.screenSpace)
+			return;
+
+		long viewCoords[6] = { 0,0,0,0,0,0 };
+		long result[3] = { 0, 0, 0 };
+		long x1, y1, z1;
+		float zv;
+
+		if (view)
+		{
+			viewCoords[0] = view[0];
+			viewCoords[1] = view[1];
+			viewCoords[2] = view[2];
+		}
+		else
+		{
+			auto partPos = AbsPos();
+
+			x1 = lroundf(partPos.x) - lara_item->pos.xPos;
+			y1 = lroundf(partPos.y) - lara_item->pos.yPos;
+			z1 = lroundf(partPos.z) - lara_item->pos.zPos;
+
+			result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
+			result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
+			result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
+
+			zv = f_persp / float(result[2]);
+			viewCoords[0] = lroundf(result[0] * zv + f_centerx);
+			viewCoords[1] = lroundf(result[1] * zv + f_centery);
+			viewCoords[2] = result[2] >> 14;
+		}
+		
+		auto parentPos = parent->AbsPos();
+
+		x1 = lroundf(parentPos.x) - lara_item->pos.xPos;
+		y1 = lroundf(parentPos.y) - lara_item->pos.yPos;
+		z1 = lroundf(parentPos.z) - lara_item->pos.zPos;
+
+		result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
+		result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
+		result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
+
+		zv = f_persp / float(result[2]);
+		viewCoords[3] = lroundf(result[0] * zv + f_centerx);
+		viewCoords[4] = lroundf(result[1] * zv + f_centery);
+		viewCoords[5] = result[2] >> 14;
+
+		x1 = viewCoords[0];
+		y1 = viewCoords[1];
+		z1 = viewCoords[2];
+		long x2 = viewCoords[3];
+		long y2 = viewCoords[4];
+		long z2 = viewCoords[5];
+
+		if (z1 <= 0 || z2 <= 0)
+			return;
+		if (z1 >= 0x5000 || z2 >= 0x5000)
+			return;
+
+		if (ClipLine(x1, y1, z1, x2, y2, z2, phd_winxmin, phd_winymin, phd_winxmax, phd_winymax))
+		{
+			D3DTLVERTEX v[2];
+
+			auto col1 = GetColor();
+			auto col2 = parent->GetColor();
+
+			long c1 = RGBA(col1.R, col1.G, col1.B, 0xFF);
+			long c2 = RGBA(col2.R, col2.G, col2.B , 0xFF);
+
+			v[0].sx = float(x1);
+			v[0].sy = float(y1);
+			v[0].rhw = f_mpersp / z1 * f_moneopersp;
+			v[0].sz = f_a - v[0].rhw * f_boo;
+			v[0].color = c1;
+			v[0].specular = 0xFF000000;
+
+			v[1].sx = float(x2);
+			v[1].sy = float(y2);
+			v[1].rhw = f_mpersp / z2 * f_moneopersp;
+			v[1].sz = f_a - v[1].rhw * f_boo;
+			v[1].color = c2;
+			v[1].specular = 0xFF000000;
+
+			(*AddLineSorted)(&v[0], &v[1], 6);
+		}
 	}
 
 
@@ -1108,6 +1218,32 @@ namespace Particles
 	}
 
 
+	ColorRGB SpriteParticle::GetColor()
+	{
+		ColorRGB res = colCust;
+
+		if (fadeIn)
+		{
+			int lifeDif = lifeSpan - lifeCounter;
+			if (lifeDif < fadeIn)
+			{
+				float s = lifeDif / float(fadeIn);
+				res = Lerp(ColorRGB(0, 0, 0), res, s);
+			}
+		}
+		if (fadeOut)
+		{
+			if (lifeCounter < fadeOut)
+			{
+				float s = lifeCounter / float(fadeOut);
+				res = Lerp(ColorRGB(0, 0, 0), res, s);
+			}
+		}
+
+		return res;
+	}
+
+
 	void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size)
 	{
 		long z1 = view[2];
@@ -1117,32 +1253,7 @@ namespace Particles
 		if (z1 >= 0x5000)
 			return;
 
-		int cR = colCust.R;
-		int cG = colCust.G;
-		int cB = colCust.B;
-
-		if (fadeIn)
-		{
-			int lifeDif = lifeSpan - lifeCounter;
-			if (lifeDif < fadeIn)
-			{
-				float s = lifeDif / float(fadeIn);
-				cR = lroundf(Lerp(0.0f, (float)cR, s));
-				cG = lroundf(Lerp(0.0f, (float)cG, s));
-				cB = lroundf(Lerp(0.0f, (float)cB, s));
-			}
-		}
-
-		if (fadeOut)
-		{
-			if (lifeCounter < fadeOut)
-			{
-				float s = lifeCounter / float(fadeOut);
-				cR = lroundf(Lerp(0.0f, (float)cR, s));
-				cG = lroundf(Lerp(0.0f, (float)cG, s));
-				cB = lroundf(Lerp(0.0f, (float)cB, s));
-			}
-		}
+		auto col = GetColor();
 
 		if (pgroup.drawMode > DrawMode::DRAW_SQUARE) // line or arrow
 		{
@@ -1157,8 +1268,8 @@ namespace Particles
 			{
 				D3DTLVERTEX v[2];
 
-				long c1 = RGBA(cR, cG, cB, 0xFF);
-				long c2 = RGBA(cR >> 2, cG >> 2, cB >> 2, 0xFF);
+				long c1 = RGBA(col.R, col.G , col.B, 0xFF);
+				long c2 = RGBA(col.R >> 2, col.G >> 2, col.B >> 2, 0xFF);
 
 				v[0].sx = float(x1);
 				v[0].sy = float(y1);
@@ -1276,7 +1387,7 @@ namespace Particles
 					setXY4(v, x1, y1, x2, y1, x2, y2, x1, y2, z1, clipflags);
 				}
 
-				long c1 = RGBA(cR, cG, cB, 0xFF);
+				long c1 = RGBA(col.R, col.G, col.B, 0xFF);
 
 				v[0].color = c1;
 				v[1].color = c1;
@@ -1539,6 +1650,11 @@ namespace Particles
 		return v;
 	}
 
+	ColorRGB MeshParticle::GetColor()
+	{
+		return tint;
+	}
+
 
 	void MeshParticle::DrawMeshPart()
 	{
@@ -1557,6 +1673,8 @@ namespace Particles
 			lifeCounter = 0;
 			return;
 		}
+
+		DrawLink(pgroup, nullptr);
 
 		phd_PushMatrix();
 		phd_TranslateAbs(projPos.x, projPos.y, projPos.z);

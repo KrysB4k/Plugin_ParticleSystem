@@ -342,6 +342,11 @@ namespace Particles
 					Script::PushBoolean(lineIgnoreVel);
 					return;
 				}
+				if (!strcmp(field, "linkDrawMode"))
+				{
+					Script::PushInteger(linkDrawMode);
+					return;
+				}
 				break;
 
 			case 's':
@@ -418,6 +423,11 @@ namespace Particles
 				if (!strcmp(field, "lineIgnoreVel"))
 				{
 					lineIgnoreVel = GetBoolean(-1);
+					return;
+				}
+				if (!strcmp(field, "linkDrawMode"))
+				{
+					linkDrawMode = static_cast<LinkDrawMode>(GetClampedInteger(-1, LinkDrawMode::LINKDRAW_NONE, LinkDrawMode::LINKDRAW_LINE, false));
 					return;
 				}
 				break;
@@ -644,6 +654,14 @@ namespace Particles
 				break;
 
 			case 'p':
+				if (!strcmp(field, "parent"))
+				{
+					if (parent)
+						Script::PushData(parent);
+					else
+						Script::PushNil();
+					return;
+				}
 				if (!strcmp(field, "pos"))
 				{
 					Script::PushData(&pos);
@@ -736,6 +754,10 @@ namespace Particles
 				break;
 
 			case 'p':
+				if (!strcmp(field, "parent"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				if (!strcmp(field, "pos"))
 				{
 					pos = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));

@@ -221,10 +221,15 @@ namespace LuaFunctions
 		{
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createMeshPart");
 
+			int count = GetArgCount(1, 2);
+
 			auto group = GetData<Particles::ParticleGroup>(1);
 			int i = Particles::GetFreeMeshPart();
 			Particles::meshParts[i].groupIndex = group->groupIndex;
 			Particles::meshParts[i].createdInCurrentLoop = true;
+
+			if (count > 1 && !Script::IsNil(2))
+				Particles::meshParts[i].parent = GetData<Particles::BaseParticle>(2);
 
 			Tr4ItemInfo* item = &Particles::meshParts[i].item;
 			item->il.fcnt = -1;
@@ -294,10 +299,17 @@ namespace LuaFunctions
 		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createSpritePart");
+			
+			int count = GetArgCount(1, 2);
+
 			auto group = GetData<Particles::ParticleGroup>(1);
 			int i = Particles::GetFreeSpritePart();
 			Particles::spriteParts[i].groupIndex = group->groupIndex;
 			Particles::spriteParts[i].createdInCurrentLoop = true;
+
+			if (count > 1 && !Script::IsNil(2))
+				Particles::spriteParts[i].parent = GetData<Particles::BaseParticle>(2);
+
 			Script::PushData(&Particles::spriteParts[i]);
 			return 1;
 		}
@@ -925,6 +937,7 @@ namespace LuaFunctions
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
 			Script::DeleteTable(part->data.table);
+			part->parent = nullptr;
 			part->lifeCounter = 0;
 			return 0;
 		}
