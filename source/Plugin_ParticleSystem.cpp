@@ -31,6 +31,9 @@ char TexMyPluginName[80];
 
 StrMyData MyData;
 
+const char* LevelScriptNames[MAX_LEVEL_SCRIPTS];
+int LevelScriptNamesCount;
+bool GlobalScriptIntegrityDefined, GlobalScriptIntegrity, LocalScriptIntegrityDefined, LocalScriptIntegrity;
 
 // ************  Utilities section  ****************
 
@@ -82,6 +85,12 @@ void CloseGame()
 void InitialiseLevel()
 {
 	MyData.Save.Global.gameTick = 0;
+	LevelScriptNamesCount = 0;
+
+	if (!gfCurrentLevel)
+		GlobalScriptIntegrityDefined = false;
+
+	LocalScriptIntegrityDefined = false;
 
 	Logger::Trace("InitialiseLevel");
 	Script::NewState();
@@ -89,12 +98,51 @@ void InitialiseLevel()
 	Particles::ClearPartGroups();
 	Particles::ClearModules();
 	Particles::ClearFunctionRefs();
-	Logger::Information(Utilities::FormatString("Loading functions of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
-	Particles::InitLevelScript();
 #ifdef DIAGNOSTICS
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
 #endif
+}
+
+void CustomizeLevel(WORD CustomizeValue, int NumberOfItems, short* pItemArray)
+{
+	Logger::Trace("CustomizeLevel");
+	switch (CustomizeValue)
+	{
+	case CUST_LEVEL_SCRIPTS:
+		LevelScriptNamesCount = NumberOfItems <= MAX_LEVEL_SCRIPTS ? NumberOfItems : MAX_LEVEL_SCRIPTS;
+
+		for (int i = 0; i < LevelScriptNamesCount; i++)
+			LevelScriptNames[i] = GetString(STRING_NG | pItemArray[i]);
+
+		break;
+	case CUST_SCRIPT_INTEGRITY:
+
+		if (NumberOfItems >= 1)
+		{
+			if (!gfCurrentLevel)
+			{
+				GlobalScriptIntegrityDefined = true;
+				GlobalScriptIntegrity = pItemArray[0] == 1;
+			}
+
+			LocalScriptIntegrityDefined = true;
+			LocalScriptIntegrity = pItemArray[0] == 1;
+		}
+
+		break;
+	}
+}
+
+void LoadLevelScripts()
+{
+	Logger::Trace("LoadLevelScripts");
+
+	if (LevelScriptNamesCount)
+		Logger::Information(Utilities::FormatString("Loading scripts of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
+
+	for (int i = 0; i < LevelScriptNamesCount; i++)
+		Particles::InitLevelScript(LevelScriptNames[i]);
 }
 
 void CloseLevel()
@@ -391,6 +439,8 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// here you can initialize specific items of currnet level.
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
+
+	LoadLevelScripts();
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
@@ -742,6 +792,8 @@ void cbCustomizeMine(WORD CustomizeValue, int NumberOfItems, short *pItemArray)
 
 	MyData.BaseCustomizeMine.TotCustomize= TotCust;
 	// ---- end of default managemnt for generic customize -------------	
+
+	CustomizeLevel(CustomizeValue, NumberOfItems, pItemArray);
 }
 // callback called everytime in current level section of the script it has been found an AssignSlot command
 // with one of your OBJ_ constants

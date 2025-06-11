@@ -422,7 +422,7 @@ namespace Particles
 	void ClearFunctionRefs();
 
 	void InitParts();
-	void InitLevelScript();
+	void InitLevelScript(const char* base);
 
 	void UpdateParts();
 	void UpdateSprites();

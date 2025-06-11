@@ -197,4 +197,6 @@ namespace LuaHelpers
 	void CheckModuleParameter(int argument);
 	void CheckParticleData(int argument);
 	int GetBoundFunction(int index);
+	bool GetScriptIntegrity();
+	void ExitSystem(const char* message);
 }

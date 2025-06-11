@@ -4,6 +4,7 @@
 #include "../definitions/Tomb4Globals.h"
 #include "particle.h"
 #include "utilities.h"
+#include "logger.h"
 
 using namespace Utilities;
 
@@ -635,11 +636,21 @@ namespace Particles
 	}
 
 
-	void InitLevelScript()
+	void InitLevelScript(const char* base)
 	{
+		char name[100];
+
+		strcpy_s(name, "levelscripts\\");
+		strcat_s(name, base);
 		Particles::CallerGuard guard(FUNCTION_LEVEL);
 		Script::PreFunctionLoop();
-		Script::LoadFunctions(&gfFilenameWad[gfFilenameOffset[gfCurrentLevel]]);
+		if (!Script::LoadFunctions(name))
+		{
+			if (!LuaHelpers::GetScriptIntegrity())
+				Script::EmitFailure(FormatString("cannot load '%s' level script", base), Logger::Warning);
+			else
+				LuaHelpers::ExitSystem(FormatString("Level script '%s' cannot be found.", base));
+		}
 		Script::PostFunctionLoop();
 	}
 

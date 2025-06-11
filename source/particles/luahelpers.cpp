@@ -230,7 +230,12 @@ namespace LuaHelpers
 		auto string = GetBoundedLuaString(argument, 50);
 		Script::PreFunctionLoop();
 		if (!Script::Require(string))
-			Script::EmitFailure(FormatString("cannot load '%s' module", string), Logger::Warning);
+		{
+			if (!GetScriptIntegrity())
+				Script::EmitFailure(FormatString("cannot load '%s' module", string), Logger::Warning);
+			else
+				ExitSystem(FormatString("Module '%s' cannot be found.", string));
+		}
 		else
 			Logger::Information(FormatString("loaded module '%s'", string));
 		Script::PostFunctionLoop();
@@ -271,5 +276,22 @@ namespace LuaHelpers
 		if (Particles::functionRefs[index - 1].ref == SCRIPT_REFNIL)
 			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Warning);
 		return index - 1;
+	}
+
+	bool GetScriptIntegrity()
+	{
+		if (LocalScriptIntegrityDefined)
+			return LocalScriptIntegrity;
+
+		if (GlobalScriptIntegrityDefined)
+			return GlobalScriptIntegrity;
+
+		return false;
+	}
+
+	void ExitSystem(const char* message)
+	{
+		MessageBox(NULL, message, "Plugin_ParticleSystem", MB_ICONWARNING);
+		TerminateProcess(GetCurrentProcess(), 0);
 	}
 }
