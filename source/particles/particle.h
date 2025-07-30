@@ -343,7 +343,6 @@ namespace Particles
 
 		ushort		sizeStart;
 		ushort		sizeEnd;
-		ushort		sizeCust;
 		short		sizeRatio;
 
 		short		rot;
@@ -356,7 +355,6 @@ namespace Particles
 
 		uchar	colStartR, colStartG, colStartB;
 		uchar	colEndR, colEndG, colEndB;
-		uchar	colCustR, colCustG, colCustB;
 	};
 
 	struct MeshParticleSave

@@ -69,7 +69,7 @@ void InitialiseGame()
 	else if (Trng.MainPluginFlags == MPS_LOGGER_FILE)
 		Logger::Create(LoggerType::LOGGER_FILE);
 
-	Logger::SetLogLevel(LogLevel::LOG_DEBUG);
+	Logger::SetLogLevel(LogLevel::LOG_TRACE);
 
 #ifdef DIAGNOSTICS
 	Diagnostics::Initialise();
