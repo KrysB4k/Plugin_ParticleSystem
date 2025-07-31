@@ -168,7 +168,7 @@ void ColorRGB::NewIndex(const char* field)
 		case 'b':
 			if (!strcmp(field, "b"))
 			{
-				B = GetClampedInteger(-1, 0, 255, false);
+				B = GetClampedInteger(-1, 0, UINT8_MAX, false);
 				return;
 			}
 			break;
@@ -176,7 +176,7 @@ void ColorRGB::NewIndex(const char* field)
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
-				G = GetClampedInteger(-1, 0, 255, false);
+				G = GetClampedInteger(-1, 0, UINT8_MAX, false);
 				return;
 			}
 			break;
@@ -184,7 +184,7 @@ void ColorRGB::NewIndex(const char* field)
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
-				R = GetClampedInteger(-1, 0, 255, false);
+				R = GetClampedInteger(-1, 0, UINT8_MAX, false);
 				return;
 			}
 			break;
@@ -258,7 +258,7 @@ namespace Particles
 			case 'c':
 				if (!strcmp(field, "cutoff"))
 				{
-					cutoff = GetClampedInteger(-1, 0, 32767, false);
+					cutoff = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -266,7 +266,7 @@ namespace Particles
 			case 'r':
 				if (!strcmp(field, "random"))
 				{
-					random = GetClampedInteger(-1, 0, 32767, false);
+					random = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -730,7 +730,7 @@ namespace Particles
 				if (!strcmp(field, "lifeSpan"))
 				{
 					// set lifeCounter to lifeSpan automatically
-					lifeCounter = lifeSpan = GetClampedInteger(-1, 0, 32767, false);
+					lifeCounter = lifeSpan = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -885,7 +885,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "colorFadeTime"))
 				{
-					colorFadeTime = GetClampedInteger(-1, -32768, 32767, false);
+					colorFadeTime = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -893,12 +893,12 @@ namespace Particles
 			case 'f':
 				if (!strcmp(field, "fadeIn"))
 				{
-					fadeIn = GetClampedInteger(-1, 0, 32767, false);
+					fadeIn = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "fadeOut"))
 				{
-					fadeOut = GetClampedInteger(-1, 0, 32767, false);
+					fadeOut = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -919,22 +919,22 @@ namespace Particles
 			case 's':
 				if (!strcmp(field, "sizeCust"))
 				{
-					sizeCust = GetClampedInteger(-1, 0, 65535, false);
+					sizeCust = GetClampedInteger(-1, 0, UINT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "sizeEnd"))
 				{
-					sizeEnd = GetClampedInteger(-1, 0, 65535, false);
+					sizeEnd = GetClampedInteger(-1, 0, UINT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "sizeStart"))
 				{
-					sizeStart = GetClampedInteger(-1, 0, 65535, false);
+					sizeStart = GetClampedInteger(-1, 0, UINT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "sizeRatio"))
 				{
-					sizeRatio = (short)lroundf(32767 * GetClampedNumber(-1, -1.0f, 1.0f, false));
+					sizeRatio = (short)lroundf(INT16_MAX * GetClampedNumber(-1, -1.0f, 1.0f, false));
 					return;
 				}
 				if (!strcmp(field, "spriteIndex"))
@@ -1066,7 +1066,7 @@ namespace Particles
 			case 't':
 				if (!strcmp(field, "transparency"))
 				{
-					transparency = GetClampedInteger(-1, 0, 255, false);
+					transparency = GetClampedInteger(-1, 0, UINT8_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "tint"))

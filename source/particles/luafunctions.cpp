@@ -187,9 +187,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			uchar r = (uchar)GetClampedInteger(1, 0, 255, false);
-			uchar g = (uchar)GetClampedInteger(2, 0, 255, false);
-			uchar b = (uchar)GetClampedInteger(3, 0, 255, false);
+			uchar r = (uchar)GetClampedInteger(1, 0, UINT8_MAX, false);
+			uchar g = (uchar)GetClampedInteger(2, 0, UINT8_MAX, false);
+			uchar b = (uchar)GetClampedInteger(3, 0, UINT8_MAX, false);
 			ConstructManagedData<ColorRGB>(r, g, b);
 			return 1;
 		}
@@ -606,7 +606,7 @@ namespace LuaFunctions
 		{
 			auto part = GetData<Particles::MeshParticle>(1);
 			Vector3f vector = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
-			float factor = GetClampedNumber(3, 0.0, 1.0f, false);
+			float factor = GetClampedNumber(3, 0.0f, 1.0f, false);
 			bool invert = GetBoolean(4);
 			part->AlignToTarget(vector, factor, invert);
 			return 0;
@@ -1200,9 +1200,9 @@ namespace LuaFunctions
 			int y = GetInteger(2);
 			int z = GetInteger(3);
 			int intensity = GetInteger(4);
-			int red = GetClampedInteger(5, 0, 255, false);
-			int green = GetClampedInteger(6, 0, 255, false);
-			int blue = GetClampedInteger(7, 0, 255, false);
+			int red = GetClampedInteger(5, 0, UINT8_MAX, false);
+			int green = GetClampedInteger(6, 0, UINT8_MAX, false);
+			int blue = GetClampedInteger(7, 0, UINT8_MAX, false);
 			TriggerDynamic(x, y, z, intensity, red, green, blue);
 			return 0;
 		}
@@ -1215,13 +1215,13 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			int innerRad = GetClampedInteger(4, -32768, 32767, false);
-			int outerRad = GetClampedInteger(5, -32768, 32767, false);
+			int innerRad = GetClampedInteger(4, INT16_MIN, INT16_MAX, false);
+			int outerRad = GetClampedInteger(5, INT16_MIN, INT16_MAX, false);
 			int speed = GetInteger(6);
-			int life = GetClampedInteger(7, 0, 255, false);
-			int red = GetClampedInteger(8, 0, 255, false);
-			int green = GetClampedInteger(9, 0, 255, false);
-			int blue = GetClampedInteger(10, 0, 255, false);
+			int life = GetClampedInteger(7, 0, UINT8_MAX, false);
+			int red = GetClampedInteger(8, 0, UINT8_MAX, false);
+			int green = GetClampedInteger(9, 0, UINT8_MAX, false);
+			int blue = GetClampedInteger(10, 0, UINT8_MAX, false);
 			int xRot = RadToShort(GetNumber(11));
 			int flags = GetInteger(12);
 			auto vec = phd_vector(x, y, z);

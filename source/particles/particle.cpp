@@ -148,7 +148,7 @@ namespace Particles
 			}
 		}
 	
-		int eldest = 0x7FFFFFFF;
+		int eldest = INT32_MAX;
 		free = 0;
 		part = &spriteParts[0];
 
@@ -202,7 +202,7 @@ namespace Particles
 			}
 		}
 
-		int eldest = 0x7FFFFFFF;
+		int eldest = INT32_MAX;
 		free = 0;
 		part = &meshParts[0];
 
