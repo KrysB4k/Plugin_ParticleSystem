@@ -181,8 +181,6 @@ namespace LuaHelpers
 	int GetArgCount(int minimum, int maximum);
 	int VerifyItemIndex(int argument);
 	int GetTombIndexByNGLEIndex(int argument);
-	float GetMathResult(int argument, float (*operation)(float));
-	float GetMathResult(int firstArgument, int secondArgument, float (*operation)(float, float));
 	int GetClampedInteger(int argument, int min, int max, bool throwBoundsError = false);
 	float GetClampedNumber(int argument, float min, float max, bool throwBoundsError = false);
 	int GetConstrainedInteger(int argument, int defaultValue, int count, ...);

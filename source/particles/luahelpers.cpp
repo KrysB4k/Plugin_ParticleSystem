@@ -89,29 +89,6 @@ namespace LuaHelpers
 		return -1;
 	}
 
-	float GetMathResult(int argument, float (*operation)(float))
-	{
-		float x, result;
-
-		x = GetNumber(argument);
-		result = operation(x);
-		if (!isnan(x) && isnan(result))
-			Script::EmitFailure("the operation resulted in a NaN", Logger::Warning);
-		return result;
-	}
-
-	float GetMathResult(int firstArgument, int secondArgument, float (*operation)(float, float))
-	{
-		float x, y, result;
-
-		x = GetNumber(firstArgument);
-		y = GetNumber(secondArgument);
-		result = operation(x, y);
-		if (!isnan(x) && !isnan(y) && isnan(result))
-			Script::EmitFailure("the operation resulted in a NaN", Logger::Warning);
-		return result;
-	}
-
 	int GetClampedInteger(int argument, int min, int max, bool throwBoundsError)
 	{
 		int x;

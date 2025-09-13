@@ -17,7 +17,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, fabsf));
+			Script::PushNumber(fabs(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -26,7 +26,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, acosf));
+			Script::PushNumber(acos(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -35,7 +35,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, asinf));
+			Script::PushNumber(asin(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -44,7 +44,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, atanf));
+			Script::PushNumber(atan(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -53,7 +53,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, 2, atan2f));
+			float y = GetNumber(1);
+			float x = GetNumber(2);
+			Script::PushNumber(atan2(y, x));
 			return 1;
 		}
 	};
@@ -136,7 +138,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, ceilf));
+			Script::PushNumber(ceil(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -145,7 +147,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, cbrtf));
+			Script::PushNumber(cbrt(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -166,7 +168,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, cosf));
+			Script::PushNumber(cos(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -364,7 +366,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, expf));
+			Script::PushNumber(exp(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -387,7 +389,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, floorf));
+			Script::PushNumber(floor(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -396,7 +398,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, 2, fmodf));
+			float x = GetNumber(1);
+			float y = GetNumber(2);
+			Script::PushNumber(fmod(x, y));
 			return 1;
 		}
 	};
@@ -583,7 +587,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, logf));
+			Script::PushNumber(log(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1055,7 +1059,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, sinf));
+			Script::PushNumber(sin(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1166,7 +1170,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, sqrtf));
+			Script::PushNumber(sqrt(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1175,7 +1179,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, tanf));
+			Script::PushNumber(tan(GetNumber(1)));
 			return 1;
 		}
 	};
