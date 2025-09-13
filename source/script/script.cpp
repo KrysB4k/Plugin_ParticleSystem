@@ -16,7 +16,7 @@ namespace
 
 	const char* StringRepresentation(int idx)
 	{
-		return lua_type(lua, idx) == LUA_TSTRING ? lua_tostring(lua, idx) : nullptr;
+		return lua_isstring(lua, idx) ? lua_tostring(lua, idx) : nullptr;
 	}
 
 	int MetaIndex(lua_State* L)
@@ -317,7 +317,7 @@ void Script::PushNil()
 
 int Script::ToInteger(int argument)
 {
-	return lroundf((float)lua_tonumber(lua, ArgumentToStack(argument)));
+	return lua_tointeger(lua, ArgumentToStack(argument));
 }
 
 bool Script::ToBoolean(int argument)
@@ -327,7 +327,7 @@ bool Script::ToBoolean(int argument)
 
 float Script::ToNumber(int argument)
 {
-	return (float)lua_tonumber(lua, ArgumentToStack(argument));
+	return lua_tonumber(lua, ArgumentToStack(argument));
 }
 
 LuaObject* Script::ToData(int argument)
@@ -347,7 +347,7 @@ int Script::ArgCount()
 
 bool Script::IsInteger(int argument)
 {
-	return lua_isnumber(lua, ArgumentToStack(argument));
+	return IsNumber(argument);
 }
 
 bool Script::IsBoolean(int argument)
@@ -357,7 +357,7 @@ bool Script::IsBoolean(int argument)
 
 bool Script::IsNumber(int argument)
 {
-	return lua_isnumber(lua, ArgumentToStack(argument));
+	return lua_type(lua, ArgumentToStack(argument)) == LUA_TNUMBER;
 }
 
 bool Script::IsData(int argument)

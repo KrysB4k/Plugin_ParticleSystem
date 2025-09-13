@@ -26,7 +26,10 @@ namespace LuaHelpers
 	{
 		if (!Script::IsNumber(argument))
 			Script::Throw("number expected");
-		return Script::ToNumber(argument);
+		float number = Script::ToNumber(argument);
+		if (!isfinite(number))
+			Script::Throw("number is invalid");
+		return number;
 	}
 
 	int GetFunction(int argument)
