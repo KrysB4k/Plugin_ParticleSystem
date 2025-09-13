@@ -208,16 +208,15 @@ namespace LuaHelpers
 	{
 		Particles::CallerGuard guard(FUNCTION_MODULE);
 		auto string = GetBoundedLuaString(argument, 50);
+		Logger::Information(FormatString("Loading module: %s", string));
 		Script::PreFunctionLoop();
 		if (!Script::Require(string))
 		{
 			if (!GetScriptIntegrity())
-				Script::EmitFailure(FormatString("cannot load '%s' module", string), Logger::Warning);
+				Script::EmitFailure(FormatString("cannot load '%s' module", string), Logger::Error);
 			else
 				ExitSystem(FormatString("Module '%s' cannot be found.", string));
 		}
-		else
-			Logger::Information(FormatString("loaded module '%s'", string));
 		Script::PostFunctionLoop();
 		int last = Particles::GetLastModule();
 		if (last != -1 && Particles::modules[last].createdInCurrentModule)
@@ -241,21 +240,25 @@ namespace LuaHelpers
 			Script::Throw("boolean, number or nil expected");
 	}
 
-	int GetBoundFunction(int index)
+	Particles::BoundFunction* GetBoundFunction(int index)
 	{
 		if (index < 1)
 		{
-			Script::EmitFailure(FormatString("%d is less than the minimum of %d, clamping to minimum", index, 1), Logger::Warning);
-			index = 1;
+			Script::EmitFailure(FormatString("index %d is less than the minimum of %d", index, 1), Logger::Error);
+			return nullptr;
 		}
-		else if (index > MAX_FUNCREFS)
+		if (index > MAX_FUNCREFS)
 		{
-			Script::EmitFailure(FormatString("%d is greater than the maximum of %d, clamping to maximum", index, MAX_FUNCREFS), Logger::Warning);
-			index = MAX_FUNCREFS;
+			Script::EmitFailure(FormatString("index %d is greater than the maximum of %d", index, MAX_FUNCREFS), Logger::Error);
+			return nullptr;
 		}
-		if (Particles::functionRefs[index - 1].ref == SCRIPT_REFNIL)
-			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Warning);
-		return index - 1;
+		auto function = &Particles::functionRefs[index - 1];
+		if (function->ref == SCRIPT_REFNIL)
+		{
+			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Error);
+			return nullptr;
+		}
+		return function;
 	}
 
 	bool GetScriptIntegrity()

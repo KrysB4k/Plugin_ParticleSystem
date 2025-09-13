@@ -89,7 +89,7 @@ namespace LuaFunctions
 			auto group = GetData<Particles::ParticleGroup>(2);
 			if (group->autoTrigger)
 			{
-				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Warning);
+				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Error);
 				return 0;
 			}
 			Particles::functionRefs[index].ref = group->initIndex;
@@ -506,7 +506,7 @@ namespace LuaFunctions
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->autoTrigger)
 			{
-				Script::EmitFailure("this group cannot be invoked because it is auto triggered", Logger::Warning);
+				Script::EmitFailure("this group cannot be invoked because it is auto triggered", Logger::Error);
 				return 0;
 			}
 			Script::PreFunctionLoop();
@@ -1049,7 +1049,7 @@ namespace LuaFunctions
 		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "setLogLevel");
-			LogLevel requested = static_cast<LogLevel>(GetClampedInteger(1, LogLevel::LOG_TRACE, LogLevel::LOG_FATAL, false));
+			LogLevel requested = static_cast<LogLevel>(GetClampedInteger(1, LogLevel::LOG_INFO, LogLevel::LOG_ERROR, false));
 			Logger::SetLogLevel(requested);
 			return 0;
 		}

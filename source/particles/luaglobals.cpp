@@ -360,12 +360,8 @@ namespace LuaGlobals
 				return std::optional(LogLevel::LOG_DEBUG);
 			if (!strcmp(field, "LOG_ERROR"))
 				return std::optional(LogLevel::LOG_ERROR);
-			if (!strcmp(field, "LOG_FATAL"))
-				return std::optional(LogLevel::LOG_FATAL);
 			if (!strcmp(field, "LOG_INFO"))
 				return std::optional(LogLevel::LOG_INFO);
-			if (!strcmp(field, "LOG_TRACE"))
-				return std::optional(LogLevel::LOG_TRACE);
 			if (!strcmp(field, "LOG_WARN"))
 				return std::optional(LogLevel::LOG_WARN);
 			break;

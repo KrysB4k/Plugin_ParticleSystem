@@ -69,7 +69,7 @@ void InitialiseGame()
 	else if (Trng.MainPluginFlags == MPS_LOGGER_FILE)
 		Logger::Create(LoggerType::LOGGER_FILE);
 
-	Logger::SetLogLevel(LogLevel::LOG_TRACE);
+	Logger::SetLogLevel(LogLevel::LOG_INFO);
 
 #ifdef DIAGNOSTICS
 	Diagnostics::Initialise();
@@ -78,7 +78,6 @@ void InitialiseGame()
 
 void CloseGame()
 {
-	Logger::Trace("CloseGame");
 	Logger::Close();
 }
 
@@ -92,7 +91,6 @@ void InitialiseLevel()
 
 	LocalScriptIntegrityDefined = false;
 
-	Logger::Trace("InitialiseLevel");
 	Script::NewState();
 	Particles::ClearParts();
 	Particles::ClearPartGroups();
@@ -106,7 +104,6 @@ void InitialiseLevel()
 
 void CustomizeLevel(WORD CustomizeValue, int NumberOfItems, short* pItemArray)
 {
-	Logger::Trace("CustomizeLevel");
 	switch (CustomizeValue)
 	{
 	case CUST_LEVEL_SCRIPTS:
@@ -136,8 +133,6 @@ void CustomizeLevel(WORD CustomizeValue, int NumberOfItems, short* pItemArray)
 
 void LoadLevelScripts()
 {
-	Logger::Trace("LoadLevelScripts");
-
 	if (LevelScriptNamesCount)
 		Logger::Information(Utilities::FormatString("Loading scripts of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
 
@@ -147,7 +142,6 @@ void LoadLevelScripts()
 
 void CloseLevel()
 {
-	Logger::Trace("CloseLevel");
 	Script::Close();
 }
 
@@ -178,8 +172,6 @@ void SaveSpriteParticles(WORD** p2VetExtra, int* pNWords)
 {
 	std::vector<Particles::SpriteParticleSave> spriteSave;
 	std::list<std::vector<char>> spriteDataList;
-
-	Logger::Trace("SaveSpriteParticles");
 
 	auto& spriteCount = *reinterpret_cast<short*>(spriteDataList.emplace_back(sizeof(short)).data());
 	spriteCount = 0;
@@ -214,8 +206,6 @@ void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
 	std::vector<Particles::MeshParticleSave> meshSave;
 	std::list<std::vector<char>> meshDataList;
 
-	Logger::Trace("SaveMeshParticles");
-
 	auto& meshCount = *reinterpret_cast<short*>(meshDataList.emplace_back(sizeof(short)).data());
 	meshCount = 0;
 	for (int i = 0; i < MAX_MESHPARTS; i++)
@@ -248,7 +238,6 @@ void LoadSpriteParticles(WORD* pData)
 {
 	WORD TotParts;
 
-	Logger::Trace("LoadSpriteParticles");
 	TotParts = pData[0];
 	if (TotParts > 0)
 	{
@@ -262,7 +251,6 @@ void LoadMeshParticles(WORD* pData)
 {
 	WORD TotParts;
 
-	Logger::Trace("LoadMeshParticles");
 	TotParts = pData[0];
 	if (TotParts > 0)
 	{
@@ -275,8 +263,6 @@ void LoadMeshParticles(WORD* pData)
 void LoadSpriteParticlesData(WORD* pData)
 {
 	char* ptr;
-
-	Logger::Trace("LoadSpriteParticlesData");
 
 	ptr = reinterpret_cast<char*>(pData);
 
@@ -315,8 +301,6 @@ void LoadSpriteParticlesData(WORD* pData)
 void LoadMeshParticlesData(WORD* pData)
 {
 	char* ptr;
-
-	Logger::Trace("LoadMeshParticlesData");
 
 	ptr = reinterpret_cast<char*>(pData);
 

@@ -9,6 +9,7 @@ struct phd_3dpos;
 namespace Particles
 {
 	struct ParticleGroup;
+	struct BoundFunction;
 }
 
 struct LuaObjectClass : public LuaObject
@@ -194,7 +195,7 @@ namespace LuaHelpers
 	void RequireModule(int argument);
 	void CheckModuleParameter(int argument);
 	void CheckParticleData(int argument);
-	int GetBoundFunction(int index);
+	Particles::BoundFunction* GetBoundFunction(int index);
 	bool GetScriptIntegrity();
 	void ExitSystem(const char* message);
 }

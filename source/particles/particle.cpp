@@ -647,7 +647,7 @@ namespace Particles
 		if (!Script::LoadFunctions(name))
 		{
 			if (!LuaHelpers::GetScriptIntegrity())
-				Script::EmitFailure(FormatString("cannot load '%s' level script", base), Logger::Warning);
+				Script::EmitFailure(FormatString("cannot load '%s' level script", base), Logger::Error);
 			else
 				LuaHelpers::ExitSystem(FormatString("Level script '%s' cannot be found.", base));
 		}
@@ -657,11 +657,13 @@ namespace Particles
 
 	void ExecuteBoundFunction(int index)
 	{
-		index = LuaHelpers::GetBoundFunction(index);
+		auto function = LuaHelpers::GetBoundFunction(index);
+		if (!function)
+			return;
 
-		Particles::CallerGuard guard(Particles::functionRefs[index].type);
+		Particles::CallerGuard guard(function->type);
 		Script::PreFunctionLoop();
-		int ref = Particles::functionRefs[index].ref;
+		int ref = function->ref;
 		if (!Script::ExecuteFunction(ref, nullptr))
 			Script::DeleteFunction(&ref);
 		Script::PostFunctionLoop();

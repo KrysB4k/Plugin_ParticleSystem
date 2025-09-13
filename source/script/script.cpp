@@ -409,7 +409,7 @@ bool Script::ExecuteFunction(int reference, void* value)
 		}
 		if (status != LUA_OK)
 		{
-			Logger::Fatal(lua_tostring(lua, -1));
+			Logger::Error(lua_tostring(lua, -1));
 			lua_pop(lua, 1);
 			return false;
 		}
@@ -505,13 +505,13 @@ bool Script::LoadFunctions(const char* name)
 		status = lua_pcall(lua, 0, 0, -2);
 		if (status != LUA_OK)
 		{
-			Logger::Fatal(lua_tostring(lua, -1));
+			Logger::Error(lua_tostring(lua, -1));
 			lua_pop(lua, 1);
 		}
 	}
 	else
 	{
-		EmitFailure(lua_tostring(lua, -1), Logger::Fatal);
+		EmitFailure(lua_tostring(lua, -1), Logger::Error);
 		lua_pop(lua, 1);
 	}
 	return true;
@@ -529,11 +529,6 @@ void Script::EmitFailure(const char* msg, void (*log)(const char*))
 	luaL_traceback(lua, lua, lua_tostring(lua, -1), 1);
 	log(lua_tostring(lua, -1));
 	lua_pop(lua, 2);
-}
-
-void Script::AddInformation(const char* msg)
-{
-	Logger::Information(msg);
 }
 
 int Script::GarbageCount()
