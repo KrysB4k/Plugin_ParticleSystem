@@ -98,10 +98,11 @@ enum FunctionType
 	FUNCTION_UPDATE = 0x10
 };
 
-enum DataValueType
+enum DataType
 {
-	DATA_VALUE_BOOLEAN,
-	DATA_VALUE_NUMBER
+	DATA_BOOLEAN,
+	DATA_NUMBER,
+	DATA_INTEGER
 };
 
 namespace Particles

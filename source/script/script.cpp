@@ -347,7 +347,10 @@ int Script::ArgCount()
 
 bool Script::IsInteger(int argument)
 {
-	return IsNumber(argument);
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	return lua_type(lua, stack) == LUA_TNUMBER && lua_isinteger(lua, stack);
 }
 
 bool Script::IsBoolean(int argument)
@@ -357,7 +360,10 @@ bool Script::IsBoolean(int argument)
 
 bool Script::IsNumber(int argument)
 {
-	return lua_type(lua, ArgumentToStack(argument)) == LUA_TNUMBER;
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	return lua_type(lua, stack) == LUA_TNUMBER && !lua_isinteger(lua, stack);
 }
 
 bool Script::IsData(int argument)
@@ -619,7 +625,7 @@ int Script::CloneTable(int reference)
 	return luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
-int Script::TraverseTable(int reference, void* opaque, void (*process)(void*, const char*))
+int Script::TraverseReadTable(int reference, void* opaque, void (*process)(void*))
 {
 	int count;
 
@@ -631,7 +637,7 @@ int Script::TraverseTable(int reference, void* opaque, void (*process)(void*, co
 		lua_pushnil(lua);
 		while (lua_next(lua, -2))
 		{
-			process(opaque, lua_tostring(lua, -2));
+			process(opaque);
 			count++;
 			lua_pop(lua, 1);
 		}
@@ -641,7 +647,16 @@ int Script::TraverseTable(int reference, void* opaque, void (*process)(void*, co
 	return count;
 }
 
-void Script::Pop()
+void Script::TraverseAssignTable(int reference, int count, void* opaque, void (*process)(void*))
 {
-	lua_pop(lua, 1);
+	if (reference != LUA_REFNIL)
+	{
+		lua_rawgeti(lua, LUA_REGISTRYINDEX, reference);
+		for (int i = 0; i < count; i++)
+		{
+			process(opaque);
+			lua_rawset(lua, -3);
+		}
+		lua_pop(lua, 1);
+	}
 }

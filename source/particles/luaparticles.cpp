@@ -95,7 +95,7 @@ void Vector3i::NewIndex(const char* field)
 		case 'x':
 			if (!strcmp(field, "x"))
 			{
-				x = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
+				x = SaturateRound<int>(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
@@ -103,7 +103,7 @@ void Vector3i::NewIndex(const char* field)
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
-				y = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
+				y = SaturateRound<int>(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
@@ -111,7 +111,7 @@ void Vector3i::NewIndex(const char* field)
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
-				z = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
+				z = SaturateRound<int>(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
@@ -934,7 +934,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "sizeRatio"))
 				{
-					sizeRatio = (short)lroundf(INT16_MAX * GetClampedNumber(-1, -1.0f, 1.0f, false));
+					sizeRatio = SaturateRound<short>(INT16_MAX * GetClampedNumber(-1, -1.0f, 1.0f, false));
 					return;
 				}
 				if (!strcmp(field, "spriteIndex"))

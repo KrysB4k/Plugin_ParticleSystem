@@ -1030,7 +1030,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushInteger(lroundf(GetNumber(1)));
+			Script::PushInteger(SaturateRound<int>(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1085,9 +1085,9 @@ namespace LuaFunctions
 			if (!Script::IsNil(2))
 			{
 				auto pos = GetData<LuaObjectClassPosition>(2);
-				vec.x = lround(pos->GetX());
-				vec.y = lround(pos->GetY());
-				vec.z = lround(pos->GetZ());
+				vec.x = SaturateRound<int>(pos->GetX());
+				vec.y = SaturateRound<int>(pos->GetY());
+				vec.z = SaturateRound<int>(pos->GetZ());
 				pvec = &vec;
 			}
 

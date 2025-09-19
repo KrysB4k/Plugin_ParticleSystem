@@ -10,9 +10,16 @@ namespace LuaHelpers
 {
 	int GetInteger(int argument)
 	{
-		if (!Script::IsInteger(argument))
-			Script::Throw("integer expected");
-		return Script::ToInteger(argument);
+		if (Script::IsInteger(argument))
+			return Script::ToInteger(argument);
+		if (Script::IsNumber(argument))
+		{
+			float number = Script::ToNumber(argument);
+			if (!isfinite(number))
+				Script::Throw("number is invalid");
+			return SaturateRound<int>(number);
+		}
+		Script::Throw("number expected");
 	}
 
 	bool GetBoolean(int argument)
@@ -24,12 +31,16 @@ namespace LuaHelpers
 
 	float GetNumber(int argument)
 	{
-		if (!Script::IsNumber(argument))
-			Script::Throw("number expected");
-		float number = Script::ToNumber(argument);
-		if (!isfinite(number))
-			Script::Throw("number is invalid");
-		return number;
+		if (Script::IsNumber(argument))
+		{
+			float number = Script::ToNumber(argument);
+			if (!isfinite(number))
+				Script::Throw("number is invalid");
+			return number;
+		}
+		if (Script::IsInteger(argument))
+			return (float)Script::ToInteger(argument);
+		Script::Throw("number expected");
 	}
 
 	int GetFunction(int argument)
@@ -230,13 +241,13 @@ namespace LuaHelpers
 
 	void CheckModuleParameter(int argument)
 	{
-		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsString(argument))
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsInteger(argument) && !Script::IsString(argument))
 			Script::Throw("boolean, number or string expected");
 	}
 
 	void CheckParticleData(int argument)
 	{
-		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsNil(argument))
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsInteger(argument) && !Script::IsNil(argument))
 			Script::Throw("boolean, number or nil expected");
 	}
 

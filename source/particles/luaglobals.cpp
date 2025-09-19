@@ -257,9 +257,9 @@ namespace LuaGlobals
 				if (!strcmp(field, "pos"))
 				{
 					auto position = GetData<LuaObjectClassPosition>(-1);
-					itemptr->pos.xPos = lroundf(position->GetX());
-					itemptr->pos.yPos = lroundf(position->GetY());
-					itemptr->pos.zPos = lroundf(position->GetZ());
+					itemptr->pos.xPos = SaturateRound<int>(position->GetX());
+					itemptr->pos.yPos = SaturateRound<int>(position->GetY());
+					itemptr->pos.zPos = SaturateRound<int>(position->GetZ());
 					return;
 				}
 				break;
