@@ -489,7 +489,7 @@ bool Script::Require(const char* base)
 {
 	char name[100];
 
-	strcpy_s(name, "effects\\");
+	strcpy_s(name, "modulescripts\\");
 	strcat_s(name, base);
 	return LoadFunctions(name);
 }

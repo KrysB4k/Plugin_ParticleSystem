@@ -5,8 +5,8 @@ namespace
 {
 	enum ConsoleColour
 	{
-		COLOUR_AQUA,
 		COLOUR_WHITE,
+		COLOUR_GREEN,
 		COLOUR_YELLOW,
 		COLOUR_RED
 	};
@@ -28,11 +28,11 @@ namespace
 		{
 			switch (colour)
 			{
-			case COLOUR_AQUA:
-				SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-				break;
 			case COLOUR_WHITE:
 				SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+				break;
+			case COLOUR_GREEN:
+				SetConsoleTextAttribute(console, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 				break;
 			case COLOUR_YELLOW:
 				SetConsoleTextAttribute(console, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
@@ -118,7 +118,7 @@ void Logger::Information(const char* string)
 	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
-			SetConsoleColour(COLOUR_AQUA);
+			SetConsoleColour(COLOUR_WHITE);
 			WriteConsole(console, LEVEL_INFORMATION, strlen(LEVEL_INFORMATION), &bytes, nullptr);
 			WriteConsole(console, string, strlen(string), &bytes, nullptr);
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
@@ -147,7 +147,7 @@ void Logger::Debug(const char* string)
 	case LOGGER_CONSOLE:
 		if (console != INVALID_HANDLE_VALUE)
 		{
-			SetConsoleColour(COLOUR_WHITE);
+			SetConsoleColour(COLOUR_GREEN);
 			WriteConsole(console, LEVEL_DEBUG, strlen(LEVEL_DEBUG), &bytes, nullptr);
 			WriteConsole(console, string, strlen(string), &bytes, nullptr);
 			WriteConsole(console, NEWLINE, strlen(NEWLINE), &bytes, nullptr);
