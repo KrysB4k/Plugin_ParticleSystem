@@ -31,6 +31,9 @@ char TexMyPluginName[80];
 
 StrMyData MyData;
 
+const char* LevelScriptNames[MAX_LEVEL_SCRIPTS];
+int LevelScriptNamesCount;
+bool GlobalScriptIntegrityDefined, GlobalScriptIntegrity, LocalScriptIntegrityDefined, LocalScriptIntegrity;
 
 // ************  Utilities section  ****************
 
@@ -66,7 +69,7 @@ void InitialiseGame()
 	else if (Trng.MainPluginFlags == MPS_LOGGER_FILE)
 		Logger::Create(LoggerType::LOGGER_FILE);
 
-	Logger::SetLogLevel(LogLevel::LOG_DEBUG);
+	Logger::SetLogLevel(LogLevel::LOG_INFO);
 
 #ifdef DIAGNOSTICS
 	Diagnostics::Initialise();
@@ -75,54 +78,101 @@ void InitialiseGame()
 
 void CloseGame()
 {
-	Logger::Trace("CloseGame");
 	Logger::Close();
 }
 
 void InitialiseLevel()
 {
 	MyData.Save.Global.gameTick = 0;
+	LevelScriptNamesCount = 0;
 
-	Logger::Trace("InitialiseLevel");
+	if (!gfCurrentLevel)
+		GlobalScriptIntegrityDefined = false;
+
+	LocalScriptIntegrityDefined = false;
+
 	Script::NewState();
 	Particles::ClearParts();
 	Particles::ClearPartGroups();
 	Particles::ClearModules();
 	Particles::ClearFunctionRefs();
-	Logger::Information(Utilities::FormatString("Loading functions of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
-	Particles::InitLevelScript();
 #ifdef DIAGNOSTICS
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
 #endif
 }
 
+void CustomizeLevel(WORD CustomizeValue, int NumberOfItems, short* pItemArray)
+{
+	switch (CustomizeValue)
+	{
+	case CUST_LEVEL_SCRIPTS:
+		LevelScriptNamesCount = NumberOfItems <= MAX_LEVEL_SCRIPTS ? NumberOfItems : MAX_LEVEL_SCRIPTS;
+
+		for (int i = 0; i < LevelScriptNamesCount; i++)
+			LevelScriptNames[i] = GetString(STRING_NG | pItemArray[i]);
+
+		break;
+	case CUST_SCRIPT_INTEGRITY:
+
+		if (NumberOfItems >= 1)
+		{
+			if (!gfCurrentLevel)
+			{
+				GlobalScriptIntegrityDefined = true;
+				GlobalScriptIntegrity = pItemArray[0] == 1;
+			}
+
+			LocalScriptIntegrityDefined = true;
+			LocalScriptIntegrity = pItemArray[0] == 1;
+		}
+
+		break;
+	}
+}
+
+void LoadLevelScripts()
+{
+	if (LevelScriptNamesCount)
+		Logger::Information(Utilities::FormatString("Loading scripts of level: %s", gfCurrentLevel ? &gfStringWad[gfStringOffset[gfLevelNames[gfCurrentLevel]]] : "Title"));
+
+	for (int i = 0; i < LevelScriptNamesCount; i++)
+		Particles::InitLevelScript(LevelScriptNames[i]);
+}
+
 void CloseLevel()
 {
-	Logger::Trace("CloseLevel");
 	Script::Close();
 }
 
-void EmplaceData(void* opaque, const char* key)
+void ReadData(void* opaque)
 {
 	auto& dataList = *reinterpret_cast<std::list<std::vector<char>>*>(opaque);
 
+	auto key = Script::ToString(-2);
 	auto dataKey = dataList.emplace_back(strlen(key) + 1).data();
 	strcpy(dataKey, key);
 
 	if (Script::IsBoolean(-1))
 	{
-		auto dataValue = dataList.emplace_back(sizeof(char) + sizeof(bool)).data();
-		*dataValue = DATA_VALUE_BOOLEAN;
-		auto& value = *reinterpret_cast<bool*>(dataValue + sizeof(char));
-		value = Script::ToBoolean(-1);
+		auto dataType = dataList.emplace_back(sizeof(char) + sizeof(bool)).data();
+		*dataType = DATA_BOOLEAN;
+		auto dataValue = reinterpret_cast<bool*>(dataType + sizeof(char));
+		*dataValue = Script::ToBoolean(-1);
 	}
 	else if (Script::IsNumber(-1))
 	{
-		auto dataValue = dataList.emplace_back(sizeof(char) + sizeof(float)).data();
-		*dataValue = DATA_VALUE_NUMBER;
-		auto& value = *reinterpret_cast<float*>(dataValue + sizeof(char));
-		value = Script::ToNumber(-1);
+		auto dataType = dataList.emplace_back(sizeof(char) + sizeof(float)).data();
+		*dataType = DATA_NUMBER;
+		auto dataValue = reinterpret_cast<float*>(dataType + sizeof(char));
+		*dataValue = Script::ToNumber(-1);
+	}
+	else if (Script::IsInteger(-1))
+	{
+		auto dataType = dataList.emplace_back(sizeof(char) + sizeof(int)).data();
+		*dataType = DATA_INTEGER;
+		auto dataValue = reinterpret_cast<int*>(dataType + sizeof(char));
+		*dataValue = Script::ToInteger(-1);
 	}
 }
 
@@ -130,8 +180,6 @@ void SaveSpriteParticles(WORD** p2VetExtra, int* pNWords)
 {
 	std::vector<Particles::SpriteParticleSave> spriteSave;
 	std::list<std::vector<char>> spriteDataList;
-
-	Logger::Trace("SaveSpriteParticles");
 
 	auto& spriteCount = *reinterpret_cast<short*>(spriteDataList.emplace_back(sizeof(short)).data());
 	spriteCount = 0;
@@ -142,7 +190,7 @@ void SaveSpriteParticles(WORD** p2VetExtra, int* pNWords)
 			spriteSave.emplace_back(Particles::spriteParts[i]);
 
 			auto& spriteDataCount = *reinterpret_cast<short*>(spriteDataList.emplace_back(sizeof(short)).data());
-			spriteDataCount = Script::TraverseTable(Particles::spriteParts[i].data.table, &spriteDataList, EmplaceData);
+			spriteDataCount = Script::TraverseReadTable(Particles::spriteParts[i].data.table, &spriteDataList, ReadData);
 			spriteCount++;
 		}
 	}
@@ -166,8 +214,6 @@ void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
 	std::vector<Particles::MeshParticleSave> meshSave;
 	std::list<std::vector<char>> meshDataList;
 
-	Logger::Trace("SaveMeshParticles");
-
 	auto& meshCount = *reinterpret_cast<short*>(meshDataList.emplace_back(sizeof(short)).data());
 	meshCount = 0;
 	for (int i = 0; i < MAX_MESHPARTS; i++)
@@ -177,7 +223,7 @@ void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
 			meshSave.emplace_back(Particles::meshParts[i]);
 
 			auto& meshDataCount = *reinterpret_cast<short*>(meshDataList.emplace_back(sizeof(short)).data());
-			meshDataCount = Script::TraverseTable(Particles::meshParts[i].data.table, &meshDataList, EmplaceData);
+			meshDataCount = Script::TraverseReadTable(Particles::meshParts[i].data.table, &meshDataList, ReadData);
 			meshCount++;
 		}
 	}
@@ -200,7 +246,6 @@ void LoadSpriteParticles(WORD* pData)
 {
 	WORD TotParts;
 
-	Logger::Trace("LoadSpriteParticles");
 	TotParts = pData[0];
 	if (TotParts > 0)
 	{
@@ -214,7 +259,6 @@ void LoadMeshParticles(WORD* pData)
 {
 	WORD TotParts;
 
-	Logger::Trace("LoadMeshParticles");
 	TotParts = pData[0];
 	if (TotParts > 0)
 	{
@@ -224,43 +268,50 @@ void LoadMeshParticles(WORD* pData)
 	}
 }
 
+void AssignData(void* opaque)
+{
+	auto& ptr = *reinterpret_cast<char**>(opaque);
+
+	Script::PushString(ptr);
+	ptr += strlen(ptr) + 1;
+
+	if (*ptr == DATA_BOOLEAN)
+	{
+		auto dataValue = reinterpret_cast<bool*>(ptr + sizeof(char));
+		Script::PushBoolean(*dataValue);
+
+		ptr += sizeof(char) + sizeof(bool);
+	}
+	else if (*ptr == DATA_NUMBER)
+	{
+		auto dataValue = reinterpret_cast<float*>(ptr + sizeof(char));
+		Script::PushNumber(*dataValue);
+
+		ptr += sizeof(char) + sizeof(float);
+	}
+	else if (*ptr == DATA_INTEGER)
+	{
+		auto dataValue = reinterpret_cast<int*>(ptr + sizeof(char));
+		Script::PushInteger(*dataValue);
+
+		ptr += sizeof(char) + sizeof(int);
+	}
+}
+
 void LoadSpriteParticlesData(WORD* pData)
 {
 	char* ptr;
 
-	Logger::Trace("LoadSpriteParticlesData");
-
 	ptr = reinterpret_cast<char*>(pData);
 
-	auto& spriteCount = *reinterpret_cast<short*>(ptr);
+	int spriteCount = *reinterpret_cast<short*>(ptr);
 	ptr += sizeof(short);
 	for (int i = 0; i < spriteCount; i++)
 	{
-		auto& spriteDataCount = *reinterpret_cast<short*>(ptr);
+		int spriteDataCount = *reinterpret_cast<short*>(ptr);
 		ptr += sizeof(short);
-		for (int j = 0; j < spriteDataCount; j++)
-		{
-			auto key = ptr;
-			ptr += strlen(key) + 1;
 
-			if (*ptr == DATA_VALUE_BOOLEAN)
-			{
-				auto& value = *reinterpret_cast<bool*>(ptr + sizeof(char));
-				ptr += sizeof(char) + sizeof(bool);
-
-				Script::PushBoolean(value);
-			}
-			else if (*ptr == DATA_VALUE_NUMBER)
-			{
-				auto& value = *reinterpret_cast<float*>(ptr + sizeof(char));
-				ptr += sizeof(char) + sizeof(float);
-
-				Script::PushNumber(value);
-			}
-
-			Script::AssignTableValue(Particles::spriteParts[i].data.table, key, -1);
-			Script::Pop();
-		}
+		Script::TraverseAssignTable(Particles::spriteParts[i].data.table, spriteDataCount, &ptr, AssignData);
 	}
 }
 
@@ -268,39 +319,16 @@ void LoadMeshParticlesData(WORD* pData)
 {
 	char* ptr;
 
-	Logger::Trace("LoadMeshParticlesData");
-
 	ptr = reinterpret_cast<char*>(pData);
 
-	auto& meshCount = *reinterpret_cast<short*>(ptr);
+	int meshCount = *reinterpret_cast<short*>(ptr);
 	ptr += sizeof(short);
 	for (int i = 0; i < meshCount; i++)
 	{
-		auto& meshDataCount = *reinterpret_cast<short*>(ptr);
+		int meshDataCount = *reinterpret_cast<short*>(ptr);
 		ptr += sizeof(short);
-		for (int j = 0; j < meshDataCount; j++)
-		{
-			auto key = ptr;
-			ptr += strlen(key) + 1;
 
-			if (*ptr == DATA_VALUE_BOOLEAN)
-			{
-				auto& value = *reinterpret_cast<bool*>(ptr + sizeof(char));
-				ptr += sizeof(char) + sizeof(bool);
-
-				Script::PushBoolean(value);
-			}
-			else if (*ptr == DATA_VALUE_NUMBER)
-			{
-				auto& value = *reinterpret_cast<float*>(ptr + sizeof(char));
-				ptr += sizeof(char) + sizeof(float);
-
-				Script::PushNumber(value);
-			}
-
-			Script::AssignTableValue(Particles::meshParts[i].data.table, key, -1);
-			Script::Pop();
-		}
+		Script::TraverseAssignTable(Particles::meshParts[i].data.table, meshDataCount, &ptr, AssignData);
 	}
 }
 
@@ -391,6 +419,8 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// here you can initialize specific items of currnet level.
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
+
+	LoadLevelScripts();
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
@@ -742,6 +772,8 @@ void cbCustomizeMine(WORD CustomizeValue, int NumberOfItems, short *pItemArray)
 
 	MyData.BaseCustomizeMine.TotCustomize= TotCust;
 	// ---- end of default managemnt for generic customize -------------	
+
+	CustomizeLevel(CustomizeValue, NumberOfItems, pItemArray);
 }
 // callback called everytime in current level section of the script it has been found an AssignSlot command
 // with one of your OBJ_ constants

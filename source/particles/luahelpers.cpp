@@ -10,9 +10,16 @@ namespace LuaHelpers
 {
 	int GetInteger(int argument)
 	{
-		if (!Script::IsInteger(argument))
-			Script::Throw("integer expected");
-		return Script::ToInteger(argument);
+		if (Script::IsInteger(argument))
+			return Script::ToInteger(argument);
+		if (Script::IsNumber(argument))
+		{
+			float number = Script::ToNumber(argument);
+			if (!isfinite(number))
+				Script::Throw("number is invalid");
+			return SaturateRound<int>(number);
+		}
+		Script::Throw("number expected");
 	}
 
 	bool GetBoolean(int argument)
@@ -24,9 +31,16 @@ namespace LuaHelpers
 
 	float GetNumber(int argument)
 	{
-		if (!Script::IsNumber(argument))
-			Script::Throw("number expected");
-		return Script::ToNumber(argument);
+		if (Script::IsNumber(argument))
+		{
+			float number = Script::ToNumber(argument);
+			if (!isfinite(number))
+				Script::Throw("number is invalid");
+			return number;
+		}
+		if (Script::IsInteger(argument))
+			return (float)Script::ToInteger(argument);
+		Script::Throw("number expected");
 	}
 
 	int GetFunction(int argument)
@@ -87,29 +101,6 @@ namespace LuaHelpers
 		}
 		Script::EmitFailure(FormatString("%d does not correspond to a valid NGLE index", ngindex), Logger::Warning);
 		return -1;
-	}
-
-	float GetMathResult(int argument, float (*operation)(float))
-	{
-		float x, result;
-
-		x = GetNumber(argument);
-		result = operation(x);
-		if (!isnan(x) && isnan(result))
-			Script::EmitFailure("the operation resulted in a NaN", Logger::Warning);
-		return result;
-	}
-
-	float GetMathResult(int firstArgument, int secondArgument, float (*operation)(float, float))
-	{
-		float x, y, result;
-
-		x = GetNumber(firstArgument);
-		y = GetNumber(secondArgument);
-		result = operation(x, y);
-		if (!isnan(x) && !isnan(y) && isnan(result))
-			Script::EmitFailure("the operation resulted in a NaN", Logger::Warning);
-		return result;
 	}
 
 	int GetClampedInteger(int argument, int min, int max, bool throwBoundsError)
@@ -228,11 +219,15 @@ namespace LuaHelpers
 	{
 		Particles::CallerGuard guard(FUNCTION_MODULE);
 		auto string = GetBoundedLuaString(argument, 50);
+		Logger::Information(FormatString("Loading module: %s", string));
 		Script::PreFunctionLoop();
 		if (!Script::Require(string))
-			Script::EmitFailure(FormatString("cannot load '%s' module", string), Logger::Warning);
-		else
-			Logger::Information(FormatString("loaded module '%s'", string));
+		{
+			if (!GetScriptIntegrity())
+				Script::EmitFailure(FormatString("cannot load '%s' module", string), Logger::Error);
+			else
+				ExitSystem(FormatString("Module '%s' cannot be found.", string));
+		}
 		Script::PostFunctionLoop();
 		int last = Particles::GetLastModule();
 		if (last != -1 && Particles::modules[last].createdInCurrentModule)
@@ -246,30 +241,51 @@ namespace LuaHelpers
 
 	void CheckModuleParameter(int argument)
 	{
-		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsString(argument))
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsInteger(argument) && !Script::IsString(argument))
 			Script::Throw("boolean, number or string expected");
 	}
 
 	void CheckParticleData(int argument)
 	{
-		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsNil(argument))
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsInteger(argument) && !Script::IsNil(argument))
 			Script::Throw("boolean, number or nil expected");
 	}
 
-	int GetBoundFunction(int index)
+	Particles::BoundFunction* GetBoundFunction(int index)
 	{
 		if (index < 1)
 		{
-			Script::EmitFailure(FormatString("%d is less than the minimum of %d, clamping to minimum", index, 1), Logger::Warning);
-			index = 1;
+			Script::EmitFailure(FormatString("index %d is less than the minimum of %d", index, 1), Logger::Error);
+			return nullptr;
 		}
-		else if (index > MAX_FUNCREFS)
+		if (index > MAX_FUNCREFS)
 		{
-			Script::EmitFailure(FormatString("%d is greater than the maximum of %d, clamping to maximum", index, MAX_FUNCREFS), Logger::Warning);
-			index = MAX_FUNCREFS;
+			Script::EmitFailure(FormatString("index %d is greater than the maximum of %d", index, MAX_FUNCREFS), Logger::Error);
+			return nullptr;
 		}
-		if (Particles::functionRefs[index - 1].ref == SCRIPT_REFNIL)
-			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Warning);
-		return index - 1;
+		auto function = &Particles::functionRefs[index - 1];
+		if (function->ref == SCRIPT_REFNIL)
+		{
+			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Error);
+			return nullptr;
+		}
+		return function;
+	}
+
+	bool GetScriptIntegrity()
+	{
+		if (LocalScriptIntegrityDefined)
+			return LocalScriptIntegrity;
+
+		if (GlobalScriptIntegrityDefined)
+			return GlobalScriptIntegrity;
+
+		return false;
+	}
+
+	void ExitSystem(const char* message)
+	{
+		MessageBox(NULL, message, "Plugin_ParticleSystem", MB_ICONWARNING);
+		TerminateProcess(GetCurrentProcess(), 0);
 	}
 }

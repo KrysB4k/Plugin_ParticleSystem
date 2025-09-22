@@ -17,7 +17,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, fabsf));
+			Script::PushNumber(fabs(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -26,7 +26,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, acosf));
+			Script::PushNumber(acos(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -35,7 +35,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, asinf));
+			Script::PushNumber(asin(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -44,7 +44,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, atanf));
+			Script::PushNumber(atan(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -53,7 +53,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, 2, atan2f));
+			float y = GetNumber(1);
+			float x = GetNumber(2);
+			Script::PushNumber(atan2(y, x));
 			return 1;
 		}
 	};
@@ -87,7 +89,7 @@ namespace LuaFunctions
 			auto group = GetData<Particles::ParticleGroup>(2);
 			if (group->autoTrigger)
 			{
-				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Warning);
+				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Error);
 				return 0;
 			}
 			Particles::functionRefs[index].ref = group->initIndex;
@@ -136,7 +138,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, ceilf));
+			Script::PushNumber(ceil(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -145,7 +147,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, cbrtf));
+			Script::PushNumber(cbrt(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -166,7 +168,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, cosf));
+			Script::PushNumber(cos(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -187,9 +189,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			uchar r = (uchar)GetClampedInteger(1, 0, 255, false);
-			uchar g = (uchar)GetClampedInteger(2, 0, 255, false);
-			uchar b = (uchar)GetClampedInteger(3, 0, 255, false);
+			uchar r = (uchar)GetClampedInteger(1, 0, UINT8_MAX, false);
+			uchar g = (uchar)GetClampedInteger(2, 0, UINT8_MAX, false);
+			uchar b = (uchar)GetClampedInteger(3, 0, UINT8_MAX, false);
 			ConstructManagedData<ColorRGB>(r, g, b);
 			return 1;
 		}
@@ -364,7 +366,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, expf));
+			Script::PushNumber(exp(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -387,7 +389,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, floorf));
+			Script::PushNumber(floor(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -396,7 +398,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, 2, fmodf));
+			float x = GetNumber(1);
+			float y = GetNumber(2);
+			Script::PushNumber(fmod(x, y));
 			return 1;
 		}
 	};
@@ -502,7 +506,7 @@ namespace LuaFunctions
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->autoTrigger)
 			{
-				Script::EmitFailure("this group cannot be invoked because it is auto triggered", Logger::Warning);
+				Script::EmitFailure("this group cannot be invoked because it is auto triggered", Logger::Error);
 				return 0;
 			}
 			Script::PreFunctionLoop();
@@ -583,7 +587,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, logf));
+			Script::PushNumber(log(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -606,7 +610,7 @@ namespace LuaFunctions
 		{
 			auto part = GetData<Particles::MeshParticle>(1);
 			Vector3f vector = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
-			float factor = GetClampedNumber(3, 0.0, 1.0f, false);
+			float factor = GetClampedNumber(3, 0.0f, 1.0f, false);
 			bool invert = GetBoolean(4);
 			part->AlignToTarget(vector, factor, invert);
 			return 0;
@@ -1026,7 +1030,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushInteger(lroundf(GetNumber(1)));
+			Script::PushInteger(SaturateRound<int>(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1045,7 +1049,7 @@ namespace LuaFunctions
 		int Call() final
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "setLogLevel");
-			LogLevel requested = static_cast<LogLevel>(GetClampedInteger(1, LogLevel::LOG_TRACE, LogLevel::LOG_FATAL, false));
+			LogLevel requested = static_cast<LogLevel>(GetClampedInteger(1, LogLevel::LOG_INFO, LogLevel::LOG_ERROR, false));
 			Logger::SetLogLevel(requested);
 			return 0;
 		}
@@ -1055,7 +1059,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, sinf));
+			Script::PushNumber(sin(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1081,9 +1085,9 @@ namespace LuaFunctions
 			if (!Script::IsNil(2))
 			{
 				auto pos = GetData<LuaObjectClassPosition>(2);
-				vec.x = lround(pos->GetX());
-				vec.y = lround(pos->GetY());
-				vec.z = lround(pos->GetZ());
+				vec.x = SaturateRound<int>(pos->GetX());
+				vec.y = SaturateRound<int>(pos->GetY());
+				vec.z = SaturateRound<int>(pos->GetZ());
 				pvec = &vec;
 			}
 
@@ -1166,7 +1170,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, sqrtf));
+			Script::PushNumber(sqrt(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1175,7 +1179,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			Script::PushNumber(GetMathResult(1, tanf));
+			Script::PushNumber(tan(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -1200,9 +1204,9 @@ namespace LuaFunctions
 			int y = GetInteger(2);
 			int z = GetInteger(3);
 			int intensity = GetInteger(4);
-			int red = GetClampedInteger(5, 0, 255, false);
-			int green = GetClampedInteger(6, 0, 255, false);
-			int blue = GetClampedInteger(7, 0, 255, false);
+			int red = GetClampedInteger(5, 0, UINT8_MAX, false);
+			int green = GetClampedInteger(6, 0, UINT8_MAX, false);
+			int blue = GetClampedInteger(7, 0, UINT8_MAX, false);
 			TriggerDynamic(x, y, z, intensity, red, green, blue);
 			return 0;
 		}
@@ -1215,13 +1219,13 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			int innerRad = GetClampedInteger(4, -32768, 32767, false);
-			int outerRad = GetClampedInteger(5, -32768, 32767, false);
+			int innerRad = GetClampedInteger(4, INT16_MIN, INT16_MAX, false);
+			int outerRad = GetClampedInteger(5, INT16_MIN, INT16_MAX, false);
 			int speed = GetInteger(6);
-			int life = GetClampedInteger(7, 0, 255, false);
-			int red = GetClampedInteger(8, 0, 255, false);
-			int green = GetClampedInteger(9, 0, 255, false);
-			int blue = GetClampedInteger(10, 0, 255, false);
+			int life = GetClampedInteger(7, 0, UINT8_MAX, false);
+			int red = GetClampedInteger(8, 0, UINT8_MAX, false);
+			int green = GetClampedInteger(9, 0, UINT8_MAX, false);
+			int blue = GetClampedInteger(10, 0, UINT8_MAX, false);
 			int xRot = RadToShort(GetNumber(11));
 			int flags = GetInteger(12);
 			auto vec = phd_vector(x, y, z);

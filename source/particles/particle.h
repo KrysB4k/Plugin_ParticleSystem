@@ -98,10 +98,11 @@ enum FunctionType
 	FUNCTION_UPDATE = 0x10
 };
 
-enum DataValueType
+enum DataType
 {
-	DATA_VALUE_BOOLEAN,
-	DATA_VALUE_NUMBER
+	DATA_BOOLEAN,
+	DATA_NUMBER,
+	DATA_INTEGER
 };
 
 namespace Particles
@@ -343,7 +344,6 @@ namespace Particles
 
 		ushort		sizeStart;
 		ushort		sizeEnd;
-		ushort		sizeCust;
 		short		sizeRatio;
 
 		short		rot;
@@ -356,7 +356,6 @@ namespace Particles
 
 		uchar	colStartR, colStartG, colStartB;
 		uchar	colEndR, colEndG, colEndB;
-		uchar	colCustR, colCustG, colCustB;
 	};
 
 	struct MeshParticleSave
@@ -422,7 +421,7 @@ namespace Particles
 	void ClearFunctionRefs();
 
 	void InitParts();
-	void InitLevelScript();
+	void InitLevelScript(const char* base);
 
 	void UpdateParts();
 	void UpdateSprites();

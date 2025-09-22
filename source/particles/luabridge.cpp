@@ -285,17 +285,17 @@ float LuaItemInfoPos::GetZ()
 
 void LuaItemInfoPos::SetX(float x)
 {
-	pos->xPos = lround(x);
+	pos->xPos = SaturateRound<int>(x);
 }
 
 void LuaItemInfoPos::SetY(float y)
 {
-	pos->yPos = lround(y);
+	pos->yPos = SaturateRound<int>(y);
 }
 
 void LuaItemInfoPos::SetZ(float z)
 {
-	pos->zPos = lround(z);
+	pos->zPos = SaturateRound<int>(z);
 }
 
 LuaItemInfoPos::operator Vector3f()
