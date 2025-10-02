@@ -707,15 +707,18 @@ namespace Particles
 				if (!strcmp(field, "emitterIndex"))
 				{
 					emitterIndex = GetClampedInteger(-1, -1, level_items - 1, false);
-					if (emitterIndex != -1)
+					if (emitterIndex != NO_ITEM)
+					{
 						emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+						roomIndex = items[emitterIndex].room_number;
+					}
 					else
 						emitterNode = NO_MESH;
 					return;
 				}
 				if (!strcmp(field, "emitterNode"))
 				{
-					if (emitterIndex != -1)
+					if (emitterIndex != NO_ITEM)
 						emitterNode = GetClampedInteger(-1, -1, objects[items[emitterIndex].object_number].nmeshes - 1, false);
 					return;
 				}

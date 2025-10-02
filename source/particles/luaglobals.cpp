@@ -122,7 +122,7 @@ namespace LuaGlobals
 				}
 				break;
 			case 'r':
-				if (!strcmp(field, "roomNumber"))
+				if (!strcmp(field, "roomIndex"))
 				{
 					Script::PushInteger(itemptr->room_number);
 					return;
@@ -172,8 +172,8 @@ namespace LuaGlobals
 			case 'a':
 				if (!strcmp(field, "animNumber"))
 				{
-					int maxAnim = objects[itemptr->object_number + 1].anim_index - 1;
-					int anim = GetClampedInteger(-1, 0, maxAnim, false) + objects[itemptr->object_number].anim_index;
+					//int maxAnim = objects[itemptr->object_number + 1].anim_index - 1;
+					int anim = GetClampedInteger(-1, 0, 1000, false) + objects[itemptr->object_number].anim_index;
 					itemptr->anim_number = anim;
 					itemptr->frame_number = anims[itemptr->anim_number].frame_base;
 					return;
@@ -264,7 +264,7 @@ namespace LuaGlobals
 				}
 				break;
 			case 'r':
-				if (!strcmp(field, "roomNumber"))
+				if (!strcmp(field, "roomIndex"))
 				{
 					ReadOnlyFieldError(field);
 				}
