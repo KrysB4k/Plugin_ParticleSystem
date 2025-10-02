@@ -44,6 +44,8 @@ namespace Utilities
 	short RadToShort(float angle);
 	float GetRandom();
 	float RandomNegate(float x);
+	Vector3f RandomSpherePoint(float r);
+	float Remap(float x, float oldMin, float oldMax, float newMin, float newMax);
 	float DegToRad(float deg);
 	float RadToDeg(float rad);
 	ushort ConvertTo16BitBGR(const ColorRGB& c);

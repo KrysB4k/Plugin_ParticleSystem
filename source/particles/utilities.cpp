@@ -438,6 +438,35 @@ namespace Utilities
 		return (mt() & 1) ? x : -x;
 	}
 
+	Vector3f RandomSpherePoint(float r)
+	{
+		float x1, x2, s;
+		do
+		{
+			x1 = GetRandom() * 2.0f - 1.0f;
+			x2 = GetRandom() * 2.0f - 1.0f;
+			s = x1 * x1 + x2 * x2;
+		} while (s >= 1.0f || s == 0.0f);
+
+		float factor = sqrtf(1.0f - s);
+
+		float x = x1 * factor * 2.0f;
+		float y = x2 * factor * 2.0f;
+		float z = 1.0f - (2.0f * s);
+
+		return Vector3f(x * r, y * r, z * r);
+	}
+
+	float Remap(float x, float oldMin, float oldMax, float newMin, float newMax)
+	{
+		float dif = fabsf(oldMax - oldMin);
+		if (dif <= 0.0f)
+			return x;
+		float min = fminf(oldMin, oldMax);
+		float mult = Clamp(x - min, 0.0f, dif) / dif;
+		return (fminf(newMin, newMax) + fabsf(newMax - newMin) * mult);
+	}
+
 	ushort ConvertTo16BitBGR(const ColorRGB& c)
 	{
 		ushort r = (c.R & 0xF8) >> 3;

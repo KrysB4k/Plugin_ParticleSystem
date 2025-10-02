@@ -1016,6 +1016,31 @@ namespace LuaFunctions
 		}
 	};
 
+	struct RandomSpherePointFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			ConstructManagedData<Vector3f>(RandomSpherePoint(GetNumber(1)));
+			return 1;
+		}
+	};
+
+	struct RemapFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			float x = GetNumber(1);
+			float oldMin = GetNumber(2);
+			float oldMax = GetNumber(3);
+			float newMin = GetNumber(4);
+			float newMax = GetNumber(5);
+
+			Script::PushNumber(Remap(x, oldMin, oldMax, newMin, newMax));
+
+			return 1;
+		}
+	};
+
 	struct RequireFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1377,6 +1402,8 @@ namespace LuaFunctions
 	RandfloatFunction RandfloatFunc;
 	RandintFunction RandintFunc;
 	RandomNegateFunction RandomNegateFunc;
+	RandomSpherePointFunction RandomSpherePointFunc;
+	RemapFunction RemapFunc;
 	RequireFunction RequireFunc;
 	RoundFunction RoundFunc;
 	SelectItemFunction SelectItemFunc;
@@ -1578,6 +1605,10 @@ namespace LuaFunctions
 				return &RandintFunc;
 			if (!strcmp(field, "randomNegate"))
 				return &RandomNegateFunc;
+			if (!strcmp(field, "randomSpherePoint"))
+				return &RandomSpherePointFunc;
+			if (!strcmp(field, "remap"))
+				return &RemapFunc;
 			if (!strcmp(field, "require"))
 				return &RequireFunc;
 			if (!strcmp(field, "round"))
