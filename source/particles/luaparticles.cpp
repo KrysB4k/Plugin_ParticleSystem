@@ -963,7 +963,7 @@ namespace Particles
 			switch (field[0])
 			{
 			case 'm':
-				if (!strcmp(field, "mesh"))
+				if (!strcmp(field, "meshIndex"))
 				{
 					Script::PushInteger(mesh);
 					return;
@@ -1024,7 +1024,7 @@ namespace Particles
 			switch (field[0])
 			{
 			case 'm':
-				if (!strcmp(field, "mesh"))
+				if (!strcmp(field, "meshIndex"))
 				{
 					mesh = GetClampedInteger(-1, 0, objects[object].nmeshes - 1, false);
 					return;

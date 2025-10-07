@@ -1432,6 +1432,8 @@ namespace LuaGlobals
 				return std::optional((float)M_PI_2);
 			if (!strcmp(field, "PI_QUART"))
 				return std::optional((float)M_PI_4);
+			if (!strcmp(field, "PI_THIRD"))
+				return std::optional((float)M_PI / 3.0f);
 			if (!strcmp(field, "PI_TWO"))
 				return std::optional((float)M_PI * 2.0f);
 			break;

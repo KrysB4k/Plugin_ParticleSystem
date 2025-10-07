@@ -1562,33 +1562,33 @@ namespace LuaFunctions
 			break;
 
 		case 'p':
-			if (!strcmp(field, "particleAbsPosition"))
+			if (!strcmp(field, "partAbsPos"))
 				return &ParticleAbsPosFunc;
-			if (!strcmp(field, "particleAnimate"))
+			if (!strcmp(field, "partAnimate"))
 				return &ParticleAnimateFunc;
-			if (!strcmp(field, "particleAttach"))
+			if (!strcmp(field, "partAttach"))
 				return &ParticleAttachFunc;
-			if (!strcmp(field, "particleAttractToItem"))
+			if (!strcmp(field, "partAttractToItem"))
 				return &ParticleAttractToItemFunc;
-			if (!strcmp(field, "particleAvoidRoomGeometry"))
+			if (!strcmp(field, "partAvoidRoomGeometry"))
 				return &ParticleAvoidRoomGeometryFunc;
-			if (!strcmp(field, "particleCollidedItem"))
+			if (!strcmp(field, "partCollidedItem"))
 				return &ParticleCollidedItemFunc;
-			if (!strcmp(field, "particleCollideFloors"))
+			if (!strcmp(field, "partCollideFloors"))
 				return &ParticleCollideFloorsFunc;
-			if (!strcmp(field, "particleCollideWalls"))
+			if (!strcmp(field, "partCollideWalls"))
 				return &ParticleCollideWallsFunc;
-			if (!strcmp(field, "particleDetach"))
+			if (!strcmp(field, "partDetach"))
 				return &ParticleDetachFunc;
-			if (!strcmp(field, "particleFollow"))
+			if (!strcmp(field, "partFollow"))
 				return &ParticleFollowTargetFunc;
-			if (!strcmp(field, "particleHoming"))
+			if (!strcmp(field, "partHoming"))
 				return &ParticleHomingFunc;
-			if (!strcmp(field, "particleKill"))
+			if (!strcmp(field, "partKill"))
 				return &ParticleKillFunc;
-			if (!strcmp(field, "particleLimitSpeed"))
+			if (!strcmp(field, "partLimitSpeed"))
 				return &ParticleLimitSpeedFunc;
-			if (!strcmp(field, "particleWind"))
+			if (!strcmp(field, "partWind"))
 				return &ParticleWindVelocityFunc;
 			if (!strcmp(field, "performTriggerGroup"))
 				return &PerformTriggerGroupFunc;
@@ -1599,9 +1599,9 @@ namespace LuaFunctions
 		case 'r':
 			if (!strcmp(field, "radToDeg"))
 				return &RadToDegFunc;
-			if (!strcmp(field, "randfloat"))
+			if (!strcmp(field, "randomFloat"))
 				return &RandfloatFunc;
-			if (!strcmp(field, "randint"))
+			if (!strcmp(field, "randomInt"))
 				return &RandintFunc;
 			if (!strcmp(field, "randomNegate"))
 				return &RandomNegateFunc;
