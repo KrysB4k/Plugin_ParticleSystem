@@ -862,12 +862,10 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
-			bool bounce = GetBoolean(2);
-			float rebound = GetClampedNumber(3, 0.0f, 1.0f, false);
-			float minbounce = GetNumber(4);
-			int margin = GetInteger(5);
-			bool accurate = GetBoolean(6);
-			Script::PushBoolean(part->CollideFloors(bounce, rebound, minbounce, margin, accurate));
+			float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
+			int margin = GetInteger(3);
+			bool accurate = GetBoolean(4);
+			Script::PushBoolean(part->CollideFloors(true, rebound, 1.0f, margin, accurate));
 			return 1;
 		}
 	};
@@ -877,9 +875,8 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
-			bool bounce = GetBoolean(2);
-			float rebound = GetClampedNumber(3, 0.0f, 1.0f, false);
-			Script::PushBoolean(part->CollideWalls(bounce, rebound));
+			float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
+			Script::PushBoolean(part->CollideWalls(true, rebound));
 			return 1;
 		}
 	};
