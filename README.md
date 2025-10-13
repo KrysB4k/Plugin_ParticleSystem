@@ -4,7 +4,10 @@
 
 
 ## 1. What is Plugin_ParticleSystem?
-It is a plugin for the **TRNG + FLEP** engine enhancements of **Tomb Raider Level Editor** (TRLE). It adds a dynamic particle engine that is under full user scripting control. It allows TRLE builders to create custom particle effects, going far beyond the capabilities of FLEP or TRNG. The particle engine is augumented with a responsive and extensive **Scripting API** (Application Programming Interface), which allows direct communication with the plugin, through Lua. Users can write custom **Lua scripts** that implement particle effects in the form of **modules**, which can then be used in TRLE projects or shared among other members of the community.
+It is a plugin for the **TRNG + FLEP** engine enhancements of **Tomb Raider Level Editor** (TRLE). It adds a dynamic particle engine that is under full user scripting control. It allows TRLE builders to create custom particle effects, going far beyond the capabilities of FLEP or TRNG.
+
+The particle engine is augumented with a responsive and extensive **Scripting API** (Application Programming Interface), which allows direct communication with the plugin, through Lua. Users can write custom **Lua scripts** that implement particle effects in the form of **modules**, which can then be used in TRLE projects or shared among other members of the community.
+
 
 ## Feature Showcase - example particle effects achievable with the plugin
 
@@ -54,8 +57,10 @@ It is a plugin for the **TRNG + FLEP** engine enhancements of **Tomb Raider Leve
 </a>
 
 
+
 ## 2. What engine version is this plugin for?
 The targetted engine version is **TRNG 1.3.0.7**, combined with the FLEP patching system for best results.
+
 
 ## 3. How do you install this plugin?
 The plugin's binary builds are bundled as **releases** on this repository. Always download the plugin ZIP package from the latest available release for bugfixes and improvements!
@@ -67,6 +72,7 @@ Download the ZIP archive from the latest release. Open your TRLE project in Tomb
 
 ### 3.2 When using NG Center
 Download the ZIP archive from the latest release. Open NG Center and switch to your current TRLE project, if necessary. Go to the **Plugins** tab, then click **Install new Plugin**. Select **Install from ZIP**, locate the plugin ZIP in the file explorer and select it. The plugin should now be installed and ready to use.
+
 
 ## 4. How to use this plugin?
 This plugin is very robust and its usage cannot be explained in a single paragraph of text. A dedicated series of manuals explaining how to use it were created. They are being written an will be gradually updated with more contents in future releases. Each plugin release comes bundled with a copy of the manual available at the time of the release (in the **Manual** subfolder). However, the most up-to-date version will be hosted online as a GitHub Pages website, under this link:
@@ -83,12 +89,14 @@ The **Coder Path** is still in development and new chapters will be added gradua
 
 Coming soon, an **API Reference** will be hosted and updated with new functionalities and features in future plugin releases.
 
+
 ## 5. I found a bug in the plugin / I have a complaint about some feature. Where can I report it?
 We mainly accept bug reports on the Issues section of this repository. Reporting an issue requires registering a (free) GitHub account.
 
 Additionally, we will accept bug reports in the Tomb Raider Forums thread pertaining to this plugin:
 
 Reports through other communcation routes (e.g. personal messages) can be given, but we still strongly recommend creating an Issues entry in this repository, or making a post in the TRF thread, so to keep everything tidy and organized.
+
 
 ## 6. Credits
 This plugin was co-developed by:
