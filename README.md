@@ -69,10 +69,10 @@ The plugin's binary builds are bundled as [**releases**](https://github.com/Krys
 The exact steps of plugin installation depend on whether you are managing your TRLE project with TombIDE from the [Tomb Editor suite](https://github.com/TombEngine/TombEditorReleases/releases) or with old NG Center.
 
 ### 3.1 When using TombIDE
-Download the ZIP archive from the latest release. Open your TRLE project in TombIDE, go to the **Plugin Manager** tab and click **Install plugin from .zip archive**. In the file explorer, find the plugin ZIP file and select it. The plugin should now be installed and ready to use.
+Download the **Plugin_ParticleSystem** ZIP archive from the latest release. Open your TRLE project in TombIDE, go to the **Plugin Manager** tab and click **Install plugin from .zip archive**. In the file explorer, find the plugin ZIP file and select it. The plugin should now be installed and ready to use.
 
 ### 3.2 When using NG Center
-Download the ZIP archive from the latest release. Open NG Center and switch to your current TRLE project, if necessary. Go to the **Plugins** tab, then click **Install new Plugin**. Select **Install from ZIP**, locate the plugin ZIP in the file explorer and select it. The plugin should now be installed and ready to use.
+Download the **Plugin_ParticleSystem** ZIP archive from the latest release. Open NG Center and switch to your current TRLE project, if necessary. Go to the **Plugins** tab, then click **Install new Plugin**. Select **Install from ZIP**, locate the plugin ZIP in the file explorer and select it. The plugin should now be installed and ready to use.
 
 
 ## 4. How to use this plugin?
