@@ -22,27 +22,22 @@ The particle engine is augumented with a responsive and extensive **Scripting AP
 	<img src="https://img.youtube.com/vi/yqc19lnccN4/0.jpg"alt="Video 2" width="240" height="180" border="10" />
 </a>
 
-### Firefly emitter
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=m-qeH2Q5OEU" target="_blank">
-	<img src="https://img.youtube.com/vi/m-qeH2Q5OEU/0.jpg"alt="Video 3" width="240" height="180" border="10" />
-</a>
-
-### Bat emitter - animated particles with swarm intelligence
+### Animated particles with swarm intelligence
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=mzR5-LadmRU" target="_blank">
 	<img src="https://img.youtube.com/vi/mzR5-LadmRU/0.jpg"alt="Video 4" width="240" height="180" border="10" />
 </a>
 
-### Autumn leaves emitter
+### Autumn leaves
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=yMgZJK-JQsk" target="_blank">
 	<img src="https://img.youtube.com/vi/yMgZJK-JQsk/0.jpg"alt="Video 5" width="240" height="180" border="10" />
 </a>
 
-### Better AddEffects - attaching arbitrary particles to meshes of moveables
+### Better AddEffects - attaching custom particles to meshes of moveables
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=lXhmGMtjqaU" target="_blank">
 	<img src="https://img.youtube.com/vi/lXhmGMtjqaU/0.jpg"alt="Video 6" width="240" height="180" border="10" />
 </a>
 
-### Particles with complex custom behavior - collisions with room geometry, spawning shockwaves
+### Particles with complex custom behavior - collisions with room geometry, spawning shockwaves, etc.
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=qSH70ALZ8L4" target="_blank">
 	<img src="https://img.youtube.com/vi/qSH70ALZ8L4/0.jpg"alt="Video 7" width="240" height="180" border="10" />
 </a>
@@ -50,6 +45,9 @@ The particle engine is augumented with a responsive and extensive **Scripting AP
 ### ScreenSpace particles - particles which exist in the game screen foreground
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=PbC29phy0ks" target="_blank">
 	<img src="https://img.youtube.com/vi/PbC29phy0ks/0.jpg"alt="Video 8" width="240" height="180" border="10" />
+</a>
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=qSMAS30MvZM" target="_blank">
+	<img src="https://img.youtube.com/vi/qSMAS30MvZM/0.jpg"alt="Video 8" width="240" height="180" border="10" />
 </a>
 
 ### Scripting custom weapon types or traps:
