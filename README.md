@@ -63,7 +63,7 @@ The targeted engine version is **TRNG 1.3.0.7**, combined with the FLEP patching
 
 
 ## 3. How do you install this plugin?
-The plugin's binary builds are bundled as **releases** on this repository. Always download the plugin ZIP package from the latest available release for bugfixes and improvements!
+The plugin's binary builds are bundled as [**releases**](https://github.com/KrysB4k/Plugin_ParticleSystem/releases) on this repository. Always download the plugin ZIP package from the latest available release for bugfixes and improvements!
 
 The exact steps of plugin installation depend on whether you are managing your TRLE project with TombIDE from the [Tomb Editor suite](https://github.com/TombEngine/TombEditorReleases/releases) or with old NG Center.
 
@@ -85,9 +85,9 @@ To learn how to import existing **effect modules** into your TRLE project, follo
 ### 4.2 Scripting your own effects
 To learn how to script your own effects, follow the [**Coder Path**](https://krysb4k.github.io/ParticleManual/coder/CoderIntro.html) in the manual. It describes everything about the scripting process in great detail, including a basic rundown of the Lua scripting language and how to script your first **effect modules** and use them in your levels. Although prior experience with Lua or programming in general can help, it is not required. The **Coder Path** is tailored to any skill level, including complete beginners. That being said, a solid grasp of more advanced TRNG scripting (Global Triggers, Trigger Groups, Organizers, Conditions) is certainly recommended for this path.
 
-The **Coder Path** is still in development and new chapters will be added gradually, when ready, so be sure to check out the online manual version!
+The **Coder Path** is still in development and new chapters will be added gradually, when ready, so be sure to check out the online manual version ever so often!
 
-Coming soon, an **API Reference** will be hosted and updated with new functionalities and features in future plugin releases.
+Coming soon, an **API Reference** will also be hosted and updated with new functionalities and features in future plugin releases.
 
 
 ## 5. I found a bug in the plugin / I have a complaint about some feature. Where can I report it?
