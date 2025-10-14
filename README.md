@@ -89,7 +89,7 @@ The **Coder Path** is still in development and new chapters will be added gradua
 Coming soon, an **API Reference** will also be hosted and updated with new functionalities and features in future plugin releases.
 
 
-## 5. I found a bug in the plugin / I have a complaint about some feature. Where can I report it?
+## 5. I found a bug in the plugin / I would like to request some feature. Where can I report it?
 We mainly accept bug reports on the [Issues section](https://github.com/KrysB4k/Plugin_ParticleSystem/issues) of this repository. Reporting an issue requires registering a (free) GitHub account.
 
 Additionally, we will accept bug reports in the Tomb Raider Forums thread pertaining to this plugin:
