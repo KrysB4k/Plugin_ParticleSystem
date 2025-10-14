@@ -17,14 +17,9 @@ The particle engine is augumented with a responsive and extensive **Scripting AP
 	<img src="https://img.youtube.com/vi/-707H-99Pw4/0.jpg"alt="Video 1" width="240" height="180" border="10" />
 </a>
 
-### Mesh particles - use meshes for particles
+### Mesh particles - use 3D meshes for particles
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=yqc19lnccN4" target="_blank">
 	<img src="https://img.youtube.com/vi/yqc19lnccN4/0.jpg"alt="Video 2" width="240" height="180" border="10" />
-</a>
-
-### Animated particles with swarm intelligence
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=mzR5-LadmRU" target="_blank">
-	<img src="https://img.youtube.com/vi/mzR5-LadmRU/0.jpg"alt="Video 4" width="240" height="180" border="10" />
 </a>
 
 ### Autumn leaves
