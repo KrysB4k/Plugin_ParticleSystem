@@ -59,7 +59,7 @@ The particle engine is augumented with a responsive and extensive **Scripting AP
 
 
 ## 2. What engine version is this plugin for?
-The targetted engine version is **TRNG 1.3.0.7**, combined with the FLEP patching system for best results.
+The targeted engine version is **TRNG 1.3.0.7**, combined with the FLEP patching system for best results.
 
 
 ## 3. How do you install this plugin?
@@ -80,10 +80,10 @@ This plugin is very robust and its usage cannot be explained in a single paragra
 How you use this plugin depends on whether you intend to script your own effects in Lua, or use effects shared by other users.
 
 ### 4.1 Using effects made by others
-To learn how to import existing **effect modules** into your TRLE project, follow the **Builder Path** in the manual. It describes the basic usage of the plugin for builder who will not code custom effects. Because this is a rather simple process, it is a short read, consisting of 4 HTML documents in total. Once you finish the **Builder Path** and you want to try your strengths in coding custom effects, you can check out the **Coder Path**.
+To learn how to import existing **effect modules** into your TRLE project, follow the [**Builder Path**](https://krysb4k.github.io/ParticleManual/builder/BuilderIntro.html) in the manual. It describes the basic usage of the plugin for builder who will not code custom effects. Because this is a rather simple process, it is a short read, consisting of 4 HTML documents in total. Once you finish the **Builder Path** and you want to try your strengths in coding custom effects, you can check out the **Coder Path**.
 
 ### 4.2 Scripting your own effects
-To learn how to script your own effects, follow the **Coder Path** in the manual. It describes everything about the scripting process in great detail, including a basic rundown of the Lua scripting language and how to script your first **effect modules** and use them in your levels. Although prior experience with Lua or programming in general can help, it is not required. The **Coder Path** is tailored to any skill level, including complete beginners. That being said, a solid grasp of more advanced TRNG scripting (Global Triggers, Trigger Groups, Organizers, Conditions) is certainly recommended for this path.
+To learn how to script your own effects, follow the [**Coder Path**](https://krysb4k.github.io/ParticleManual/coder/CoderIntro.html) in the manual. It describes everything about the scripting process in great detail, including a basic rundown of the Lua scripting language and how to script your first **effect modules** and use them in your levels. Although prior experience with Lua or programming in general can help, it is not required. The **Coder Path** is tailored to any skill level, including complete beginners. That being said, a solid grasp of more advanced TRNG scripting (Global Triggers, Trigger Groups, Organizers, Conditions) is certainly recommended for this path.
 
 The **Coder Path** is still in development and new chapters will be added gradually, when ready, so be sure to check out the online manual version!
 
