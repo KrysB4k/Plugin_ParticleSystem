@@ -31,6 +31,9 @@ The particle engine is augumented with a responsive and extensive **Scripting AP
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=lXhmGMtjqaU" target="_blank">
 	<img src="https://img.youtube.com/vi/lXhmGMtjqaU/0.jpg"alt="Video 6" width="240" height="180" border="10" />
 </a>
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=H9pxqTsz1T4" target="_blank">
+	<img src="https://img.youtube.com/vi/H9pxqTsz1T4/0.jpg"alt="Video 6" width="240" height="180" border="10" />
+</a>
 
 ### Particles with complex custom behavior - collisions with room geometry, spawning shockwaves, emitting lights etc.
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=qSH70ALZ8L4" target="_blank">
