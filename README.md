@@ -1,7 +1,7 @@
 # Particle System Plugin
 
 ## General Links
-
+- [Online Plugin Manual](https://krysb4k.github.io/ParticleManual/index.html)
 
 ## 1. What is Plugin_ParticleSystem?
 It is a plugin for the **TRNG + FLEP** engine enhancements of **Tomb Raider Level Editor** (TRLE). It adds a dynamic particle engine that is under full user scripting control. It allows TRLE builders to create custom particle effects, going far beyond the capabilities of FLEP or TRNG.
@@ -75,7 +75,7 @@ Download the ZIP archive from the latest release. Open NG Center and switch to y
 
 
 ## 4. How to use this plugin?
-This plugin is very robust and its usage cannot be explained in a single paragraph of text. A dedicated series of manuals explaining how to use it were created. They are being written an will be gradually updated with more contents in future releases. Each plugin release comes bundled with a copy of the manual available at the time of the release (in the **Manual** subfolder). However, the most up-to-date version will be hosted online as a GitHub Pages website, under this link:
+This plugin is very robust and its usage cannot be explained in a single paragraph of text. A dedicated series of manuals explaining how to use it were created. They are being written an will be gradually updated with more contents in future releases. Each plugin release comes bundled with a copy of the manual available at the time of the release (in the **Manual** subfolder). However, the most up-to-date version will be hosted online as a GitHub Pages website, under this link: [Online Plugin Manual](https://krysb4k.github.io/ParticleManual/index.html)
 
 How you use this plugin depends on whether you intend to script your own effects in Lua, or use effects shared by other users.
 
@@ -91,11 +91,11 @@ Coming soon, an **API Reference** will be hosted and updated with new functional
 
 
 ## 5. I found a bug in the plugin / I have a complaint about some feature. Where can I report it?
-We mainly accept bug reports on the Issues section of this repository. Reporting an issue requires registering a (free) GitHub account.
+We mainly accept bug reports on the [Issues section](https://github.com/KrysB4k/Plugin_ParticleSystem/issues) of this repository. Reporting an issue requires registering a (free) GitHub account.
 
 Additionally, we will accept bug reports in the Tomb Raider Forums thread pertaining to this plugin:
 
-Reports through other communcation routes (e.g. personal messages) can be given, but we still strongly recommend creating an Issues entry in this repository, or making a post in the TRF thread, so to keep everything tidy and organized.
+Reports through other communication routes (e.g. personal messages, Discord chats) can be given, but we still strongly recommend creating an Issue entry in this repository, or making a post in the TRF thread, to keep everything tidy and organized.
 
 
 ## 6. Credits
