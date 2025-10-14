@@ -74,9 +74,9 @@ Download the **Plugin_ParticleSystem** ZIP archive from the latest release. Open
 
 
 ## 4. How to use this plugin?
-This plugin is very robust and its usage cannot be explained in a single paragraph of text. A dedicated series of manuals explaining how to use it were created. They are being written an will be gradually updated with more contents in future releases. Each plugin release comes bundled with a copy of the manual available at the time of the release (in the **Manual** subfolder). However, the most up-to-date version will be hosted online as a GitHub Pages website, under this link: [Online Plugin Manual](https://krysb4k.github.io/ParticleManual/index.html)
+This plugin is very robust and its usage cannot be explained in a single paragraph of text. A dedicated series of manuals explaining how to use it was created. These manuals are being written an will be gradually updated with more contents in future releases. Each plugin release comes bundled with a copy of the manual available at the time of the release (in the **Manual** folder). However, the most up-to-date version will be hosted online as a GitHub Pages website, under this link: [Online Plugin Manual](https://krysb4k.github.io/ParticleManual/index.html)
 
-How you use this plugin depends on whether you intend to script your own effects in Lua, or use effects shared by other users.
+How you should use this plugin depends on whether you intend to script your own effects in Lua, or use effects shared by other users.
 
 ### 4.1 Using effects made by others
 To learn how to import existing **effect modules** into your TRLE project, follow the [**Builder Path**](https://krysb4k.github.io/ParticleManual/builder/BuilderIntro.html) in the manual. It describes the basic usage of the plugin for builder who will not code custom effects. Because this is a rather simple process, it is a short read, consisting of 4 pages in total. Once you finish the **Builder Path** and you want to try your strengths in coding custom effects, you can check out the **Coder Path**.
