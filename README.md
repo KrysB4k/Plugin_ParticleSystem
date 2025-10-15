@@ -1,5 +1,5 @@
 # Particle System Plugin
-[Newest Release] (https://github.com/KrysB4k/Plugin_ParticleSystem/releases/tag/NewRelease)
+[Newest Release](https://github.com/KrysB4k/Plugin_ParticleSystem/releases/tag/NewRelease)
 ## General Links
 - [Online Plugin Manual](https://krysb4k.github.io/ParticleManual/index.html)
 - [Particle-Module-Templates](https://github.com/KrysB4k/Particle-Module-Templates) (repository of example/demo module scripts)
