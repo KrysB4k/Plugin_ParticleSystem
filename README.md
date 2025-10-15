@@ -91,7 +91,7 @@ Coming soon, an **API Reference** will also be hosted and updated with new funct
 
 
 ## 5. I found a bug in the plugin / I would like to request some feature. Where can I report it?
-We mainly accept bug reports on the [Issues section](https://github.com/KrysB4k/Plugin_ParticleSystem/issues) of this repository. Reporting an issue requires registering a (free) GitHub account. After that, you simply click the "New Issue" button, following the examples for a [bug report](https://github.com/KrysB4k/Plugin_ParticleSystem/issues/11) or [feature request](https://github.com/KrysB4k/Plugin_ParticleSystem/issues/12) as guidelines.
+We mainly accept bug reports on the [Issues page](https://github.com/KrysB4k/Plugin_ParticleSystem/issues) of this repository. Reporting an issue requires registering a (free) GitHub account. After that, you simply click the "New Issue" button, following the examples for a [bug report](https://github.com/KrysB4k/Plugin_ParticleSystem/issues/11) or [feature request](https://github.com/KrysB4k/Plugin_ParticleSystem/issues/12) as guidelines.
 
 Additionally, we will accept bug reports in the Tomb Raider Forums thread pertaining to this plugin:
 
