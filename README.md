@@ -3,6 +3,7 @@
 ## General Links
 - [Online Plugin Manual](https://krysb4k.github.io/ParticleManual/index.html)
 - [Particle-Module-Templates](https://github.com/KrysB4k/Particle-Module-Templates) (repository of example/demo module scripts)
+- [Tomb Raider Forums thread](https://www.tombraiderforums.com/showthread.php?p=8579984)
 
 ## 1. What is Plugin_ParticleSystem?
 It is a plugin for the **TRNG + FLEP** engine enhancements of **Tomb Raider Level Editor** (TRLE). It adds a dynamic particle engine that is under full user scripting control. It allows TRLE builders to create custom particle effects, going far beyond the capabilities of FLEP or TRNG.
