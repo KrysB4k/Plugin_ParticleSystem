@@ -675,6 +675,10 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 		Particles::ExecuteBoundFunction(TimerFull);
 		break;
 
+	case 2:
+		Particles::ClearParts();
+		break;
+
 	default:
 		SendToLog("WARNING: Flipeffect trigger number %d has not been handled in cbFlipEffectMine() function", FlipIndex);
 		break;
