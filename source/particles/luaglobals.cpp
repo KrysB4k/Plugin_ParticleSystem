@@ -9,6 +9,8 @@
 using namespace LuaHelpers;
 using namespace Utilities;
 
+#define NO_CUTOFF -1
+
 namespace LuaGlobals
 {
 	TrngVarWrapper TrngVars;
@@ -364,6 +366,11 @@ namespace LuaGlobals
 				return std::optional(LogLevel::LOG_INFO);
 			if (!strcmp(field, "LOG_WARN"))
 				return std::optional(LogLevel::LOG_WARN);
+			break;
+
+		case 'N':
+			if (!strcmp(field, "NO_CUTOFF"))
+				return std::optional(NO_CUTOFF);
 			break;
 
 		case 'S':

@@ -305,12 +305,14 @@ namespace Particles
 		MyData.Save.Global.gameTick++;
 	}
 
-	static ulong randomHashInt(ulong i0)
+	static ulong permute32(ulong x)
 	{
-		ulong z0 = (i0 * 1831267127) ^ i0;
-		ulong z1 = (z0 * 3915839201) ^ (z0 >> 20);
-		ulong z2 = (z1 * 1561867961) ^ (z1 >> 24);
-		return z2;
+		x = (x ^ 61) ^ (x >> 16);
+		x = x + (x << 3);
+		x = x ^ (x >> 4);
+		x = x * 0x27D4EB2D;
+		x = x ^ (x >> 15);
+		return x;
 	}
 
 	void UpdateSprites()
@@ -327,22 +329,21 @@ namespace Particles
 
 			auto& pgroup = partGroups[part->groupIndex];
 
+			int lifefactor = (part->lifeSpan - part->lifeCounter);
+
 			if (part->emitterIndex >= 0 && !pgroup.screenSpace)
 			{
-				int cutoff = 0;
+				int cutoff = pgroup.attach.cutoff;
 
-				if (pgroup.attach.cutoff > 0)
-					cutoff = pgroup.attach.cutoff;
-				if (pgroup.attach.random > 1)
-					cutoff += (randomHashInt(825364519 + i) % pgroup.attach.random);
+				if (cutoff <= INT16_MAX && pgroup.attach.random > 1)
+					cutoff += (permute32(825764519 + i) % pgroup.attach.random);
 					
-				if ((part->lifeSpan - part->lifeCounter) >= cutoff)
+				if (lifefactor >= cutoff)
 					part->Detach();
 			}
 
 			int fadetime = part->lifeSpan;
-			int lifefactor = (part->lifeSpan - part->lifeCounter);
-
+			
 			if (part->colorFadeTime)
 			{
 				if (part->colorFadeTime < 0 && part->lifeSpan >(-part->colorFadeTime))
@@ -397,16 +398,16 @@ namespace Particles
 
 			auto& pgroup = partGroups[part->groupIndex];
 
+			int lifefactor = (part->lifeSpan - part->lifeCounter);
+
 			if (part->emitterIndex >= 0 && !pgroup.screenSpace)
 			{
-				int cutoff = 0;
+				int cutoff = pgroup.attach.cutoff;
 
-				if (pgroup.attach.cutoff > 0)
-					cutoff = pgroup.attach.cutoff;
-				if (pgroup.attach.random > 1)
-					cutoff += (randomHashInt(825364519 + i) % pgroup.attach.random);
+				if (cutoff <= INT16_MAX && pgroup.attach.random > 1)
+					cutoff += (permute32(1325764289 + i) % pgroup.attach.random);
 
-				if ((part->lifeSpan - part->lifeCounter) >= cutoff)
+				if (lifefactor >= cutoff)
 					part->Detach();
 			}
 

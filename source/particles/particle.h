@@ -129,7 +129,8 @@ namespace Particles
 	struct NodeAttachment final : public LuaObjectClass
 	{
 		TetherType tether;
-		short cutoff, random;
+		int cutoff;
+		short random;
 
 		static const char* Name();
 		void Index(const char* field) final;

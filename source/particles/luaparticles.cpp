@@ -258,7 +258,9 @@ namespace Particles
 			case 'c':
 				if (!strcmp(field, "cutoff"))
 				{
-					cutoff = GetClampedInteger(-1, 0, INT16_MAX, false);
+					cutoff = GetClampedInteger(-1, -1, INT16_MAX, false);
+					if (cutoff < 0)
+						cutoff = INT32_MAX;
 					return;
 				}
 				break;
