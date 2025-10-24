@@ -47,7 +47,7 @@
 /*
 ** By default, Lua on Windows use (some) specific Windows features
 */
-#if !defined(LUA_USE_C89) && defined(_WIN32) && !defined(_WIN32_WCE)
+#if 0
 #define LUA_USE_WINDOWS  /* enable goodies for regular Windows */
 #endif
 
@@ -122,7 +122,7 @@
 /*
 @@ LUA_32BITS enables Lua with 32-bit integers and 32-bit floats.
 */
-#define LUA_32BITS	0
+#define LUA_32BITS	1
 
 
 /*
@@ -714,8 +714,8 @@
 ** numbers to strings. Define LUA_NOCVTS2N to turn off automatic
 ** coercion from strings to numbers.
 */
-/* #define LUA_NOCVTN2S */
-/* #define LUA_NOCVTS2N */
+#define LUA_NOCVTN2S
+#define LUA_NOCVTS2N
 
 
 /*

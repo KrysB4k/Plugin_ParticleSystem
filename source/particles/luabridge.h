@@ -9,6 +9,7 @@ struct phd_3dpos;
 namespace Particles
 {
 	struct ParticleGroup;
+	struct BoundFunction;
 }
 
 struct LuaObjectClass : public LuaObject
@@ -181,8 +182,6 @@ namespace LuaHelpers
 	int GetArgCount(int minimum, int maximum);
 	int VerifyItemIndex(int argument);
 	int GetTombIndexByNGLEIndex(int argument);
-	float GetMathResult(int argument, float (*operation)(float));
-	float GetMathResult(int firstArgument, int secondArgument, float (*operation)(float, float));
 	int GetClampedInteger(int argument, int min, int max, bool throwBoundsError = false);
 	float GetClampedNumber(int argument, float min, float max, bool throwBoundsError = false);
 	int GetConstrainedInteger(int argument, int defaultValue, int count, ...);
@@ -196,5 +195,7 @@ namespace LuaHelpers
 	void RequireModule(int argument);
 	void CheckModuleParameter(int argument);
 	void CheckParticleData(int argument);
-	int GetBoundFunction(int index);
+	Particles::BoundFunction* GetBoundFunction(int index);
+	bool GetScriptIntegrity();
+	void ExitSystem(const char* message);
 }

@@ -16,7 +16,7 @@ namespace
 
 	const char* StringRepresentation(int idx)
 	{
-		return lua_type(lua, idx) == LUA_TSTRING ? lua_tostring(lua, idx) : nullptr;
+		return lua_isstring(lua, idx) ? lua_tostring(lua, idx) : nullptr;
 	}
 
 	int MetaIndex(lua_State* L)
@@ -317,7 +317,7 @@ void Script::PushNil()
 
 int Script::ToInteger(int argument)
 {
-	return lroundf((float)lua_tonumber(lua, ArgumentToStack(argument)));
+	return lua_tointeger(lua, ArgumentToStack(argument));
 }
 
 bool Script::ToBoolean(int argument)
@@ -327,7 +327,7 @@ bool Script::ToBoolean(int argument)
 
 float Script::ToNumber(int argument)
 {
-	return (float)lua_tonumber(lua, ArgumentToStack(argument));
+	return lua_tonumber(lua, ArgumentToStack(argument));
 }
 
 LuaObject* Script::ToData(int argument)
@@ -347,7 +347,10 @@ int Script::ArgCount()
 
 bool Script::IsInteger(int argument)
 {
-	return lua_isnumber(lua, ArgumentToStack(argument));
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	return lua_type(lua, stack) == LUA_TNUMBER && lua_isinteger(lua, stack);
 }
 
 bool Script::IsBoolean(int argument)
@@ -357,7 +360,10 @@ bool Script::IsBoolean(int argument)
 
 bool Script::IsNumber(int argument)
 {
-	return lua_isnumber(lua, ArgumentToStack(argument));
+	int stack;
+
+	stack = ArgumentToStack(argument);
+	return lua_type(lua, stack) == LUA_TNUMBER && !lua_isinteger(lua, stack);
 }
 
 bool Script::IsData(int argument)
@@ -409,7 +415,7 @@ bool Script::ExecuteFunction(int reference, void* value)
 		}
 		if (status != LUA_OK)
 		{
-			Logger::Fatal(lua_tostring(lua, -1));
+			Logger::Error(lua_tostring(lua, -1));
 			lua_pop(lua, 1);
 			return false;
 		}
@@ -483,7 +489,7 @@ bool Script::Require(const char* base)
 {
 	char name[100];
 
-	strcpy_s(name, "effects\\");
+	strcpy_s(name, "modulescripts\\");
 	strcat_s(name, base);
 	return LoadFunctions(name);
 }
@@ -505,13 +511,13 @@ bool Script::LoadFunctions(const char* name)
 		status = lua_pcall(lua, 0, 0, -2);
 		if (status != LUA_OK)
 		{
-			Logger::Fatal(lua_tostring(lua, -1));
+			Logger::Error(lua_tostring(lua, -1));
 			lua_pop(lua, 1);
 		}
 	}
 	else
 	{
-		EmitFailure(lua_tostring(lua, -1), Logger::Fatal);
+		EmitFailure(lua_tostring(lua, -1), Logger::Error);
 		lua_pop(lua, 1);
 	}
 	return true;
@@ -529,11 +535,6 @@ void Script::EmitFailure(const char* msg, void (*log)(const char*))
 	luaL_traceback(lua, lua, lua_tostring(lua, -1), 1);
 	log(lua_tostring(lua, -1));
 	lua_pop(lua, 2);
-}
-
-void Script::AddInformation(const char* msg)
-{
-	Logger::Information(msg);
 }
 
 int Script::GarbageCount()
@@ -624,7 +625,7 @@ int Script::CloneTable(int reference)
 	return luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
-int Script::TraverseTable(int reference, void* opaque, void (*process)(void*, const char*))
+int Script::TraverseReadTable(int reference, void* opaque, void (*process)(void*))
 {
 	int count;
 
@@ -636,7 +637,7 @@ int Script::TraverseTable(int reference, void* opaque, void (*process)(void*, co
 		lua_pushnil(lua);
 		while (lua_next(lua, -2))
 		{
-			process(opaque, lua_tostring(lua, -2));
+			process(opaque);
 			count++;
 			lua_pop(lua, 1);
 		}
@@ -646,7 +647,16 @@ int Script::TraverseTable(int reference, void* opaque, void (*process)(void*, co
 	return count;
 }
 
-void Script::Pop()
+void Script::TraverseAssignTable(int reference, int count, void* opaque, void (*process)(void*))
 {
-	lua_pop(lua, 1);
+	if (reference != LUA_REFNIL)
+	{
+		lua_rawgeti(lua, LUA_REGISTRYINDEX, reference);
+		for (int i = 0; i < count; i++)
+		{
+			process(opaque);
+			lua_rawset(lua, -3);
+		}
+		lua_pop(lua, 1);
+	}
 }

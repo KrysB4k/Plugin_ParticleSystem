@@ -95,7 +95,7 @@ void Vector3i::NewIndex(const char* field)
 		case 'x':
 			if (!strcmp(field, "x"))
 			{
-				x = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
+				x = SaturateRound<int>(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
@@ -103,7 +103,7 @@ void Vector3i::NewIndex(const char* field)
 		case 'y':
 			if (!strcmp(field, "y"))
 			{
-				y = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
+				y = SaturateRound<int>(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
@@ -111,7 +111,7 @@ void Vector3i::NewIndex(const char* field)
 		case 'z':
 			if (!strcmp(field, "z"))
 			{
-				z = lroundf(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
+				z = SaturateRound<int>(16384 * GetClampedNumber(-1, 0.0f, 65536.0f, false));
 				return;
 			}
 			break;
@@ -168,7 +168,7 @@ void ColorRGB::NewIndex(const char* field)
 		case 'b':
 			if (!strcmp(field, "b"))
 			{
-				B = GetClampedInteger(-1, 0, 255, false);
+				B = GetClampedInteger(-1, 0, UINT8_MAX, false);
 				return;
 			}
 			break;
@@ -176,7 +176,7 @@ void ColorRGB::NewIndex(const char* field)
 		case 'g':
 			if (!strcmp(field, "g"))
 			{
-				G = GetClampedInteger(-1, 0, 255, false);
+				G = GetClampedInteger(-1, 0, UINT8_MAX, false);
 				return;
 			}
 			break;
@@ -184,7 +184,7 @@ void ColorRGB::NewIndex(const char* field)
 		case 'r':
 			if (!strcmp(field, "r"))
 			{
-				R = GetClampedInteger(-1, 0, 255, false);
+				R = GetClampedInteger(-1, 0, UINT8_MAX, false);
 				return;
 			}
 			break;
@@ -258,7 +258,9 @@ namespace Particles
 			case 'c':
 				if (!strcmp(field, "cutoff"))
 				{
-					cutoff = GetClampedInteger(-1, 0, 32767, false);
+					cutoff = GetClampedInteger(-1, -1, INT16_MAX, false);
+					if (cutoff < 0)
+						cutoff = INT32_MAX;
 					return;
 				}
 				break;
@@ -266,7 +268,7 @@ namespace Particles
 			case 'r':
 				if (!strcmp(field, "random"))
 				{
-					random = GetClampedInteger(-1, 0, 32767, false);
+					random = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -707,15 +709,18 @@ namespace Particles
 				if (!strcmp(field, "emitterIndex"))
 				{
 					emitterIndex = GetClampedInteger(-1, -1, level_items - 1, false);
-					if (emitterIndex != -1)
+					if (emitterIndex != NO_ITEM)
+					{
 						emitterNode = Clamp(emitterNode, -1, objects[items[emitterIndex].object_number].nmeshes - 1);
+						roomIndex = items[emitterIndex].room_number;
+					}
 					else
 						emitterNode = NO_MESH;
 					return;
 				}
 				if (!strcmp(field, "emitterNode"))
 				{
-					if (emitterIndex != -1)
+					if (emitterIndex != NO_ITEM)
 						emitterNode = GetClampedInteger(-1, -1, objects[items[emitterIndex].object_number].nmeshes - 1, false);
 					return;
 				}
@@ -730,7 +735,7 @@ namespace Particles
 				if (!strcmp(field, "lifeSpan"))
 				{
 					// set lifeCounter to lifeSpan automatically
-					lifeCounter = lifeSpan = GetClampedInteger(-1, 0, 32767, false);
+					lifeCounter = lifeSpan = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -885,7 +890,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "colorFadeTime"))
 				{
-					colorFadeTime = GetClampedInteger(-1, -32768, 32767, false);
+					colorFadeTime = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -893,12 +898,12 @@ namespace Particles
 			case 'f':
 				if (!strcmp(field, "fadeIn"))
 				{
-					fadeIn = GetClampedInteger(-1, 0, 32767, false);
+					fadeIn = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "fadeOut"))
 				{
-					fadeOut = GetClampedInteger(-1, 0, 32767, false);
+					fadeOut = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -919,22 +924,22 @@ namespace Particles
 			case 's':
 				if (!strcmp(field, "sizeCust"))
 				{
-					sizeCust = GetClampedInteger(-1, 0, 65535, false);
+					sizeCust = GetClampedInteger(-1, 0, UINT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "sizeEnd"))
 				{
-					sizeEnd = GetClampedInteger(-1, 0, 65535, false);
+					sizeEnd = GetClampedInteger(-1, 0, UINT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "sizeStart"))
 				{
-					sizeStart = GetClampedInteger(-1, 0, 65535, false);
+					sizeStart = GetClampedInteger(-1, 0, UINT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "sizeRatio"))
 				{
-					sizeRatio = (short)lroundf(32767 * GetClampedNumber(-1, -1.0f, 1.0f, false));
+					sizeRatio = SaturateRound<short>(INT16_MAX * GetClampedNumber(-1, -1.0f, 1.0f, false));
 					return;
 				}
 				if (!strcmp(field, "spriteIndex"))
@@ -960,7 +965,7 @@ namespace Particles
 			switch (field[0])
 			{
 			case 'm':
-				if (!strcmp(field, "mesh"))
+				if (!strcmp(field, "meshIndex"))
 				{
 					Script::PushInteger(mesh);
 					return;
@@ -1021,7 +1026,7 @@ namespace Particles
 			switch (field[0])
 			{
 			case 'm':
-				if (!strcmp(field, "mesh"))
+				if (!strcmp(field, "meshIndex"))
 				{
 					mesh = GetClampedInteger(-1, 0, objects[object].nmeshes - 1, false);
 					return;
@@ -1066,7 +1071,7 @@ namespace Particles
 			case 't':
 				if (!strcmp(field, "transparency"))
 				{
-					transparency = GetClampedInteger(-1, 0, 255, false);
+					transparency = GetClampedInteger(-1, 0, UINT8_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "tint"))

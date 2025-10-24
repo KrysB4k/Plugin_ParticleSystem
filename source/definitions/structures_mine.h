@@ -788,3 +788,7 @@ struct DYNAMIC
 #pragma pack(2)
 
 extern StrMyData MyData;
+
+extern const char* LevelScriptNames[MAX_LEVEL_SCRIPTS];
+extern int LevelScriptNamesCount;
+extern bool GlobalScriptIntegrityDefined, GlobalScriptIntegrity, LocalScriptIntegrityDefined, LocalScriptIntegrity;

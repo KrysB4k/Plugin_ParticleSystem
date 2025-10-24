@@ -24,6 +24,7 @@
 #define MAX_MODULES 1024
 #define MAX_MESHES_OBJ 32
 #define MAX_FUNCREFS 1024
+#define MAX_LEVEL_SCRIPTS 64
 
 #define MAX_DRAWDIST 20480
 #define HALF_ANGLE 32768
@@ -35,6 +36,9 @@
 
 #define NO_ITEM -1
 #define NO_MESH (char(-1))
+
+#define CUST_LEVEL_SCRIPTS 1
+#define CUST_SCRIPT_INTEGRITY 2
 
 // MPS_ flags
 // you should type here your MPS_ flags for plugin command.

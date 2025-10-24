@@ -7,6 +7,18 @@ struct ColorRGB;
 
 namespace Utilities
 {
+	template<class T>
+	std::enable_if_t<std::is_integral_v<T>, T> SaturateRound(float x)
+	{
+		const auto lowest = (std::numeric_limits<T>::min)();
+		const auto highest = (std::numeric_limits<T>::max)();
+		if (x <= (float)lowest)
+			return lowest;
+		if (x >= (float)highest)
+			return highest;
+		return static_cast<T>(round(x));
+	}
+
 	phd_vector RoundPos(const Vector3f& v);
 	short GetOrientDiff(short sourceOrient, short targetOrient);
 	float Lerp(float a, float b, float t);
@@ -32,6 +44,8 @@ namespace Utilities
 	short RadToShort(float angle);
 	float GetRandom();
 	float RandomNegate(float x);
+	Vector3f RandomSpherePoint(float r);
+	float Remap(float x, float oldMin, float oldMax, float newMin, float newMax);
 	float DegToRad(float deg);
 	float RadToDeg(float rad);
 	ushort ConvertTo16BitBGR(const ColorRGB& c);

@@ -56,7 +56,6 @@ namespace Script
 	bool LoadFunctions(const char* name);
 	[[noreturn]] void Throw(const char* msg);
 	void EmitFailure(const char* msg, void (*log)(const char*));
-	void AddInformation(const char* msg);
 	int GarbageCount();
 	void PreFunctionLoop();
 	void PostFunctionLoop();
@@ -68,6 +67,6 @@ namespace Script
 	int StoreNewTable();
 	void DeleteTable(int reference);
 	int CloneTable(int reference);
-	int TraverseTable(int reference, void* opaque, void (*process)(void*, const char*));
-	void Pop();
+	int TraverseReadTable(int reference, void* opaque, void (*process)(void*));
+	void TraverseAssignTable(int reference, int count, void* opaque, void (*process)(void*));
 }

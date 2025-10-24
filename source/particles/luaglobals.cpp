@@ -9,6 +9,8 @@
 using namespace LuaHelpers;
 using namespace Utilities;
 
+#define NO_CUTOFF -1
+
 namespace LuaGlobals
 {
 	TrngVarWrapper TrngVars;
@@ -122,7 +124,7 @@ namespace LuaGlobals
 				}
 				break;
 			case 'r':
-				if (!strcmp(field, "roomNumber"))
+				if (!strcmp(field, "roomIndex"))
 				{
 					Script::PushInteger(itemptr->room_number);
 					return;
@@ -172,8 +174,8 @@ namespace LuaGlobals
 			case 'a':
 				if (!strcmp(field, "animNumber"))
 				{
-					int maxAnim = objects[itemptr->object_number + 1].anim_index - 1;
-					int anim = GetClampedInteger(-1, 0, maxAnim, false) + objects[itemptr->object_number].anim_index;
+					//int maxAnim = objects[itemptr->object_number + 1].anim_index - 1;
+					int anim = GetClampedInteger(-1, 0, 1000, false) + objects[itemptr->object_number].anim_index;
 					itemptr->anim_number = anim;
 					itemptr->frame_number = anims[itemptr->anim_number].frame_base;
 					return;
@@ -182,14 +184,14 @@ namespace LuaGlobals
 			case 'c':
 				if (!strcmp(field, "currentAnimState"))
 				{
-					itemptr->current_anim_state = GetClampedInteger(-1, 0, 32767, false);
+					itemptr->current_anim_state = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
 			case 'f':
 				if (!strcmp(field, "fallSpeed"))
 				{
-					itemptr->fallspeed = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->fallspeed = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "floorDistance"))
@@ -207,36 +209,36 @@ namespace LuaGlobals
 			case 'g':
 				if (!strcmp(field, "goalAnimState"))
 				{
-					itemptr->goal_anim_state = GetClampedInteger(-1, 0, 32767, false);
+					itemptr->goal_anim_state = GetClampedInteger(-1, 0, INT16_MAX, false);
 					return;
 				}
 				break;
 			case 'h':
 				if (!strcmp(field, "hitPoints"))
 				{
-					itemptr->hit_points = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->hit_points = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				break;
 			case 'i':
 				if (!strcmp(field, "itemFlag1"))
 				{
-					itemptr->item_flags[0] = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->item_flags[0] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "itemFlag2"))
 				{
-					itemptr->item_flags[1] = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->item_flags[1] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "itemFlag3"))
 				{
-					itemptr->item_flags[2] = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->item_flags[2] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				if (!strcmp(field, "itemFlag4"))
 				{
-					itemptr->item_flags[3] = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->item_flags[3] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -249,7 +251,7 @@ namespace LuaGlobals
 			case 'o':
 				if (!strcmp(field, "ocbNumber"))
 				{
-					itemptr->trigger_flags = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->trigger_flags = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -257,14 +259,14 @@ namespace LuaGlobals
 				if (!strcmp(field, "pos"))
 				{
 					auto position = GetData<LuaObjectClassPosition>(-1);
-					itemptr->pos.xPos = lroundf(position->GetX());
-					itemptr->pos.yPos = lroundf(position->GetY());
-					itemptr->pos.zPos = lroundf(position->GetZ());
+					itemptr->pos.xPos = SaturateRound<int>(position->GetX());
+					itemptr->pos.yPos = SaturateRound<int>(position->GetY());
+					itemptr->pos.zPos = SaturateRound<int>(position->GetZ());
 					return;
 				}
 				break;
 			case 'r':
-				if (!strcmp(field, "roomNumber"))
+				if (!strcmp(field, "roomIndex"))
 				{
 					ReadOnlyFieldError(field);
 				}
@@ -280,7 +282,7 @@ namespace LuaGlobals
 			case 's':
 				if (!strcmp(field, "speed"))
 				{
-					itemptr->speed = GetClampedInteger(-1, -32768, 32767, false);
+					itemptr->speed = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
 				break;
@@ -362,14 +364,15 @@ namespace LuaGlobals
 				return std::optional(LogLevel::LOG_DEBUG);
 			if (!strcmp(field, "LOG_ERROR"))
 				return std::optional(LogLevel::LOG_ERROR);
-			if (!strcmp(field, "LOG_FATAL"))
-				return std::optional(LogLevel::LOG_FATAL);
 			if (!strcmp(field, "LOG_INFO"))
 				return std::optional(LogLevel::LOG_INFO);
-			if (!strcmp(field, "LOG_TRACE"))
-				return std::optional(LogLevel::LOG_TRACE);
 			if (!strcmp(field, "LOG_WARN"))
 				return std::optional(LogLevel::LOG_WARN);
+			break;
+
+		case 'N':
+			if (!strcmp(field, "NO_CUTOFF"))
+				return std::optional(NO_CUTOFF);
 			break;
 
 		case 'S':
@@ -1438,6 +1441,8 @@ namespace LuaGlobals
 				return std::optional((float)M_PI_2);
 			if (!strcmp(field, "PI_QUART"))
 				return std::optional((float)M_PI_4);
+			if (!strcmp(field, "PI_THIRD"))
+				return std::optional((float)M_PI / 3.0f);
 			if (!strcmp(field, "PI_TWO"))
 				return std::optional((float)M_PI * 2.0f);
 			break;
@@ -2528,22 +2533,22 @@ namespace LuaGlobals
 						case 'A':
 							if (!strcmp(field, "GlobalByteAlfa1"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[0] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[0] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteAlfa2"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[1] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[1] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteAlfa3"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[2] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[2] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteAlfa4"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[3] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[3] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							break;
@@ -2551,22 +2556,22 @@ namespace LuaGlobals
 						case 'B':
 							if (!strcmp(field, "GlobalByteBeta1"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[4] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[4] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteBeta2"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[5] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[5] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteBeta3"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[6] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[6] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteBeta4"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[7] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[7] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							break;
@@ -2574,22 +2579,22 @@ namespace LuaGlobals
 						case 'D':
 							if (!strcmp(field, "GlobalByteDelta1"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[8] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[8] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteDelta2"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[9] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[9] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteDelta3"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[10] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[10] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalByteDelta4"))
 							{
-								vars->Globals.NumWar.VetNumeriByte[11] = GetClampedInteger(-1, 0, 255, false);
+								vars->Globals.NumWar.VetNumeriByte[11] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							break;
@@ -2625,12 +2630,12 @@ namespace LuaGlobals
 						case 'A':
 							if (!strcmp(field, "GlobalShortAlfa1"))
 							{
-								vars->Globals.NumWar.VetNumeriShort[0] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Globals.NumWar.VetNumeriShort[0] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalShortAlfa2"))
 							{
-								vars->Globals.NumWar.VetNumeriShort[1] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Globals.NumWar.VetNumeriShort[1] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							break;
@@ -2638,12 +2643,12 @@ namespace LuaGlobals
 						case 'B':
 							if (!strcmp(field, "GlobalShortBeta1"))
 							{
-								vars->Globals.NumWar.VetNumeriShort[2] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Globals.NumWar.VetNumeriShort[2] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalShortBeta2"))
 							{
-								vars->Globals.NumWar.VetNumeriShort[3] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Globals.NumWar.VetNumeriShort[3] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							break;
@@ -2651,12 +2656,12 @@ namespace LuaGlobals
 						case 'D':
 							if (!strcmp(field, "GlobalShortDelta1"))
 							{
-								vars->Globals.NumWar.VetNumeriShort[4] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Globals.NumWar.VetNumeriShort[4] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "GlobalShortDelta2"))
 							{
-								vars->Globals.NumWar.VetNumeriShort[5] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Globals.NumWar.VetNumeriShort[5] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							break;
@@ -2687,22 +2692,22 @@ namespace LuaGlobals
 						case 'A':
 							if (!strcmp(field, "LocalByteAlfa1"))
 							{
-								vars->Locals.VetNumeriByte[0] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[0] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteAlfa2"))
 							{
-								vars->Locals.VetNumeriByte[1] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[1] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteAlfa3"))
 							{
-								vars->Locals.VetNumeriByte[2] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[2] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteAlfa4"))
 							{
-								vars->Locals.VetNumeriByte[3] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[3] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							break;
@@ -2710,22 +2715,22 @@ namespace LuaGlobals
 						case 'B':
 							if (!strcmp(field, "LocalByteBeta1"))
 							{
-								vars->Locals.VetNumeriByte[4] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[4] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteBeta2"))
 							{
-								vars->Locals.VetNumeriByte[5] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[5] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteBeta3"))
 							{
-								vars->Locals.VetNumeriByte[6] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[6] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteBeta4"))
 							{
-								vars->Locals.VetNumeriByte[7] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[7] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							break;
@@ -2733,22 +2738,22 @@ namespace LuaGlobals
 						case 'D':
 							if (!strcmp(field, "LocalByteDelta1"))
 							{
-								vars->Locals.VetNumeriByte[8] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[8] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteDelta2"))
 							{
-								vars->Locals.VetNumeriByte[9] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[9] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteDelta3"))
 							{
-								vars->Locals.VetNumeriByte[10] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[10] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalByteDelta4"))
 							{
-								vars->Locals.VetNumeriByte[11] = GetClampedInteger(-1, 0, 255, false);
+								vars->Locals.VetNumeriByte[11] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 								return;
 							}
 							break;
@@ -2784,12 +2789,12 @@ namespace LuaGlobals
 						case 'A':
 							if (!strcmp(field, "LocalShortAlfa1"))
 							{
-								vars->Locals.VetNumeriShort[0] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Locals.VetNumeriShort[0] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalShortAlfa2"))
 							{
-								vars->Locals.VetNumeriShort[1] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Locals.VetNumeriShort[1] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							break;
@@ -2797,12 +2802,12 @@ namespace LuaGlobals
 						case 'B':
 							if (!strcmp(field, "LocalShortBeta1"))
 							{
-								vars->Locals.VetNumeriShort[2] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Locals.VetNumeriShort[2] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalShortBeta2"))
 							{
-								vars->Locals.VetNumeriShort[3] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Locals.VetNumeriShort[3] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							break;
@@ -2810,12 +2815,12 @@ namespace LuaGlobals
 						case 'D':
 							if (!strcmp(field, "LocalShortDelta1"))
 							{
-								vars->Locals.VetNumeriShort[4] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Locals.VetNumeriShort[4] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							if (!strcmp(field, "LocalShortDelta2"))
 							{
-								vars->Locals.VetNumeriShort[5] = GetClampedInteger(-1, -32768, 32767, false);
+								vars->Locals.VetNumeriShort[5] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 								return;
 							}
 							break;
@@ -2838,22 +2843,22 @@ namespace LuaGlobals
 							case 'A':
 								if (!strcmp(field, "StoreByteA1"))
 								{
-									vars->Globals.VetStoreByte[0] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[0] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteA2"))
 								{
-									vars->Globals.VetStoreByte[1] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[1] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteA3"))
 								{
-									vars->Globals.VetStoreByte[2] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[2] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteA4"))
 								{
-									vars->Globals.VetStoreByte[3] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[3] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -2861,22 +2866,22 @@ namespace LuaGlobals
 							case 'B':
 								if (!strcmp(field, "StoreByteB1"))
 								{
-									vars->Globals.VetStoreByte[4] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[4] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteB2"))
 								{
-									vars->Globals.VetStoreByte[5] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[5] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteB3"))
 								{
-									vars->Globals.VetStoreByte[6] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[6] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteB4"))
 								{
-									vars->Globals.VetStoreByte[7] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[7] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -2884,22 +2889,22 @@ namespace LuaGlobals
 							case 'C':
 								if (!strcmp(field, "StoreByteC1"))
 								{
-									vars->Globals.VetStoreByte[8] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[8] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteC2"))
 								{
-									vars->Globals.VetStoreByte[9] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[9] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteC3"))
 								{
-									vars->Globals.VetStoreByte[10] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[10] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteC4"))
 								{
-									vars->Globals.VetStoreByte[11] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[11] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -2907,22 +2912,22 @@ namespace LuaGlobals
 							case 'D':
 								if (!strcmp(field, "StoreByteD1"))
 								{
-									vars->Globals.VetStoreByte[12] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[12] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteD2"))
 								{
-									vars->Globals.VetStoreByte[13] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[13] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteD3"))
 								{
-									vars->Globals.VetStoreByte[14] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[14] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteD4"))
 								{
-									vars->Globals.VetStoreByte[15] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[15] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -2930,22 +2935,22 @@ namespace LuaGlobals
 							case 'E':
 								if (!strcmp(field, "StoreByteE1"))
 								{
-									vars->Globals.VetStoreByte[16] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[16] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteE2"))
 								{
-									vars->Globals.VetStoreByte[17] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[17] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteE3"))
 								{
-									vars->Globals.VetStoreByte[18] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[18] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteE4"))
 								{
-									vars->Globals.VetStoreByte[19] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[19] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -2953,22 +2958,22 @@ namespace LuaGlobals
 							case 'F':
 								if (!strcmp(field, "StoreByteF1"))
 								{
-									vars->Globals.VetStoreByte[20] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[20] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteF2"))
 								{
-									vars->Globals.VetStoreByte[21] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[21] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteF3"))
 								{
-									vars->Globals.VetStoreByte[22] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[22] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteF4"))
 								{
-									vars->Globals.VetStoreByte[23] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[23] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -2976,44 +2981,44 @@ namespace LuaGlobals
 							case 'G':
 								if (!strcmp(field, "StoreByteG1"))
 								{
-									vars->Globals.VetStoreByte[24] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[24] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteG2"))
 								{
-									vars->Globals.VetStoreByte[25] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[25] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteG3"))
 								{
-									vars->Globals.VetStoreByte[26] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[26] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteG4"))
 								{
-									vars->Globals.VetStoreByte[27] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[27] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
 							case 'H':
 								if (!strcmp(field, "StoreByteH1"))
 								{
-									vars->Globals.VetStoreByte[28] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[28] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteH2"))
 								{
-									vars->Globals.VetStoreByte[29] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[29] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteH3"))
 								{
-									vars->Globals.VetStoreByte[30] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[30] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteH4"))
 								{
-									vars->Globals.VetStoreByte[31] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[31] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3021,22 +3026,22 @@ namespace LuaGlobals
 							case 'I':
 								if (!strcmp(field, "StoreByteI1"))
 								{
-									vars->Globals.VetStoreByte[32] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[32] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteI2"))
 								{
-									vars->Globals.VetStoreByte[33] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[33] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteI3"))
 								{
-									vars->Globals.VetStoreByte[34] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[34] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteI4"))
 								{
-									vars->Globals.VetStoreByte[35] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[35] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3044,22 +3049,22 @@ namespace LuaGlobals
 							case 'J':
 								if (!strcmp(field, "StoreByteJ1"))
 								{
-									vars->Globals.VetStoreByte[36] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[36] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteJ2"))
 								{
-									vars->Globals.VetStoreByte[37] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[37] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteJ3"))
 								{
-									vars->Globals.VetStoreByte[38] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[38] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteJ4"))
 								{
-									vars->Globals.VetStoreByte[39] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[39] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3067,22 +3072,22 @@ namespace LuaGlobals
 							case 'K':
 								if (!strcmp(field, "StoreByteK1"))
 								{
-									vars->Globals.VetStoreByte[40] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[40] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteK2"))
 								{
-									vars->Globals.VetStoreByte[41] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[41] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteK3"))
 								{
-									vars->Globals.VetStoreByte[42] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[42] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteK4"))
 								{
-									vars->Globals.VetStoreByte[43] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[43] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3090,22 +3095,22 @@ namespace LuaGlobals
 							case 'L':
 								if (!strcmp(field, "StoreByteL1"))
 								{
-									vars->Globals.VetStoreByte[44] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[44] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteL2"))
 								{
-									vars->Globals.VetStoreByte[45] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[45] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteL3"))
 								{
-									vars->Globals.VetStoreByte[46] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[46] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteL4"))
 								{
-									vars->Globals.VetStoreByte[47] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[47] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3113,22 +3118,22 @@ namespace LuaGlobals
 							case 'M':
 								if (!strcmp(field, "StoreByteM1"))
 								{
-									vars->Globals.VetStoreByte[48] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[48] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteM2"))
 								{
-									vars->Globals.VetStoreByte[49] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[49] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteM3"))
 								{
-									vars->Globals.VetStoreByte[50] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[50] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteM4"))
 								{
-									vars->Globals.VetStoreByte[51] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[51] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3136,22 +3141,22 @@ namespace LuaGlobals
 							case 'N':
 								if (!strcmp(field, "StoreByteN1"))
 								{
-									vars->Globals.VetStoreByte[52] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[52] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteN2"))
 								{
-									vars->Globals.VetStoreByte[53] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[53] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteN3"))
 								{
-									vars->Globals.VetStoreByte[54] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[54] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteN4"))
 								{
-									vars->Globals.VetStoreByte[55] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[55] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3159,22 +3164,22 @@ namespace LuaGlobals
 							case 'O':
 								if (!strcmp(field, "StoreByteO1"))
 								{
-									vars->Globals.VetStoreByte[56] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[56] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteO2"))
 								{
-									vars->Globals.VetStoreByte[57] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[57] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteO3"))
 								{
-									vars->Globals.VetStoreByte[58] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[58] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteO4"))
 								{
-									vars->Globals.VetStoreByte[59] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[59] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3182,22 +3187,22 @@ namespace LuaGlobals
 							case 'P':
 								if (!strcmp(field, "StoreByteP1"))
 								{
-									vars->Globals.VetStoreByte[60] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[60] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteP2"))
 								{
-									vars->Globals.VetStoreByte[61] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[61] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteP3"))
 								{
-									vars->Globals.VetStoreByte[62] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[62] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreByteP4"))
 								{
-									vars->Globals.VetStoreByte[63] = GetClampedInteger(-1, 0, 255, false);
+									vars->Globals.VetStoreByte[63] = GetClampedInteger(-1, 0, UINT8_MAX, false);
 									return;
 								}
 								break;
@@ -3296,12 +3301,12 @@ namespace LuaGlobals
 							case 'A':
 								if (!strcmp(field, "StoreShortA1"))
 								{
-									vars->Globals.VetStoreShort[0] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[0] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortA2"))
 								{
-									vars->Globals.VetStoreShort[1] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[1] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3309,12 +3314,12 @@ namespace LuaGlobals
 							case 'B':
 								if (!strcmp(field, "StoreShortB1"))
 								{
-									vars->Globals.VetStoreShort[2] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[2] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortB2"))
 								{
-									vars->Globals.VetStoreShort[3] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[3] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3322,12 +3327,12 @@ namespace LuaGlobals
 							case 'C':
 								if (!strcmp(field, "StoreShortC1"))
 								{
-									vars->Globals.VetStoreShort[4] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[4] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortC2"))
 								{
-									vars->Globals.VetStoreShort[5] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[5] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3335,12 +3340,12 @@ namespace LuaGlobals
 							case 'D':
 								if (!strcmp(field, "StoreShortD1"))
 								{
-									vars->Globals.VetStoreShort[6] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[6] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortD2"))
 								{
-									vars->Globals.VetStoreShort[7] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[7] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3348,12 +3353,12 @@ namespace LuaGlobals
 							case 'E':
 								if (!strcmp(field, "StoreShortE1"))
 								{
-									vars->Globals.VetStoreShort[8] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[8] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortE2"))
 								{
-									vars->Globals.VetStoreShort[9] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[9] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3361,12 +3366,12 @@ namespace LuaGlobals
 							case 'F':
 								if (!strcmp(field, "StoreShortF1"))
 								{
-									vars->Globals.VetStoreShort[10] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[10] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortF2"))
 								{
-									vars->Globals.VetStoreShort[11] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[11] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3374,12 +3379,12 @@ namespace LuaGlobals
 							case 'G':
 								if (!strcmp(field, "StoreShortG1"))
 								{
-									vars->Globals.VetStoreShort[12] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[12] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortG2"))
 								{
-									vars->Globals.VetStoreShort[13] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[13] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3387,12 +3392,12 @@ namespace LuaGlobals
 							case 'H':
 								if (!strcmp(field, "StoreShortH1"))
 								{
-									vars->Globals.VetStoreShort[14] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[14] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortH2"))
 								{
-									vars->Globals.VetStoreShort[15] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[15] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3400,12 +3405,12 @@ namespace LuaGlobals
 							case 'I':
 								if (!strcmp(field, "StoreShortI1"))
 								{
-									vars->Globals.VetStoreShort[16] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[16] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortI2"))
 								{
-									vars->Globals.VetStoreShort[17] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[17] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3413,12 +3418,12 @@ namespace LuaGlobals
 							case 'J':
 								if (!strcmp(field, "StoreShortJ1"))
 								{
-									vars->Globals.VetStoreShort[18] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[18] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortJ2"))
 								{
-									vars->Globals.VetStoreShort[19] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[19] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3426,12 +3431,12 @@ namespace LuaGlobals
 							case 'K':
 								if (!strcmp(field, "StoreShortK1"))
 								{
-									vars->Globals.VetStoreShort[20] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[20] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortK2"))
 								{
-									vars->Globals.VetStoreShort[21] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[21] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3439,12 +3444,12 @@ namespace LuaGlobals
 							case 'L':
 								if (!strcmp(field, "StoreShortL1"))
 								{
-									vars->Globals.VetStoreShort[22] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[22] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortL2"))
 								{
-									vars->Globals.VetStoreShort[23] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[23] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3452,12 +3457,12 @@ namespace LuaGlobals
 							case 'M':
 								if (!strcmp(field, "StoreShortM1"))
 								{
-									vars->Globals.VetStoreShort[24] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[24] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortM2"))
 								{
-									vars->Globals.VetStoreShort[25] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[25] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3465,12 +3470,12 @@ namespace LuaGlobals
 							case 'N':
 								if (!strcmp(field, "StoreShortN1"))
 								{
-									vars->Globals.VetStoreShort[26] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[26] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortN2"))
 								{
-									vars->Globals.VetStoreShort[27] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[27] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3478,12 +3483,12 @@ namespace LuaGlobals
 							case 'O':
 								if (!strcmp(field, "StoreShortO1"))
 								{
-									vars->Globals.VetStoreShort[28] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[28] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortO2"))
 								{
-									vars->Globals.VetStoreShort[29] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[29] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;
@@ -3491,12 +3496,12 @@ namespace LuaGlobals
 							case 'P':
 								if (!strcmp(field, "StoreShortP1"))
 								{
-									vars->Globals.VetStoreShort[30] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[30] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								if (!strcmp(field, "StoreShortP2"))
 								{
-									vars->Globals.VetStoreShort[31] = GetClampedInteger(-1, -32768, 32767, false);
+									vars->Globals.VetStoreShort[31] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 									return;
 								}
 								break;

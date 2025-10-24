@@ -14,7 +14,7 @@ namespace Utilities
 
 	phd_vector RoundPos(const Vector3f& v)
 	{
-		return phd_vector(lroundf(v.x), lroundf(v.y), lroundf(v.z));
+		return phd_vector(SaturateRound<int>(v.x), SaturateRound<int>(v.y), SaturateRound<int>(v.z));
 	}
 
 	short GetOrientDiff(short sourceOrient, short targetOrient)
@@ -83,9 +83,9 @@ namespace Utilities
 	ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t)
 	{
 		return ColorRGB(
-			(uchar)lroundf(C1.R + (C2.R - C1.R) * t),
-			(uchar)lroundf(C1.G + (C2.G - C1.G) * t),
-			(uchar)lroundf(C1.B + (C2.B - C1.B) * t)
+			SaturateRound<uchar>(C1.R + (C2.R - C1.R) * t),
+			SaturateRound<uchar>(C1.G + (C2.G - C1.G) * t),
+			SaturateRound<uchar>(C1.B + (C2.B - C1.B) * t)
 		);
 	}
 
@@ -97,7 +97,7 @@ namespace Utilities
 
 		if (sat <= 0.0f)
 		{
-			uchar v = (uchar)lroundf(val * 255);
+			uchar v = SaturateRound<uchar>(val * 255);
 			return ColorRGB(v, v, v);
 		}
 
@@ -143,9 +143,9 @@ namespace Utilities
 			b = xval;
 		}
 
-		ColorRGB c((uchar)lroundf((r + m) * 255),
-			(uchar)lroundf((g + m) * 255),
-			(uchar)lroundf((b + m) * 255));
+		ColorRGB c(SaturateRound<uchar>((r + m) * 255),
+			SaturateRound<uchar>((g + m) * 255),
+			SaturateRound<uchar>((b + m) * 255));
 
 		return c;
 	}
@@ -163,12 +163,12 @@ namespace Utilities
 			for (int i = 0; i < num; ++i)
 			{
 				auto sph = &SphereList[i];
-				int r = lroundf(sph->r + radius);
+				int r = SaturateRound<int>(sph->r + radius);
 				if (r > 0)
 				{
-					int x = lroundf(posTest.x - sph->x);
-					int y = lroundf(posTest.y - sph->y);
-					int z = lroundf(posTest.z - sph->z);
+					int x = SaturateRound<int>(posTest.x - sph->x);
+					int y = SaturateRound<int>(posTest.y - sph->y);
+					int z = SaturateRound<int>(posTest.z - sph->z);
 
 					if ((x * x + y * y + z * z) < r * r)
 						flags |= (1 << i);
@@ -415,7 +415,7 @@ namespace Utilities
 
 	short RadToShort(float angle)
 	{
-		return (short)lroundf(32768 * angle / (float)M_PI);
+		return SaturateRound<short>(32768 * angle / (float)M_PI);
 	}
 
 	float DegToRad(float deg)
@@ -436,6 +436,35 @@ namespace Utilities
 	float RandomNegate(float x)
 	{
 		return (mt() & 1) ? x : -x;
+	}
+
+	Vector3f RandomSpherePoint(float r)
+	{
+		float x1, x2, s;
+		do
+		{
+			x1 = GetRandom() * 2.0f - 1.0f;
+			x2 = GetRandom() * 2.0f - 1.0f;
+			s = x1 * x1 + x2 * x2;
+		} while (s >= 1.0f || s == 0.0f);
+
+		float factor = sqrtf(1.0f - s);
+
+		float x = x1 * factor * 2.0f;
+		float y = x2 * factor * 2.0f;
+		float z = 1.0f - (2.0f * s);
+
+		return Vector3f(x * r, y * r, z * r);
+	}
+
+	float Remap(float x, float oldMin, float oldMax, float newMin, float newMax)
+	{
+		float dif = fabsf(oldMax - oldMin);
+		if (dif <= 0.0f)
+			return x;
+		float min = fminf(oldMin, oldMax);
+		float mult = Clamp(x - min, 0.0f, dif) / dif;
+		return (fminf(newMin, newMax) + fabsf(newMax - newMin) * mult);
 	}
 
 	ushort ConvertTo16BitBGR(const ColorRGB& c)
