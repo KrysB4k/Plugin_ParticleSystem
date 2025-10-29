@@ -826,9 +826,19 @@ namespace Particles
 					Script::PushNumber(ShortToRad(rot));
 					return;
 				}
+				if (!strcmp(field, "rot3D"))
+				{
+					Script::PushData(&rot3D);
+					return;
+				}
 				if (!strcmp(field, "rotVel"))
 				{
 					Script::PushNumber(ShortToRad(rotVel));
+					return;
+				}
+				if (!strcmp(field, "rotVel3D"))
+				{
+					Script::PushData(&rotVel3D);
 					return;
 				}
 				break;
@@ -914,9 +924,19 @@ namespace Particles
 					rot = RadToShort(GetNumber(-1));
 					return;
 				}
+				if (!strcmp(field, "rot3D"))
+				{
+					static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
+					return;
+				}
 				if (!strcmp(field, "rotVel"))
 				{
 					rotVel = RadToShort(GetNumber(-1));
+					return;
+				}
+				if (!strcmp(field, "rotVel3D"))
+				{
+					static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 					return;
 				}
 				break;
@@ -951,48 +971,6 @@ namespace Particles
 			}
 		}
 		BaseParticle::NewIndex(field);
-	}
-
-	const char* SpriteParticle3D::Name()
-	{
-		return "SpriteParticle3D";
-	}
-
-	void SpriteParticle3D::Index(const char* field)
-	{
-		if (field)
-		{
-			if (!strcmp(field, "rot"))
-			{
-				Script::PushData(&rot3D);
-				return;
-			}
-			if (!strcmp(field, "rotVel"))
-			{
-				Script::PushData(&rotVel3D);
-				return;
-			}
-		}
-		SpriteParticle::Index(field);
-	}
-
-	void SpriteParticle3D::NewIndex(const char* field)
-	{
-		CheckFieldCaller(FUNCTION_INIT | FUNCTION_UPDATE, field);
-		if (field)
-		{
-			if (!strcmp(field, "rot"))
-			{
-				rot3D = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
-				return;
-			}
-			if (!strcmp(field, "rotVel"))
-			{
-				rotVel3D = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
-				return;
-			}
-		}
-		SpriteParticle::NewIndex(field);
 	}
 
 	const char* MeshParticle::Name()

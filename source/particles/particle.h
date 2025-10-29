@@ -122,6 +122,7 @@ namespace Particles
 	{
 		DRAW_SPRITE,
 		DRAW_SQUARE,
+		DRAW_SPRITE3D,
 		DRAW_LINE,
 		DRAW_ARROW,
 		DRAW_NONE
@@ -258,6 +259,8 @@ namespace Particles
 
 		short		rot;
 		short		rotVel;
+		Vector3s    rot3D;
+		Vector3s    rotVel3D;
 
 		short		fadeIn;
 		short		fadeOut;
@@ -323,30 +326,6 @@ namespace Particles
 		void LoadParticle(const MeshParticleSave* m);
 	};
 
-
-	struct SpriteParticle3D final : public SpriteParticle
-	{
-		// fields
-		Vector3s rot3D;
-		Vector3s rotVel3D;
-
-		// draw function
-		void DrawSpritePart3D(const ParticleGroup& pgroup, long* const view);
-
-		// boid-specific
-		Vector3f BoidSeparationRule(float radius, float factor) final;
-		Vector3f BoidCohesionRule(float radius, float factor) final;
-		Vector3f BoidAlignmentRule(float radius, float factor) final;
-
-		// lua integration
-		static const char* Name();
-		void Index(const char* field) final;
-		void NewIndex(const char* field) final;
-
-		void LoadParticle3D(const SpriteParticle3DSave* s);
-	};
-
-
 	struct SpriteParticleSave
 	{
 		SpriteParticleSave() = default;
@@ -371,8 +350,12 @@ namespace Particles
 		ushort		sizeEnd;
 		short		sizeRatio;
 
-		short		rot;
-		short		rotVel;
+		short		rotX;
+		short		rotY;
+		short		rotZ;
+		short		rotVelX;
+		short		rotVelY;
+		short		rotVelZ;
 
 		short		fadeIn;
 		short		fadeOut;
@@ -411,46 +394,6 @@ namespace Particles
 		uchar		tintR, tintG, tintB;
 	};
 
-	struct SpriteParticle3DSave
-	{
-		SpriteParticle3DSave() = default;
-		SpriteParticle3DSave(const SpriteParticle3D& s);
-
-		float		posX, posY, posZ;
-		float		velX, velY, velZ;
-		float		accelX, accelY, accelZ;
-
-		ushort		groupIndex;
-
-		short		roomIndex;
-		short		lifeSpan;
-		short		lifeCounter;
-
-		short		emitterIndex;
-		char		emitterNode;
-
-		ushort		spriteIndex;
-
-		ushort		sizeStart;
-		ushort		sizeEnd;
-		short		sizeRatio;
-
-		short		rotX;
-		short		rotY;
-		short		rotZ;
-		short		rotVelX;
-		short		rotVelY;
-		short		rotVelZ;
-
-		short		fadeIn;
-		short		fadeOut;
-
-		short		colorFadeTime;
-
-		uchar	colStartR, colStartG, colStartB;
-		uchar	colEndR, colEndG, colEndB;
-	};
-
 	struct CallerGuard
 	{
 		FunctionType previousCaller;
@@ -471,7 +414,6 @@ namespace Particles
 
 	extern SpriteParticle spriteParts[];
 	extern MeshParticle meshParts[];
-	extern SpriteParticle3D spriteParts3D[];
 	extern ParticleGroup partGroups[];
 	extern Module modules[];
 	extern BoundFunction functionRefs[];
@@ -492,17 +434,14 @@ namespace Particles
 	void UpdateParts();
 	void UpdateSprites();
 	void UpdateMeshes();
-	void UpdateSprites3D();
 	void PostUpdateLoop();
 
 	void DrawParts();
 	void DrawSprites();
 	void DrawMeshes();
-	void DrawSprites3D();
 
 	int GetFreeSpritePart();
 	int GetFreeMeshPart();
-	int GetFreeSpritePart3D();
 	int GetFreeParticleGroup();
 	int GetFreeModule();
 	int GetLastModule();

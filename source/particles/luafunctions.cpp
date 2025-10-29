@@ -305,21 +305,6 @@ namespace LuaFunctions
 		}
 	};
 
-	struct CreateSpritePart3DFunction final : public LuaObjectFunction
-	{
-		int Call() final
-		{
-			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createSpritePart3D");
-			auto group = GetData<Particles::ParticleGroup>(1);
-			int i = Particles::GetFreeSpritePart3D();
-			Particles::spriteParts3D[i].groupIndex = group->groupIndex;
-			Particles::spriteParts3D[i].createdInCurrentLoop = true;
-			Script::PushData(&Particles::spriteParts3D[i]);
-			return 1;
-		}
-	};
-
-
 	struct CreateVectorFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1362,7 +1347,6 @@ namespace LuaFunctions
 	CreatePerlinNoiseFunction CreatePerlinNoiseFunc;
 	CreateSimplexNoiseFunction CreateSimplexNoiseFunc;
 	CreateSpritePartFunction CreateSpritePartFunc;
-	CreateSpritePart3DFunction CreateSpritePart3DFunc;
 	CreateVectorFunction CreateVectorFunc;
 	DegToRadFunction DegToRadFunc;
 	DistanceFunction DistanceFunc;
@@ -1491,8 +1475,6 @@ namespace LuaFunctions
 				return &CreateSimplexNoiseFunc;
 			if (!strcmp(field, "createSpritePart"))
 				return &CreateSpritePartFunc;
-			if (!strcmp(field, "createSpritePart3D"))
-				return &CreateSpritePart3DFunc;
 			if (!strcmp(field, "createVector"))
 				return &CreateVectorFunc;
 			break;
