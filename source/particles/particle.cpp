@@ -464,10 +464,10 @@ namespace Particles
 		phd_vector verts[4];
 		int x1 = 0, y1 = 0, z1 = 0;
 
+		SpriteParticle* part = &spriteParts[0];
+
 		phd_PushMatrix();
 		phd_TranslateAbs(lara_item->pos.xPos, lara_item->pos.yPos, lara_item->pos.zPos);
-
-		SpriteParticle* part = &spriteParts[0];
 
 		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
 		{
@@ -583,12 +583,13 @@ namespace Particles
 					}
 
 					phd_PopMatrix();
+
 	
 					for (int j = 0; j < 4; j++)
 					{
-						long x = x1 + verts[j].x;
-						long y = y1 + verts[j].y;
-						long z = z1 + verts[j].z;
+						long x = verts[j].x + x1;
+						long y = verts[j].y + y1;
+						long z = verts[j].z + z1;
 
 						result[0] = (phd_mxptr[M00] * x + phd_mxptr[M01] * y + phd_mxptr[M02] * z + phd_mxptr[M03]) >> 14;
 						result[1] = (phd_mxptr[M10] * x + phd_mxptr[M11] * y + phd_mxptr[M12] * z + phd_mxptr[M13]) >> 14;
@@ -662,6 +663,7 @@ namespace Particles
 
 			// draw the particle to the given screen coordinates
 			part->DrawSpritePart(pgroup, viewCoords, minSize);
+
 		}
 
 		phd_PopMatrix();
@@ -1186,6 +1188,7 @@ namespace Particles
 	void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size)
 	{
 		long z1 = view[2];
+		D3DTLVERTEX v[4];
 
 		if (z1 <= 0)
 			return;
@@ -1229,8 +1232,6 @@ namespace Particles
 
 			if (ClipLine(x1, y1, z1, x2, y2, z2, phd_winxmin, phd_winymin, phd_winxmax, phd_winymax))
 			{
-				D3DTLVERTEX v[2];
-
 				long c1 = RGBA(cR, cG, cB, 0xFF);
 				long c2 = RGBA(cR >> 2, cG >> 2, cB >> 2, 0xFF);
 
@@ -1277,42 +1278,34 @@ namespace Particles
 		}
 		else if (pgroup.drawMode == DrawMode::DRAW_SPRITE3D)
 		{
-			auto xminmax = std::minmax({ view[0], view[3], view[6], view[9] });
-			auto yminmax = std::minmax({ view[1], view[4], view[7], view[10] });
+			setXYZ4(v, view[0], view[1], view[2], view[3], view[4], view[5], view[6], view[7], view[8], view[9], view[10], view[11], clipflags);
 
-			if (xminmax.first >= phd_winxmin && xminmax.second < phd_winxmax && yminmax.first >= phd_winymin && yminmax.second < phd_winymax)
-			{
-				D3DTLVERTEX v[4];
+			long c1 = RGBA(cR, cG, cB, 0xFF);
 
-				setXYZ4(v, view[0], view[1], view[2], view[3], view[4], view[5], view[6], view[7], view[8], view[9], view[10], view[11], clipflags);
+			v[0].color = c1;
+			v[1].color = c1;
+			v[2].color = c1;
+			v[3].color = c1;
+			v[0].specular = 0xFF000000;
+			v[1].specular = 0xFF000000;
+			v[2].specular = 0xFF000000;
+			v[3].specular = 0xFF000000;
 
-				long c1 = RGBA(cR, cG, cB, 0xFF);
+			TextureStruct tex;
+			tex.drawtype = pgroup.blendMode;
 
-				v[0].color = c1;
-				v[1].color = c1;
-				v[2].color = c1;
-				v[3].color = c1;
-				v[0].specular = 0xFF000000;
-				v[1].specular = 0xFF000000;
-				v[2].specular = 0xFF000000;
-				v[3].specular = 0xFF000000;
+			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
+			tex.tpage = sprite->tpage;
+			tex.u1 = sprite->x1;
+			tex.v1 = sprite->y1;
+			tex.u2 = sprite->x2;
+			tex.v2 = sprite->y1;
+			tex.u3 = sprite->x2;
+			tex.v3 = sprite->y2;
+			tex.u4 = sprite->x1;
+			tex.v4 = sprite->y2;
 
-				TextureStruct tex;
-				tex.drawtype = pgroup.blendMode;
-
-				SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
-				tex.tpage = sprite->tpage;
-				tex.u1 = sprite->x1;
-				tex.v1 = sprite->y1;
-				tex.u2 = sprite->x2;
-				tex.v2 = sprite->y1;
-				tex.u3 = sprite->x2;
-				tex.v3 = sprite->y2;
-				tex.u4 = sprite->x1;
-				tex.v4 = sprite->y2;
-
-				(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 0);
-			}
+			(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 1);
 		}
 		else
 		{
@@ -1346,7 +1339,6 @@ namespace Particles
 
 			if (xmin >= phd_winxmin && xmax < phd_winxmax && ymin >= phd_winymin && ymax < phd_winymax)
 			{
-				D3DTLVERTEX v[4];
 				long x1, y1, x2, y2, x3, y3, x4, y4;
 
 				if (rot)
