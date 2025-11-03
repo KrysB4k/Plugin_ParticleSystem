@@ -24,6 +24,7 @@
 #include <type_traits>
 #include <vector>
 #include <list>
+#include <array>
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

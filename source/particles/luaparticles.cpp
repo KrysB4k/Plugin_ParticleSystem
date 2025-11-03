@@ -926,7 +926,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "rot3D"))
 				{
-					static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
+					rot3D = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 					return;
 				}
 				if (!strcmp(field, "rotVel"))
@@ -936,7 +936,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "rotVel3D"))
 				{
-					static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
+					rotVel3D = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 					return;
 				}
 				break;
@@ -964,7 +964,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "spriteIndex"))
 				{
-					spriteIndex = GetClampedInteger(-1, 0, (-objects[Particles::partGroups[groupIndex].spriteSlot].nmeshes) - 1, false);
+					spriteIndex = GetClampedInteger(-1, 0, (-objects[Particles::ParticleGroup::groups[groupIndex].spriteSlot].nmeshes) - 1, false);
 					return;
 				}
 				break;

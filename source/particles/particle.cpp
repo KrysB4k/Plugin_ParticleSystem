@@ -5,7 +5,6 @@
 #include "particle.h"
 #include "utilities.h"
 #include "logger.h"
-#include <algorithm>
 
 using namespace Utilities;
 
@@ -84,16 +83,16 @@ void Diagnostics::ResetLevel()
 
 namespace Particles
 {
-	int nextSpritePart;
-	SpriteParticle spriteParts[MAX_SPRITEPARTS];
-	int nextMeshPart;
-	MeshParticle meshParts[MAX_MESHPARTS];
-	int nextPartGroup;
-	ParticleGroup partGroups[MAX_PARTGROUPS];
-	int nextModule;
-	Module modules[MAX_MODULES];
+	int SpriteParticle::nextPart;
+	std::array<SpriteParticle, MAX_SPRITEPARTS> SpriteParticle::parts;
+	int MeshParticle::nextPart;
+	std::array<MeshParticle, MAX_MESHPARTS> MeshParticle::parts;
+	int ParticleGroup::nextGroup;
+	std::array<ParticleGroup, MAX_PARTGROUPS> ParticleGroup::groups;
+	int Module::nextModule;
+	std::array<Module, MAX_MODULES> Module::modules;
 	
-	BoundFunction functionRefs[MAX_FUNCREFS];
+	std::array<BoundFunction, MAX_FUNCREFS> BoundFunction::functionRefs;
 
 	FunctionType GetCaller()
 	{
@@ -118,27 +117,27 @@ namespace Particles
 		SetCaller(previousCaller);
 	}
 
-	int GetFreeSpritePart()
+	int SpriteParticle::GetFreePart()
 	{
 		int i, free;
 		SpriteParticle* part;
 	
-		for (part = &spriteParts[nextSpritePart], free = nextSpritePart, i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (part = &parts[nextPart], free = nextPart, i = 0; i < parts.size(); ++i)
 		{
 			if (part->lifeCounter <= 0)
 			{
-				nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
+				nextPart = (free + 1) % parts.size();
 
-				spriteParts[free] = SpriteParticle();
-				spriteParts[free].emitterIndex = NO_ITEM;
-				spriteParts[free].emitterNode = NO_MESH;
-				spriteParts[free].data.table = Script::StoreNewTable();
+				parts[free] = SpriteParticle();
+				parts[free].emitterIndex = NO_ITEM;
+				parts[free].emitterNode = NO_MESH;
+				parts[free].data.table = Script::StoreNewTable();
 				return free;
 			}
 
-			if (free == MAX_SPRITEPARTS - 1)
+			if (free == parts.size() - 1)
 			{
-				part = &spriteParts[0];
+				part = &parts[0];
 				free = 0;
 			}
 			else
@@ -150,9 +149,9 @@ namespace Particles
 	
 		int eldest = INT32_MAX;
 		free = 0;
-		part = &spriteParts[0];
+		part = &parts[0];
 
-		for (i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
+		for (i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter < eldest)
 			{
@@ -161,38 +160,44 @@ namespace Particles
 			}
 		}
 
-		nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
+		nextPart = (free + 1) % parts.size();
 
-		Script::DeleteTable(spriteParts[free].data.table);
-		spriteParts[free] = SpriteParticle();
-		spriteParts[free].emitterIndex = NO_ITEM;
-		spriteParts[free].emitterNode = NO_MESH;
-		spriteParts[free].data.table = Script::StoreNewTable();
+		Script::DeleteTable(parts[free].data.table);
+		parts[free] = SpriteParticle();
+		parts[free].emitterIndex = NO_ITEM;
+		parts[free].emitterNode = NO_MESH;
+		parts[free].data.table = Script::StoreNewTable();
 		return free;
 	}
 
+	void SpriteParticle::ClearParts()
+	{
+		for (auto& part : parts)
+			part = SpriteParticle();
+		nextPart = 0;
+	}
 
-	int GetFreeMeshPart()
+	int MeshParticle::GetFreePart()
 	{
 		int i, free;
 		MeshParticle* part;
 
-		for (part = &meshParts[nextMeshPart], free = nextMeshPart, i = 0; i < MAX_MESHPARTS; ++i)
+		for (part = &parts[nextPart], free = nextPart, i = 0; i < parts.size(); ++i)
 		{
 			if (part->lifeCounter <= 0)
 			{
-				nextMeshPart = (free + 1) % MAX_MESHPARTS;
+				nextPart = (free + 1) % parts.size();
 
-				meshParts[free] = MeshParticle();
-				meshParts[free].emitterIndex = NO_ITEM;
-				meshParts[free].emitterNode = NO_MESH;
-				meshParts[free].data.table = Script::StoreNewTable();
+				parts[free] = MeshParticle();
+				parts[free].emitterIndex = NO_ITEM;
+				parts[free].emitterNode = NO_MESH;
+				parts[free].data.table = Script::StoreNewTable();
 				return free;
 			}
 
-			if (free == MAX_MESHPARTS - 1)
+			if (free == parts.size() - 1)
 			{
-				part = &meshParts[0];
+				part = &parts[0];
 				free = 0;
 			}
 			else
@@ -204,9 +209,9 @@ namespace Particles
 
 		int eldest = INT32_MAX;
 		free = 0;
-		part = &meshParts[0];
+		part = &parts[0];
 
-		for (i = 0; i < MAX_MESHPARTS; ++i, ++part)
+		for (i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter < eldest)
 			{
@@ -215,40 +220,47 @@ namespace Particles
 			}
 		}
 
-		nextMeshPart = (free + 1) % MAX_MESHPARTS;
+		nextPart = (free + 1) % parts.size();
 
-		Script::DeleteTable(meshParts[free].data.table);
-		meshParts[free] = MeshParticle();
-		meshParts[free].emitterIndex = NO_ITEM;
-		meshParts[free].emitterNode = NO_MESH;
-		meshParts[free].data.table = Script::StoreNewTable();
+		Script::DeleteTable(parts[free].data.table);
+		parts[free] = MeshParticle();
+		parts[free].emitterIndex = NO_ITEM;
+		parts[free].emitterNode = NO_MESH;
+		parts[free].data.table = Script::StoreNewTable();
 		return free;
 	}
 
-	int GetFreeParticleGroup()
+	void MeshParticle::ClearParts()
+	{
+		for (auto& part : parts)
+			part = MeshParticle();
+		nextPart = 0;
+	}
+
+	int ParticleGroup::GetFreeGroup()
 	{
 		int free;
 
-		free = nextPartGroup;
-		if (free < MAX_PARTGROUPS)
+		free = nextGroup;
+		if (free < groups.size())
 		{
-			nextPartGroup++;
-			partGroups[free] = ParticleGroup();
-			partGroups[free].groupIndex = free;
-			partGroups[free].blendMode = BlendMode::BLEND_COLORADD;
-			partGroups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
-			partGroups[free].autoTrigger = true;
+			nextGroup++;
+			groups[free] = ParticleGroup();
+			groups[free].groupIndex = free;
+			groups[free].blendMode = BlendMode::BLEND_COLORADD;
+			groups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
+			groups[free].autoTrigger = true;
 			return free;
 		}
 		return -1;
 	}
 
-	int GetFreeModule()
+	int Module::GetFreeModule()
 	{
 		int free;
 
 		free = nextModule;
-		if (free < MAX_MODULES)
+		if (free < modules.size())
 		{
 			nextModule++;
 			modules[free] = Module();
@@ -259,46 +271,41 @@ namespace Particles
 		return -1;
 	}
 
-	int GetLastModule()
+	int Module::GetLastModule()
 	{
 		return nextModule - 1;
 	}
 
 	void ClearParts()
 	{
-		for (int i = 0; i < MAX_SPRITEPARTS; i++)
-			spriteParts[i] = SpriteParticle();
-		nextSpritePart = 0;
-
-		for (int i = 0; i < MAX_MESHPARTS; i++)
-			meshParts[i] = MeshParticle();
-		nextMeshPart = 0;
+		SpriteParticle::ClearParts();
+		MeshParticle::ClearParts();
 	}
 
-	void ClearPartGroups()
+	void ParticleGroup::ClearGroups()
 	{
-		for (int i = 0; i < MAX_PARTGROUPS; i++)
-			partGroups[i] = ParticleGroup();
-		nextPartGroup = 0;
+		for (auto& group : groups)
+			group = ParticleGroup();
+		nextGroup = 0;
 	}
 
-	void ClearModules()
+	void Module::ClearModules()
 	{
-		for (int i = 0; i < MAX_MODULES; i++)
-			modules[i] = Module();
+		for (auto& module : modules)
+			module = Module();
 		nextModule = 0;
 	}
 
-	void ClearFunctionRefs()
+	void BoundFunction::ClearFunctionRefs()
 	{
-		for (int i = 0; i < MAX_FUNCREFS; i++)
-			functionRefs[i] = BoundFunction();
+		for (auto& func : functionRefs)
+			func = BoundFunction();
 	}
 
 	void UpdateParts()
 	{
-		UpdateSprites();
-		UpdateMeshes();
+		SpriteParticle::UpdateParts();
+		MeshParticle::UpdateParts();
 		PostUpdateLoop();
 
 		MyData.Save.Global.gameTick++;
@@ -314,19 +321,19 @@ namespace Particles
 		return x;
 	}
 
-	void UpdateSprites()
+	void SpriteParticle::UpdateParts()
 	{
-		SpriteParticle* part = &spriteParts[0];
+		SpriteParticle* part = &parts[0];
 
 		Particles::CallerGuard guard(FUNCTION_UPDATE);
 
 		Script::PreFunctionLoop();
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
 
-			auto& pgroup = partGroups[part->groupIndex];
+			auto& pgroup = ParticleGroup::groups[part->groupIndex];
 
 			int lifefactor = (part->lifeSpan - part->lifeCounter);
 
@@ -387,18 +394,18 @@ namespace Particles
 	}
 
 
-	void UpdateMeshes()
+	void MeshParticle::UpdateParts()
 	{
-		auto part = &meshParts[0];
+		auto part = &parts[0];
 
 		Particles::CallerGuard guard(FUNCTION_UPDATE);
 		Script::PreFunctionLoop();
-		for (int i = 0; i < MAX_MESHPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
 
-			auto& pgroup = partGroups[part->groupIndex];
+			auto& pgroup = ParticleGroup::groups[part->groupIndex];
 
 			int lifefactor = (part->lifeSpan - part->lifeCounter);
 
@@ -441,42 +448,40 @@ namespace Particles
 
 	void PostUpdateLoop()
 	{
-		SpriteParticle* sprite = &spriteParts[0];
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++sprite)
-			sprite->createdInCurrentLoop = false;
+		for (auto& part : SpriteParticle::parts)
+			part.createdInCurrentLoop = false;
 
-		MeshParticle* mesh = &meshParts[0];
-		for (int i = 0; i < MAX_MESHPARTS; ++i, ++mesh)
-			mesh->createdInCurrentLoop = false;
+		for (auto& part : MeshParticle::parts)
+			part.createdInCurrentLoop = false;
 	}
 
 
 	void DrawParts()
 	{
-		DrawSprites();
-		DrawMeshes();
+		SpriteParticle::DrawParts();
+		MeshParticle::DrawParts();
 	}
 
 
-	void DrawSprites()
+	void SpriteParticle::DrawParts()
 	{
 		long viewCoords[12] = {};
-		phd_vector verts[4];
+		phd_vector verts[4] = {};
 		int x1 = 0, y1 = 0, z1 = 0;
 
-		SpriteParticle* part = &spriteParts[0];
+		SpriteParticle* part = &parts[0];
 
 		phd_PushMatrix();
 		phd_TranslateAbs(lara_item->pos.xPos, lara_item->pos.yPos, lara_item->pos.zPos);
 
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0)
 				continue;
 
 			Diagnostics::activeSpriteParticles++;
 
-			const auto& pgroup = partGroups[part->groupIndex];
+			const auto& pgroup = ParticleGroup::groups[part->groupIndex];
 
 			if (pgroup.drawMode == DrawMode::DRAW_NONE)
 				continue;
@@ -521,7 +526,7 @@ namespace Particles
 				y1 = SaturateRound<int>(partPos.y);
 				z1 = SaturateRound<int>(partPos.z);
 
-				if (pgroup.lightMode == LIGHT_DYNAMIC)
+				if (pgroup.lightMode == LightMode::LIGHT_DYNAMIC)
 				{
 					const auto col = CalculateVertexDynamicLighting(x1, y1, z1);
 					part->colCust.R = Clamp(part->colCust.R + col.R, 0, 255);
@@ -670,11 +675,11 @@ namespace Particles
 	}
 
 
-	void DrawMeshes()
+	void MeshParticle::DrawParts()
 	{
-		auto part = &meshParts[0];
+		auto part = &parts[0];
 
-		for (int i = 0; i < MAX_MESHPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter > 0)
 			{
@@ -691,10 +696,10 @@ namespace Particles
 	{
 		Particles::CallerGuard guard(FUNCTION_INIT);
 		Script::PreFunctionLoop();
-		for (int i = 0; i < nextPartGroup; i++)
+		for (auto& group : ParticleGroup::groups)
 		{
-			if (partGroups[i].autoTrigger && !Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
-				Script::DeleteFunction(&partGroups[i].initIndex);
+			if (group.autoTrigger && !Script::ExecuteFunction(group.initIndex, nullptr))
+				Script::DeleteFunction(&group.initIndex);
 		}
 		Script::PostFunctionLoop();
 	}
@@ -753,7 +758,7 @@ namespace Particles
 	Vector3f BaseParticle::AbsPos()
 	{
 		auto absPos = pos;
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
 		if (tether != TetherType::TETHER_NONE && emitterIndex >= 0 && emitterIndex < level_items)
 		{
@@ -791,7 +796,7 @@ namespace Particles
 			return;
 
 		auto item = &items[itemIndex];
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 		Vector3f relPos;
 
 		if (tether != TetherType::TETHER_NONE)
@@ -833,7 +838,7 @@ namespace Particles
 
 	bool BaseParticle::CollideWalls(bool bounce, float rebound)
 	{
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
 		if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 		{
@@ -876,7 +881,7 @@ namespace Particles
 
 	bool BaseParticle::CollideFloors(bool bounce, float rebound, float minBounce, int collMargin, bool accurate)
 	{
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
 		if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 		{
@@ -1097,9 +1102,9 @@ namespace Particles
 	{
 		Vector3f v;
 
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &spriteParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1122,9 +1127,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &spriteParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1156,9 +1161,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &spriteParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1564,9 +1569,9 @@ namespace Particles
 	{
 		Vector3f v;
 
-		for (int i = 0; i < MAX_MESHPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &meshParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1589,9 +1594,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_MESHPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &meshParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1623,9 +1628,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_MESHPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &meshParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1656,7 +1661,7 @@ namespace Particles
 	{
 		phd_vector projPos = RoundPos(AbsPos());
 
-		const auto& pgroup = partGroups[groupIndex];
+		const auto& pgroup = ParticleGroup::groups[groupIndex];
 
 		int testx = projPos.x - lara_item->pos.xPos;
 		int testy = projPos.y - lara_item->pos.yPos;
@@ -1797,7 +1802,7 @@ namespace Particles
 		sizeEnd = s.sizeEnd;
 		sizeRatio = s.sizeRatio;
 
-		if (partGroups[s.groupIndex].drawMode < DrawMode::DRAW_SPRITE3D)
+		if (ParticleGroup::groups[s.groupIndex].drawMode < DrawMode::DRAW_SPRITE3D)
 		{
 			rotX = s.rot;
 			rotY = 0;

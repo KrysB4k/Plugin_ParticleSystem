@@ -92,10 +92,11 @@ void InitialiseLevel()
 	LocalScriptIntegrityDefined = false;
 
 	Script::NewState();
-	Particles::ClearParts();
-	Particles::ClearPartGroups();
-	Particles::ClearModules();
-	Particles::ClearFunctionRefs();
+	Particles::SpriteParticle::ClearParts();
+	Particles::MeshParticle::ClearParts();
+	Particles::ParticleGroup::ClearGroups();
+	Particles::Module::ClearModules();
+	Particles::BoundFunction::ClearFunctionRefs();
 #ifdef DIAGNOSTICS
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
@@ -183,14 +184,14 @@ void SaveSpriteParticles(WORD** p2VetExtra, int* pNWords)
 
 	auto& spriteCount = *reinterpret_cast<short*>(spriteDataList.emplace_back(sizeof(short)).data());
 	spriteCount = 0;
-	for (int i = 0; i < MAX_SPRITEPARTS; i++)
+	for (const auto& part : Particles::SpriteParticle::parts)
 	{
-		if (Particles::spriteParts[i].lifeCounter > 0 && Particles::partGroups[Particles::spriteParts[i].groupIndex].saved)
+		if (part.lifeCounter > 0 && Particles::ParticleGroup::groups[part.groupIndex].saved)
 		{
-			spriteSave.emplace_back(Particles::spriteParts[i]);
+			spriteSave.emplace_back(part);
 
 			auto& spriteDataCount = *reinterpret_cast<short*>(spriteDataList.emplace_back(sizeof(short)).data());
-			spriteDataCount = Script::TraverseReadTable(Particles::spriteParts[i].data.table, &spriteDataList, ReadData);
+			spriteDataCount = Script::TraverseReadTable(part.data.table, &spriteDataList, ReadData);
 			spriteCount++;
 		}
 	}
@@ -216,14 +217,14 @@ void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
 
 	auto& meshCount = *reinterpret_cast<short*>(meshDataList.emplace_back(sizeof(short)).data());
 	meshCount = 0;
-	for (int i = 0; i < MAX_MESHPARTS; i++)
+	for (const auto& part : Particles::MeshParticle::parts)
 	{
-		if (Particles::meshParts[i].lifeCounter > 0 && Particles::partGroups[Particles::meshParts[i].groupIndex].saved)
+		if (part.lifeCounter > 0 && Particles::ParticleGroup::groups[part.groupIndex].saved)
 		{
-			meshSave.emplace_back(Particles::meshParts[i]);
+			meshSave.emplace_back(part);
 
 			auto& meshDataCount = *reinterpret_cast<short*>(meshDataList.emplace_back(sizeof(short)).data());
-			meshDataCount = Script::TraverseReadTable(Particles::meshParts[i].data.table, &meshDataList, ReadData);
+			meshDataCount = Script::TraverseReadTable(part.data.table, &meshDataList, ReadData);
 			meshCount++;
 		}
 	}
@@ -251,7 +252,7 @@ void LoadSpriteParticles(WORD* pData)
 	{
 		auto ptr = reinterpret_cast<Particles::SpriteParticleSave*>(&pData[1]);
 		for (int i = 0; i < TotParts; i++)
-			Particles::spriteParts[i].LoadParticle(ptr++);
+			Particles::SpriteParticle::parts[i].LoadParticle(ptr++);
 	}
 }
 
@@ -264,7 +265,7 @@ void LoadMeshParticles(WORD* pData)
 	{
 		auto ptr = reinterpret_cast<Particles::MeshParticleSave*>(&pData[1]);
 		for (int i = 0; i < TotParts; i++)
-			Particles::meshParts[i].LoadParticle(ptr++);
+			Particles::MeshParticle::parts[i].LoadParticle(ptr++);
 	}
 }
 
@@ -311,7 +312,7 @@ void LoadSpriteParticlesData(WORD* pData)
 		int spriteDataCount = *reinterpret_cast<short*>(ptr);
 		ptr += sizeof(short);
 
-		Script::TraverseAssignTable(Particles::spriteParts[i].data.table, spriteDataCount, &ptr, AssignData);
+		Script::TraverseAssignTable(Particles::SpriteParticle::parts[i].data.table, spriteDataCount, &ptr, AssignData);
 	}
 }
 
@@ -328,7 +329,7 @@ void LoadMeshParticlesData(WORD* pData)
 		int meshDataCount = *reinterpret_cast<short*>(ptr);
 		ptr += sizeof(short);
 
-		Script::TraverseAssignTable(Particles::meshParts[i].data.table, meshDataCount, &ptr, AssignData);
+		Script::TraverseAssignTable(Particles::MeshParticle::parts[i].data.table, meshDataCount, &ptr, AssignData);
 	}
 }
 
@@ -676,7 +677,8 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 		break;
 
 	case 2:
-		Particles::ClearParts();
+		Particles::SpriteParticle::ClearParts();
+		Particles::MeshParticle::ClearParts();
 		break;
 
 	default:
