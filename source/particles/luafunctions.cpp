@@ -137,20 +137,30 @@ namespace LuaFunctions
 		}
 	};
 
-	struct CeilFunction final : public LuaObjectFunction
-	{
-		int Call() final
-		{
-			Script::PushNumber(ceil(GetNumber(1)));
-			return 1;
-		}
-	};
-
 	struct CbrtFunction final : public LuaObjectFunction
 	{
 		int Call() final
 		{
 			Script::PushNumber(cbrt(GetNumber(1)));
+			return 1;
+		}
+	};
+
+	struct CheckPartLimitFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto group = GetData<Particles::ParticleGroup>(1);
+			Script::PushBoolean((group->partCount < group->partLimit));
+			return 1;
+		}
+	};
+
+	struct CeilFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			Script::PushNumber(ceil(GetNumber(1)));
 			return 1;
 		}
 	};
@@ -228,6 +238,17 @@ namespace LuaFunctions
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createMeshPart");
 
 			auto group = GetData<Particles::ParticleGroup>(1);
+			if (group->partLimit)
+			{
+				if (group->partCount >= group->partLimit)
+				{
+					Script::EmitFailure("exceeded particle limit for group", Logger::Warning);
+					return 0;
+				}
+
+				group->partCount++;
+			}
+
 			int i = Particles::MeshParticle::GetFreePart();
 			auto part = &Particles::MeshParticle::parts[i];
 			part->groupIndex = group->groupIndex;
@@ -303,6 +324,17 @@ namespace LuaFunctions
 		{
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createSpritePart");
 			auto group = GetData<Particles::ParticleGroup>(1);
+			if (group->partLimit)
+			{
+				if (group->partCount >= group->partLimit)
+				{
+					Script::EmitFailure("exceeded particle limit for group", Logger::Warning);
+					return 0;
+				}
+
+				group->partCount++;
+			}
+
 			int i = Particles::SpriteParticle::GetFreePart();
 			auto part = &Particles::SpriteParticle::parts[i];
 			part->groupIndex = group->groupIndex;
@@ -530,27 +562,26 @@ namespace LuaFunctions
 		{
 			auto group = GetData<Particles::ParticleGroup>(1);
 			
-			if (group)
+			for (auto& part : Particles::SpriteParticle::parts)
 			{
-				for (auto& part : Particles::SpriteParticle::parts)
+				if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
 				{
-					if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
-					{
-						Script::DeleteTable(part.data.table);
-						part.lifeCounter = 0;
-					}
-
+					Script::DeleteTable(part.data.table);
+					part.lifeCounter = 0;
 				}
-				for (auto& part : Particles::MeshParticle::parts)
-				{
-					if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
-					{
-						Script::DeleteTable(part.data.table);
-						part.lifeCounter = 0;
-					}
 
-				}
 			}
+			for (auto& part : Particles::MeshParticle::parts)
+			{
+				if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
+				{
+					Script::DeleteTable(part.data.table);
+					part.lifeCounter = 0;
+				}
+
+			}
+
+			group->partCount = 0;
 
 			return 0;
 		}
@@ -933,6 +964,11 @@ namespace LuaFunctions
 			auto part = GetData<Particles::BaseParticle>(1);
 			Script::DeleteTable(part->data.table);
 			part->lifeCounter = 0;
+
+			auto group = Particles::ParticleGroup::groups[part->groupIndex];
+			if (group.partLimit)
+				group.partCount--;
+
 			return 0;
 		}
 	};
@@ -1363,6 +1399,7 @@ namespace LuaFunctions
 	BoidSeparationFunction BoidSeparationFunc;
 	CbrtFunction CbrtFunc;
 	CeilFunction CeilFunc;
+	CheckPartLimitFunction CheckPartLimitFunc;
 	ClampFunction ClampFunc;
 	CosFunction CosFunc;
 	CreateColorFunction CreateColorFunc;
@@ -1482,6 +1519,8 @@ namespace LuaFunctions
 				return &CbrtFunc;
 			if (!strcmp(field, "ceil"))
 				return &CeilFunc;
+			if (!strcmp(field, "checkPartLimit"))
+				return &CheckPartLimitFunc;
 			if (!strcmp(field, "clamp"))
 				return &ClampFunc;
 			if (!strcmp(field, "cos"))

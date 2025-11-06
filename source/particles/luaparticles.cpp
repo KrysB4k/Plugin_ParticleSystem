@@ -292,80 +292,89 @@ namespace Particles
 
 	void ParticleGroup::Index(const char* field)
 	{
-		if (Particles::GetCaller() & FUNCTION_MODULE && field)
+		switch (field[0])
 		{
-			switch (field[0])
+		case 'a':
+			if (!strcmp(field, "attach"))
 			{
-			case 'a':
-				if (!strcmp(field, "attach"))
-				{
-					Script::PushData(&attach);
-					return;
-				}
-				if (!strcmp(field, "autoTrigger"))
-				{
-					Script::PushBoolean(autoTrigger);
-					return;
-				}
-				break;
-
-			case 'b':
-				if (!strcmp(field, "blendMode"))
-				{
-					Script::PushInteger(blendMode);
-					return;
-				}
-				break;
-
-			case 'd':
-				if (!strcmp(field, "drawMode"))
-				{
-					Script::PushInteger(drawMode);
-					return;
-				}
-				break;
-
-			case 'i':
-				if (!strcmp(field, "immortal"))
-				{
-					Script::PushBoolean(immortal);
-					return;
-				}
-				break;
-
-			case 'l':
-				if (!strcmp(field, "lightMode"))
-				{
-					Script::PushInteger(lightMode);
-					return;
-				}
-				if (!strcmp(field, "lineIgnoreVel"))
-				{
-					Script::PushBoolean(lineIgnoreVel);
-					return;
-				}
-				break;
-
-			case 's':
-				if (!strcmp(field, "saved"))
-				{
-					Script::PushBoolean(saved);
-					return;
-				}
-				if (!strcmp(field, "screenSpace"))
-				{
-					Script::PushBoolean(screenSpace);
-					return;
-				}
-				if (!strcmp(field, "spriteSlot"))
-				{
-					Script::PushInteger(spriteSlot);
-					return;
-				}
-				break;
+				Script::PushData(&attach);
+				return;
 			}
+			if (!strcmp(field, "autoTrigger"))
+			{
+				Script::PushBoolean(autoTrigger);
+				return;
+			}
+			break;
+
+		case 'b':
+			if (!strcmp(field, "blendMode"))
+			{
+				Script::PushInteger(blendMode);
+				return;
+			}
+			break;
+
+		case 'd':
+			if (!strcmp(field, "drawMode"))
+			{
+				Script::PushInteger(drawMode);
+				return;
+			}
+			break;
+
+		case 'i':
+			if (!strcmp(field, "immortal"))
+			{
+				Script::PushBoolean(immortal);
+				return;
+			}
+			break;
+
+		case 'l':
+			if (!strcmp(field, "lightMode"))
+			{
+				Script::PushInteger(lightMode);
+				return;
+			}
+			if (!strcmp(field, "lineIgnoreVel"))
+			{
+				Script::PushBoolean(lineIgnoreVel);
+				return;
+			}
+			break;
+
+		case 'p':
+			if (!strcmp(field, "partCount"))
+			{
+				Script::PushInteger(partCount);
+				return;
+			}
+			if (!strcmp(field, "partLimit"))
+			{
+				Script::PushInteger(partLimit);
+				return;
+			}
+			break;
+
+		case 's':
+			if (!strcmp(field, "saved"))
+			{
+				Script::PushBoolean(saved);
+				return;
+			}
+			if (!strcmp(field, "screenSpace"))
+			{
+				Script::PushBoolean(screenSpace);
+				return;
+			}
+			if (!strcmp(field, "spriteSlot"))
+			{
+				Script::PushInteger(spriteSlot);
+				return;
+			}
+			break;
 		}
-		LuaObjectClass::Index(field);
 	}
 
 	void ParticleGroup::NewIndex(const char* field)
@@ -420,6 +429,18 @@ namespace Particles
 				if (!strcmp(field, "lineIgnoreVel"))
 				{
 					lineIgnoreVel = GetBoolean(-1);
+					return;
+				}
+				break;
+
+			case 'p':
+				if (!strcmp(field, "partCount"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				if (!strcmp(field, "partLimit"))
+				{
+					partLimit = GetClampedInteger(-1, 0, MAX_SPRITEPARTS, false);
 					return;
 				}
 				break;

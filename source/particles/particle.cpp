@@ -386,7 +386,11 @@ namespace Particles
 				if (pgroup.immortal)
 					part->lifeCounter = part->lifeSpan;
 				else
+				{
 					Script::DeleteTable(part->data.table);
+					if (pgroup.partLimit)
+						pgroup.partCount--;
+				}
 			}
 		}
 
@@ -438,7 +442,11 @@ namespace Particles
 				if (pgroup.immortal)
 					part->lifeCounter = part->lifeSpan;
 				else
+				{
 					Script::DeleteTable(part->data.table);
+					if (pgroup.partLimit)
+						pgroup.partCount--;
+				}
 			}
 		}
 
@@ -489,10 +497,7 @@ namespace Particles
 			if (pgroup.screenSpace)
 			{
 				if (part->pos.x < -1.0f || part->pos.x > 2.0f || part->pos.y < -1.0f || part->pos.y > 2.0f)
-				{
-					part->lifeCounter = 0;
 					continue;
-				}
 
 				viewCoords[0] = SaturateRound<long>(part->pos.x * phd_winxmax);
 				viewCoords[1] = SaturateRound<long>(part->pos.y * phd_winxmax);
@@ -1561,7 +1566,8 @@ namespace Particles
 		shatter.flags = 0;
 		ShatterObject(&shatter, 0, -32, roomIndex, 0);
 
-		lifeCounter = 1;
+		Script::DeleteTable(data.table);
+		lifeCounter = 0;
 	}
 
 
@@ -1671,7 +1677,6 @@ namespace Particles
 			testy < -MAX_DRAWDIST || testy > MAX_DRAWDIST ||
 			testz < -MAX_DRAWDIST || testz > MAX_DRAWDIST)
 		{
-			lifeCounter = 0;
 			return;
 		}
 
