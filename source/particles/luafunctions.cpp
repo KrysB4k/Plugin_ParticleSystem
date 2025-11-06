@@ -67,11 +67,12 @@ namespace LuaFunctions
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindFunction");
 
 			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
-			if (Particles::functionRefs[index].ref != SCRIPT_REFNIL)
+			auto funcRef = &Particles::BoundFunction::functionRefs[index];
+			if (funcRef->ref != SCRIPT_REFNIL)
 				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
 
-			Particles::functionRefs[index].ref = GetFunction(2);
-			Particles::functionRefs[index].type = FUNCTION_BIND;
+			funcRef->ref = GetFunction(2);
+			funcRef->type = FUNCTION_BIND;
 			return 0;
 		}
 	};
@@ -83,17 +84,19 @@ namespace LuaFunctions
 			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindGroup");
 
 			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
-			if (Particles::functionRefs[index].ref != SCRIPT_REFNIL)
+			if (Particles::BoundFunction::functionRefs[index].ref != SCRIPT_REFNIL)
 				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
 
+			auto funcRef = &Particles::BoundFunction::functionRefs[index];
 			auto group = GetData<Particles::ParticleGroup>(2);
 			if (group->autoTrigger)
 			{
 				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Error);
 				return 0;
 			}
-			Particles::functionRefs[index].ref = group->initIndex;
-			Particles::functionRefs[index].type = FUNCTION_INIT;
+
+			funcRef->ref = group->initIndex;
+			funcRef->type = FUNCTION_INIT;
 			return 0;
 		}
 	};
@@ -206,13 +209,14 @@ namespace LuaFunctions
 			int init = GetFunction(1);
 			int update = GetFunction(2);
 
-			int i = Particles::GetFreeParticleGroup();
+			int i = Particles::ParticleGroup::GetFreeGroup();
 			if (i == -1)
 				Script::Throw("group creation failed, exceeded available particle group maximum");
 
-			Particles::partGroups[i].initIndex = init;
-			Particles::partGroups[i].updateIndex = update;
-			Script::PushData(&Particles::partGroups[i]);
+			auto group = &Particles::ParticleGroup::groups[i];
+			group->initIndex = init;
+			group->updateIndex = update;
+			Script::PushData(group);
 			return 1;
 		}
 	};
@@ -224,11 +228,12 @@ namespace LuaFunctions
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createMeshPart");
 
 			auto group = GetData<Particles::ParticleGroup>(1);
-			int i = Particles::GetFreeMeshPart();
-			Particles::meshParts[i].groupIndex = group->groupIndex;
-			Particles::meshParts[i].createdInCurrentLoop = true;
+			int i = Particles::MeshParticle::GetFreePart();
+			auto part = &Particles::MeshParticle::parts[i];
+			part->groupIndex = group->groupIndex;
+			part->createdInCurrentLoop = true;
 
-			Tr4ItemInfo* item = &Particles::meshParts[i].item;
+			Tr4ItemInfo* item = &part->item;
 			item->il.fcnt = -1;
 			item->il.room_number = -1;
 			item->il.RoomChange = 0;
@@ -238,7 +243,7 @@ namespace LuaFunctions
 			item->il.pCurrentLights = item->il.CurrentLights;
 			item->il.pPrevLights = item->il.PrevLights;
 
-			Script::PushData(&Particles::meshParts[i]);
+			Script::PushData(part);
 			return 1;
 		}
 	};
@@ -249,16 +254,17 @@ namespace LuaFunctions
 		{
 			CheckCaller(FunctionType::FUNCTION_MODULE, "createModule");
 
-			int last = Particles::GetLastModule();
-			if (last != -1 && Particles::modules[last].createdInCurrentModule)
+			int last = Particles::Module::GetLastModule();
+			if (last != -1 && Particles::Module::modules[last].createdInCurrentModule)
 				Script::Throw("module creation failed, a module already exists");
 
-			int i = Particles::GetFreeModule();
+			int i = Particles::Module::GetFreeModule();
 			if (i == -1)
 				Script::Throw("module creation failed, exceeded available module maximum");
 
-			Particles::modules[i].createdInCurrentModule = true;
-			Script::PushData(&Particles::modules[i]);
+			auto module = &Particles::Module::modules[i];
+			module->createdInCurrentModule = true;
+			Script::PushData(module);
 			return 1;
 		}
 	};
@@ -297,10 +303,11 @@ namespace LuaFunctions
 		{
 			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createSpritePart");
 			auto group = GetData<Particles::ParticleGroup>(1);
-			int i = Particles::GetFreeSpritePart();
-			Particles::spriteParts[i].groupIndex = group->groupIndex;
-			Particles::spriteParts[i].createdInCurrentLoop = true;
-			Script::PushData(&Particles::spriteParts[i]);
+			int i = Particles::SpriteParticle::GetFreePart();
+			auto part = &Particles::SpriteParticle::parts[i];
+			part->groupIndex = group->groupIndex;
+			part->createdInCurrentLoop = true;
+			Script::PushData(part);
 			return 1;
 		}
 	};
@@ -525,24 +532,23 @@ namespace LuaFunctions
 			
 			if (group)
 			{
-				for (int i = 0; i < MAX_SPRITEPARTS; i++)
+				for (auto& part : Particles::SpriteParticle::parts)
 				{
-					auto part = &Particles::spriteParts[i];
-					if (part->groupIndex == group->groupIndex && part->lifeCounter > 0)
+					if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
 					{
-						Script::DeleteTable(part->data.table);
-						part->lifeCounter = 0;
+						Script::DeleteTable(part.data.table);
+						part.lifeCounter = 0;
 					}
 
 				}
-				for (int i = 0; i < MAX_MESHPARTS; i++)
+				for (auto& part : Particles::MeshParticle::parts)
 				{
-					auto part = &Particles::meshParts[i];
-					if (part->groupIndex == group->groupIndex && part->lifeCounter > 0)
+					if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
 					{
-						Script::DeleteTable(part->data.table);
-						part->lifeCounter = 0;
+						Script::DeleteTable(part.data.table);
+						part.lifeCounter = 0;
 					}
+
 				}
 			}
 
@@ -1048,6 +1054,26 @@ namespace LuaFunctions
 		}
 	};
 
+	struct RotFromVectorFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto vec = GetData<LuaObjectClassPosition>(1);
+			int adjustment = 1;
+			if (GetArgCount(1, 2) > 1)
+				adjustment = static_cast<int>(!GetBoolean(2));
+			float x = vec->GetX();
+			float y = vec->GetY();
+			float z = vec->GetZ();
+
+			short rotY = RadToShort(atan2f(x, z));
+			short rotX = RadToShort(atan2f(sqrtf(x * x + z * z), y)) - (16384 * adjustment);
+
+			ConstructManagedData<Vector3s>(rotX, rotY, 0);
+			return 1;
+		}
+	};
+
 	struct RoundFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1402,6 +1428,7 @@ namespace LuaFunctions
 	RandomSpherePointFunction RandomSpherePointFunc;
 	RemapFunction RemapFunc;
 	RequireFunction RequireFunc;
+	RotFromVectorFunction RotFromVectorFunc;
 	RoundFunction RoundFunc;
 	SelectItemFunction SelectItemFunc;
 	SetLogLevelFunction SetLogLevelFunc;
@@ -1608,6 +1635,8 @@ namespace LuaFunctions
 				return &RemapFunc;
 			if (!strcmp(field, "require"))
 				return &RequireFunc;
+			if (!strcmp(field, "rotFromVector"))
+				return &RotFromVectorFunc;
 			if (!strcmp(field, "round"))
 				return &RoundFunc;
 			break;

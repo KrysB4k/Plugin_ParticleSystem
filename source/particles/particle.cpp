@@ -83,17 +83,16 @@ void Diagnostics::ResetLevel()
 
 namespace Particles
 {
-
-	int nextSpritePart;
-	SpriteParticle spriteParts[MAX_SPRITEPARTS];
-	int nextMeshPart;
-	MeshParticle meshParts[MAX_MESHPARTS];
-	int nextPartGroup;
-	ParticleGroup partGroups[MAX_PARTGROUPS];
-	int nextModule;
-	Module modules[MAX_MODULES];
+	int SpriteParticle::nextPart;
+	std::array<SpriteParticle, MAX_SPRITEPARTS> SpriteParticle::parts;
+	int MeshParticle::nextPart;
+	std::array<MeshParticle, MAX_MESHPARTS> MeshParticle::parts;
+	int ParticleGroup::nextGroup;
+	std::array<ParticleGroup, MAX_PARTGROUPS> ParticleGroup::groups;
+	int Module::nextModule;
+	std::array<Module, MAX_MODULES> Module::modules;
 	
-	BoundFunction functionRefs[MAX_FUNCREFS];
+	std::array<BoundFunction, MAX_FUNCREFS> BoundFunction::functionRefs;
 
 	FunctionType GetCaller()
 	{
@@ -118,27 +117,27 @@ namespace Particles
 		SetCaller(previousCaller);
 	}
 
-	int GetFreeSpritePart()
+	int SpriteParticle::GetFreePart()
 	{
 		int i, free;
 		SpriteParticle* part;
 	
-		for (part = &spriteParts[nextSpritePart], free = nextSpritePart, i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (part = &parts[nextPart], free = nextPart, i = 0; i < parts.size(); ++i)
 		{
 			if (part->lifeCounter <= 0)
 			{
-				nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
+				nextPart = (free + 1) % parts.size();
 
-				spriteParts[free] = SpriteParticle();
-				spriteParts[free].emitterIndex = NO_ITEM;
-				spriteParts[free].emitterNode = NO_MESH;
-				spriteParts[free].data.table = Script::StoreNewTable();
+				parts[free] = SpriteParticle();
+				parts[free].emitterIndex = NO_ITEM;
+				parts[free].emitterNode = NO_MESH;
+				parts[free].data.table = Script::StoreNewTable();
 				return free;
 			}
 
-			if (free == MAX_SPRITEPARTS - 1)
+			if (free == parts.size() - 1)
 			{
-				part = &spriteParts[0];
+				part = &parts[0];
 				free = 0;
 			}
 			else
@@ -150,9 +149,9 @@ namespace Particles
 	
 		int eldest = INT32_MAX;
 		free = 0;
-		part = &spriteParts[0];
+		part = &parts[0];
 
-		for (i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
+		for (i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter < eldest)
 			{
@@ -161,38 +160,44 @@ namespace Particles
 			}
 		}
 
-		nextSpritePart = (free + 1) % MAX_SPRITEPARTS;
+		nextPart = (free + 1) % parts.size();
 
-		Script::DeleteTable(spriteParts[free].data.table);
-		spriteParts[free] = SpriteParticle();
-		spriteParts[free].emitterIndex = NO_ITEM;
-		spriteParts[free].emitterNode = NO_MESH;
-		spriteParts[free].data.table = Script::StoreNewTable();
+		Script::DeleteTable(parts[free].data.table);
+		parts[free] = SpriteParticle();
+		parts[free].emitterIndex = NO_ITEM;
+		parts[free].emitterNode = NO_MESH;
+		parts[free].data.table = Script::StoreNewTable();
 		return free;
 	}
 
+	void SpriteParticle::ClearParts()
+	{
+		for (auto& part : parts)
+			part = SpriteParticle();
+		nextPart = 0;
+	}
 
-	int GetFreeMeshPart()
+	int MeshParticle::GetFreePart()
 	{
 		int i, free;
 		MeshParticle* part;
 
-		for (part = &meshParts[nextMeshPart], free = nextMeshPart, i = 0; i < MAX_MESHPARTS; ++i)
+		for (part = &parts[nextPart], free = nextPart, i = 0; i < parts.size(); ++i)
 		{
 			if (part->lifeCounter <= 0)
 			{
-				nextMeshPart = (free + 1) % MAX_MESHPARTS;
+				nextPart = (free + 1) % parts.size();
 
-				meshParts[free] = MeshParticle();
-				meshParts[free].emitterIndex = NO_ITEM;
-				meshParts[free].emitterNode = NO_MESH;
-				meshParts[free].data.table = Script::StoreNewTable();
+				parts[free] = MeshParticle();
+				parts[free].emitterIndex = NO_ITEM;
+				parts[free].emitterNode = NO_MESH;
+				parts[free].data.table = Script::StoreNewTable();
 				return free;
 			}
 
-			if (free == MAX_MESHPARTS - 1)
+			if (free == parts.size() - 1)
 			{
-				part = &meshParts[0];
+				part = &parts[0];
 				free = 0;
 			}
 			else
@@ -204,9 +209,9 @@ namespace Particles
 
 		int eldest = INT32_MAX;
 		free = 0;
-		part = &meshParts[0];
+		part = &parts[0];
 
-		for (i = 0; i < MAX_MESHPARTS; ++i, ++part)
+		for (i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter < eldest)
 			{
@@ -215,41 +220,47 @@ namespace Particles
 			}
 		}
 
-		nextMeshPart = (free + 1) % MAX_MESHPARTS;
+		nextPart = (free + 1) % parts.size();
 
-		Script::DeleteTable(meshParts[free].data.table);
-		meshParts[free] = MeshParticle();
-		meshParts[free].emitterIndex = NO_ITEM;
-		meshParts[free].emitterNode = NO_MESH;
-		meshParts[free].data.table = Script::StoreNewTable();
+		Script::DeleteTable(parts[free].data.table);
+		parts[free] = MeshParticle();
+		parts[free].emitterIndex = NO_ITEM;
+		parts[free].emitterNode = NO_MESH;
+		parts[free].data.table = Script::StoreNewTable();
 		return free;
 	}
 
+	void MeshParticle::ClearParts()
+	{
+		for (auto& part : parts)
+			part = MeshParticle();
+		nextPart = 0;
+	}
 
-	int GetFreeParticleGroup()
+	int ParticleGroup::GetFreeGroup()
 	{
 		int free;
 
-		free = nextPartGroup;
-		if (free < MAX_PARTGROUPS)
+		free = nextGroup;
+		if (free < groups.size())
 		{
-			nextPartGroup++;
-			partGroups[free] = ParticleGroup();
-			partGroups[free].groupIndex = free;
-			partGroups[free].blendMode = BlendMode::BLEND_COLORADD;
-			partGroups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
-			partGroups[free].autoTrigger = true;
+			nextGroup++;
+			groups[free] = ParticleGroup();
+			groups[free].groupIndex = free;
+			groups[free].blendMode = BlendMode::BLEND_COLORADD;
+			groups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
+			groups[free].autoTrigger = true;
 			return free;
 		}
 		return -1;
 	}
 
-	int GetFreeModule()
+	int Module::GetFreeModule()
 	{
 		int free;
 
 		free = nextModule;
-		if (free < MAX_MODULES)
+		if (free < modules.size())
 		{
 			nextModule++;
 			modules[free] = Module();
@@ -260,46 +271,41 @@ namespace Particles
 		return -1;
 	}
 
-	int GetLastModule()
+	int Module::GetLastModule()
 	{
 		return nextModule - 1;
 	}
 
 	void ClearParts()
 	{
-		for (int i = 0; i < MAX_SPRITEPARTS; i++)
-			spriteParts[i] = SpriteParticle();
-		nextSpritePart = 0;
-
-		for (int i = 0; i < MAX_MESHPARTS; i++)
-			meshParts[i] = MeshParticle();
-		nextMeshPart = 0;
+		SpriteParticle::ClearParts();
+		MeshParticle::ClearParts();
 	}
 
-	void ClearPartGroups()
+	void ParticleGroup::ClearGroups()
 	{
-		for (int i = 0; i < MAX_PARTGROUPS; i++)
-			partGroups[i] = ParticleGroup();
-		nextPartGroup = 0;
+		for (auto& group : groups)
+			group = ParticleGroup();
+		nextGroup = 0;
 	}
 
-	void ClearModules()
+	void Module::ClearModules()
 	{
-		for (int i = 0; i < MAX_MODULES; i++)
-			modules[i] = Module();
+		for (auto& module : modules)
+			module = Module();
 		nextModule = 0;
 	}
 
-	void ClearFunctionRefs()
+	void BoundFunction::ClearFunctionRefs()
 	{
-		for (int i = 0; i < MAX_FUNCREFS; i++)
-			functionRefs[i] = BoundFunction();
+		for (auto& func : functionRefs)
+			func = BoundFunction();
 	}
 
 	void UpdateParts()
 	{
-		UpdateSprites();
-		UpdateMeshes();
+		SpriteParticle::UpdateParts();
+		MeshParticle::UpdateParts();
 		PostUpdateLoop();
 
 		MyData.Save.Global.gameTick++;
@@ -315,19 +321,19 @@ namespace Particles
 		return x;
 	}
 
-	void UpdateSprites()
+	void SpriteParticle::UpdateParts()
 	{
-		SpriteParticle* part = &spriteParts[0];
+		SpriteParticle* part = &parts[0];
 
 		Particles::CallerGuard guard(FUNCTION_UPDATE);
 
 		Script::PreFunctionLoop();
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
 
-			auto& pgroup = partGroups[part->groupIndex];
+			auto& pgroup = ParticleGroup::groups[part->groupIndex];
 
 			int lifefactor = (part->lifeSpan - part->lifeCounter);
 
@@ -370,6 +376,9 @@ namespace Particles
 			part->vel += part->accel;
 			part->pos += part->vel;
 			part->rot += part->rotVel;
+			part->rot3D.x += part->rotVel3D.x;
+			part->rot3D.y += part->rotVel3D.y;
+			part->rot3D.z += part->rotVel3D.z;
 
 			--part->lifeCounter;
 			if (!part->lifeCounter)
@@ -385,18 +394,18 @@ namespace Particles
 	}
 
 
-	void UpdateMeshes()
+	void MeshParticle::UpdateParts()
 	{
-		auto part = &meshParts[0];
+		auto part = &parts[0];
 
 		Particles::CallerGuard guard(FUNCTION_UPDATE);
 		Script::PreFunctionLoop();
-		for (int i = 0; i < MAX_MESHPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
 
-			auto& pgroup = partGroups[part->groupIndex];
+			auto& pgroup = ParticleGroup::groups[part->groupIndex];
 
 			int lifefactor = (part->lifeSpan - part->lifeCounter);
 
@@ -439,44 +448,43 @@ namespace Particles
 
 	void PostUpdateLoop()
 	{
-		SpriteParticle* sprite = &spriteParts[0];
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++sprite)
-			sprite->createdInCurrentLoop = false;
+		for (auto& part : SpriteParticle::parts)
+			part.createdInCurrentLoop = false;
 
-		MeshParticle* mesh = &meshParts[0];
-		for (int i = 0; i < MAX_MESHPARTS; ++i, ++mesh)
-			mesh->createdInCurrentLoop = false;
+		for (auto& part : MeshParticle::parts)
+			part.createdInCurrentLoop = false;
 	}
 
 
 	void DrawParts()
 	{
-		DrawSprites();
-		DrawMeshes();
+		SpriteParticle::DrawParts();
+		MeshParticle::DrawParts();
 	}
 
 
-	void DrawSprites()
+	void SpriteParticle::DrawParts()
 	{
+		long viewCoords[12] = {};
+		phd_vector verts[4] = {};
+		int x1 = 0, y1 = 0, z1 = 0;
+
+		SpriteParticle* part = &parts[0];
+
 		phd_PushMatrix();
 		phd_TranslateAbs(lara_item->pos.xPos, lara_item->pos.yPos, lara_item->pos.zPos);
 
-		SpriteParticle* part = &spriteParts[0];
-
-		int x1 = 0, y1 = 0, z1 = 0;
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0)
 				continue;
 
 			Diagnostics::activeSpriteParticles++;
 
-			const auto& pgroup = partGroups[part->groupIndex];
+			const auto& pgroup = ParticleGroup::groups[part->groupIndex];
 
 			if (pgroup.drawMode == DrawMode::DRAW_NONE)
 				continue;
-
-			long viewCoords[6] = { 0,0,0,0,0,0 };
 
 			if (pgroup.screenSpace)
 			{
@@ -490,7 +498,7 @@ namespace Particles
 				viewCoords[1] = SaturateRound<long>(part->pos.y * phd_winxmax);
 				viewCoords[2] = SaturateRound<long>(part->pos.z + f_mznear);
 
-				if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
+				if (pgroup.drawMode > DrawMode::DRAW_SPRITE3D)
 				{
 					float size = part->sizeCust;
 					auto vel = part->vel;
@@ -518,7 +526,7 @@ namespace Particles
 				y1 = SaturateRound<int>(partPos.y);
 				z1 = SaturateRound<int>(partPos.z);
 
-				if (pgroup.lightMode == LIGHT_DYNAMIC)
+				if (pgroup.lightMode == LightMode::LIGHT_DYNAMIC)
 				{
 					const auto col = CalculateVertexDynamicLighting(x1, y1, z1);
 					part->colCust.R = Clamp(part->colCust.R + col.R, 0, 255);
@@ -534,66 +542,125 @@ namespace Particles
 					y1 < -MAX_DRAWDIST || y1 > MAX_DRAWDIST ||
 					z1 < -MAX_DRAWDIST || z1 > MAX_DRAWDIST)
 				{
-					part->lifeCounter = 0;
 					continue;
 				}
 
-				// convert from world coordinates to screen coordinates
 				long result[3] = { 0, 0, 0 };
 
-				result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
-				result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
-				result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
-
-				float zv = f_persp / float(result[2]);
-				viewCoords[0] = SaturateRound<long>(result[0] * zv + f_centerx);
-				viewCoords[1] = SaturateRound<long>(result[1] * zv + f_centery);
-				viewCoords[2] = result[2] >> 14;
-
-				// if particle is a line do world to screen transform for second vertex
-				if (pgroup.drawMode > DrawMode::DRAW_SQUARE)
+				if (pgroup.drawMode == DrawMode::DRAW_SPRITE3D)
 				{
-					float size = part->sizeCust;
-					auto vel = part->vel;
+					float xsize = 0.5f, ysize = 0.5f;
 
-					if (pgroup.lineIgnoreVel)
-						vel = vel.normalized(); // ignore speed contribution to particle's size
-					else
-						size *= (1.0f / 32.0f); // else scale down size
-
-					vel *= size;
-
-					if (part->emitterIndex >= 0)
+					if (part->sizeRatio)
 					{
-						if (pgroup.attach.tether == TETHER_ROTATING)
-						{
-							auto item = lara_item;
-							if (part->emitterIndex >= 0 && part->emitterIndex < level_items)
-								item = &items[part->emitterIndex];
-
-							if (part->emitterNode >= 0) // if attached to specific mesh node of item
-							{
-								vel = GetJointPos(item, part->emitterNode, SaturateRound<int>(vel.x), SaturateRound<int>(vel.y), SaturateRound<int>(vel.z)) - GetJointPos(item, part->emitterNode, 0, 0, 0);
-							}
-							else // no mesh node, use item's pos
-							{
-								vel = RotatePoint3D(vel, item->pos.xRot, item->pos.yRot, item->pos.zRot);
-							}
-						}
+						xsize = (part->sizeRatio + 32768.0f) / 65536.0f;
+						ysize = 1.0f - xsize;
 					}
 
-					x1 = SaturateRound<int>(x1 - vel.x);
-					y1 = SaturateRound<int>(y1 - vel.y);
-					z1 = SaturateRound<int>(z1 - vel.z);
+					int s1h = SaturateRound<int>(part->sizeCust * xsize);
+					int s2h = SaturateRound<int>(part->sizeCust * ysize);
 
+					verts[0].x = -s1h;
+					verts[0].y = 0;
+					verts[0].z = -s2h;
+					verts[1].x = -s1h;
+					verts[1].y = 0;
+					verts[1].z = s2h;
+					verts[2].x = s1h;
+					verts[2].y = 0;
+					verts[2].z = s2h;
+					verts[3].x = s1h;
+					verts[3].y = 0;
+					verts[3].z = -s2h;
+
+					phd_PushUnitMatrix();
+					phd_RotYXZ(part->rot3D.y, part->rot3D.x, part->rot3D.z);
+
+					for (int j = 0; j < 4; j++)
+					{
+						int x = verts[j].x;
+						int y = verts[j].y;
+						int z = verts[j].z;
+
+						verts[j].x = (phd_mxptr[M00] * x + phd_mxptr[M01] * y + phd_mxptr[M02] * z) >> 14;
+						verts[j].y = (phd_mxptr[M10] * x + phd_mxptr[M11] * y + phd_mxptr[M12] * z) >> 14;
+						verts[j].z = (phd_mxptr[M20] * x + phd_mxptr[M21] * y + phd_mxptr[M22] * z) >> 14;
+					}
+
+					phd_PopMatrix();
+
+	
+					for (int j = 0; j < 4; j++)
+					{
+						long x = verts[j].x + x1;
+						long y = verts[j].y + y1;
+						long z = verts[j].z + z1;
+
+						result[0] = (phd_mxptr[M00] * x + phd_mxptr[M01] * y + phd_mxptr[M02] * z + phd_mxptr[M03]) >> 14;
+						result[1] = (phd_mxptr[M10] * x + phd_mxptr[M11] * y + phd_mxptr[M12] * z + phd_mxptr[M13]) >> 14;
+						result[2] = (phd_mxptr[M20] * x + phd_mxptr[M21] * y + phd_mxptr[M22] * z + phd_mxptr[M23]) >> 14;
+
+						viewCoords[(j * 3) + 0] = result[0];
+						viewCoords[(j * 3) + 1] = result[1];
+						viewCoords[(j * 3) + 2] = result[2];
+					}
+				}
+				else
+				{
 					result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
 					result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
 					result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
 
-					zv = f_persp / float(result[2]);
-					viewCoords[3] = SaturateRound<long>(result[0] * zv + f_centerx);
-					viewCoords[4] = SaturateRound<long>(result[1] * zv + f_centery);
-					viewCoords[5] = result[2] >> 14;
+					float zv = f_persp / float(result[2]);
+					viewCoords[0] = SaturateRound<long>(result[0] * zv + f_centerx);
+					viewCoords[1] = SaturateRound<long>(result[1] * zv + f_centery);
+					viewCoords[2] = result[2] >> 14;
+
+					// if particle is a line do world to screen transform for second vertex
+					if (pgroup.drawMode > DrawMode::DRAW_SPRITE3D)
+					{
+						float size = part->sizeCust;
+						auto vel = part->vel;
+
+						if (pgroup.lineIgnoreVel)
+							vel = vel.normalized(); // ignore speed contribution to particle's size
+						else
+							size *= (1.0f / 32.0f); // else scale down size
+
+						vel *= size;
+
+						if (part->emitterIndex >= 0)
+						{
+							if (pgroup.attach.tether == TETHER_ROTATING)
+							{
+								auto item = lara_item;
+								if (part->emitterIndex >= 0 && part->emitterIndex < level_items)
+									item = &items[part->emitterIndex];
+
+								if (part->emitterNode >= 0) // if attached to specific mesh node of item
+								{
+									vel = GetJointPos(item, part->emitterNode, SaturateRound<int>(vel.x), SaturateRound<int>(vel.y), SaturateRound<int>(vel.z)) - GetJointPos(item, part->emitterNode, 0, 0, 0);
+								}
+								else // no mesh node, use item's pos
+								{
+									vel = RotatePoint3D(vel, item->pos.xRot, item->pos.yRot, item->pos.zRot);
+								}
+							}
+						}
+
+						x1 = SaturateRound<int>(x1 - vel.x);
+						y1 = SaturateRound<int>(y1 - vel.y);
+						z1 = SaturateRound<int>(z1 - vel.z);
+
+						result[0] = (phd_mxptr[M00] * x1 + phd_mxptr[M01] * y1 + phd_mxptr[M02] * z1 + phd_mxptr[M03]);
+						result[1] = (phd_mxptr[M10] * x1 + phd_mxptr[M11] * y1 + phd_mxptr[M12] * z1 + phd_mxptr[M13]);
+						result[2] = (phd_mxptr[M20] * x1 + phd_mxptr[M21] * y1 + phd_mxptr[M22] * z1 + phd_mxptr[M23]);
+
+						zv = f_persp / float(result[2]);
+						viewCoords[3] = SaturateRound<long>(result[0] * zv + f_centerx);
+						viewCoords[4] = SaturateRound<long>(result[1] * zv + f_centery);
+						viewCoords[5] = result[2] >> 14;
+					}
 				}
 			}
 
@@ -601,17 +668,18 @@ namespace Particles
 
 			// draw the particle to the given screen coordinates
 			part->DrawSpritePart(pgroup, viewCoords, minSize);
+
 		}
 
 		phd_PopMatrix();
 	}
 
 
-	void DrawMeshes()
+	void MeshParticle::DrawParts()
 	{
-		auto part = &meshParts[0];
+		auto part = &parts[0];
 
-		for (int i = 0; i < MAX_MESHPARTS; ++i, ++part)
+		for (int i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter > 0)
 			{
@@ -628,10 +696,10 @@ namespace Particles
 	{
 		Particles::CallerGuard guard(FUNCTION_INIT);
 		Script::PreFunctionLoop();
-		for (int i = 0; i < nextPartGroup; i++)
+		for (auto& group : ParticleGroup::groups)
 		{
-			if (partGroups[i].autoTrigger && !Script::ExecuteFunction(partGroups[i].initIndex, nullptr))
-				Script::DeleteFunction(&partGroups[i].initIndex);
+			if (group.autoTrigger && !Script::ExecuteFunction(group.initIndex, nullptr))
+				Script::DeleteFunction(&group.initIndex);
 		}
 		Script::PostFunctionLoop();
 	}
@@ -690,7 +758,7 @@ namespace Particles
 	Vector3f BaseParticle::AbsPos()
 	{
 		auto absPos = pos;
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
 		if (tether != TetherType::TETHER_NONE && emitterIndex >= 0 && emitterIndex < level_items)
 		{
@@ -728,7 +796,7 @@ namespace Particles
 			return;
 
 		auto item = &items[itemIndex];
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 		Vector3f relPos;
 
 		if (tether != TetherType::TETHER_NONE)
@@ -770,7 +838,7 @@ namespace Particles
 
 	bool BaseParticle::CollideWalls(bool bounce, float rebound)
 	{
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
 		if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 		{
@@ -813,7 +881,7 @@ namespace Particles
 
 	bool BaseParticle::CollideFloors(bool bounce, float rebound, float minBounce, int collMargin, bool accurate)
 	{
-		const auto& tether = partGroups[groupIndex].attach.tether;
+		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
 		if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
 		{
@@ -1034,9 +1102,9 @@ namespace Particles
 	{
 		Vector3f v;
 
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &spriteParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1059,9 +1127,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &spriteParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1093,9 +1161,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_SPRITEPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &spriteParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1125,6 +1193,7 @@ namespace Particles
 	void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size)
 	{
 		long z1 = view[2];
+		D3DTLVERTEX v[4];
 
 		if (z1 <= 0)
 			return;
@@ -1146,7 +1215,6 @@ namespace Particles
 				cB = SaturateRound<uchar>(Lerp(0.0f, (float)cB, s));
 			}
 		}
-
 		if (fadeOut)
 		{
 			if (lifeCounter < fadeOut)
@@ -1158,7 +1226,7 @@ namespace Particles
 			}
 		}
 
-		if (pgroup.drawMode > DrawMode::DRAW_SQUARE) // line or arrow
+		if (pgroup.drawMode > DrawMode::DRAW_SPRITE3D) // line or arrow
 		{
 			long x1 = view[0];
 			long y1 = view[1];
@@ -1169,8 +1237,6 @@ namespace Particles
 
 			if (ClipLine(x1, y1, z1, x2, y2, z2, phd_winxmin, phd_winymin, phd_winxmax, phd_winymax))
 			{
-				D3DTLVERTEX v[2];
-
 				long c1 = RGBA(cR, cG, cB, 0xFF);
 				long c2 = RGBA(cR >> 2, cG >> 2, cB >> 2, 0xFF);
 
@@ -1215,6 +1281,37 @@ namespace Particles
 				}
 			}
 		}
+		else if (pgroup.drawMode == DrawMode::DRAW_SPRITE3D)
+		{
+			setXYZ4(v, view[0], view[1], view[2], view[3], view[4], view[5], view[6], view[7], view[8], view[9], view[10], view[11], clipflags);
+
+			long c1 = RGBA(cR, cG, cB, 0xFF);
+
+			v[0].color = c1;
+			v[1].color = c1;
+			v[2].color = c1;
+			v[3].color = c1;
+			v[0].specular = 0xFF000000;
+			v[1].specular = 0xFF000000;
+			v[2].specular = 0xFF000000;
+			v[3].specular = 0xFF000000;
+
+			TextureStruct tex;
+			tex.drawtype = pgroup.blendMode;
+
+			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
+			tex.tpage = sprite->tpage;
+			tex.u1 = sprite->x1;
+			tex.v1 = sprite->y1;
+			tex.u2 = sprite->x2;
+			tex.v2 = sprite->y1;
+			tex.u3 = sprite->x2;
+			tex.v3 = sprite->y2;
+			tex.u4 = sprite->x1;
+			tex.v4 = sprite->y2;
+
+			(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 1);
+		}
 		else
 		{
 			float size;
@@ -1247,7 +1344,6 @@ namespace Particles
 
 			if (xmin >= phd_winxmin && xmax < phd_winxmax && ymin >= phd_winymin && ymax < phd_winymax)
 			{
-				D3DTLVERTEX v[4];
 				long x1, y1, x2, y2, x3, y3, x4, y4;
 
 				if (rot)
@@ -1354,8 +1450,15 @@ namespace Particles
 		sizeEnd = s->sizeEnd;
 		sizeRatio = s->sizeRatio;
 
-		rot = s->rot;
-		rotVel = s->rotVel;
+		rot = s->rotX;
+		rot3D.x = s->rotX;
+		rot3D.y = s->rotY;
+		rot3D.z = s->rotZ;
+		rotVel = s->rotVelX;
+		rotVel3D.x = s->rotVelX;
+		rotVel3D.y = s->rotVelY;
+		rotVel3D.z = s->rotVelZ;
+
 		fadeIn = s->fadeIn;
 		fadeOut = s->fadeOut;
 		colorFadeTime = s->colorFadeTime;
@@ -1466,9 +1569,9 @@ namespace Particles
 	{
 		Vector3f v;
 
-		for (int i = 0; i < MAX_MESHPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &meshParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1491,9 +1594,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_MESHPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &meshParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1525,9 +1628,9 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < MAX_MESHPARTS; ++i)
+		for (int i = 0; i < parts.size(); ++i)
 		{
-			auto part = &meshParts[i];
+			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
 				continue;
 
@@ -1558,7 +1661,7 @@ namespace Particles
 	{
 		phd_vector projPos = RoundPos(AbsPos());
 
-		const auto& pgroup = partGroups[groupIndex];
+		const auto& pgroup = ParticleGroup::groups[groupIndex];
 
 		int testx = projPos.x - lara_item->pos.xPos;
 		int testy = projPos.y - lara_item->pos.yPos;
@@ -1699,8 +1802,25 @@ namespace Particles
 		sizeEnd = s.sizeEnd;
 		sizeRatio = s.sizeRatio;
 
-		rot = s.rot;
-		rotVel = s.rotVel;
+		if (ParticleGroup::groups[s.groupIndex].drawMode < DrawMode::DRAW_SPRITE3D)
+		{
+			rotX = s.rot;
+			rotY = 0;
+			rotZ = 0;
+			rotVelX = s.rotVel;
+			rotVelY = 0;
+			rotVelZ = 0;
+		}
+		else
+		{
+			rotX = s.rot3D.x;
+			rotY = s.rot3D.y;
+			rotZ = s.rot3D.z;
+			rotVelX = s.rotVel3D.x;
+			rotVelY = s.rotVel3D.y;
+			rotVelZ = s.rotVel3D.z;
+		}
+		
 		fadeIn = s.fadeIn;
 		fadeOut = s.fadeOut;
 		colorFadeTime = s.colorFadeTime;

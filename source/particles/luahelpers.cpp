@@ -229,11 +229,11 @@ namespace LuaHelpers
 				ExitSystem(FormatString("Module '%s' cannot be found.", string));
 		}
 		Script::PostFunctionLoop();
-		int last = Particles::GetLastModule();
-		if (last != -1 && Particles::modules[last].createdInCurrentModule)
+		int last = Particles::Module::GetLastModule();
+		if (last != -1 && Particles::Module::modules[last].createdInCurrentModule)
 		{
-			Particles::modules[last].createdInCurrentModule = false;
-			Script::PushData(&Particles::modules[last]);
+			Particles::Module::modules[last].createdInCurrentModule = false;
+			Script::PushData(&Particles::Module::modules[last]);
 		}
 		else
 			Script::PushNil();
@@ -263,7 +263,7 @@ namespace LuaHelpers
 			Script::EmitFailure(FormatString("index %d is greater than the maximum of %d", index, MAX_FUNCREFS), Logger::Error);
 			return nullptr;
 		}
-		auto function = &Particles::functionRefs[index - 1];
+		auto function = &Particles::BoundFunction::functionRefs[index - 1];
 		if (function->ref == SCRIPT_REFNIL)
 		{
 			Script::EmitFailure(FormatString("index %d is not bound to a Lua function", index), Logger::Error);

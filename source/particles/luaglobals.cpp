@@ -343,6 +343,8 @@ namespace LuaGlobals
 		case 'D':
 			if (!strcmp(field, "DRAW_SPRITE"))
 				return std::optional(Particles::DrawMode::DRAW_SPRITE);
+			if (!strcmp(field, "DRAW_SPRITE3D"))
+				return std::optional(Particles::DrawMode::DRAW_SPRITE3D);
 			if (!strcmp(field, "DRAW_SQUARE"))
 				return std::optional(Particles::DrawMode::DRAW_SQUARE);
 			if (!strcmp(field, "DRAW_LINE"))

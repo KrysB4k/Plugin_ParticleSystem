@@ -121,6 +121,7 @@ namespace Particles
 	{
 		DRAW_SPRITE,
 		DRAW_SQUARE,
+		DRAW_SPRITE3D,
 		DRAW_LINE,
 		DRAW_ARROW,
 		DRAW_NONE
@@ -139,6 +140,12 @@ namespace Particles
 
 	struct ParticleGroup final : public LuaObjectClass
 	{
+		static std::array<ParticleGroup, MAX_PARTGROUPS> groups;
+		static int nextGroup;
+
+		static int GetFreeGroup();
+		static void ClearGroups();
+
 		// fields
 		int initIndex;
 		int updateIndex;
@@ -183,6 +190,14 @@ namespace Particles
 
 	struct Module final : public LuaObjectClass
 	{
+		static std::array<Module, MAX_MODULES> modules;
+		static int nextModule;
+
+		static int GetFreeModule();
+		static int GetLastModule();
+		static void ClearModules();
+
+		// fields
 		ModuleGroups groups;
 		ModuleParameters parameters;
 		bool createdInCurrentModule;
@@ -245,8 +260,16 @@ namespace Particles
 		void NewIndex(const char* field) override;
 	};
 
-	struct SpriteParticle final : public BaseParticle
+	struct SpriteParticle : public BaseParticle
 	{
+		static std::array<SpriteParticle, MAX_SPRITEPARTS> parts;
+		static int nextPart;
+
+		static int GetFreePart();
+		static void ClearParts();
+		static void UpdateParts();
+		static void DrawParts();
+
 		// fields
 		ushort		spriteIndex;
 
@@ -257,6 +280,8 @@ namespace Particles
 
 		short		rot;
 		short		rotVel;
+		Vector3s    rot3D;
+		Vector3s    rotVel3D;
 
 		short		fadeIn;
 		short		fadeOut;
@@ -273,20 +298,28 @@ namespace Particles
 		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size);
 
 		// boid-specific
-		Vector3f BoidSeparationRule(float radius, float factor) final;
-		Vector3f BoidCohesionRule(float radius, float factor) final;
-		Vector3f BoidAlignmentRule(float radius, float factor) final;
+		Vector3f BoidSeparationRule(float radius, float factor);
+		Vector3f BoidCohesionRule(float radius, float factor);
+		Vector3f BoidAlignmentRule(float radius, float factor);
 
 		// lua integration
 		static const char* Name();
-		void Index(const char* field) final;
-		void NewIndex(const char* field) final;
+		void Index(const char* field);
+		void NewIndex(const char* field);
 
 		void LoadParticle(const SpriteParticleSave* s);
 	};
 
 	struct MeshParticle final : public BaseParticle
 	{
+		static std::array<MeshParticle, MAX_MESHPARTS> parts;
+		static int nextPart;
+
+		static int GetFreePart();
+		static void ClearParts();
+		static void UpdateParts();
+		static void DrawParts();
+
 		// fields
 		Vector3s	rot;
 		Vector3s	rotVel;
@@ -322,7 +355,6 @@ namespace Particles
 		void LoadParticle(const MeshParticleSave* m);
 	};
 
-
 	struct SpriteParticleSave
 	{
 		SpriteParticleSave() = default;
@@ -347,8 +379,12 @@ namespace Particles
 		ushort		sizeEnd;
 		short		sizeRatio;
 
-		short		rot;
-		short		rotVel;
+		short		rotX;
+		short		rotY;
+		short		rotZ;
+		short		rotVelX;
+		short		rotVelY;
+		short		rotVelZ;
 
 		short		fadeIn;
 		short		fadeOut;
@@ -397,6 +433,10 @@ namespace Particles
 
 	struct BoundFunction
 	{
+		static std::array <BoundFunction, MAX_FUNCREFS> functionRefs;
+
+		static void ClearFunctionRefs();
+
 		int ref;
 		FunctionType type;
 
@@ -405,39 +445,17 @@ namespace Particles
 
 	// ************  Global declarations ************ //
 
-	extern SpriteParticle spriteParts[];
-	extern MeshParticle meshParts[];
-	extern ParticleGroup partGroups[];
-	extern Module modules[];
-	extern BoundFunction functionRefs[];
-
 	FunctionType GetCaller();
 	void SetCaller(FunctionType caller);
 
-	// ************  Particles functions ************ //
+	// ************  Particle functions ************ //
 
-	void ClearParts();
-	void ClearPartGroups();
-	void ClearModules();
-	void ClearFunctionRefs();
-
-	void InitParts();
 	void InitLevelScript(const char* base);
 
+	void InitParts();
 	void UpdateParts();
-	void UpdateSprites();
-	void UpdateMeshes();
 	void PostUpdateLoop();
-
 	void DrawParts();
-	void DrawSprites();
-	void DrawMeshes();
-
-	int GetFreeSpritePart();
-	int GetFreeMeshPart();
-	int GetFreeParticleGroup();
-	int GetFreeModule();
-	int GetLastModule();
 
 	void ExecuteBoundFunction(int index);
 };

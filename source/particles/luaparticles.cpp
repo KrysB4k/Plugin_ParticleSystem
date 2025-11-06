@@ -826,9 +826,19 @@ namespace Particles
 					Script::PushNumber(ShortToRad(rot));
 					return;
 				}
+				if (!strcmp(field, "rot3D"))
+				{
+					Script::PushData(&rot3D);
+					return;
+				}
 				if (!strcmp(field, "rotVel"))
 				{
 					Script::PushNumber(ShortToRad(rotVel));
+					return;
+				}
+				if (!strcmp(field, "rotVel3D"))
+				{
+					Script::PushData(&rotVel3D);
 					return;
 				}
 				break;
@@ -914,9 +924,19 @@ namespace Particles
 					rot = RadToShort(GetNumber(-1));
 					return;
 				}
+				if (!strcmp(field, "rot3D"))
+				{
+					rot3D = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
+					return;
+				}
 				if (!strcmp(field, "rotVel"))
 				{
 					rotVel = RadToShort(GetNumber(-1));
+					return;
+				}
+				if (!strcmp(field, "rotVel3D"))
+				{
+					rotVel3D = static_cast<Vector3s>(*GetData<LuaObjectClassRotation>(-1));
 					return;
 				}
 				break;
@@ -944,7 +964,7 @@ namespace Particles
 				}
 				if (!strcmp(field, "spriteIndex"))
 				{
-					spriteIndex = GetClampedInteger(-1, 0, (-objects[Particles::partGroups[groupIndex].spriteSlot].nmeshes) - 1, false);
+					spriteIndex = GetClampedInteger(-1, 0, (-objects[Particles::ParticleGroup::groups[groupIndex].spriteSlot].nmeshes) - 1, false);
 					return;
 				}
 				break;
