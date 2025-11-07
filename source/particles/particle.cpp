@@ -94,6 +94,8 @@ namespace Particles
 	
 	std::array<BoundFunction, MAX_FUNCREFS> BoundFunction::functionRefs;
 
+	bool ParticleGroup::triggerInit;
+
 	FunctionType GetCaller()
 	{
 		auto ptr = reinterpret_cast<FunctionType*>(Script::GetExtraSpace());
@@ -699,14 +701,17 @@ namespace Particles
 
 	void InitParts()
 	{
-		Particles::CallerGuard guard(FUNCTION_INIT);
-		Script::PreFunctionLoop();
-		for (auto& group : ParticleGroup::groups)
+		if (ParticleGroup::triggerInit)
 		{
-			if (group.autoTrigger && !Script::ExecuteFunction(group.initIndex, nullptr))
-				Script::DeleteFunction(&group.initIndex);
+			Particles::CallerGuard guard(FUNCTION_INIT);
+			Script::PreFunctionLoop();
+			for (auto& group : ParticleGroup::groups)
+			{
+				if (group.autoTrigger && !Script::ExecuteFunction(group.initIndex, nullptr))
+					Script::DeleteFunction(&group.initIndex);
+			}
+			Script::PostFunctionLoop();
 		}
-		Script::PostFunctionLoop();
 	}
 
 

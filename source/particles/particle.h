@@ -146,6 +146,8 @@ namespace Particles
 		static int GetFreeGroup();
 		static void ClearGroups();
 
+		static bool triggerInit;
+
 		// fields
 		int initIndex;
 		int updateIndex;

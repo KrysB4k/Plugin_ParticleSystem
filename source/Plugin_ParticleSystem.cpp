@@ -95,6 +95,7 @@ void InitialiseLevel()
 	Particles::SpriteParticle::ClearParts();
 	Particles::MeshParticle::ClearParts();
 	Particles::ParticleGroup::ClearGroups();
+	Particles::ParticleGroup::triggerInit = true;
 	Particles::Module::ClearModules();
 	Particles::BoundFunction::ClearFunctionRefs();
 #ifdef DIAGNOSTICS
@@ -679,6 +680,14 @@ int cbFlipEffectMine(WORD FlipIndex, WORD Timer, WORD Extra, WORD ActivationMode
 	case 2:
 		Particles::SpriteParticle::ClearParts();
 		Particles::MeshParticle::ClearParts();
+		break;
+
+	case 3:
+		Particles::ParticleGroup::triggerInit = false;
+		break;
+
+	case 4:
+		Particles::ParticleGroup::triggerInit = true;
 		break;
 
 	default:
