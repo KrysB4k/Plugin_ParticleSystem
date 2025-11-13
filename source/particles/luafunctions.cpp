@@ -31,6 +31,27 @@ namespace LuaFunctions
 		}
 	};
 
+	struct ActivateTriggersFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int heavy = 0;
+			int flags = 0;
+			int count = GetArgCount(4, 6);
+			int x = GetInteger(1);
+			int y = GetInteger(2);
+			int z = GetInteger(3);
+			short room = GetInteger(4);
+			if (count > 4 && !Script::IsNil(5))
+				heavy = (int)GetBoolean(5);
+			if (count > 5 && !Script::IsNil(6))
+				flags = GetInteger(6);
+
+			TestTriggersAtXYZ(x, y, z, room, heavy, flags);
+			return 0;
+		}
+	};
+
 	struct AsinFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -64,7 +85,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindFunction");
+			CheckCaller(FunctionType::FUNCTION_LEVEL | FunctionType::FUNCTION_MODULE, "bindFunction");
 
 			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
 			auto funcRef = &Particles::BoundFunction::functionRefs[index];
@@ -81,7 +102,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			CheckCaller(FunctionType::FUNCTION_LEVEL, "bindGroup");
+			CheckCaller(FunctionType::FUNCTION_LEVEL | FunctionType::FUNCTION_MODULE, "bindGroup");
 
 			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
 			if (Particles::BoundFunction::functionRefs[index].ref != SCRIPT_REFNIL)
@@ -98,6 +119,7 @@ namespace LuaFunctions
 			funcRef->ref = group->initIndex;
 			funcRef->type = FUNCTION_INIT;
 			return 0;
+			
 		}
 	};
 
@@ -444,6 +466,57 @@ namespace LuaFunctions
 		}
 	};
 
+	struct GetCeilingHeightFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int x = GetInteger(1);
+			int y = GetInteger(2);
+			int z = GetInteger(3);
+			short room = GetInteger(4);
+
+			int ceilHeight = GetCeiling(GetFloor(x, y, z, &room), x, y, z);
+			if (ceilHeight == NO_HEIGHT)
+				Script::PushNil();
+			else
+				Script::PushInteger(ceilHeight);
+			return 1;
+		}
+	};
+
+	struct GetFloorHeightFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int x = GetInteger(1);
+			int y = GetInteger(2);
+			int z = GetInteger(3);
+			short room = GetInteger(4);
+
+			int floorHeight = GetHeight(GetFloor(x, y, z, &room), x, y, z);
+			if (floorHeight == NO_HEIGHT)
+				Script::PushNil();
+			else
+				Script::PushInteger(floorHeight);
+			return 1;
+		}
+	};
+
+	struct GetFloorNormalFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int x = GetInteger(1);
+			int y = GetInteger(2);
+			int z = GetInteger(3);
+			short room = GetInteger(4);
+			
+			auto normal = GetSlopeNormal((Tr4FloorInfo*)GetFloor(x, y, z, &room), x, y, z);
+			ConstructManagedData<Vector3f>(normal.x, normal.y, normal.z);
+			return 1;
+		}
+	};
+
 	struct GetGameTickFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -509,6 +582,40 @@ namespace LuaFunctions
 		int Call() final
 		{
 			Script::PushInteger(GetTombIndexByNGLEIndex(1));
+			return 1;
+		}
+	};
+
+	struct GetWaterDepthFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int x = GetInteger(1);
+			int y = GetInteger(2);
+			int z = GetInteger(3);
+			short room = GetInteger(4);
+			int waterDepth = GetWaterDepth(x, y, z, room);
+			if (waterDepth == NO_HEIGHT)
+				Script::PushNil();
+			else
+				Script::PushInteger(waterDepth);
+			return 1;
+		}
+	};
+
+	struct GetWaterHeightFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int x = GetInteger(1);
+			int y = GetInteger(2);
+			int z = GetInteger(3);
+			short room = GetInteger(4);
+			int waterHeight = GetWaterHeight(x, y, z, room);
+			if (waterHeight == NO_HEIGHT)
+				Script::PushNil();
+			else
+				Script::PushInteger(waterHeight);
 			return 1;
 		}
 	};
@@ -1163,10 +1270,12 @@ namespace LuaFunctions
 		{
 			phd_vector vec;
 			phd_vector* pvec = nullptr ;
+			int flags = 0;
+			int count = GetArgCount(1, 3);
 
 			int sfxIndex = GetInteger(1);
-
-			if (!Script::IsNil(2))
+			
+			if (count > 1 && !Script::IsNil(2))
 			{
 				auto pos = GetData<LuaObjectClassPosition>(2);
 				vec.x = SaturateRound<int>(pos->GetX());
@@ -1174,8 +1283,8 @@ namespace LuaFunctions
 				vec.z = SaturateRound<int>(pos->GetZ());
 				pvec = &vec;
 			}
-
-			int flags = GetInteger(3);
+			if (count > 2 && !Script::IsNil(3))
+				flags = GetInteger(3);
 
 			SoundEffect(sfxIndex, pvec, flags);
 			return 0;
@@ -1276,6 +1385,20 @@ namespace LuaFunctions
 			Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 			float radius = GetNumber(3);
 			Script::PushInteger(TestCollisionSpheres(item, vec, radius));
+			return 1;
+		}
+	};
+
+	struct TestWallFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int x = GetInteger(1);
+			int y = GetInteger(2);
+			int z = GetInteger(3);
+			short room = GetInteger(4);
+
+			Script::PushBoolean((bool)TestForWall(x, y, z, &room));
 			return 1;
 		}
 	};
@@ -1389,6 +1512,7 @@ namespace LuaFunctions
 
 	AbsFunction AbsFunc;
 	AcosFunction AcosFunc;
+	ActivateTriggersFunction ActivateTriggersFunc;
 	AsinFunction AsinFunc;
 	AtanFunction AtanFunc;
 	Atan2Function Atan2Func;
@@ -1418,6 +1542,9 @@ namespace LuaFunctions
 	FindNearestTargetFunction FindNearestTargetFunc;
 	FloorFunction FloorFunc;
 	FmodFunction FmodFunc;
+	GetCeilingHeightFunction GetCeilingHeightFunc;
+	GetFloorHeightFunction GetFloorHeightFunc;
+	GetFloorNormalFunction GetFloorNormalFunc;
 	GetGameTickFunction GetGameTickFunc;
 	GetItemInfoFunction GetItemInfoFunc;
 	GetItemJointPosFunction GetItemJointPosFunc;
@@ -1425,6 +1552,8 @@ namespace LuaFunctions
 	GetLaraIndexFunction GetLaraIndexFunc;
 	GetSelectedItemFunction GetSelectedItemFunc;
 	GetTombIndexFunction GetTombIndexFunc;
+	GetWaterDepthFunction GetWaterDepthFunc;
+	GetWaterHeightFunction GetWaterHeightFunc;
 	IntervalFunction IntervalFunc;
 	InvokeInitFunction InvokeInitFunc;
 	KillPartsOfGroupFunction KillPartsOfGroupFunc;
@@ -1476,6 +1605,7 @@ namespace LuaFunctions
 	SqrtFunction SqrtFunc;
 	TanFunction TanFunc;
 	TestCollisionSpheresFunction TestCollisionSpheresFunc;
+	TestWallFunction TestWallFunc;
 	TriggerDynamicFunction TriggerDynamicFunc;
 	TriggerShockwaveFunction TriggerShockwaveFunc;
 	VectorCrossFunction VectorCrossFunc;
@@ -1493,6 +1623,8 @@ namespace LuaFunctions
 				return &AbsFunc;
 			if (!strcmp(field, "acos"))
 				return &AcosFunc;
+			if (!strcmp(field, "activateTriggers"))
+				return &ActivateTriggersFunc;
 			if (!strcmp(field, "asin"))
 				return &AsinFunc;
 			if (!strcmp(field, "atan"))
@@ -1567,6 +1699,12 @@ namespace LuaFunctions
 			break;
 
 		case 'g':
+			if (!strcmp(field, "getCeilingHeight"))
+				return &GetCeilingHeightFunc;
+			if (!strcmp(field, "getFloorHeight"))
+				return &GetFloorHeightFunc;
+			if (!strcmp(field, "getFloorNormal"))
+				return &GetFloorNormalFunc;
 			if (!strcmp(field, "getGameTick"))
 				return &GetGameTickFunc;
 			if (!strcmp(field, "getItemJointPosition"))
@@ -1581,6 +1719,10 @@ namespace LuaFunctions
 				return &GetSelectedItemFunc;
 			if (!strcmp(field, "getTombIndex"))
 				return &GetTombIndexFunc;
+			if (!strcmp(field, "getWaterDepth"))
+				return &GetWaterDepthFunc;
+			if (!strcmp(field, "getWaterHeight"))
+				return &GetWaterHeightFunc;
 			break;
 
 		case 'i':
@@ -1710,6 +1852,8 @@ namespace LuaFunctions
 				return &TanFunc;
 			if (!strcmp(field, "testCollisionSpheres"))
 				return &TestCollisionSpheresFunc;
+			if (!strcmp(field, "testWall"))
+				return &TestWallFunc;
 			if (!strcmp(field, "triggerDynamicLight"))
 				return &TriggerDynamicFunc;
 			if (!strcmp(field, "triggerShockwave"))

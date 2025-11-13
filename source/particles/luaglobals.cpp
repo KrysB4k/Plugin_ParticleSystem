@@ -150,7 +150,8 @@ namespace LuaGlobals
 			case 't':
 				if (!strcmp(field, "triggered"))
 				{
-					Script::PushBoolean(TriggerActive((StrItemTr4*)itemptr));
+					bool active = (itemptr->status == 0x1) ? true : false;
+					Script::PushBoolean(active);
 					return;
 				}
 				break;

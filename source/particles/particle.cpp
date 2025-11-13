@@ -1449,6 +1449,8 @@ namespace Particles
 		accel.z = s->accelZ;
 
 		groupIndex = s->groupIndex;
+		if (ParticleGroup::groups[groupIndex].partLimit)
+			ParticleGroup::groups[groupIndex].partCount++;
 		roomIndex = s->roomIndex;
 		lifeSpan = s->lifeSpan;
 		lifeCounter = s->lifeCounter;
@@ -1748,6 +1750,8 @@ namespace Particles
 		accel.z = m->accelZ;
 
 		groupIndex = m->groupIndex;
+		if (ParticleGroup::groups[groupIndex].partLimit)
+			ParticleGroup::groups[groupIndex].partCount++;
 		roomIndex = m->roomIndex;
 		lifeSpan = m->lifeSpan;
 		lifeCounter = m->lifeCounter;
