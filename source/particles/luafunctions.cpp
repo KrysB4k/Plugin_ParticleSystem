@@ -41,7 +41,7 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			short room = GetInteger(4);
+			short room = GetClampedInteger(4, 0, number_rooms - 1, false);
 			if (count > 4 && !Script::IsNil(5))
 				heavy = (int)GetBoolean(5);
 			if (count > 5 && !Script::IsNil(6))
@@ -473,7 +473,7 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			short room = GetInteger(4);
+			short room = GetClampedInteger(4, 0, number_rooms - 1, false);
 
 			int ceilHeight = GetCeiling(GetFloor(x, y, z, &room), x, y, z);
 			if (ceilHeight == NO_HEIGHT)
@@ -491,7 +491,7 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			short room = GetInteger(4);
+			short room = GetClampedInteger(4, 0, number_rooms - 1, false);
 
 			int floorHeight = GetHeight(GetFloor(x, y, z, &room), x, y, z);
 			if (floorHeight == NO_HEIGHT)
@@ -509,7 +509,7 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			short room = GetInteger(4);
+			short room = GetClampedInteger(4, 0, number_rooms - 1, false);
 			
 			auto normal = GetSlopeNormal((Tr4FloorInfo*)GetFloor(x, y, z, &room), x, y, z);
 			ConstructManagedData<Vector3f>(normal.x, normal.y, normal.z);
@@ -568,6 +568,16 @@ namespace LuaFunctions
 		}
 	};
 
+	struct GetRoomFlagsFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			short room = GetClampedInteger(1, 0, number_rooms - 1, false);
+			Script::PushInteger(rooms[room].flags);
+			return 1;
+		}
+	};
+
 	struct GetSelectedItemFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -593,7 +603,7 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			short room = GetInteger(4);
+			short room = GetClampedInteger(4, 0, number_rooms - 1, false);
 			int waterDepth = GetWaterDepth(x, y, z, room);
 			if (waterDepth == NO_HEIGHT)
 				Script::PushNil();
@@ -610,12 +620,34 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			short room = GetInteger(4);
+			short room = GetClampedInteger(4, 0, number_rooms - 1, false);
 			int waterHeight = GetWaterHeight(x, y, z, room);
 			if (waterHeight == NO_HEIGHT)
 				Script::PushNil();
 			else
 				Script::PushInteger(waterHeight);
+			return 1;
+		}
+	};
+
+	struct HasAllFlagsFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int testedFlags = GetInteger(1);
+			int checkFlags = GetInteger(2);
+			Script::PushBoolean((testedFlags & checkFlags) == checkFlags);
+			return 1;
+		}
+	};
+
+	struct HasAnyFlagsFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int testedFlags = GetInteger(1);
+			int checkFlags = GetInteger(2);
+			Script::PushBoolean(testedFlags & checkFlags);
 			return 1;
 		}
 	};
@@ -1396,7 +1428,7 @@ namespace LuaFunctions
 			int x = GetInteger(1);
 			int y = GetInteger(2);
 			int z = GetInteger(3);
-			short room = GetInteger(4);
+			short room = GetClampedInteger(4, 0, number_rooms - 1, false);
 
 			Script::PushBoolean((bool)TestForWall(x, y, z, &room));
 			return 1;
@@ -1550,10 +1582,13 @@ namespace LuaFunctions
 	GetItemJointPosFunction GetItemJointPosFunc;
 	GetItemRoomFunction GetItemRoomFunc;
 	GetLaraIndexFunction GetLaraIndexFunc;
+	GetRoomFlagsFunction GetRoomFlagsFunc;
 	GetSelectedItemFunction GetSelectedItemFunc;
 	GetTombIndexFunction GetTombIndexFunc;
 	GetWaterDepthFunction GetWaterDepthFunc;
 	GetWaterHeightFunction GetWaterHeightFunc;
+	HasAllFlagsFunction HasAllFlagsFunc;
+	HasAnyFlagsFunction HasAnyFlagsFunc;
 	IntervalFunction IntervalFunc;
 	InvokeInitFunction InvokeInitFunc;
 	KillPartsOfGroupFunction KillPartsOfGroupFunc;
@@ -1715,6 +1750,8 @@ namespace LuaFunctions
 				return &GetItemRoomFunc;
 			if (!strcmp(field, "getLaraIndex"))
 				return &GetLaraIndexFunc;
+			if (!strcmp(field, "getRoomFlags"))
+				return &GetRoomFlagsFunc;
 			if (!strcmp(field, "getSelectedItemIndex"))
 				return &GetSelectedItemFunc;
 			if (!strcmp(field, "getTombIndex"))
@@ -1723,6 +1760,13 @@ namespace LuaFunctions
 				return &GetWaterDepthFunc;
 			if (!strcmp(field, "getWaterHeight"))
 				return &GetWaterHeightFunc;
+			break;
+
+		case 'h':
+			if (!strcmp(field, "hasAllFlags"))
+				return &HasAllFlagsFunc;
+			if (!strcmp(field, "hasAnyFlags"))
+				return &HasAnyFlagsFunc;
 			break;
 
 		case 'i':

@@ -376,6 +376,31 @@ namespace LuaGlobals
 				return std::optional(NO_CUTOFF);
 			break;
 
+		case 'R':
+			if (!strcmp(field, "ROOM_COLD"))
+				return std::optional(FROOM_COLD);
+			if (!strcmp(field, "ROOM_DAMAGE"))
+				return std::optional(FROOM_DAMAGE);
+			if (!strcmp(field, "ROOM_FLIPROOM"))
+				return std::optional(FROOM_IS_FLIPROOM);
+			if (!strcmp(field, "ROOM_HORIZON"))
+				return std::optional(FROOM_HORIZON);
+			if (!strcmp(field, "ROOM_MIST"))
+				return std::optional(FROOM_MIST);
+			if (!strcmp(field, "ROOM_NO_LENSFLARE"))
+				return std::optional(FROOM_NON_LENS_FLARE);
+			if (!strcmp(field, "ROOM_OUTSIDE"))
+				return std::optional(FROOM_OUTSIDE);
+			if (!strcmp(field, "ROOM_QUICKSAND"))
+				return std::optional(FROOM_QUICKSAND);
+			if (!strcmp(field, "ROOM_RAIN"))
+				return std::optional(FROOM_RAIN);
+			if (!strcmp(field, "ROOM_SNOW"))
+				return std::optional(FROOM_SNOW);
+			if (!strcmp(field, "ROOM_WATER"))
+				return std::optional(FROOM_WATER);
+			break;
+
 		case 'S':
 			if (!strcmp(field, "SLOT_LARA"))
 				return std::optional(SLOT_LARA);
