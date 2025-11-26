@@ -49,6 +49,7 @@ namespace Utilities
 	float DegToRad(float deg);
 	float RadToDeg(float rad);
 	ushort ConvertTo16BitBGR(const ColorRGB& c);
+	ColorRGB ConvertFrom16BitBGR(ushort shade);
 	const char* FormatString(const char* format, ...);
 	ColorRGB CalculateVertexDynamicLighting(int x, int y, int z);
 }

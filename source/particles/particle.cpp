@@ -330,7 +330,7 @@ namespace Particles
 		Particles::CallerGuard guard(FUNCTION_UPDATE);
 
 		Script::PreFunctionLoop();
-		for (int i = 0; i < parts.size(); ++i, ++part)
+		for (ulong i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
@@ -406,7 +406,7 @@ namespace Particles
 
 		Particles::CallerGuard guard(FUNCTION_UPDATE);
 		Script::PreFunctionLoop();
-		for (int i = 0; i < parts.size(); ++i, ++part)
+		for (ulong i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0 || part->createdInCurrentLoop)
 				continue;
@@ -484,7 +484,7 @@ namespace Particles
 		phd_PushMatrix();
 		phd_TranslateAbs(lara_item->pos.xPos, lara_item->pos.yPos, lara_item->pos.zPos);
 
-		for (int i = 0; i < parts.size(); ++i, ++part)
+		for (ulong i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter <= 0)
 				continue;
@@ -686,7 +686,7 @@ namespace Particles
 	{
 		auto part = &parts[0];
 
-		for (int i = 0; i < parts.size(); ++i, ++part)
+		for (ulong i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter > 0)
 			{
@@ -1112,7 +1112,7 @@ namespace Particles
 	{
 		Vector3f v;
 
-		for (int i = 0; i < parts.size(); ++i)
+		for (ulong i = 0; i < parts.size(); ++i)
 		{
 			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
@@ -1137,7 +1137,7 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < parts.size(); ++i)
+		for (ulong i = 0; i < parts.size(); ++i)
 		{
 			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
@@ -1171,7 +1171,7 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < parts.size(); ++i)
+		for (ulong i = 0; i < parts.size(); ++i)
 		{
 			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
@@ -1582,7 +1582,7 @@ namespace Particles
 	{
 		Vector3f v;
 
-		for (int i = 0; i < parts.size(); ++i)
+		for (ulong i = 0; i < parts.size(); ++i)
 		{
 			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
@@ -1607,7 +1607,7 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < parts.size(); ++i)
+		for (ulong i = 0; i < parts.size(); ++i)
 		{
 			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)
@@ -1641,7 +1641,7 @@ namespace Particles
 		Vector3f v;
 
 		int neighbors = 0;
-		for (int i = 0; i < parts.size(); ++i)
+		for (ulong i = 0; i < parts.size(); ++i)
 		{
 			auto part = &parts[i];
 			if (part->lifeCounter <= 0 || part == this)

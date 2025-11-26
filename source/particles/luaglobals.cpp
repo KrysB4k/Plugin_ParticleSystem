@@ -108,6 +108,11 @@ namespace LuaGlobals
 					Script::PushInteger(itemptr->mesh_bits);
 					return;
 				}
+				if (!strcmp(field, "meshes"))
+				{
+					Script::PushInteger(objects[itemptr->object_number].nmeshes);
+					return;
+				}
 				break;
 			case 'o':
 				if (!strcmp(field, "ocbNumber"))
@@ -148,6 +153,11 @@ namespace LuaGlobals
 				}
 				break;
 			case 't':
+				if (!strcmp(field, "tombIndex"))
+				{
+					Script::PushInteger(itemIndex);
+					return;
+				}
 				if (!strcmp(field, "triggered"))
 				{
 					bool active = (itemptr->status == 0x1) ? true : false;
@@ -179,6 +189,7 @@ namespace LuaGlobals
 					int anim = GetClampedInteger(-1, 0, 1000, false) + objects[itemptr->object_number].anim_index;
 					itemptr->anim_number = anim;
 					itemptr->frame_number = anims[itemptr->anim_number].frame_base;
+					itemptr->current_anim_state = itemptr->goal_anim_state = anims[itemptr->anim_number].current_anim_state;
 					return;
 				}
 				break;
@@ -248,6 +259,10 @@ namespace LuaGlobals
 				{
 					ReadOnlyFieldError(field);
 				}
+				if (!strcmp(field, "meshes"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				break;
 			case 'o':
 				if (!strcmp(field, "ocbNumber"))
@@ -288,7 +303,103 @@ namespace LuaGlobals
 				}
 				break;
 			case 't':
+				if (!strcmp(field, "tombIndex"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				if (!strcmp(field, "triggered"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			}
+		}
+		LuaObjectClass::NewIndex(field);
+	}
+
+	const char* LuaStaticInfoWrapper::Name()
+	{
+		return "StaticInfo";
+	}
+
+	void LuaStaticInfoWrapper::Index(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'o':
+				if (!strcmp(field, "ocbFlags"))
+				{
+					Script::PushInteger(ref.Flags);
+					return;
+				}
+				break;
+			case 'p':
+				if (!strcmp(field, "pos"))
+				{
+					ConstructManagedData<Vector3f>((float)ref.x, (float)ref.y, (float)ref.z);
+					return;
+				}
+				break;
+			case 'r':
+				if (!strcmp(field, "rot"))
+				{
+					ConstructManagedData<Vector3s>(0, ref.y_rot, 0);
+					return;
+				}
+				break;
+			case 's':
+				if (!strcmp(field, "slot"))
+				{
+					Script::PushInteger(ref.static_number);
+					return;
+				}
+				break;
+			case 't':
+				if (!strcmp(field, "tint"))
+				{
+					ConstructManagedData<ColorRGB>(ConvertFrom16BitBGR(ref.shade));
+					return;
+				}
+				break;
+			}
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void LuaStaticInfoWrapper::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'o':
+				if (!strcmp(field, "ocbFlags"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			case 'p':
+				if (!strcmp(field, "pos"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			case 'r':
+				if (!strcmp(field, "rot"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			case 's':
+				if (!strcmp(field, "slot"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			case 't':
+				if (!strcmp(field, "tint"))
 				{
 					ReadOnlyFieldError(field);
 				}
@@ -1442,6 +1553,326 @@ namespace LuaGlobals
 				return std::optional(SLOT_NEW_SLOT17);
 			if (!strcmp(field, "SLOT_NEW_SLOT18"))
 				return std::optional(SLOT_NEW_SLOT18);
+			if (!strcmp(field, "SLOT_ARCHITECTURE0"))
+				return std::optional(SSLOT_ARCHITECTURE0);
+			if (!strcmp(field, "SLOT_ARCHITECTURE1"))
+				return std::optional(SSLOT_ARCHITECTURE1);
+			if (!strcmp(field, "SLOT_ARCHITECTURE2"))
+				return std::optional(SSLOT_ARCHITECTURE2);
+			if (!strcmp(field, "SLOT_ARCHITECTURE3"))
+				return std::optional(SSLOT_ARCHITECTURE3);
+			if (!strcmp(field, "SLOT_ARCHITECTURE4"))
+				return std::optional(SSLOT_ARCHITECTURE4);
+			if (!strcmp(field, "SLOT_ARCHITECTURE5"))
+				return std::optional(SSLOT_ARCHITECTURE5);
+			if (!strcmp(field, "SLOT_ARCHITECTURE6"))
+				return std::optional(SSLOT_ARCHITECTURE6);
+			if (!strcmp(field, "SLOT_ARCHITECTURE7"))
+				return std::optional(SSLOT_ARCHITECTURE7);
+			if (!strcmp(field, "SLOT_ARCHITECTURE8"))
+				return std::optional(SSLOT_ARCHITECTURE8);
+			if (!strcmp(field, "SLOT_ARCHITECTURE9"))
+				return std::optional(SSLOT_ARCHITECTURE9);
+			if (!strcmp(field, "SLOT_DEBRIS0"))
+				return std::optional(SSLOT_DEBRIS0);
+			if (!strcmp(field, "SLOT_DEBRIS1"))
+				return std::optional(SSLOT_DEBRIS1);
+			if (!strcmp(field, "SLOT_DEBRIS2"))
+				return std::optional(SSLOT_DEBRIS2);
+			if (!strcmp(field, "SLOT_DEBRIS3"))
+				return std::optional(SSLOT_DEBRIS3);
+			if (!strcmp(field, "SLOT_DEBRIS4"))
+				return std::optional(SSLOT_DEBRIS4);
+			if (!strcmp(field, "SLOT_DEBRIS5"))
+				return std::optional(SSLOT_DEBRIS5);
+			if (!strcmp(field, "SLOT_DEBRIS6"))
+				return std::optional(SSLOT_DEBRIS6);
+			if (!strcmp(field, "SLOT_DEBRIS7"))
+				return std::optional(SSLOT_DEBRIS7);
+			if (!strcmp(field, "SLOT_DEBRIS8"))
+				return std::optional(SSLOT_DEBRIS8);
+			if (!strcmp(field, "SLOT_DEBRIS9"))
+				return std::optional(SSLOT_DEBRIS9);
+			if (!strcmp(field, "SLOT_EXTRA00"))
+				return std::optional(SSLOT_EXTRA00);
+			if (!strcmp(field, "SLOT_EXTRA01"))
+				return std::optional(SSLOT_EXTRA01);
+			if (!strcmp(field, "SLOT_EXTRA02"))
+				return std::optional(SSLOT_EXTRA02);
+			if (!strcmp(field, "SLOT_EXTRA03"))
+				return std::optional(SSLOT_EXTRA03);
+			if (!strcmp(field, "SLOT_EXTRA04"))
+				return std::optional(SSLOT_EXTRA04);
+			if (!strcmp(field, "SLOT_EXTRA05"))
+				return std::optional(SSLOT_EXTRA05);
+			if (!strcmp(field, "SLOT_EXTRA06"))
+				return std::optional(SSLOT_EXTRA06);
+			if (!strcmp(field, "SLOT_EXTRA07"))
+				return std::optional(SSLOT_EXTRA07);
+			if (!strcmp(field, "SLOT_EXTRA08"))
+				return std::optional(SSLOT_EXTRA08);
+			if (!strcmp(field, "SLOT_EXTRA09"))
+				return std::optional(SSLOT_EXTRA09);
+			if (!strcmp(field, "SLOT_EXTRA10"))
+				return std::optional(SSLOT_EXTRA10);
+			if (!strcmp(field, "SLOT_EXTRA11"))
+				return std::optional(SSLOT_EXTRA11);
+			if (!strcmp(field, "SLOT_EXTRA12"))
+				return std::optional(SSLOT_EXTRA12);
+			if (!strcmp(field, "SLOT_EXTRA13"))
+				return std::optional(SSLOT_EXTRA13);
+			if (!strcmp(field, "SLOT_EXTRA14"))
+				return std::optional(SSLOT_EXTRA14);
+			if (!strcmp(field, "SLOT_EXTRA15"))
+				return std::optional(SSLOT_EXTRA15);
+			if (!strcmp(field, "SLOT_EXTRA16"))
+				return std::optional(SSLOT_EXTRA16);
+			if (!strcmp(field, "SLOT_EXTRA17"))
+				return std::optional(SSLOT_EXTRA17);
+			if (!strcmp(field, "SLOT_EXTRA18"))
+				return std::optional(SSLOT_EXTRA18);
+			if (!strcmp(field, "SLOT_EXTRA19"))
+				return std::optional(SSLOT_EXTRA19);
+			if (!strcmp(field, "SLOT_EXTRA20"))
+				return std::optional(SSLOT_EXTRA20);
+			if (!strcmp(field, "SLOT_EXTRA21"))
+				return std::optional(SSLOT_EXTRA21);
+			if (!strcmp(field, "SLOT_EXTRA22"))
+				return std::optional(SSLOT_EXTRA22);
+			if (!strcmp(field, "SLOT_EXTRA23"))
+				return std::optional(SSLOT_EXTRA23);
+			if (!strcmp(field, "SLOT_EXTRA24"))
+				return std::optional(SSLOT_EXTRA24);
+			if (!strcmp(field, "SLOT_EXTRA25"))
+				return std::optional(SSLOT_EXTRA25);
+			if (!strcmp(field, "SLOT_EXTRA26"))
+				return std::optional(SSLOT_EXTRA26);
+			if (!strcmp(field, "SLOT_EXTRA27"))
+				return std::optional(SSLOT_EXTRA27);
+			if (!strcmp(field, "SLOT_EXTRA28"))
+				return std::optional(SSLOT_EXTRA28);
+			if (!strcmp(field, "SLOT_EXTRA29"))
+				return std::optional(SSLOT_EXTRA29);
+			if (!strcmp(field, "SLOT_EXTRA30"))
+				return std::optional(SSLOT_EXTRA30);
+			if (!strcmp(field, "SLOT_EXTRA31"))
+				return std::optional(SSLOT_EXTRA31);
+			if (!strcmp(field, "SLOT_EXTRA32"))
+				return std::optional(SSLOT_EXTRA32);
+			if (!strcmp(field, "SLOT_EXTRA33"))
+				return std::optional(SSLOT_EXTRA33);
+			if (!strcmp(field, "SLOT_EXTRA34"))
+				return std::optional(SSLOT_EXTRA34);
+			if (!strcmp(field, "SLOT_EXTRA35"))
+				return std::optional(SSLOT_EXTRA35);
+			if (!strcmp(field, "SLOT_EXTRA36"))
+				return std::optional(SSLOT_EXTRA36);
+			if (!strcmp(field, "SLOT_EXTRA37"))
+				return std::optional(SSLOT_EXTRA37);
+			if (!strcmp(field, "SLOT_EXTRA38"))
+				return std::optional(SSLOT_EXTRA38);
+			if (!strcmp(field, "SLOT_EXTRA39"))
+				return std::optional(SSLOT_EXTRA39);
+			if (!strcmp(field, "SLOT_EXTRA40"))
+				return std::optional(SSLOT_EXTRA40);
+			if (!strcmp(field, "SLOT_EXTRA41"))
+				return std::optional(SSLOT_EXTRA41);
+			if (!strcmp(field, "SLOT_EXTRA42"))
+				return std::optional(SSLOT_EXTRA42);
+			if (!strcmp(field, "SLOT_EXTRA43"))
+				return std::optional(SSLOT_EXTRA43);
+			if (!strcmp(field, "SLOT_EXTRA44"))
+				return std::optional(SSLOT_EXTRA44);
+			if (!strcmp(field, "SLOT_EXTRA45"))
+				return std::optional(SSLOT_EXTRA45);
+			if (!strcmp(field, "SLOT_EXTRA46"))
+				return std::optional(SSLOT_EXTRA46);
+			if (!strcmp(field, "SLOT_EXTRA47"))
+				return std::optional(SSLOT_EXTRA47);
+			if (!strcmp(field, "SLOT_EXTRA48"))
+				return std::optional(SSLOT_EXTRA48);
+			if (!strcmp(field, "SLOT_EXTRA49"))
+				return std::optional(SSLOT_EXTRA49);
+			if (!strcmp(field, "SLOT_EXTRA50"))
+				return std::optional(SSLOT_EXTRA50);
+			if (!strcmp(field, "SLOT_EXTRA51"))
+				return std::optional(SSLOT_EXTRA51);
+			if (!strcmp(field, "SLOT_EXTRA52"))
+				return std::optional(SSLOT_EXTRA52);
+			if (!strcmp(field, "SLOT_EXTRA53"))
+				return std::optional(SSLOT_EXTRA53);
+			if (!strcmp(field, "SLOT_EXTRA54"))
+				return std::optional(SSLOT_EXTRA54);
+			if (!strcmp(field, "SLOT_EXTRA55"))
+				return std::optional(SSLOT_EXTRA55);
+			if (!strcmp(field, "SLOT_EXTRA56"))
+				return std::optional(SSLOT_EXTRA56);
+			if (!strcmp(field, "SLOT_EXTRA57"))
+				return std::optional(SSLOT_EXTRA57);
+			if (!strcmp(field, "SLOT_EXTRA58"))
+				return std::optional(SSLOT_EXTRA58);
+			if (!strcmp(field, "SLOT_EXTRA59"))
+				return std::optional(SSLOT_EXTRA59);
+			if (!strcmp(field, "SLOT_EXTRA60"))
+				return std::optional(SSLOT_EXTRA60);
+			if (!strcmp(field, "SLOT_EXTRA61"))
+				return std::optional(SSLOT_EXTRA61);
+			if (!strcmp(field, "SLOT_EXTRA62"))
+				return std::optional(SSLOT_EXTRA62);
+			if (!strcmp(field, "SLOT_EXTRA63"))
+				return std::optional(SSLOT_EXTRA63);
+			if (!strcmp(field, "SLOT_EXTRA64"))
+				return std::optional(SSLOT_EXTRA64);
+			if (!strcmp(field, "SLOT_EXTRA65"))
+				return std::optional(SSLOT_EXTRA65);
+			if (!strcmp(field, "SLOT_EXTRA66"))
+				return std::optional(SSLOT_EXTRA66);
+			if (!strcmp(field, "SLOT_EXTRA67"))
+				return std::optional(SSLOT_EXTRA67);
+			if (!strcmp(field, "SLOT_EXTRA68"))
+				return std::optional(SSLOT_EXTRA68);
+			if (!strcmp(field, "SLOT_EXTRA69"))
+				return std::optional(SSLOT_EXTRA69);
+			if (!strcmp(field, "SLOT_EXTRA70"))
+				return std::optional(SSLOT_EXTRA70);
+			if (!strcmp(field, "SLOT_EXTRA71"))
+				return std::optional(SSLOT_EXTRA71);
+			if (!strcmp(field, "SLOT_EXTRA72"))
+				return std::optional(SSLOT_EXTRA72);
+			if (!strcmp(field, "SLOT_EXTRA73"))
+				return std::optional(SSLOT_EXTRA73);
+			if (!strcmp(field, "SLOT_EXTRA74"))
+				return std::optional(SSLOT_EXTRA74);
+			if (!strcmp(field, "SLOT_EXTRA75"))
+				return std::optional(SSLOT_EXTRA75);
+			if (!strcmp(field, "SLOT_EXTRA76"))
+				return std::optional(SSLOT_EXTRA76);
+			if (!strcmp(field, "SLOT_EXTRA77"))
+				return std::optional(SSLOT_EXTRA77);
+			if (!strcmp(field, "SLOT_EXTRA78"))
+				return std::optional(SSLOT_EXTRA78);
+			if (!strcmp(field, "SLOT_EXTRA79"))
+				return std::optional(SSLOT_EXTRA79);
+			if (!strcmp(field, "SLOT_EXTRA80"))
+				return std::optional(SSLOT_EXTRA80);
+			if (!strcmp(field, "SLOT_EXTRA81"))
+				return std::optional(SSLOT_EXTRA81);
+			if (!strcmp(field, "SLOT_EXTRA82"))
+				return std::optional(SSLOT_EXTRA82);
+			if (!strcmp(field, "SLOT_EXTRA83"))
+				return std::optional(SSLOT_EXTRA83);
+			if (!strcmp(field, "SLOT_EXTRA84"))
+				return std::optional(SSLOT_EXTRA84);
+			if (!strcmp(field, "SLOT_EXTRA85"))
+				return std::optional(SSLOT_EXTRA85);
+			if (!strcmp(field, "SLOT_EXTRA86"))
+				return std::optional(SSLOT_EXTRA86);
+			if (!strcmp(field, "SLOT_EXTRA87"))
+				return std::optional(SSLOT_EXTRA87);
+			if (!strcmp(field, "SLOT_EXTRA88"))
+				return std::optional(SSLOT_EXTRA88);
+			if (!strcmp(field, "SLOT_EXTRA89"))
+				return std::optional(SSLOT_EXTRA89);
+			if (!strcmp(field, "SLOT_EXTRA90"))
+				return std::optional(SSLOT_EXTRA90);
+			if (!strcmp(field, "SLOT_EXTRA91"))
+				return std::optional(SSLOT_EXTRA91);
+			if (!strcmp(field, "SLOT_EXTRA92"))
+				return std::optional(SSLOT_EXTRA92);
+			if (!strcmp(field, "SLOT_EXTRA93"))
+				return std::optional(SSLOT_EXTRA93);
+			if (!strcmp(field, "SLOT_EXTRA94"))
+				return std::optional(SSLOT_EXTRA94);
+			if (!strcmp(field, "SLOT_EXTRA95"))
+				return std::optional(SSLOT_EXTRA95);
+			if (!strcmp(field, "SLOT_EXTRA96"))
+				return std::optional(SSLOT_EXTRA96);
+			if (!strcmp(field, "SLOT_EXTRA97"))
+				return std::optional(SSLOT_EXTRA97);
+			if (!strcmp(field, "SLOT_EXTRA98"))
+				return std::optional(SSLOT_EXTRA98);
+			if (!strcmp(field, "SLOT_EXTRA99"))
+				return std::optional(SSLOT_EXTRA99);
+			if (!strcmp(field, "SLOT_FURNITURE0"))
+				return std::optional(SSLOT_FURNITURE0);
+			if (!strcmp(field, "SLOT_FURNITURE1"))
+				return std::optional(SSLOT_FURNITURE1);
+			if (!strcmp(field, "SLOT_FURNITURE2"))
+				return std::optional(SSLOT_FURNITURE2);
+			if (!strcmp(field, "SLOT_FURNITURE3"))
+				return std::optional(SSLOT_FURNITURE3);
+			if (!strcmp(field, "SLOT_FURNITURE4"))
+				return std::optional(SSLOT_FURNITURE4);
+			if (!strcmp(field, "SLOT_FURNITURE5"))
+				return std::optional(SSLOT_FURNITURE5);
+			if (!strcmp(field, "SLOT_FURNITURE6"))
+				return std::optional(SSLOT_FURNITURE6);
+			if (!strcmp(field, "SLOT_FURNITURE7"))
+				return std::optional(SSLOT_FURNITURE7);
+			if (!strcmp(field, "SLOT_FURNITURE8"))
+				return std::optional(SSLOT_FURNITURE8);
+			if (!strcmp(field, "SLOT_FURNITURE9"))
+				return std::optional(SSLOT_FURNITURE9);
+			if (!strcmp(field, "SLOT_PLANT0"))
+				return std::optional(SSLOT_PLANT0);
+			if (!strcmp(field, "SLOT_PLANT1"))
+				return std::optional(SSLOT_PLANT1);
+			if (!strcmp(field, "SLOT_PLANT2"))
+				return std::optional(SSLOT_PLANT2);
+			if (!strcmp(field, "SLOT_PLANT3"))
+				return std::optional(SSLOT_PLANT3);
+			if (!strcmp(field, "SLOT_PLANT4"))
+				return std::optional(SSLOT_PLANT4);
+			if (!strcmp(field, "SLOT_PLANT5"))
+				return std::optional(SSLOT_PLANT5);
+			if (!strcmp(field, "SLOT_PLANT6"))
+				return std::optional(SSLOT_PLANT6);
+			if (!strcmp(field, "SLOT_PLANT7"))
+				return std::optional(SSLOT_PLANT7);
+			if (!strcmp(field, "SLOT_PLANT8"))
+				return std::optional(SSLOT_PLANT8);
+			if (!strcmp(field, "SLOT_PLANT9"))
+				return std::optional(SSLOT_PLANT9);
+			if (!strcmp(field, "SLOT_ROCK0"))
+				return std::optional(SSLOT_ROCK0);
+			if (!strcmp(field, "SLOT_ROCK1"))
+				return std::optional(SSLOT_ROCK1);
+			if (!strcmp(field, "SLOT_ROCK2"))
+				return std::optional(SSLOT_ROCK2);
+			if (!strcmp(field, "SLOT_ROCK3"))
+				return std::optional(SSLOT_ROCK3);
+			if (!strcmp(field, "SLOT_ROCK4"))
+				return std::optional(SSLOT_ROCK4);
+			if (!strcmp(field, "SLOT_ROCK5"))
+				return std::optional(SSLOT_ROCK5);
+			if (!strcmp(field, "SLOT_ROCK6"))
+				return std::optional(SSLOT_ROCK6);
+			if (!strcmp(field, "SLOT_ROCK7"))
+				return std::optional(SSLOT_ROCK7);
+			if (!strcmp(field, "SLOT_ROCK8"))
+				return std::optional(SSLOT_ROCK8);
+			if (!strcmp(field, "SLOT_ROCK9"))
+				return std::optional(SSLOT_ROCK9);
+			if (!strcmp(field, "SLOT_SHATTER0"))
+				return std::optional(SSLOT_SHATTER0);
+			if (!strcmp(field, "SLOT_SHATTER1"))
+				return std::optional(SSLOT_SHATTER1);
+			if (!strcmp(field, "SLOT_SHATTER2"))
+				return std::optional(SSLOT_SHATTER2);
+			if (!strcmp(field, "SLOT_SHATTER3"))
+				return std::optional(SSLOT_SHATTER3);
+			if (!strcmp(field, "SLOT_SHATTER4"))
+				return std::optional(SSLOT_SHATTER4);
+			if (!strcmp(field, "SLOT_SHATTER5"))
+				return std::optional(SSLOT_SHATTER5);
+			if (!strcmp(field, "SLOT_SHATTER6"))
+				return std::optional(SSLOT_SHATTER6);
+			if (!strcmp(field, "SLOT_SHATTER7"))
+				return std::optional(SSLOT_SHATTER7);
+			if (!strcmp(field, "SLOT_SHATTER8"))
+				return std::optional(SSLOT_SHATTER8);
+			if (!strcmp(field, "SLOT_SHATTER9"))
+				return std::optional(SSLOT_SHATTER9);
 			break;
 
 		case 'T':

@@ -438,10 +438,14 @@ namespace LuaFunctions
 		{
 			Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
 			float radius = GetNumber(2);
-			std::vector<short> slotList(GetTable(3));
-			for (ulong i = 0; i < slotList.size(); i++)
-				slotList[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
-			Script::PushInteger(FindNearestTarget(vec, radius, slotList.data(), slotList.size()));
+			std::vector<short> slots(GetTable(3, false));
+			for (ulong i = 0; i < slots.size(); i++)
+				slots[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
+			int target = FindNearestTarget(vec, radius, slots.data(), slots.size());
+			if (target != NO_ITEM)
+				Script::PushInteger(target);
+			else
+				Script::PushNil();
 			return 1;
 		}
 	};
@@ -559,11 +563,43 @@ namespace LuaFunctions
 		}
 	};
 
+	struct GetItemsBySlotFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int elements = 0;
+			int slot = GetClampedInteger(1, SLOT_LARA, SLOT_NUMBER_OBJECTS - 1, false);
+			for (int i = 0; i < level_items; i++)
+			{
+				const auto& item = items[i];
+				if (item.object_number == slot)
+				{
+					Script::PushInteger(i);
+					elements++;
+				}
+			}
+			Script::PushTable(2, elements);
+			return 1;
+		}
+	};
+
 	struct GetLaraIndexFunction final : public LuaObjectFunction
 	{
 		int Call() final
 		{
 			Script::PushInteger(lara_info.item_number);
+			return 1;
+		}
+	};
+
+	struct GetLaraTargetIndexFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			if (lara_info.target)
+				Script::PushInteger(lara_info.target - items);
+			else
+				Script::PushNil();
 			return 1;
 		}
 	};
@@ -578,11 +614,86 @@ namespace LuaFunctions
 		}
 	};
 
+	struct GetRoomIndexFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			short ngIndex = GetClampedInteger(1, 0, MAX_ROOMS, false);
+			int roomIndex = Trng.pGlobTomb4->VetRemapRooms[ngIndex];
+			if (roomIndex == -1)
+			{
+				Script::EmitFailure(FormatString("Index = %d does not correspond to a valid room index in level", ngIndex), Logger::Error);
+				return 0;
+			}
+			Script::PushInteger(roomIndex);
+			return 1;
+		}
+	};
+	
+	struct GetRoomStaticsFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int count = GetArgCount(1, 2);
+			short roomIndex = GetClampedInteger(1, 0, number_rooms - 1, false);
+			const auto& room = rooms[roomIndex];
+			
+			int length = 0;
+			if (count > 1 && !Script::IsNil(2))
+				length = GetTable(2, true);
+			std::vector<short> slots(length);
+			for (ulong i = 0; i < slots.size(); i++)
+				slots[i] = GetClampedInteger(3 + i, SSLOT_PLANT0, SSLOT_NUMBER_STATIC_OBJECTS - 1, false);
+	
+			int elements = 0;
+			for (int i = 0; i < room.num_meshes; i++)
+			{
+				const auto& mesh = room.mesh[i];
+				bool matched = false;
+				if (slots.size())
+				{
+					for (const auto& j : slots)
+					{
+						matched = (mesh.static_number == j);
+						if (matched) break;
+					}
+				}
+				else
+					matched = true;
+
+				if (matched)
+				{
+					ConstructManagedData<LuaGlobals::LuaStaticInfoWrapper>(mesh);
+					elements++;
+				}
+			}
+			Script::PushTable(count + length + 1, elements);
+			return 1;
+		}
+	};
+
 	struct GetSelectedItemFunction final : public LuaObjectFunction
 	{
 		int Call() final
 		{
 			Script::PushInteger(Trng.pGlobTomb4->ItemIndexSelected);
+			return 1;
+		}
+	};
+
+	struct GetStaticInfoFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int ngIndex = GetClampedInteger(1, 0, 6000, false);
+			short staticIndex = Trng.pGlobTomb4->VetRemapStatics[ngIndex].IndiceStatic;
+			if (staticIndex == -1)
+			{
+				Script::EmitFailure(FormatString("Index = %d does not match any static object", ngIndex), Logger::Error);
+				return 0;
+			}
+			const auto& room = rooms[Trng.pGlobTomb4->VetRemapStatics[ngIndex].IndiceRoom];
+			ConstructManagedData<LuaGlobals::LuaStaticInfoWrapper>(room.mesh[staticIndex]);
 			return 1;
 		}
 	};
@@ -1295,7 +1406,7 @@ namespace LuaFunctions
 			return 1;
 		}
 	};
-
+	
 	struct SoundEffectFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1340,7 +1451,7 @@ namespace LuaFunctions
 		int Call() final
 		{
 			float t = GetNumber(1);
-			std::vector<Vector3f> vecList(GetTable(2));
+			std::vector<Vector3f> vecList(GetTable(2, false));
 			for (ulong i = 0; i < vecList.size(); i++)
 				vecList[i] = GetItemPos(i + 3);
 			ConstructManagedData<Vector3f>(SplinePos(t, vecList.data(), vecList.size()));
@@ -1353,7 +1464,7 @@ namespace LuaFunctions
 		int Call() final
 		{
 			float t = GetNumber(1);
-			std::vector<Vector3f> vecList(GetTable(2));
+			std::vector<Vector3f> vecList(GetTable(2, false));
 			for (ulong i = 0; i < vecList.size(); i++)
 				vecList[i] = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(i + 3));
 			Vector3f vec = SplinePos(t, vecList.data(), vecList.size());
@@ -1368,7 +1479,7 @@ namespace LuaFunctions
 		{
 			float t = GetNumber(1);
 			float duration = GetNumber(2);
-			std::vector<Vector3f> vecList(GetTable(3));
+			std::vector<Vector3f> vecList(GetTable(3, false));
 			for (ulong i = 0; i < vecList.size(); i++)
 				vecList[i] = GetItemPos(i + 4);
 			ConstructManagedData<Vector3f>(SplineVel(t, duration, vecList.data(), vecList.size()));
@@ -1382,7 +1493,7 @@ namespace LuaFunctions
 		{
 			float t = GetNumber(1);
 			float duration = GetNumber(2);
-			std::vector<Vector3f> vecList(GetTable(3));
+			std::vector<Vector3f> vecList(GetTable(3, false));
 			for (ulong i = 0; i < vecList.size(); i++)
 				vecList[i] = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(i + 4));
 			Vector3f vec = SplineVel(t, duration, vecList.data(), vecList.size());
@@ -1581,9 +1692,14 @@ namespace LuaFunctions
 	GetItemInfoFunction GetItemInfoFunc;
 	GetItemJointPosFunction GetItemJointPosFunc;
 	GetItemRoomFunction GetItemRoomFunc;
+	GetItemsBySlotFunction GetItemsBySlotFunc;
 	GetLaraIndexFunction GetLaraIndexFunc;
+	GetLaraTargetIndexFunction GetLaraTargetIndexFunc;
 	GetRoomFlagsFunction GetRoomFlagsFunc;
+	GetRoomIndexFunction GetRoomIndexFunc;
+	GetRoomStaticsFunction GetRoomStaticsFunc;
 	GetSelectedItemFunction GetSelectedItemFunc;
+	GetStaticInfoFunction GetStaticInfoFunc;
 	GetTombIndexFunction GetTombIndexFunc;
 	GetWaterDepthFunction GetWaterDepthFunc;
 	GetWaterHeightFunction GetWaterHeightFunc;
@@ -1727,10 +1843,12 @@ namespace LuaFunctions
 			break;
 
 		case 'f':
-			if (!strcmp(field, "findNearestTarget"))
+			if (!strcmp(field, "findNearestItem"))
 				return &FindNearestTargetFunc;
 			if (!strcmp(field, "floor"))
 				return &FindNearestTargetFunc;
+			if (!strcmp(field, "fmod"))
+				return &FmodFunc;
 			break;
 
 		case 'g':
@@ -1748,12 +1866,22 @@ namespace LuaFunctions
 				return &GetItemInfoFunc;
 			if (!strcmp(field, "getItemRoom"))
 				return &GetItemRoomFunc;
+			if (!strcmp(field, "getItemsBySlot"))
+				return &GetItemsBySlotFunc;
 			if (!strcmp(field, "getLaraIndex"))
 				return &GetLaraIndexFunc;
+			if (!strcmp(field, "getLaraTargetIndex"))
+				return &GetLaraTargetIndexFunc;
 			if (!strcmp(field, "getRoomFlags"))
 				return &GetRoomFlagsFunc;
+			if (!strcmp(field, "getRoomIndex"))
+				return &GetRoomIndexFunc;
+			if (!strcmp(field, "getRoomStatics"))
+				return &GetRoomStaticsFunc;
 			if (!strcmp(field, "getSelectedItemIndex"))
 				return &GetSelectedItemFunc;
+			if (!strcmp(field, "getStatic"))
+				return &GetStaticInfoFunc;
 			if (!strcmp(field, "getTombIndex"))
 				return &GetTombIndexFunc;
 			if (!strcmp(field, "getWaterDepth"))

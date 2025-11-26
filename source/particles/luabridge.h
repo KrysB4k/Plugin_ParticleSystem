@@ -5,6 +5,7 @@
 struct Vector3f;
 struct Vector3s;
 struct phd_3dpos;
+struct Tr4MeshInfo;
 
 namespace Particles
 {
@@ -136,6 +137,18 @@ namespace LuaGlobals
 		void NewIndex(const char* field) final;
 	};
 
+	struct LuaStaticInfoWrapper final : public LuaObjectClass
+	{
+		LuaStaticInfoWrapper(const Tr4MeshInfo& mesh) : ref(mesh) {}
+
+		static const char* Name();
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
+
+	private:
+		const Tr4MeshInfo& ref;
+	};
+
 	extern TrngVarWrapper TrngVars;
 	extern LuaItemInfoWrapper LuaItemArray[];
 
@@ -178,7 +191,7 @@ namespace LuaHelpers
 	float GetNumber(int argument);
 	int GetFunction(int argument);
 	const char* GetLuaString(int argument);
-	int GetTable(int argument);
+	int GetTable(int argument, bool canBeEmpty);
 	int GetArgCount(int minimum, int maximum);
 	int VerifyItemIndex(int argument);
 	int GetTombIndexByNGLEIndex(int argument);

@@ -475,6 +475,14 @@ namespace Utilities
 		return b | g | r;
 	}
 
+	ColorRGB ConvertFrom16BitBGR(ushort shade)
+	{
+		uchar red = (shade & 31) << 3;
+		uchar green = ((shade >> 5) & 31) << 3;
+		uchar blue = ((shade >> 10) & 31) << 3;
+		return ColorRGB(red, green, blue);
+	}
+
 	const char* FormatString(const char* format, ...)
 	{
 		static char buffer[4096];

@@ -57,12 +57,12 @@ namespace LuaHelpers
 		return Script::ToString(argument);
 	}
 
-	int GetTable(int argument)
+	int GetTable(int argument, bool canBeEmpty)
 	{
 		if (!Script::IsTable(argument))
 			Script::Throw("table expected");
 		int length = Script::ExplodeTable(argument);
-		if (!length)
+		if (!length && !canBeEmpty)
 			Script::Throw("table is empty");
 		return length;
 	}
