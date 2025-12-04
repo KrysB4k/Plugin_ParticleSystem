@@ -3,6 +3,7 @@
 // ************  Utility functions ************ //
 
 struct Vector3f;
+struct Vector3s;
 struct ColorRGB;
 
 namespace Utilities
@@ -31,8 +32,11 @@ namespace Utilities
 	ColorRGB HSVtoRGB(float hue, float sat, float val);
 	long TestCollisionSpheres(Tr4ItemInfo* item, const Vector3f& posTest, float radius);
 	int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count);
+	Vector3s GetJointRot(Tr4ItemInfo* item, int joint);
 	Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff);
-	Vector3f RotatePoint3D(const Vector3f& point, short xrot, short yrot, short zrot);
+	void GetJointPosRot(Tr4ItemInfo* item, int joint, Vector3f& pos, Vector3s& rot);
+	Vector3f RotatePointByAngles(const Vector3f& point, short xrot, short yrot, short zrot);
+	Vector3f RotatePointByAxisAngle(const Vector3f& point, const Vector3f& axis, short angle);
 	Vector3f SphericalToCartesian(float r, float theta, float phi);
 	int TestForWall(int x, int y, int z, short* room);
 	Vector3f GetSlopeNormal(Tr4FloorInfo* floor, int x, int y, int z);

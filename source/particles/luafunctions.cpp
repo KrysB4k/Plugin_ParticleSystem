@@ -553,6 +553,35 @@ namespace LuaFunctions
 		}
 	};
 
+	struct GetItemJointRotFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto item = &items[VerifyItemIndex(1)];
+			int joint = GetClampedInteger(2, 0, objects[item->object_number].nmeshes - 1, false);
+			ConstructManagedData<Vector3s>(GetJointRot(item, joint));
+			return 1;
+		}
+	};
+
+	struct GetItemJointPosRotFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			Vector3s rot;
+			auto item = &items[VerifyItemIndex(1)];
+			int joint = GetClampedInteger(2, 0, objects[item->object_number].nmeshes - 1, false);
+			int offX = GetInteger(3);
+			int offY = GetInteger(4);
+			int offZ = GetInteger(5);
+			Vector3f pos(offX, offY, offZ);
+			GetJointPosRot(item, joint, pos, rot);
+			ConstructManagedData<Vector3f>(pos.x, pos.y, pos.z);
+			ConstructManagedData<Vector3s>(rot.x, rot.y, rot.z);
+			return 2;
+		}
+	};
+
 	struct GetItemRoomFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1340,6 +1369,31 @@ namespace LuaFunctions
 		}
 	};
 
+	struct RotateVectorByAnglesFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
+			auto xrot = RadToShort(GetNumber(2));
+			auto yrot = RadToShort(GetNumber(2));
+			auto zrot = RadToShort(GetNumber(2));
+			ConstructManagedData<Vector3f>(RotatePointByAngles(vec, xrot, yrot, zrot));
+			return 1;
+		}
+	};
+
+	struct RotateVectorByAxisAngleFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
+			auto axis = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
+			auto angle = RadToShort(GetNumber(3));
+			ConstructManagedData<Vector3f>(RotatePointByAxisAngle(vec, axis, angle));
+			return 1;
+		}
+	};
+
 	struct RotFromVectorFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1691,6 +1745,8 @@ namespace LuaFunctions
 	GetGameTickFunction GetGameTickFunc;
 	GetItemInfoFunction GetItemInfoFunc;
 	GetItemJointPosFunction GetItemJointPosFunc;
+	GetItemJointRotFunction GetItemJointRotFunc;
+	GetItemJointPosRotFunction GetItemJointPosRotFunc;
 	GetItemRoomFunction GetItemRoomFunc;
 	GetItemsBySlotFunction GetItemsBySlotFunc;
 	GetLaraIndexFunction GetLaraIndexFunc;
@@ -1745,6 +1801,8 @@ namespace LuaFunctions
 	RandomSpherePointFunction RandomSpherePointFunc;
 	RemapFunction RemapFunc;
 	RequireFunction RequireFunc;
+	RotateVectorByAnglesFunction RotateVectorByAnglesFunc;
+	RotateVectorByAxisAngleFunction RotateVectorByAxisAngleFunc;
 	RotFromVectorFunction RotFromVectorFunc;
 	RoundFunction RoundFunc;
 	SelectItemFunction SelectItemFunc;
@@ -1862,6 +1920,10 @@ namespace LuaFunctions
 				return &GetGameTickFunc;
 			if (!strcmp(field, "getItemJointPosition"))
 				return &GetItemJointPosFunc;
+			if (!strcmp(field, "getItemJointPosRot"))
+				return &GetItemJointPosRotFunc;
+			if (!strcmp(field, "getItemJointRotation"))
+				return &GetItemJointRotFunc;
 			if (!strcmp(field, "getItemInfo"))
 				return &GetItemInfoFunc;
 			if (!strcmp(field, "getItemRoom"))
@@ -1988,6 +2050,10 @@ namespace LuaFunctions
 				return &RemapFunc;
 			if (!strcmp(field, "require"))
 				return &RequireFunc;
+			if (!strcmp(field, "rotateVectorByAngles"))
+				return &RotateVectorByAnglesFunc;
+			if (!strcmp(field, "rotateVectorByAxisAngle"))
+				return &RotateVectorByAxisAngleFunc;
 			if (!strcmp(field, "rotFromVector"))
 				return &RotFromVectorFunc;
 			if (!strcmp(field, "round"))

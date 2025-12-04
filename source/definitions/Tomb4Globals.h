@@ -20,6 +20,8 @@
 #define f_mznear (*(float*)(0x753BA4))
 
 #define phd_mxptr (*(long**)(0x7E70C8))
+#define IMptr (*(long**)(0x7FE004))
+#define lara_joint_matrices ((long*)(0x80E8E0))
 #define scratchpad ((char*)(0x80D6A0))
 #define clipflags (*(short**)(0x753854))
 
@@ -27,8 +29,8 @@
 #define objects ((Tr4ObjectInfo*)(0x52B720))
 #define items (*(Tr4ItemInfo**)(0x7FE16C))
 #define anims (*(Tr4AnimStruct**)(0x533938))
-#define effects (*(Tr4FXInfo**)(0x8011C0))
 #define meshes (*(short***)(0x533950))
+#define bones (*(long**)(0x533958))
 #define input (*(DWORD*)(0x5355D8))
 #define rooms (*(Tr4RoomInfo**)(0x533934))
 

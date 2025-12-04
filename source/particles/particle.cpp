@@ -650,7 +650,7 @@ namespace Particles
 								}
 								else // no mesh node, use item's pos
 								{
-									vel = RotatePoint3D(vel, item->pos.xRot, item->pos.yRot, item->pos.zRot);
+									vel = RotatePointByAngles(vel, item->pos.xRot, item->pos.yRot, item->pos.zRot);
 								}
 							}
 						}
@@ -786,7 +786,7 @@ namespace Particles
 			else // no mesh node, use item's pos
 			{
 				if (tether == TetherType::TETHER_ROTATING)
-					relPos = RotatePoint3D(relPos, item->pos.xRot, item->pos.yRot, item->pos.zRot);
+					relPos = RotatePointByAngles(relPos, item->pos.xRot, item->pos.yRot, item->pos.zRot);
 
 				relPos.x += item->pos.xPos;
 				relPos.y += item->pos.yPos;
@@ -818,10 +818,10 @@ namespace Particles
 				else
 					relPos += GetJointPos(item, node, 0, 0, 0);
 			}
-			else if (itemIndex >= 0)
+			else // no node
 			{
 				if (tether == TetherType::TETHER_ROTATING)
-					relPos = RotatePoint3D(relPos, item->pos.xRot, item->pos.yRot, item->pos.zRot);
+					relPos = RotatePointByAngles(relPos, item->pos.xRot, item->pos.yRot, item->pos.zRot);
 
 				relPos.x += item->pos.xPos;
 				relPos.y += item->pos.yPos;

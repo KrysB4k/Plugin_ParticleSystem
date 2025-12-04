@@ -8,6 +8,12 @@
 
 // ************  Utility functions ************ //
 
+namespace
+{
+	short no_rotation[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	constexpr uchar lara_joint_map[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 8 };
+}
+
 namespace Utilities
 {
 	std::mt19937 mt;
@@ -216,10 +222,348 @@ namespace Utilities
 		return itemIndex;
 	}
 
+	static inline short phd_sin(long angle)
+	{
+		angle >>= 3;
+		return 4 * rcossin_tbl[angle & 0x1FFE];
+	}
+
+	static inline short phd_cos(long angle)
+	{
+		angle >>= 3;
+		return 4 * rcossin_tbl[(angle & 0x1FFE) + 1];
+	}
+
+	static void phd_GetMatrixAngles(long* m, short* dest)
+	{
+		long sy, cy;
+		short roll, pitch, yaw;
+
+		pitch = (short)phd_atan(phd_sqrt(m[M22] * m[M22] + m[M02] * m[M02]), m[M12]);
+
+		if (m[M12] >= 0 && pitch > 0 || m[M12] < 0 && pitch < 0)
+			pitch = -pitch;
+
+		yaw = (short)phd_atan(m[M22], m[M02]);
+		sy = phd_sin(yaw);
+		cy = phd_cos(yaw);
+		roll = (short)phd_atan((m[M00] * cy - m[M20] * sy) >> 14, (m[M21] * sy - m[M01] * cy) >> 14);
+		dest[0] = pitch;
+		dest[1] = yaw;
+		dest[2] = roll;
+	}
+	
+	static Vector3s GetJointAbsRotation(Tr4ItemInfo* item, int joint)
+	{
+		Tr4ObjectInfo* obj;
+		long* mx;
+		long* imx;
+		long* bone;
+		short* frm[2];
+		short* extra_rotation;
+		short* rot;
+		short* rot2;
+		long frac, rate, poppush;
+
+		mx = phd_mxptr;
+		imx = IMptr;
+		obj = &objects[item->object_number];
+		frac = GetFrames(item, frm, &rate);
+
+		phd_PushUnitMatrix();
+		phd_mxptr[M03] = 0;
+		phd_mxptr[M13] = 0;
+		phd_mxptr[M23] = 0;
+		phd_RotYXZ(item->pos.yRot, item->pos.xRot, item->pos.zRot);
+
+		extra_rotation = (short*)item->data;
+
+		if (!extra_rotation)
+			extra_rotation = no_rotation;
+
+		bone = &bones[obj->bone_index];
+
+		if (frac)
+		{
+			InitInterpolate2(frac, rate);
+			rot = frm[0] + 9;
+			rot2 = frm[1] + 9;
+
+			gar_RotYXZsuperpack_I(&rot, &rot2, 0);
+
+			for (int i = 0; i < joint; i++)
+			{
+				poppush = *bone;
+
+				if (poppush & 1)
+					phd_PopMatrix_I();
+
+				if (poppush & 2)
+					phd_PushMatrix_I();
+
+				gar_RotYXZsuperpack_I(&rot, &rot2, 0);
+
+				if (poppush & 0x1C)
+				{
+					if (poppush & 8)
+						phd_RotY_I(*extra_rotation++);
+
+					if (poppush & 4)
+						phd_RotX_I(*extra_rotation++);
+
+					if (poppush & 0x10)
+						phd_RotZ_I(*extra_rotation++);
+				}
+
+				bone += 4;
+			}
+
+			InterpolateMatrix();
+		}
+		else
+		{
+			rot = frm[0] + 9;
+			gar_RotYXZsuperpack(&rot, 0);
+
+			for (int i = 0; i < joint; i++)
+			{
+				poppush = *bone;
+
+				if (poppush & 1)
+					phd_PopMatrix();
+
+				if (poppush & 2)
+					phd_PushMatrix();
+
+				gar_RotYXZsuperpack(&rot, 0);
+
+				if (poppush & 0x1C)
+				{
+					if (poppush & 8)
+						phd_RotY(*extra_rotation++);
+
+					if (poppush & 4)
+						phd_RotX(*extra_rotation++);
+
+					if (poppush & 0x10)
+						phd_RotZ(*extra_rotation++);
+				}
+
+				bone += 4;
+			}
+		}
+
+		short angles[3];
+		phd_GetMatrixAngles(phd_mxptr, angles);
+		phd_mxptr = mx;
+		IMptr = imx;
+		
+		return Vector3s(angles[0], angles[1], angles[2]);
+	}
+
+	static void GetJointAbsPosRot(Tr4ItemInfo* item, int joint, Vector3f& pos, Vector3s& rotVec)
+	{
+		Tr4ObjectInfo* obj;
+		long* mx;
+		long* imx;
+		long* bone;
+		short* frm[2];
+		short* extra_rotation;
+		short* rot;
+		short* rot2;
+		long frac, rate, poppush;
+		long x, y, z;
+
+		mx = phd_mxptr;
+		imx = IMptr;
+		obj = &objects[item->object_number];
+		frac = GetFrames(item, frm, &rate);
+		x = SaturateRound<long>(pos.x);
+		y = SaturateRound<long>(pos.y);
+		z = SaturateRound<long>(pos.z);
+
+		phd_PushUnitMatrix();
+		phd_mxptr[M03] = 0;
+		phd_mxptr[M13] = 0;
+		phd_mxptr[M23] = 0;
+		phd_RotYXZ(item->pos.yRot, item->pos.xRot, item->pos.zRot);
+
+		extra_rotation = (short*)item->data;
+
+		if (!extra_rotation)
+			extra_rotation = no_rotation;
+
+		bone = &bones[obj->bone_index];
+
+		if (frac)
+		{
+			InitInterpolate2(frac, rate);
+			rot = frm[0] + 9;
+			rot2 = frm[1] + 9;
+			phd_TranslateRel_ID(frm[0][6], frm[0][7], frm[0][8], frm[1][6], frm[1][7], frm[1][8]);
+			gar_RotYXZsuperpack_I(&rot, &rot2, 0);
+
+			for (int i = 0; i < joint; i++)
+			{
+				poppush = *bone;
+
+				if (poppush & 1)
+					phd_PopMatrix_I();
+
+				if (poppush & 2)
+					phd_PushMatrix_I();
+
+				phd_TranslateRel_I(bone[1], bone[2], bone[3]);
+				gar_RotYXZsuperpack_I(&rot, &rot2, 0);
+
+				if (poppush & 0x1C)
+				{
+					if (poppush & 8)
+						phd_RotY_I(*extra_rotation++);
+
+					if (poppush & 4)
+						phd_RotX_I(*extra_rotation++);
+
+					if (poppush & 0x10)
+						phd_RotZ_I(*extra_rotation++);
+				}
+
+				bone += 4;
+			}
+
+			phd_TranslateRel_I(x, y, z);
+			InterpolateMatrix();
+		}
+		else
+		{
+			phd_TranslateRel(frm[0][6], frm[0][7], frm[0][8]);
+			rot = frm[0] + 9;
+			gar_RotYXZsuperpack(&rot, 0);
+
+			for (int i = 0; i < joint; i++)
+			{
+				poppush = *bone;
+
+				if (poppush & 1)
+					phd_PopMatrix();
+
+				if (poppush & 2)
+					phd_PushMatrix();
+
+				phd_TranslateRel(bone[1], bone[2], bone[3]);
+				gar_RotYXZsuperpack(&rot, 0);
+
+				if (poppush & 0x1C)
+				{
+					if (poppush & 8)
+						phd_RotY(*extra_rotation++);
+
+					if (poppush & 4)
+						phd_RotX(*extra_rotation++);
+
+					if (poppush & 0x10)
+						phd_RotZ(*extra_rotation++);
+				}
+
+				bone += 4;
+			}
+			
+			phd_TranslateRel(x, y, z);
+		}
+
+		short angles[3];
+		phd_GetMatrixAngles(phd_mxptr, angles);
+
+		rotVec.x = angles[0];
+		rotVec.y = angles[1];
+		rotVec.z = angles[2];
+
+		pos.x = item->pos.xPos + (phd_mxptr[M03] >> 14);
+		pos.y = item->pos.yPos + (phd_mxptr[M13] >> 14);
+		pos.z = item->pos.zPos + (phd_mxptr[M23] >> 14);
+
+		phd_mxptr = mx;
+		IMptr = imx;
+	}
+
+	static Vector3s GetLaraJointRot(long node)
+	{
+		short angles[3];
+		phd_PushMatrix();
+		phd_mxptr[M00] = lara_joint_matrices[node * 12 + M00];
+		phd_mxptr[M01] = lara_joint_matrices[node * 12 + M01];
+		phd_mxptr[M02] = lara_joint_matrices[node * 12 + M02];
+		phd_mxptr[M10] = lara_joint_matrices[node * 12 + M10];
+		phd_mxptr[M11] = lara_joint_matrices[node * 12 + M11];
+		phd_mxptr[M12] = lara_joint_matrices[node * 12 + M12];
+		phd_mxptr[M20] = lara_joint_matrices[node * 12 + M20];
+		phd_mxptr[M21] = lara_joint_matrices[node * 12 + M21];
+		phd_mxptr[M22] = lara_joint_matrices[node * 12 + M22];
+		phd_GetMatrixAngles(phd_mxptr, angles);
+		phd_PopMatrix();
+
+		return Vector3s(angles[0], angles[1], angles[2]);
+	}
+	
+	static void GetLaraJointPosRot(long node, Vector3f& pos, Vector3s& rot)
+	{
+		short angles[3];
+		long x = SaturateRound<long>(pos.x);
+		long y = SaturateRound<long>(pos.y);
+		long z = SaturateRound<long>(pos.z);
+
+		phd_PushMatrix();
+
+		phd_mxptr[M00] = lara_joint_matrices[node * 12 + M00];
+		phd_mxptr[M01] = lara_joint_matrices[node * 12 + M01];
+		phd_mxptr[M02] = lara_joint_matrices[node * 12 + M02];
+		phd_mxptr[M03] = lara_joint_matrices[node * 12 + M03];
+		phd_mxptr[M10] = lara_joint_matrices[node * 12 + M10];
+		phd_mxptr[M11] = lara_joint_matrices[node * 12 + M11];
+		phd_mxptr[M12] = lara_joint_matrices[node * 12 + M12];
+		phd_mxptr[M13] = lara_joint_matrices[node * 12 + M13];
+		phd_mxptr[M20] = lara_joint_matrices[node * 12 + M20];
+		phd_mxptr[M21] = lara_joint_matrices[node * 12 + M21];
+		phd_mxptr[M22] = lara_joint_matrices[node * 12 + M22];
+		phd_mxptr[M23] = lara_joint_matrices[node * 12 + M23];
+
+		phd_TranslateRel(x, y, z);
+		pos.x = phd_mxptr[M03] >> 14;
+		pos.y = phd_mxptr[M13] >> 14;
+		pos.z = phd_mxptr[M23] >> 14;
+		pos.x += lara_item->pos.xPos;
+		pos.y += lara_item->pos.yPos;
+		pos.z += lara_item->pos.zPos;
+
+		phd_GetMatrixAngles(phd_mxptr, angles);
+		rot.x = angles[0];
+		rot.y = angles[1];
+		rot.z = angles[2];
+
+		phd_PopMatrix();
+	}
+
+	Vector3s GetJointRot(Tr4ItemInfo* item, int joint)
+	{
+		if (!item->object_number)
+			return GetLaraJointRot(lara_joint_map[joint]);
+
+		return GetJointAbsRotation(item, joint);
+	}
+
+	void GetJointPosRot(Tr4ItemInfo* item, int joint, Vector3f& pos, Vector3s& rot)
+	{
+		if (!item->object_number)
+		{
+			GetLaraJointPosRot(lara_joint_map[joint], pos, rot);
+			return;
+		}
+
+		GetJointAbsPosRot(item, joint, pos, rot);
+	}
+
 	Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff)
 	{
-		static const uchar lara_joint_map[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 8 };
-
 		phd_vector v(xOff, yOff, zOff);
 
 		if (!item->object_number)
@@ -230,7 +574,7 @@ namespace Utilities
 		return Vector3f((float)v.x, (float)v.y, (float)v.z);
 	}
 
-	Vector3f RotatePoint3D(const Vector3f& point, short xrot, short yrot, short zrot)
+	Vector3f RotatePointByAngles(const Vector3f& point, short xrot, short yrot, short zrot)
 	{
 		Vector3f res;
 
@@ -244,6 +588,19 @@ namespace Utilities
 		phd_PopMatrix();
 
 		return res;
+	}
+
+	Vector3f RotatePointByAxisAngle(const Vector3f& point, const Vector3f& axis, short angle)
+	{
+		Vector3f u = axis.normalized();
+		float theta = ShortToRad(angle);
+
+		float sinTheta = sin(theta);
+		float cosTheta = cos(theta);
+
+		auto rotated = point * cosTheta + u.cross(point) * sinTheta + (u * u.dot(point)) * (1.0f - cosTheta);
+
+		return rotated;
 	}
 
 	Vector3f SphericalToCartesian(float r, float theta, float phi)
