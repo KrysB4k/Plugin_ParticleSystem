@@ -190,6 +190,13 @@ namespace Particles
 		void NewIndex(const char* field) final;
 	};
 
+	struct ModuleState final : public LuaTableObjectClass
+	{
+		static const char* Name();
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
+	};
+
 	struct Module final : public LuaObjectClass
 	{
 		static std::array<Module, MAX_MODULES> modules;
@@ -202,6 +209,7 @@ namespace Particles
 		// fields
 		ModuleGroups groups;
 		ModuleParameters parameters;
+		ModuleState state;
 		bool createdInCurrentModule;
 
 		static const char* Name();
@@ -240,6 +248,7 @@ namespace Particles
 		Vector3f	AbsPos();
 		void		Attach(int itemIndex, int node);
 		void		Detach();
+		void		Kill();
 		void		LimitSpeed(float maxSpeed);
 		bool		CollideWalls(bool bounce, float rebound);
 		bool		CollideFloors(bool bounce, float rebound, float minBounce, int collMargin, bool accurate);

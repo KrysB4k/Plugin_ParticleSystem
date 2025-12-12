@@ -605,9 +605,10 @@ int Script::StoreNewTable()
 	return luaL_ref(lua, LUA_REGISTRYINDEX);
 }
 
-void Script::DeleteTable(int reference)
+void Script::DeleteTable(int* reference)
 {
-	luaL_unref(lua, LUA_REGISTRYINDEX, reference);
+	luaL_unref(lua, LUA_REGISTRYINDEX, *reference);
+	*reference = LUA_REFNIL;
 }
 
 int Script::CloneTable(int reference)

@@ -532,6 +532,32 @@ namespace Particles
 		LuaObjectClass::NewIndex(field);
 	}
 
+	const char* ModuleState::Name()
+	{
+		return "SaveTable";
+	}
+
+	void ModuleState::Index(const char* field)
+	{
+		if (field)
+		{
+			Script::PushTableValue(table, field);
+			return;
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void ModuleState::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			CheckParticleData(-1);
+			Script::AssignTableValue(table, field, -1);
+			return;
+		}
+		LuaObjectClass::NewIndex(field);
+	}
+
 	const char* Module::Name()
 	{
 		return "Module";
@@ -558,6 +584,14 @@ namespace Particles
 					return;
 				}
 				break;
+
+			case 's':
+				if (!strcmp(field, "save"))
+				{
+					Script::PushData(&state);
+					return;
+				}
+				break;
 			}
 		}
 		LuaObjectClass::Index(field);
@@ -578,6 +612,13 @@ namespace Particles
 
 			case 'p':
 				if (!strcmp(field, "params"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+
+			case 's':
+				if (!strcmp(field, "save"))
 				{
 					ReadOnlyFieldError(field);
 				}
@@ -720,7 +761,7 @@ namespace Particles
 				if (!strcmp(field, "data"))
 				{
 					const auto& partData = *GetData<ParticleData>(-1);
-					Script::DeleteTable(data.table);
+					Script::DeleteTable(&data.table);
 					data.table = Script::CloneTable(partData.table);
 					return;
 				}

@@ -65,7 +65,7 @@ namespace Script
 	void AssignTableValue(int reference, const char* key, int argument);
 	const char* TableValueTypeName(int reference, const char* key);
 	int StoreNewTable();
-	void DeleteTable(int reference);
+	void DeleteTable(int* reference);
 	int CloneTable(int reference);
 	int TraverseReadTable(int reference, void* opaque, void (*process)(void*));
 	void TraverseAssignTable(int reference, int count, void* opaque, void (*process)(void*));

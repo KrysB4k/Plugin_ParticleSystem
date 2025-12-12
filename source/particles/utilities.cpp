@@ -478,9 +478,9 @@ namespace Utilities
 		rotVec.y = angles[1];
 		rotVec.z = angles[2];
 
-		pos.x = item->pos.xPos + (phd_mxptr[M03] >> 14);
-		pos.y = item->pos.yPos + (phd_mxptr[M13] >> 14);
-		pos.z = item->pos.zPos + (phd_mxptr[M23] >> 14);
+		pos.x = (float)(item->pos.xPos + (phd_mxptr[M03] >> 14));
+		pos.y = (float)(item->pos.yPos + (phd_mxptr[M13] >> 14));
+		pos.z = (float)(item->pos.zPos + (phd_mxptr[M23] >> 14));
 
 		phd_mxptr = mx;
 		IMptr = imx;
@@ -528,9 +528,9 @@ namespace Utilities
 		phd_mxptr[M23] = lara_joint_matrices[node * 12 + M23];
 
 		phd_TranslateRel(x, y, z);
-		pos.x = phd_mxptr[M03] >> 14;
-		pos.y = phd_mxptr[M13] >> 14;
-		pos.z = phd_mxptr[M23] >> 14;
+		pos.x = (float)(phd_mxptr[M03] >> 14);
+		pos.y = (float)(phd_mxptr[M13] >> 14);
+		pos.z = (float)(phd_mxptr[M23] >> 14);
 		pos.x += lara_item->pos.xPos;
 		pos.y += lara_item->pos.yPos;
 		pos.z += lara_item->pos.zPos;
