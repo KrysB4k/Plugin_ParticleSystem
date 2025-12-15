@@ -209,7 +209,7 @@ namespace Particles
 		// fields
 		ModuleGroups groups;
 		ModuleParameters parameters;
-		ModuleState state;
+		ModuleState data;
 		bool createdInCurrentModule;
 
 		static const char* Name();

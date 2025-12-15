@@ -268,7 +268,7 @@ namespace Particles
 			modules[free] = Module();
 			modules[free].groups.table = Script::StoreNewTable();
 			modules[free].parameters.table = Script::StoreNewTable();
-			modules[free].state.table = Script::StoreNewTable();
+			modules[free].data.table = Script::StoreNewTable();
 			return free;
 		}
 		return -1;

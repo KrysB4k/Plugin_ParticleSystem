@@ -534,7 +534,7 @@ namespace Particles
 
 	const char* ModuleState::Name()
 	{
-		return "SaveTable";
+		return "ModuleData";
 	}
 
 	void ModuleState::Index(const char* field)
@@ -569,6 +569,14 @@ namespace Particles
 		{
 			switch (field[0])
 			{
+			case 'd':
+				if (!strcmp(field, "data"))
+				{
+					Script::PushData(&data);
+					return;
+				}
+				break;
+
 			case 'g':
 				if (!strcmp(field, "groups"))
 				{
@@ -584,14 +592,6 @@ namespace Particles
 					return;
 				}
 				break;
-
-			case 's':
-				if (!strcmp(field, "save"))
-				{
-					Script::PushData(&state);
-					return;
-				}
-				break;
 			}
 		}
 		LuaObjectClass::Index(field);
@@ -603,6 +603,13 @@ namespace Particles
 		{
 			switch (field[0])
 			{
+			case 'd':
+				if (!strcmp(field, "data"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+
 			case 'g':
 				if (!strcmp(field, "groups"))
 				{
@@ -612,13 +619,6 @@ namespace Particles
 
 			case 'p':
 				if (!strcmp(field, "params"))
-				{
-					ReadOnlyFieldError(field);
-				}
-				break;
-
-			case 's':
-				if (!strcmp(field, "save"))
 				{
 					ReadOnlyFieldError(field);
 				}

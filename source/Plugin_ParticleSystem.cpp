@@ -250,12 +250,12 @@ void SaveModuleData(WORD** p2VetExtra, int* pNWords)
 
 	auto& moduleCount = *reinterpret_cast<short*>(moduleDataList.emplace_back(sizeof(short)).data());
 	moduleCount = 0;
-	for (int i = 0; i < Particles::Module::nextModule; i++)
+	for (const auto& module : Particles::Module::modules)
 	{
-		const auto& module = Particles::Module::modules[i];
-
+		if (moduleCount == Particles::Module::nextModule)
+			break;
 		auto& moduleDataCount = *reinterpret_cast<short*>(moduleDataList.emplace_back(sizeof(short)).data());
-		moduleDataCount = Script::TraverseReadTable(module.state.table, &moduleDataList, ReadData);
+		moduleDataCount = Script::TraverseReadTable(module.data.table, &moduleDataList, ReadData);
 		moduleCount++;
 	}
 	if (moduleCount > 0)
@@ -265,7 +265,7 @@ void SaveModuleData(WORD** p2VetExtra, int* pNWords)
 		for (auto it = moduleDataList.begin(); it != moduleDataList.end(); it++)
 			moduleData.insert(moduleData.end(), it->begin(), it->end());
 
-		AddNGToken(NGTAG_MODULE_SAVE_DATA, NO_ARRAY, moduleData.size(),
+		AddNGToken(NGTAG_MODULE_DATA, NO_ARRAY, moduleData.size(),
 			moduleData.data(), p2VetExtra, pNWords);
 	}
 }
@@ -373,7 +373,7 @@ void LoadModuleData(WORD* pData)
 		int moduleDataCount = *reinterpret_cast<short*>(ptr);
 		ptr += sizeof(short);
 
-		Script::TraverseAssignTable(Particles::Module::modules[i].state.table, moduleDataCount, &ptr, AssignData);
+		Script::TraverseAssignTable(Particles::Module::modules[i].data.table, moduleDataCount, &ptr, AssignData);
 	}
 }
 
@@ -606,7 +606,7 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 			LoadMeshParticlesData(ParseField.pData);
 			break;
 
-		case NGTAG_MODULE_SAVE_DATA:
+		case NGTAG_MODULE_DATA:
 			LoadModuleData(ParseField.pData);
 			break;
 		}
