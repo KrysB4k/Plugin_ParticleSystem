@@ -164,7 +164,7 @@ namespace Particles
 
 		nextPart = (free + 1) % parts.size();
 
-		Script::DeleteTable(parts[free].data.table);
+		Script::DeleteTable(&parts[free].data.table);
 		parts[free] = SpriteParticle();
 		parts[free].emitterIndex = NO_ITEM;
 		parts[free].emitterNode = NO_MESH;
@@ -224,7 +224,7 @@ namespace Particles
 
 		nextPart = (free + 1) % parts.size();
 
-		Script::DeleteTable(parts[free].data.table);
+		Script::DeleteTable(&parts[free].data.table);
 		parts[free] = MeshParticle();
 		parts[free].emitterIndex = NO_ITEM;
 		parts[free].emitterNode = NO_MESH;
@@ -268,6 +268,7 @@ namespace Particles
 			modules[free] = Module();
 			modules[free].groups.table = Script::StoreNewTable();
 			modules[free].parameters.table = Script::StoreNewTable();
+			modules[free].data.table = Script::StoreNewTable();
 			return free;
 		}
 		return -1;
@@ -389,7 +390,7 @@ namespace Particles
 					part->lifeCounter = part->lifeSpan;
 				else
 				{
-					Script::DeleteTable(part->data.table);
+					Script::DeleteTable(&part->data.table);
 					if (pgroup.partLimit)
 						pgroup.partCount--;
 				}
@@ -445,7 +446,7 @@ namespace Particles
 					part->lifeCounter = part->lifeSpan;
 				else
 				{
-					Script::DeleteTable(part->data.table);
+					Script::DeleteTable(&part->data.table);
 					if (pgroup.partLimit)
 						pgroup.partCount--;
 				}
@@ -762,6 +763,16 @@ namespace Particles
 		float speed = vel.magnitude();
 		if (speed > speedMax)
 			vel *= (speedMax / speed);
+	}
+
+
+	void BaseParticle::Kill()
+	{
+		Script::DeleteTable(&data.table);
+		lifeCounter = 0;
+		auto& group = ParticleGroup::groups[groupIndex];
+		if (group.partLimit)
+			group.partCount--;
 	}
 
 
@@ -1571,10 +1582,7 @@ namespace Particles
 
 		shatter.bit = 0;
 		shatter.flags = 0;
-		ShatterObject(&shatter, 0, -32, roomIndex, 0);
-
-		Script::DeleteTable(data.table);
-		lifeCounter = 0;
+		ShatterObject(&shatter, nullptr, -32, roomIndex, 0);
 	}
 
 

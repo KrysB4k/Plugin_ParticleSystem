@@ -574,7 +574,7 @@ namespace LuaFunctions
 			int offX = GetInteger(3);
 			int offY = GetInteger(4);
 			int offZ = GetInteger(5);
-			Vector3f pos(offX, offY, offZ);
+			Vector3f pos((float)offX, (float)offY, (float)offZ);
 			GetJointPosRot(item, joint, pos, rot);
 			ConstructManagedData<Vector3f>(pos.x, pos.y, pos.z);
 			ConstructManagedData<Vector3s>(rot.x, rot.y, rot.z);
@@ -845,7 +845,7 @@ namespace LuaFunctions
 			{
 				if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
 				{
-					Script::DeleteTable(part.data.table);
+					Script::DeleteTable(&part.data.table);
 					part.lifeCounter = 0;
 				}
 
@@ -854,7 +854,7 @@ namespace LuaFunctions
 			{
 				if (part.groupIndex == group->groupIndex && part.lifeCounter > 0)
 				{
-					Script::DeleteTable(part.data.table);
+					Script::DeleteTable(&part.data.table);
 					part.lifeCounter = 0;
 				}
 
@@ -939,6 +939,7 @@ namespace LuaFunctions
 		{
 			auto part = GetData<Particles::MeshParticle>(1);
 			part->Shatter();
+			part->Kill();
 			return 0;
 		}
 	};
@@ -1241,13 +1242,7 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
-			Script::DeleteTable(part->data.table);
-			part->lifeCounter = 0;
-
-			auto group = Particles::ParticleGroup::groups[part->groupIndex];
-			if (group.partLimit)
-				group.partCount--;
-
+			part->Kill();
 			return 0;
 		}
 	};

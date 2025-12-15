@@ -244,6 +244,32 @@ void SaveMeshParticles(WORD** p2VetExtra, int* pNWords)
 	}
 }
 
+void SaveModuleData(WORD** p2VetExtra, int* pNWords)
+{
+	std::list<std::vector<char>> moduleDataList;
+
+	auto& moduleCount = *reinterpret_cast<short*>(moduleDataList.emplace_back(sizeof(short)).data());
+	moduleCount = 0;
+	for (const auto& module : Particles::Module::modules)
+	{
+		if (moduleCount == Particles::Module::nextModule)
+			break;
+		auto& moduleDataCount = *reinterpret_cast<short*>(moduleDataList.emplace_back(sizeof(short)).data());
+		moduleDataCount = Script::TraverseReadTable(module.data.table, &moduleDataList, ReadData);
+		moduleCount++;
+	}
+	if (moduleCount > 0)
+	{
+		std::vector<char> moduleData;
+
+		for (auto it = moduleDataList.begin(); it != moduleDataList.end(); it++)
+			moduleData.insert(moduleData.end(), it->begin(), it->end());
+
+		AddNGToken(NGTAG_MODULE_DATA, NO_ARRAY, moduleData.size(),
+			moduleData.data(), p2VetExtra, pNWords);
+	}
+}
+
 void LoadSpriteParticles(WORD* pData)
 {
 	WORD TotParts;
@@ -334,6 +360,24 @@ void LoadMeshParticlesData(WORD* pData)
 	}
 }
 
+void LoadModuleData(WORD* pData)
+{
+	char* ptr;
+
+	ptr = reinterpret_cast<char*>(pData);
+
+	int moduleCount = *reinterpret_cast<short*>(ptr);
+	ptr += sizeof(short);
+	for (int i = 0; i < moduleCount; i++)
+	{
+		int moduleDataCount = *reinterpret_cast<short*>(ptr);
+		ptr += sizeof(short);
+
+		Script::TraverseAssignTable(Particles::Module::modules[i].data.table, moduleDataCount, &ptr, AssignData);
+	}
+}
+
+
 // ************  Patcher Functions section  ***************
 
 void Patch_00()
@@ -421,8 +465,6 @@ void cbInitLevel(int LevelNow, int LevelOld, DWORD FIL_Flags)
 	// here you can initialize specific items of currnet level.
 	// it will be called only once for level, when all items has been already initialized
 	// and just a moment before entering in main game cycle.
-
-	LoadLevelScripts();
 }
 
 // called everytime player save the game (but also when lara move from a level to another HUB saving). 
@@ -489,6 +531,7 @@ DWORD cbSaveMyData(BYTE **pAdrZone, int SavingType)
 
 		SaveSpriteParticles(&pVetExtras, &TotNWords);
 		SaveMeshParticles(&pVetExtras, &TotNWords);
+		SaveModuleData(&pVetExtras, &TotNWords);
 	}
 
 	if (SavingType & SAVT_GLOBAL_DATA) {
@@ -561,6 +604,10 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 
 		case NGTAG_MESH_PARTS_DATA:
 			LoadMeshParticlesData(ParseField.pData);
+			break;
+
+		case NGTAG_MODULE_DATA:
+			LoadModuleData(ParseField.pData);
 			break;
 		}
 		Indice= ParseField.NextIndex; 
@@ -901,7 +948,7 @@ void cbProgrActionMine(void)
 // this callback will be called at start of loading new level and a bit after having started to load level data
 void cbInitObjects(void) 
 {
-
+	LoadLevelScripts();
 }
 
 void* cbCloseGame(WORD PatchIndex, WORD CBT_Flags, bool TestFromJump, StrRegisters* pRegisters)
