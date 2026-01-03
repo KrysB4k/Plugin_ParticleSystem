@@ -13,6 +13,7 @@ using namespace Utilities;
 
 namespace LuaFunctions
 {
+	
 	struct AbsFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -87,12 +88,12 @@ namespace LuaFunctions
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL | FunctionType::FUNCTION_MODULE, "bindFunction");
 
-			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
+			int function = GetFunction(1);
+			int index = GetClampedInteger(2, 1, MAX_FUNCREFS, false) - 1;
 			auto funcRef = &Particles::BoundFunction::functionRefs[index];
 			if (funcRef->ref != SCRIPT_REFNIL)
-				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
-
-			funcRef->ref = GetFunction(2);
+				Script::Throw(FormatString("index= %d is already registered for a different bound function", index + 1));
+			funcRef->ref = function;
 			funcRef->type = FUNCTION_BIND;
 			return 0;
 		}
@@ -104,22 +105,19 @@ namespace LuaFunctions
 		{
 			CheckCaller(FunctionType::FUNCTION_LEVEL | FunctionType::FUNCTION_MODULE, "bindGroup");
 
-			int index = GetClampedInteger(1, 1, MAX_FUNCREFS, false) - 1;
-			if (Particles::BoundFunction::functionRefs[index].ref != SCRIPT_REFNIL)
-				Script::Throw(FormatString("index= %d is already registered for a different Lua function", index + 1));
-
-			auto funcRef = &Particles::BoundFunction::functionRefs[index];
-			auto group = GetData<Particles::ParticleGroup>(2);
+			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->autoTrigger)
 			{
 				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Error);
 				return 0;
 			}
-
+			int index = GetClampedInteger(2, 1, MAX_FUNCREFS, false) - 1;
+			auto funcRef = &Particles::BoundFunction::functionRefs[index];
+			if (funcRef->ref != SCRIPT_REFNIL)
+				Script::Throw(FormatString("index= %d is already registered for a different bound function", index + 1));
 			funcRef->ref = group->initIndex;
 			funcRef->type = FUNCTION_INIT;
 			return 0;
-			
 		}
 	};
 
@@ -173,7 +171,10 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto group = GetData<Particles::ParticleGroup>(1);
-			Script::PushBoolean((group->partCount < group->partLimit));
+			if (group->partLimit)
+				Script::PushBoolean((group->partCount < group->partLimit));
+			else
+				Script::PushBoolean(true);
 			return 1;
 		}
 	};
@@ -212,10 +213,17 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			float h = GetNumber(1);
-			float s = GetClampedNumber(2, 0.0f, 1.0f, false);
-			float v = GetClampedNumber(3, 0.0f, 1.0f, false);
-			ConstructManagedData<ColorRGB>(HSVtoRGB(h, s, v));
+			float sat = 1.0f;
+			float val = 1.0f;
+			int count = GetArgCount(1, 3);
+			float hue = GetNumber(1);
+
+			if (count > 1 && !Script::IsNil(2))
+				sat = GetClampedNumber(2, 0.0f, 1.0f, false);
+			if (count > 2 && !Script::IsNil(3))
+				val = GetClampedNumber(3, 0.0f, 1.0f, false);
+
+			ConstructManagedData<ColorRGB>(HSVtoRGB(hue, sat, val));
 			return 1;
 		}
 	};
@@ -436,9 +444,13 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			int count = GetArgCount(2, 3);
 			Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
 			float radius = GetNumber(2);
-			std::vector<short> slots(GetTable(3, false));
+			int tablesize = 0;
+			if (count > 2 && !Script::IsNil(3))
+				tablesize = GetTable(3, false);
+			std::vector<short> slots(tablesize);
 			for (ulong i = 0; i < slots.size(); i++)
 				slots[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
 			int target = FindNearestTarget(vec, radius, slots.data(), slots.size());
@@ -543,11 +555,18 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			int offX = 0, offY = 0, offZ = 0;
+			int count = GetArgCount(2, 5);
 			auto item = &items[VerifyItemIndex(1)];
 			int joint = GetClampedInteger(2, 0, objects[item->object_number].nmeshes - 1, false);
-			int offX = GetInteger(3);
-			int offY = GetInteger(4);
-			int offZ = GetInteger(5);
+			
+			if (count > 2 && !Script::IsNil(3))
+				offX = GetInteger(3);
+			if (count > 3 && !Script::IsNil(4))
+				offY = GetInteger(4);
+			if (count > 4 && !Script::IsNil(5))
+				offZ = GetInteger(5);
+
 			ConstructManagedData<Vector3f>(GetJointPos(item, joint, offX, offY, offZ));
 			return 1;
 		}
@@ -568,12 +587,19 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			int offX = 0, offY = 0, offZ = 0;
 			Vector3s rot;
+			int count = GetArgCount(2, 5);
 			auto item = &items[VerifyItemIndex(1)];
 			int joint = GetClampedInteger(2, 0, objects[item->object_number].nmeshes - 1, false);
-			int offX = GetInteger(3);
-			int offY = GetInteger(4);
-			int offZ = GetInteger(5);
+			
+			if (count > 2 && !Script::IsNil(3))
+				offX = GetInteger(3);
+			if (count > 3 && !Script::IsNil(4))
+				offY = GetInteger(4);
+			if (count > 4 && !Script::IsNil(5))
+				offZ = GetInteger(5);
+
 			Vector3f pos((float)offX, (float)offY, (float)offZ);
 			GetJointPosRot(item, joint, pos, rot);
 			ConstructManagedData<Vector3f>(pos.x, pos.y, pos.z);
@@ -1115,10 +1141,15 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			int framerate = 1;
+			int count = GetArgCount(3, 4);
 			auto part = GetData<Particles::BaseParticle>(1);
 			int start = GetInteger(2);
 			int end = GetInteger(3);
-			int framerate = GetInteger(4);
+
+			if (count > 3 && !Script::IsNil(4))
+				framerate = GetInteger(4);
+
 			part->Animate(start, end, framerate);
 			return 0;
 		}
@@ -1128,9 +1159,14 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			int node = -1;
+			int count = GetArgCount(2, 3);
 			auto part = GetData<Particles::BaseParticle>(1);
 			int index = VerifyItemIndex(2);
-			int node = GetClampedInteger(3, -1, objects[items[index].object_number].nmeshes - 1, false);
+			
+			if (count > 2 && !Script::IsNil(3))
+				node = GetClampedInteger(3, -1, objects[items[index].object_number].nmeshes - 1, false);
+
 			part->Attach(index, node);
 			return 0;
 		}
@@ -1141,10 +1177,10 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto part = GetData<Particles::BaseParticle>(1);
-			auto item = &items[VerifyItemIndex(2)];
+			auto vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 			float radius = GetNumber(3);
 			float factor = GetNumber(4);
-			part->vel = part->AttractToItem(item, radius, factor);
+			part->vel = part->AttractToItem(vec, radius, factor);
 			return 0;
 		}
 	};
@@ -1178,10 +1214,17 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			bool accurate = false;
+			int margin = 0;
+			int count = GetArgCount(2, 4);
 			auto part = GetData<Particles::BaseParticle>(1);
 			float rebound = GetClampedNumber(2, 0.0f, 1.0f, false);
-			int margin = GetInteger(3);
-			bool accurate = GetBoolean(4);
+			
+			if (count > 2 && !Script::IsNil(3))
+				margin = GetInteger(3);
+			if (count > 3 && !Script::IsNil(4))
+				accurate = GetBoolean(4);
+
 			Script::PushBoolean(part->CollideFloors(true, rebound, 1.0f, margin, accurate));
 			return 1;
 		}
@@ -1215,8 +1258,8 @@ namespace LuaFunctions
 			auto part = GetData<Particles::BaseParticle>(1);
 			Vector3f vect = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 			float maxSpeed = GetNumber(3);
-			float distInner = GetNumber(4);
-			float distOuter = GetNumber(5);
+			float distOuter = GetNumber(4);
+			float distInner = GetNumber(5);
 			part->vel = part->FollowTarget(vect, maxSpeed, distInner, distOuter);
 			return 0;
 		}
@@ -1226,12 +1269,19 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			float accel = 0.0f;
+			bool predict = false;
+			int count = GetArgCount(4, 6);
 			auto part = GetData<Particles::BaseParticle>(1);
 			auto item = &items[VerifyItemIndex(2)];
 			int node = item ? GetClampedInteger(3, 0, objects[item->object_number].nmeshes, false) : GetInteger(3);
 			float factor = GetNumber(4);
-			float accel = GetNumber(5);
-			bool predict = GetBoolean(6);
+
+			if (count > 4 && !Script::IsNil(5))
+				accel = GetNumber(5);
+			if (count > 5 && !Script::IsNil(6))
+				predict = GetBoolean(6);
+
 			part->TargetHoming(item, node, factor, accel, predict);
 			return 0;
 		}
@@ -1370,8 +1420,8 @@ namespace LuaFunctions
 		{
 			auto vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
 			auto xrot = RadToShort(GetNumber(2));
-			auto yrot = RadToShort(GetNumber(2));
-			auto zrot = RadToShort(GetNumber(2));
+			auto yrot = RadToShort(GetNumber(3));
+			auto zrot = RadToShort(GetNumber(4));
 			ConstructManagedData<Vector3f>(RotatePointByAngles(vec, xrot, yrot, zrot));
 			return 1;
 		}
@@ -1962,7 +2012,7 @@ namespace LuaFunctions
 			break;
 
 		case 'k':
-			if (!strcmp(field, "killPartsOfGroup"))
+			if (!strcmp(field, "killParts"))
 				return &KillPartsOfGroupFunc;
 			break;
 

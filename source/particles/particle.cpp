@@ -249,6 +249,7 @@ namespace Particles
 			nextGroup++;
 			groups[free] = ParticleGroup();
 			groups[free].groupIndex = free;
+			groups[free].renderDistance = DEFAULT_DRAWDIST;
 			groups[free].blendMode = BlendMode::BLEND_COLORADD;
 			groups[free].spriteSlot = SLOT_DEFAULT_SPRITES;
 			groups[free].autoTrigger = true;
@@ -477,6 +478,7 @@ namespace Particles
 	void SpriteParticle::DrawParts()
 	{
 		long viewCoords[12] = {};
+		long rgb[3] = {};
 		phd_vector verts[4] = {};
 		int x1 = 0, y1 = 0, z1 = 0;
 
@@ -496,6 +498,10 @@ namespace Particles
 
 			if (pgroup.drawMode == DrawMode::DRAW_NONE)
 				continue;
+
+			rgb[0] = part->colCust.R;
+			rgb[1] = part->colCust.G;
+			rgb[2] = part->colCust.B;
 
 			if (pgroup.screenSpace)
 			{
@@ -537,21 +543,35 @@ namespace Particles
 				if (pgroup.lightMode == LightMode::LIGHT_DYNAMIC)
 				{
 					const auto col = CalculateVertexDynamicLighting(x1, y1, z1);
-					part->colCust.R = Clamp(part->colCust.R + col.R, 0, 255);
-					part->colCust.G = Clamp(part->colCust.G + col.G, 0, 255);
-					part->colCust.B = Clamp(part->colCust.B + col.B, 0, 255);
+					rgb[0] = Clamp(rgb[0] + col.R, 0, 255);
+					rgb[1] = Clamp(rgb[1] + col.G, 0, 255);
+					rgb[2] = Clamp(rgb[2] + col.B, 0, 255);
 				}
 
 				x1 -= lara_item->pos.xPos;
 				y1 -= lara_item->pos.yPos;
 				z1 -= lara_item->pos.zPos;
+				int xabs = abs(x1);
+				int yabs = abs(y1);
+				int zabs = abs(z1);
 
-				if (x1 < -MAX_DRAWDIST || x1 > MAX_DRAWDIST ||
-					y1 < -MAX_DRAWDIST || y1 > MAX_DRAWDIST ||
-					z1 < -MAX_DRAWDIST || z1 > MAX_DRAWDIST)
+				if (xabs > pgroup.renderDistance ||
+					yabs > pgroup.renderDistance ||
+					zabs > pgroup.renderDistance)
 				{
 					continue;
 				}
+
+				long fadeFactor = 256;
+
+				int fadeThreshold = pgroup.renderDistance * 3 / 4;
+				int fadeDist = max(xabs, max(yabs, zabs)) - fadeThreshold;
+				if (fadeDist > 0)
+					fadeFactor -= (fadeDist << 10) / pgroup.renderDistance;;
+
+				rgb[0] = (rgb[0] * fadeFactor) >> 8;
+				rgb[1] = (rgb[1] * fadeFactor) >> 8;
+				rgb[2] = (rgb[2] * fadeFactor) >> 8;
 
 				long result[3] = { 0, 0, 0 };
 
@@ -675,7 +695,7 @@ namespace Particles
 			long minSize = 4;
 
 			// draw the particle to the given screen coordinates
-			part->DrawSpritePart(pgroup, viewCoords, minSize);
+			part->DrawSpritePart(pgroup, viewCoords, rgb, minSize);
 
 		}
 
@@ -685,8 +705,10 @@ namespace Particles
 
 	void MeshParticle::DrawParts()
 	{
-		auto part = &parts[0];
+		const long oldAlpha = GlobalAlpha;
 
+		auto part = &parts[0];
+		
 		for (ulong i = 0; i < parts.size(); ++i, ++part)
 		{
 			if (part->lifeCounter > 0)
@@ -697,6 +719,8 @@ namespace Particles
 					part->DrawMeshPart();
 			}
 		}
+
+		GlobalAlpha = oldAlpha;
 	}
 
 
@@ -1013,10 +1037,9 @@ namespace Particles
 
 	bool BaseParticle::TargetHoming(Tr4ItemInfo* item, int targetNode, float homingFactor, float homingAccel, bool predict)
 	{
-		if (!item)
-			return false;
-
-		auto targetPos = GetJointPos(item, targetNode, 0, 0, 0);
+		Vector3f targetPos = Vector3f((float)item->pos.xPos, (float)item->pos.yPos, (float)item->pos.zPos);
+		if (targetNode >= 0)
+			targetPos = GetJointPos(item, targetNode, 0, 0, 0);
 
 		if (predict)
 		{
@@ -1078,16 +1101,13 @@ namespace Particles
 	}
 
 
-	Vector3f BaseParticle::AttractToItem(Tr4ItemInfo* item, float radius, float factor)
+	Vector3f BaseParticle::AttractToItem(const Vector3f& ipos, float radius, float factor)
 	{
 		Vector3f v;
 
-		Vector3f ipos((float)item->pos.xPos, (float)item->pos.yPos, (float)item->pos.zPos);
-
-		if (SimpleDist(ipos, pos) < radius)
+		if (CheckDistFast(ipos, pos, radius) < 0)
 		{
 			float dist = RealDist(ipos, pos);
-
 			if (dist < radius)
 				v = (ipos - pos) * (1 / dist) * factor;
 		}
@@ -1132,11 +1152,8 @@ namespace Particles
 			if (part->groupIndex != groupIndex)
 				continue;
 
-			if (SimpleDist(pos, part->pos) < radius)
-			{
-				if (CheckDistFast(pos, part->pos, radius) < 0)
-					v -= (part->pos - pos);
-			}
+			if (CheckDistFast(pos, part->pos, radius) < 0)
+				v -= (part->pos - pos);
 		}
 
 		return v * factor;
@@ -1157,13 +1174,10 @@ namespace Particles
 			if (part->groupIndex != groupIndex)
 				continue;
 
-			if (SimpleDist(pos, part->pos) < radius)
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
-				if (CheckDistFast(pos, part->pos, radius) < 0)
-				{
-					v += part->pos;
-					++neighbors;
-				}
+				v += part->pos;
+				++neighbors;
 			}
 		}
 
@@ -1191,13 +1205,10 @@ namespace Particles
 			if (part->groupIndex != groupIndex)
 				continue;
 
-			if (SimpleDist(pos, part->pos) < radius)
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
-				if (CheckDistFast(pos, part->pos, radius) < 0)
-				{
-					v += part->vel;
-					++neighbors;
-				}
+				v += part->vel;
+				++neighbors;
 			}
 		}
 
@@ -1211,7 +1222,7 @@ namespace Particles
 	}
 
 
-	void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size)
+	void SpriteParticle::DrawSpritePart(const ParticleGroup& pgroup, long* const view, long* rgb, long smallest_size)
 	{
 		long z1 = view[2];
 		D3DTLVERTEX v[4];
@@ -1221,29 +1232,27 @@ namespace Particles
 		if (z1 >= 0x5000)
 			return;
 
-		int cR = colCust.R;
-		int cG = colCust.G;
-		int cB = colCust.B;
+		int cR = rgb[0];
+		int cG = rgb[1];
+		int cB = rgb[2];
 
 		if (fadeIn)
 		{
 			int lifeDif = lifeSpan - lifeCounter;
 			if (lifeDif < fadeIn)
 			{
-				float s = lifeDif / float(fadeIn);
-				cR = SaturateRound<uchar>(Lerp(0.0f, (float)cR, s));
-				cG = SaturateRound<uchar>(Lerp(0.0f, (float)cG, s));
-				cB = SaturateRound<uchar>(Lerp(0.0f, (float)cB, s));
+				cR = cR * lifeDif / fadeIn;
+				cG = cG * lifeDif / fadeIn;
+				cB = cB * lifeDif / fadeIn;
 			}
 		}
 		if (fadeOut)
 		{
 			if (lifeCounter < fadeOut)
 			{
-				float s = lifeCounter / float(fadeOut);
-				cR = SaturateRound<uchar>(Lerp(0.0f, (float)cR, s));
-				cG = SaturateRound<uchar>(Lerp(0.0f, (float)cG, s));
-				cB = SaturateRound<uchar>(Lerp(0.0f, (float)cB, s));
+				cR = cR * lifeCounter / fadeOut;
+				cG = cG * lifeCounter / fadeOut;
+				cB = cB * lifeCounter / fadeOut;
 			}
 		}
 
@@ -1335,11 +1344,9 @@ namespace Particles
 		}
 		else
 		{
-			float size;
+			float size = sizeCust;
 
-			if (pgroup.screenSpace)
-				size = sizeCust;
-			else
+			if (!pgroup.screenSpace && !pgroup.ignorePerspective)
 			{
 				size = phd_persp * sizeCust / float(z1);
 
@@ -1599,11 +1606,8 @@ namespace Particles
 			if (part->groupIndex != groupIndex)
 				continue;
 
-			if (SimpleDist(pos, part->pos) < radius)
-			{
-				if (CheckDistFast(pos, part->pos, radius) < 0)
-					v -= (part->pos - pos);
-			}
+			if (CheckDistFast(pos, part->pos, radius) < 0)
+				v -= (part->pos - pos);
 		}
 
 		return v * factor;
@@ -1624,13 +1628,10 @@ namespace Particles
 			if (part->groupIndex != groupIndex)
 				continue;
 
-			if (SimpleDist(pos, part->pos) < radius)
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
-				if (CheckDistFast(pos, part->pos, radius) < 0)
-				{
-					v += part->pos;
-					++neighbors;
-				}
+				v += part->pos;
+				++neighbors;
 			}
 		}
 
@@ -1658,13 +1659,10 @@ namespace Particles
 			if (part->groupIndex != groupIndex)
 				continue;
 
-			if (SimpleDist(pos, part->pos) < radius)
+			if (CheckDistFast(pos, part->pos, radius) < 0)
 			{
-				if (CheckDistFast(pos, part->pos, radius) < 0)
-				{
-					v += part->vel;
-					++neighbors;
-				}
+				v += part->vel;
+				++neighbors;
 			}
 		}
 
@@ -1684,13 +1682,13 @@ namespace Particles
 
 		const auto& pgroup = ParticleGroup::groups[groupIndex];
 
-		int testx = projPos.x - lara_item->pos.xPos;
-		int testy = projPos.y - lara_item->pos.yPos;
-		int testz = projPos.z - lara_item->pos.zPos;
+		int testx = abs(projPos.x - lara_item->pos.xPos);
+		int testy = abs(projPos.y - lara_item->pos.yPos);
+		int testz = abs(projPos.z - lara_item->pos.zPos);
 
-		if (testx < -MAX_DRAWDIST || testx > MAX_DRAWDIST ||
-			testy < -MAX_DRAWDIST || testy > MAX_DRAWDIST ||
-			testz < -MAX_DRAWDIST || testz > MAX_DRAWDIST)
+		if (testx > pgroup.renderDistance ||
+			testy > pgroup.renderDistance ||
+			testz > pgroup.renderDistance)
 		{
 			return;
 		}
@@ -1712,10 +1710,17 @@ namespace Particles
 			int meshindex = objects[object].mesh_index + (mesh * 2);
 			auto meshpp = &meshes[meshindex];
 
-			long oldAlpha = GlobalAlpha;
+			long alpha = 255 - transparency;
 
-			if (transparency)
-				GlobalAlpha = (255 - transparency) << 24;
+			int fadeThreshold = pgroup.renderDistance * 3 / 4;
+			int fadeDist = max(testx, max(testy, testz)) - fadeThreshold;
+			if (fadeDist > 0)
+			{
+				int fadeFactor = (fadeDist << 10) / pgroup.renderDistance;
+				alpha = ((alpha * (256 - fadeFactor)) >> 8);
+			}
+
+			GlobalAlpha = alpha << 24;
 
 			item.pos.xPos = SaturateRound<int>(pos.x);
 			item.pos.yPos = SaturateRound<int>(pos.y);
@@ -1737,7 +1742,6 @@ namespace Particles
 			CalculateObjectLighting(&item, frame);
 
 			phd_PutPolygons(*meshpp, -1);
-			GlobalAlpha = oldAlpha;
 		}
 
 		phd_PopMatrix();

@@ -194,6 +194,8 @@ namespace Utilities
 			auto item = &items[i];
 
 			bool slotCheck = false;
+			if (!count)
+				slotCheck = true;
 
 			for (int j = 0; j < count; ++j)
 			{

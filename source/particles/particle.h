@@ -157,6 +157,8 @@ namespace Particles
 		ushort groupIndex;
 		short spriteSlot;
 
+		int renderDistance;
+
 		int partLimit;
 		mutable int partCount;
 
@@ -169,6 +171,7 @@ namespace Particles
 		bool saved;
 		bool screenSpace;
 		bool lineIgnoreVel;
+		bool ignorePerspective;
 
 		// lua integration
 		static const char* Name();
@@ -256,7 +259,7 @@ namespace Particles
 		bool		TargetHoming(Tr4ItemInfo* item, int targetNode, float homingFactor, float homingAccel, bool predict);
 		Vector3f	FollowTarget(const Vector3f& v, float maxSpeed, float distInner, float distOuter);
 		Vector3f	WindVelocities(float factor);
-		Vector3f	AttractToItem(Tr4ItemInfo* item, float radius, float factor);
+		Vector3f	AttractToItem(const Vector3f& v, float radius, float factor);
 		Vector3f	AvoidRoomGeometry(int wallMargin, int floorMargin, float factor);
 		virtual void Animate(int start, int end, int frameRate) = 0;
 
@@ -306,7 +309,7 @@ namespace Particles
 		void Animate(int start, int end, int frameRate) final;
 
 		// draw function
-		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long smallest_size);
+		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long* rgb, long smallest_size);
 
 		// boid-specific
 		Vector3f BoidSeparationRule(float radius, float factor);
