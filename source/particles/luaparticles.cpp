@@ -324,6 +324,11 @@ namespace Particles
 			break;
 
 		case 'i':
+			if (!strcmp(field, "ignorePerspective"))
+			{
+				Script::PushBoolean(ignorePerspective);
+				return;
+			}
 			if (!strcmp(field, "immortal"))
 			{
 				Script::PushBoolean(immortal);
@@ -353,6 +358,14 @@ namespace Particles
 			if (!strcmp(field, "partLimit"))
 			{
 				Script::PushInteger(partLimit);
+				return;
+			}
+			break;
+
+		case 'r':
+			if (!strcmp(field, "renderDistance"))
+			{
+				Script::PushInteger((renderDistance >> 10));
 				return;
 			}
 			break;
@@ -413,6 +426,11 @@ namespace Particles
 				break;
 
 			case 'i':
+				if (!strcmp(field, "ignorePerspective"))
+				{
+					ignorePerspective = GetBoolean(-1);
+					return;
+				}
 				if (!strcmp(field, "immortal"))
 				{
 					immortal = GetBoolean(-1);
@@ -429,6 +447,14 @@ namespace Particles
 				if (!strcmp(field, "lineIgnoreVel"))
 				{
 					lineIgnoreVel = GetBoolean(-1);
+					return;
+				}
+				break;
+
+			case 'r':
+				if (!strcmp(field, "renderDistance"))
+				{
+					renderDistance = GetClampedInteger(-1, 1, 128) * 1024;
 					return;
 				}
 				break;
@@ -862,7 +888,7 @@ namespace Particles
 					Script::PushData(&colStart);
 					return;
 				}
-				if (!strcmp(field, "colorFadeTime"))
+				if (!strcmp(field, "colFadeTime"))
 				{
 					Script::PushInteger(colorFadeTime);
 					return;
@@ -960,7 +986,7 @@ namespace Particles
 					colStart = *GetData<ColorRGB>(-1);
 					return;
 				}
-				if (!strcmp(field, "colorFadeTime"))
+				if (!strcmp(field, "colFadeTime"))
 				{
 					colorFadeTime = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;

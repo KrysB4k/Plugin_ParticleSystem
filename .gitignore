@@ -68,3 +68,9 @@ ipch/
 *.cachefile
 *.VC.db
 *.VC.VC.opendb
+
+# LDoc config and generated doc files
+*.css
+*.html
+*.ld
+*.lua

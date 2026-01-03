@@ -141,7 +141,7 @@ namespace LuaGlobals
 				}
 				break;
 			case 's':
-				if (!strcmp(field, "slotNumber"))
+				if (!strcmp(field, "slot"))
 				{
 					Script::PushInteger(itemptr->object_number);
 					return;
@@ -296,6 +296,10 @@ namespace LuaGlobals
 				}
 				break;
 			case 's':
+				if (!strcmp(field, "slot"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				if (!strcmp(field, "speed"))
 				{
 					itemptr->speed = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
@@ -480,6 +484,73 @@ namespace LuaGlobals
 				return std::optional(LogLevel::LOG_INFO);
 			if (!strcmp(field, "LOG_WARN"))
 				return std::optional(LogLevel::LOG_WARN);
+			break;
+
+		case 'M':
+			if (!strcmp(field, "MESH0"))
+				return std::optional(1 << 0);
+			if (!strcmp(field, "MESH1"))
+				return std::optional(1 << 1);
+			if (!strcmp(field, "MESH2"))
+				return std::optional(1 << 2);
+			if (!strcmp(field, "MESH3"))
+				return std::optional(1 << 3);
+			if (!strcmp(field, "MESH4"))
+				return std::optional(1 << 4);
+			if (!strcmp(field, "MESH5"))
+				return std::optional(1 << 5);
+			if (!strcmp(field, "MESH6"))
+				return std::optional(1 << 6);
+			if (!strcmp(field, "MESH7"))
+				return std::optional(1 << 7);
+			if (!strcmp(field, "MESH8"))
+				return std::optional(1 << 8);
+			if (!strcmp(field, "MESH9"))
+				return std::optional(1 << 9);
+			if (!strcmp(field, "MESH10"))
+				return std::optional(1 << 10);
+			if (!strcmp(field, "MESH11"))
+				return std::optional(1 << 11);
+			if (!strcmp(field, "MESH12"))
+				return std::optional(1 << 12);
+			if (!strcmp(field, "MESH13"))
+				return std::optional(1 << 13);
+			if (!strcmp(field, "MESH14"))
+				return std::optional(1 << 14);
+			if (!strcmp(field, "MESH15"))
+				return std::optional(1 << 15);
+			if (!strcmp(field, "MESH16"))
+				return std::optional(1 << 16);
+			if (!strcmp(field, "MESH17"))
+				return std::optional(1 << 17);
+			if (!strcmp(field, "MESH18"))
+				return std::optional(1 << 18);
+			if (!strcmp(field, "MESH19"))
+				return std::optional(1 << 19);
+			if (!strcmp(field, "MESH20"))
+				return std::optional(1 << 20);
+			if (!strcmp(field, "MESH21"))
+				return std::optional(1 << 21);
+			if (!strcmp(field, "MESH22"))
+				return std::optional(1 << 22);
+			if (!strcmp(field, "MESH23"))
+				return std::optional(1 << 23);
+			if (!strcmp(field, "MESH24"))
+				return std::optional(1 << 24);
+			if (!strcmp(field, "MESH25"))
+				return std::optional(1 << 25);
+			if (!strcmp(field, "MESH26"))
+				return std::optional(1 << 26);
+			if (!strcmp(field, "MESH27"))
+				return std::optional(1 << 27);
+			if (!strcmp(field, "MESH28"))
+				return std::optional(1 << 28);
+			if (!strcmp(field, "MESH29"))
+				return std::optional(1 << 29);
+			if (!strcmp(field, "MESH30"))
+				return std::optional(1 << 30);
+			if (!strcmp(field, "MESH31"))
+				return std::optional(1 << 31);
 			break;
 
 		case 'N':
