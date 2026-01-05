@@ -18,7 +18,9 @@
 #pragma warning( disable : 4996)
 
 // ************  Early function declarations ************
-
+extern "C" __declspec(dllexport) void ControlParticles(void);
+extern "C" __declspec(dllexport) void DrawParticles(void);
+extern "C" __declspec(dllexport) void GameCleanup(void);
 
 // ************  Global Variables Section *************
 
@@ -39,7 +41,7 @@ bool GlobalScriptIntegrityDefined, GlobalScriptIntegrity, LocalScriptIntegrityDe
 
 //#define DIAGNOSTICS
 
-void ControlParticles()
+void ControlParticles(void)
 {
 #ifdef DIAGNOSTICS
 	Diagnostics::initTime = Diagnostics::Time(Particles::InitParts);
@@ -50,7 +52,7 @@ void ControlParticles()
 #endif
 }
 
-void DrawParticles()
+void DrawParticles(void)
 {
 #ifdef DIAGNOSTICS
 	Diagnostics::drawTime = Diagnostics::Time(Particles::DrawParts);
@@ -951,10 +953,15 @@ void cbInitObjects(void)
 	LoadLevelScripts();
 }
 
-void* cbCloseGame(WORD PatchIndex, WORD CBT_Flags, bool TestFromJump, StrRegisters* pRegisters)
+void GameCleanup(void)
 {
 	CloseLevel();
 	CloseGame();
+}
+
+void* cbCloseGame(WORD PatchIndex, WORD CBT_Flags, bool TestFromJump, StrRegisters* pRegisters)
+{
+	GameCleanup();
 	return nullptr;
 }
 
