@@ -31,7 +31,6 @@ namespace Utilities
 	ColorRGB Lerp(const ColorRGB& C1, const ColorRGB& C2, float t);
 	ColorRGB HSVtoRGB(float hue, float sat, float val);
 	long TestCollisionSpheres(Tr4ItemInfo* item, const Vector3f& posTest, float radius);
-	int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count);
 	Vector3s GetJointRot(Tr4ItemInfo* item, int joint);
 	Vector3f GetJointPos(Tr4ItemInfo* item, int joint, int xOff, int yOff, int zOff);
 	void GetJointPosRot(Tr4ItemInfo* item, int joint, Vector3f& pos, Vector3s& rot);

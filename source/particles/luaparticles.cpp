@@ -238,7 +238,7 @@ namespace Particles
 				break;
 
 			case 't':
-				if (!strcmp(field, "tether"))
+				if (!strcmp(field, "tetherType"))
 				{
 					Script::PushInteger(tether);
 					return;
@@ -274,9 +274,9 @@ namespace Particles
 				break;
 
 			case 't':
-				if (!strcmp(field, "tether"))
+				if (!strcmp(field, "tetherType"))
 				{
-					tether = static_cast<TetherType>(GetClampedInteger(-1, TetherType::TETHER_ROTATING, TetherType::TETHER_NONE, false));
+					tether = static_cast<TetherType>(GetClampedInteger(-1, TetherType::TETHER_ROTATING, TetherType::TETHER_ABSTRACT, false));
 					return;
 				}
 				break;
@@ -560,7 +560,7 @@ namespace Particles
 
 	const char* ModuleState::Name()
 	{
-		return "ModuleData";
+		return "Data";
 	}
 
 	void ModuleState::Index(const char* field)
@@ -577,7 +577,7 @@ namespace Particles
 	{
 		if (field)
 		{
-			CheckParticleData(-1);
+			CheckModuleData(-1);
 			Script::AssignTableValue(table, field, -1);
 			return;
 		}
@@ -586,7 +586,7 @@ namespace Particles
 
 	const char* Module::Name()
 	{
-		return "Module";
+		return "ModuleContext";
 	}
 
 	void Module::Index(const char* field)

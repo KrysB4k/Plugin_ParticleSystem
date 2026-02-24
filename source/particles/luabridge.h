@@ -207,6 +207,7 @@ namespace LuaHelpers
 	const char* GetBoundedLuaString(int argument, unsigned int length);
 	void RequireModule(int argument);
 	void CheckModuleParameter(int argument);
+	void CheckModuleData(int argument);
 	void CheckParticleData(int argument);
 	Particles::BoundFunction* GetBoundFunction(int index);
 	bool GetScriptIntegrity();

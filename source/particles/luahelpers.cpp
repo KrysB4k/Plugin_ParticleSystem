@@ -245,6 +245,12 @@ namespace LuaHelpers
 			Script::Throw("boolean, number or string expected");
 	}
 
+	void CheckModuleData(int argument)
+	{
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsInteger(argument) && !Script::IsNil(argument))
+			Script::Throw("boolean, number or nil expected");
+	}
+
 	void CheckParticleData(int argument)
 	{
 		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsInteger(argument) && !Script::IsNil(argument))

@@ -185,45 +185,6 @@ namespace Utilities
 		return flags;
 	}
 
-	int FindNearestTarget(const Vector3f& posTest, float radius, short* const slotList, int count)
-	{
-		int itemIndex = NO_ITEM;
-
-		for (int i = 0; i < level_items; ++i)
-		{
-			auto item = &items[i];
-
-			bool slotCheck = false;
-			if (!count)
-				slotCheck = true;
-
-			for (int j = 0; j < count; ++j)
-			{
-				if (slotList[j] == item->object_number)
-				{
-					slotCheck = true;
-					break;
-				}
-			}
-
-			if (slotCheck)
-			{
-				if (objects[item->object_number].intelligent && item->hit_points <= 0)
-					continue;
-
-				Vector3f target((float)item->pos.xPos, (float)item->pos.yPos, (float)item->pos.zPos);
-
-				if (CheckDistFast(posTest, target, radius) < 0)
-				{
-					radius = RealDist(posTest, target);
-					itemIndex = i;
-				}
-			}
-		}
-
-		return itemIndex;
-	}
-
 	static inline short phd_sin(long angle)
 	{
 		angle >>= 3;

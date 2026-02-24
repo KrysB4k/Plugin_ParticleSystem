@@ -440,24 +440,54 @@ namespace LuaFunctions
 		}
 	};
 
-	struct FindNearestTargetFunction final : public LuaObjectFunction
+	struct FindNearbyItemsFunction final : public LuaObjectFunction
 	{
 		int Call() final
 		{
 			int count = GetArgCount(2, 3);
 			Vector3f vec = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(1));
 			float radius = GetNumber(2);
-			int tablesize = 0;
+			int length = 0;
 			if (count > 2 && !Script::IsNil(3))
-				tablesize = GetTable(3, false);
-			std::vector<short> slots(tablesize);
+				length = GetTable(3, false);
+
+			std::vector<short> slots(length);
 			for (ulong i = 0; i < slots.size(); i++)
 				slots[i] = GetClampedInteger(i + 4, SLOT_LARA, SLOT_NEW_SLOT18, true);
-			int target = FindNearestTarget(vec, radius, slots.data(), slots.size());
-			if (target != NO_ITEM)
-				Script::PushInteger(target);
-			else
-				Script::PushNil();
+
+			int elements = 0;
+			for (int i = 0; i < level_items; ++i)
+			{
+				const auto& item = items[i];
+				bool matched = false;
+				if (slots.size())
+				{
+					for (const auto& j : slots)
+					{
+						matched = (item.object_number == j);
+						if (matched) break;
+					}
+				}
+				else
+					matched = true;
+
+				if (matched)
+				{
+					Vector3f posItem((float)item.pos.xPos, (float)item.pos.yPos, (float)item.pos.zPos);
+					if (CheckDistFast(vec, posItem, radius) < 0)
+					{
+						Script::PushInteger(i);
+						elements++;
+						if (elements >= 128)
+						{
+							Script::EmitFailure("Exceeded list length of found items (128 entries)", Logger::Warning);
+							break;
+						}	
+					}
+				}
+			}
+
+			Script::PushTable(count + length + 1, elements);
 			return 1;
 		}
 	};
@@ -845,7 +875,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			CheckCaller(FunctionType::FUNCTION_BIND, "invokeInit");
+			//CheckCaller(FunctionType::FUNCTION_BIND, "invokeInit");
 			Particles::CallerGuard guard(FUNCTION_INIT);
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->autoTrigger)
@@ -1781,7 +1811,7 @@ namespace LuaFunctions
 	DistanceFunction DistanceFunc;
 	DistCompareFunction DistCompareFunc;
 	ExpFunction ExpFunc;
-	FindNearestTargetFunction FindNearestTargetFunc;
+	FindNearbyItemsFunction FindNearbyItemsFunc;
 	FloorFunction FloorFunc;
 	FmodFunction FmodFunc;
 	GetCeilingHeightFunction GetCeilingHeightFunc;
@@ -1946,10 +1976,10 @@ namespace LuaFunctions
 			break;
 
 		case 'f':
-			if (!strcmp(field, "findNearestItem"))
-				return &FindNearestTargetFunc;
+			if (!strcmp(field, "findNearbyItems"))
+				return &FindNearbyItemsFunc;
 			if (!strcmp(field, "floor"))
-				return &FindNearestTargetFunc;
+				return &FloorFunc;
 			if (!strcmp(field, "fmod"))
 				return &FmodFunc;
 			break;

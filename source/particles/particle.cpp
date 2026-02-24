@@ -805,7 +805,7 @@ namespace Particles
 		auto absPos = pos;
 		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
-		if (tether != TetherType::TETHER_NONE && emitterIndex >= 0 && emitterIndex < level_items)
+		if (tether != TetherType::TETHER_ABSTRACT && emitterIndex >= 0 && emitterIndex < level_items)
 		{
 			auto item = &items[emitterIndex];
 
@@ -844,7 +844,7 @@ namespace Particles
 		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 		Vector3f relPos;
 
-		if (tether != TetherType::TETHER_NONE)
+		if (tether != TetherType::TETHER_ABSTRACT)
 		{
 			if (node >= 0)
 			{
@@ -875,7 +875,13 @@ namespace Particles
 	void BaseParticle::Detach()
 	{
 		pos = AbsPos();
-
+		if (emitterIndex >= 0 && emitterIndex < level_items)
+		{
+			const auto& item = items[emitterIndex];
+			const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
+			if (tether == TetherType::TETHER_ROTATING)
+				vel = RotatePointByAngles(vel, item.pos.xRot, item.pos.yRot, item.pos.zRot);
+		}
 		emitterIndex = NO_ITEM;
 		emitterNode = NO_MESH;
 	}
@@ -885,7 +891,7 @@ namespace Particles
 	{
 		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
-		if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
+		if (tether == TetherType::TETHER_ABSTRACT || emitterIndex < 0)
 		{
 			auto testp = RoundPos(pos + vel);
 			auto p = RoundPos(pos);
@@ -928,7 +934,7 @@ namespace Particles
 	{
 		const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 
-		if (tether == TetherType::TETHER_NONE || emitterIndex < 0)
+		if (tether == TetherType::TETHER_ABSTRACT || emitterIndex < 0)
 		{
 			if (minBounce < 0)
 				minBounce = 0.0f;

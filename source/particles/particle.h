@@ -114,7 +114,7 @@ namespace Particles
 	{
 		TETHER_ROTATING,
 		TETHER_STATIC,
-		TETHER_NONE
+		TETHER_ABSTRACT
 	};
 
 	enum DrawMode
@@ -274,7 +274,7 @@ namespace Particles
 		void NewIndex(const char* field) override;
 	};
 
-	struct SpriteParticle : public BaseParticle
+	struct SpriteParticle final : public BaseParticle
 	{
 		static std::array<SpriteParticle, MAX_SPRITEPARTS> parts;
 		static int nextPart;
@@ -312,9 +312,9 @@ namespace Particles
 		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long* rgb, long smallest_size);
 
 		// boid-specific
-		Vector3f BoidSeparationRule(float radius, float factor);
-		Vector3f BoidCohesionRule(float radius, float factor);
-		Vector3f BoidAlignmentRule(float radius, float factor);
+		Vector3f BoidSeparationRule(float radius, float factor) final;
+		Vector3f BoidCohesionRule(float radius, float factor) final;
+		Vector3f BoidAlignmentRule(float radius, float factor) final;
 
 		// lua integration
 		static const char* Name();
