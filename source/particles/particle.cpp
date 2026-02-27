@@ -175,7 +175,10 @@ namespace Particles
 	void SpriteParticle::ClearParts()
 	{
 		for (auto& part : parts)
+		{
+			Script::DeleteTable(&part.data.table);
 			part = SpriteParticle();
+		}
 		nextPart = 0;
 	}
 
@@ -235,7 +238,10 @@ namespace Particles
 	void MeshParticle::ClearParts()
 	{
 		for (auto& part : parts)
+		{
+			Script::DeleteTable(&part.data.table);
 			part = MeshParticle();
+		}
 		nextPart = 0;
 	}
 
@@ -280,12 +286,6 @@ namespace Particles
 		return nextModule - 1;
 	}
 
-	void ClearParts()
-	{
-		SpriteParticle::ClearParts();
-		MeshParticle::ClearParts();
-	}
-
 	void ParticleGroup::ClearGroups()
 	{
 		for (auto& group : groups)
@@ -296,7 +296,12 @@ namespace Particles
 	void Module::ClearModules()
 	{
 		for (auto& module : modules)
+		{
+			Script::DeleteTable(&module.data.table);
+			Script::DeleteTable(&module.groups.table);
+			Script::DeleteTable(&module.parameters.table);
 			module = Module();
+		}
 		nextModule = 0;
 	}
 
@@ -1334,7 +1339,6 @@ namespace Particles
 
 			TextureStruct tex;
 			tex.drawtype = pgroup.blendMode;
-
 			SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
 			tex.tpage = sprite->tpage;
 			tex.u1 = sprite->x1;
@@ -1345,7 +1349,6 @@ namespace Particles
 			tex.v3 = sprite->y2;
 			tex.u4 = sprite->x1;
 			tex.v4 = sprite->y2;
-
 			(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 1);
 		}
 		else
@@ -1434,24 +1437,16 @@ namespace Particles
 				TextureStruct tex;
 				tex.drawtype = pgroup.blendMode;
 
-				if (!pgroup.drawMode)
-				{
-					SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
-					tex.tpage = sprite->tpage;
-					tex.u1 = sprite->x1;
-					tex.v1 = sprite->y1;
-					tex.u2 = sprite->x2;
-					tex.v2 = sprite->y1;
-					tex.u3 = sprite->x2;
-					tex.v3 = sprite->y2;
-					tex.u4 = sprite->x1;
-					tex.v4 = sprite->y2;
-				}
-				else
-				{
-					tex.flag = 0;
-					tex.tpage = 0;
-				}
+				SpriteStruct* sprite = (spriteinfo + objects[pgroup.spriteSlot].mesh_index + spriteIndex);
+				tex.tpage = sprite->tpage;
+				tex.u1 = sprite->x1;
+				tex.v1 = sprite->y1;
+				tex.u2 = sprite->x2;
+				tex.v2 = sprite->y1;
+				tex.u3 = sprite->x2;
+				tex.v3 = sprite->y2;
+				tex.u4 = sprite->x1;
+				tex.v4 = sprite->y2;
 
 				(*AddQuadSorted)(v, 0, 1, 2, 3, &tex, 0);
 			}

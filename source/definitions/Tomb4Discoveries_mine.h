@@ -50,6 +50,7 @@ typedef long (__cdecl *TYPE_ClipLine) (long& x1, long& y1, long z1, long& x2, lo
 typedef void (__cdecl *TYPE_AddLineSorted) (D3DTLVERTEX* v1, D3DTLVERTEX* v2, long l1);
 typedef void (__cdecl *TYPE_AddTriSorted) (D3DTLVERTEX* v, short s1, short s2, short s3, TextureStruct* t, long l1);
 typedef void (__cdecl *TYPE_AddQuadSorted) (D3DTLVERTEX* v, short s1, short s2, short s3, short s4, TextureStruct* t, long l1);
+typedef void (__cdecl *TYPE_AddQuadZBuffer) (D3DTLVERTEX* v, short s1, short s2, short s3, short s4, TextureStruct* t, long l1);
 typedef void (__cdecl *TYPE_phd_PutPolygons) (short* mesh, int clip);
 typedef void (__cdecl *TYPE_CalculateObjectLighting) (Tr4ItemInfo* pItem, short* pFrame);
 
@@ -92,5 +93,6 @@ extern TYPE_ClipLine ClipLine;
 extern TYPE_AddLineSorted* AddLineSorted; // function pointer
 extern TYPE_AddTriSorted* AddTriSorted; // function pointer
 extern TYPE_AddQuadSorted* AddQuadSorted; // function pointer
+extern TYPE_AddQuadZBuffer* AddQuadZBuffer; // function pointer
 extern TYPE_phd_PutPolygons phd_PutPolygons;
 extern TYPE_CalculateObjectLighting CalculateObjectLighting;

@@ -14,7 +14,33 @@ using namespace Utilities;
 namespace LuaGlobals
 {
 	TrngVarWrapper TrngVars;
-	LuaItemInfoWrapper LuaItemArray[1024];
+	LuaItemInfoWrapper LuaItemArray[MAX_LEVEL_ITEMS];
+
+	const char* ItemData::Name()
+	{
+		return "ItemData";
+	}
+
+	void ItemData::Index(const char* field)
+	{
+		if (field)
+		{
+			Script::PushTableValue(table, field);
+			return;
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void ItemData::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			CheckItemData(-1);
+			Script::AssignTableValue(table, field, -1);
+			return;
+		}
+		LuaObjectClass::NewIndex(field);
+	}
 
 	const char* LuaItemInfoWrapper::Name()
 	{
@@ -45,6 +71,13 @@ namespace LuaGlobals
 				if (!strcmp(field, "currentAnimState"))
 				{
 					Script::PushInteger(itemptr->current_anim_state);
+					return;
+				}
+				break;
+			case 'd':
+				if (!strcmp(field, "data"))
+				{
+					Script::PushData(&data);
 					return;
 				}
 				break;
@@ -197,6 +230,15 @@ namespace LuaGlobals
 				if (!strcmp(field, "currentAnimState"))
 				{
 					itemptr->current_anim_state = GetClampedInteger(-1, 0, INT16_MAX, false);
+					return;
+				}
+				break;
+			case 'd':
+				if (!strcmp(field, "data"))
+				{
+					const auto& itemData = *GetData<ItemData>(-1);
+					Script::DeleteTable(&data.table);
+					data.table = Script::CloneTable(itemData.table);
 					return;
 				}
 				break;
@@ -461,8 +503,6 @@ namespace LuaGlobals
 				return std::optional(Particles::DrawMode::DRAW_SPRITE);
 			if (!strcmp(field, "DRAW_SPRITE3D"))
 				return std::optional(Particles::DrawMode::DRAW_SPRITE3D);
-			if (!strcmp(field, "DRAW_SQUARE"))
-				return std::optional(Particles::DrawMode::DRAW_SQUARE);
 			if (!strcmp(field, "DRAW_LINE"))
 				return std::optional(Particles::DrawMode::DRAW_LINE);
 			if (!strcmp(field, "DRAW_ARROW"))

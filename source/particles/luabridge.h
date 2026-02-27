@@ -130,11 +130,20 @@ namespace LuaGlobals
 		void NewIndex(const char* field) final;
 	};
 
+	struct ItemData final : public LuaTableObjectClass
+	{
+		static const char* Name();
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
+	};
+
 	struct LuaItemInfoWrapper final : public LuaObjectClass
 	{
 		static const char* Name();
 		void Index(const char* field) final;
 		void NewIndex(const char* field) final;
+
+		ItemData data;
 	};
 
 	struct LuaStaticInfoWrapper final : public LuaObjectClass
@@ -209,6 +218,7 @@ namespace LuaHelpers
 	void CheckModuleParameter(int argument);
 	void CheckModuleData(int argument);
 	void CheckParticleData(int argument);
+	void CheckItemData(int argument);
 	Particles::BoundFunction* GetBoundFunction(int index);
 	bool GetScriptIntegrity();
 	void ExitSystem(const char* message);

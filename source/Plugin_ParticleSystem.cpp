@@ -100,6 +100,9 @@ void InitialiseLevel()
 	Particles::ParticleGroup::triggerInit = true;
 	Particles::Module::ClearModules();
 	Particles::BoundFunction::ClearFunctionRefs();
+	for (int i = 0; i < MAX_LEVEL_ITEMS; i++)
+		LuaGlobals::LuaItemArray[i].data.table = Script::StoreNewTable();
+
 #ifdef DIAGNOSTICS
 	Diagnostics::ResetFrame();
 	Diagnostics::ResetLevel();
@@ -146,6 +149,9 @@ void LoadLevelScripts()
 
 void CloseLevel()
 {
+	for (int i = 0; i < MAX_LEVEL_ITEMS; i++)
+		Script::DeleteTable(&LuaGlobals::LuaItemArray[i].data.table);
+
 	Script::Close();
 }
 
@@ -272,6 +278,31 @@ void SaveModuleData(WORD** p2VetExtra, int* pNWords)
 	}
 }
 
+void SaveItemData(WORD** p2VetExtra, int* pNWords)
+{
+	std::list<std::vector<char>> itemDataList;
+
+	auto& itemCount = *reinterpret_cast<short*>(itemDataList.emplace_back(sizeof(short)).data());
+	itemCount = 0;
+	for (int i = 0; i < level_items; i++)
+	{
+		const auto& item = LuaGlobals::LuaItemArray[i];
+		auto& itemDataCount = *reinterpret_cast<short*>(itemDataList.emplace_back(sizeof(short)).data());
+		itemDataCount = Script::TraverseReadTable(item.data.table, &itemDataList, ReadData);
+		itemCount++;
+	}
+	if (itemCount > 0)
+	{
+		std::vector<char> itemData;
+
+		for (auto it = itemDataList.begin(); it != itemDataList.end(); it++)
+			itemData.insert(itemData.end(), it->begin(), it->end());
+
+		AddNGToken(NGTAG_ITEM_DATA, NO_ARRAY, itemData.size(),
+			itemData.data(), p2VetExtra, pNWords);
+	}
+}
+
 void LoadSpriteParticles(WORD* pData)
 {
 	WORD TotParts;
@@ -379,6 +410,22 @@ void LoadModuleData(WORD* pData)
 	}
 }
 
+void LoadItemData(WORD* pData)
+{
+	char* ptr;
+
+	ptr = reinterpret_cast<char*>(pData);
+
+	int itemCount = *reinterpret_cast<short*>(ptr);
+	ptr += sizeof(short);
+	for (int i = 0; i < itemCount; i++)
+	{
+		int itemDataCount = *reinterpret_cast<short*>(ptr);
+		ptr += sizeof(short);
+
+		Script::TraverseAssignTable(LuaGlobals::LuaItemArray[i].data.table, itemDataCount, &ptr, AssignData);
+	}
+}
 
 // ************  Patcher Functions section  ***************
 
@@ -534,6 +581,7 @@ DWORD cbSaveMyData(BYTE **pAdrZone, int SavingType)
 		SaveSpriteParticles(&pVetExtras, &TotNWords);
 		SaveMeshParticles(&pVetExtras, &TotNWords);
 		SaveModuleData(&pVetExtras, &TotNWords);
+		SaveItemData(&pVetExtras, &TotNWords);
 	}
 
 	if (SavingType & SAVT_GLOBAL_DATA) {
@@ -610,6 +658,10 @@ void cbLoadMyData(BYTE *pAdrZone, DWORD SizeData)
 
 		case NGTAG_MODULE_DATA:
 			LoadModuleData(ParseField.pData);
+			break;
+
+		case NGTAG_ITEM_DATA:
+			LoadItemData(ParseField.pData);
 			break;
 		}
 		Indice= ParseField.NextIndex; 

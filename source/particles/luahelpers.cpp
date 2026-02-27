@@ -257,6 +257,12 @@ namespace LuaHelpers
 			Script::Throw("boolean, number or nil expected");
 	}
 
+	void CheckItemData(int argument)
+	{
+		if (!Script::IsBoolean(argument) && !Script::IsNumber(argument) && !Script::IsInteger(argument) && !Script::IsNil(argument))
+			Script::Throw("boolean, number or nil expected");
+	}
+
 	Particles::BoundFunction* GetBoundFunction(int index)
 	{
 		if (index < 1)
