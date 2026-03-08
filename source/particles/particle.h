@@ -120,7 +120,6 @@ namespace Particles
 	enum DrawMode
 	{
 		DRAW_SPRITE,
-		DRAW_SQUARE,
 		DRAW_SPRITE3D,
 		DRAW_LINE,
 		DRAW_ARROW,
@@ -262,6 +261,8 @@ namespace Particles
 		Vector3f	AttractToItem(const Vector3f& v, float radius, float factor);
 		Vector3f	AvoidRoomGeometry(int wallMargin, int floorMargin, float factor);
 		virtual void Animate(int start, int end, int frameRate) = 0;
+		virtual void AlignToVel(float factor, bool invert) = 0;
+		virtual void LookAtTarget(const Vector3f& target, float factor, bool invert) = 0;
 
 		// boid-specific
 		virtual Vector3f BoidSeparationRule(float radius, float factor) = 0;
@@ -307,6 +308,8 @@ namespace Particles
 
 		// methods
 		void Animate(int start, int end, int frameRate) final;
+		void AlignToVel(float factor, bool invert) final;
+		void LookAtTarget(const Vector3f& target, float factor, bool invert) final;
 
 		// draw function
 		void DrawSpritePart(const ParticleGroup& pgroup, long* const view, long* rgb, long smallest_size);
@@ -348,9 +351,9 @@ namespace Particles
 
 		// methods
 		void Animate(int startMesh, int endMesh, int framerate) final;
+		void	AlignToVel(float factor, bool invert) final;
+		void	LookAtTarget(const Vector3f& target, float factor, bool invert) final;
 
-		void	AlignToVel(float factor, bool invert);
-		void	AlignToTarget(const Vector3f& v, float factor, bool invert);
 		void	Shatter();
 
 		// draw function

@@ -11,6 +11,9 @@
 using namespace LuaHelpers;
 using namespace Utilities;
 
+#undef min
+#undef max
+
 namespace LuaFunctions
 {
 	
@@ -449,7 +452,7 @@ namespace LuaFunctions
 			float radius = GetNumber(2);
 			int length = 0;
 			if (count > 2 && !Script::IsNil(3))
-				length = GetTable(3, false);
+				length = GetTable(3, true);
 
 			std::vector<short> slots(length);
 			for (ulong i = 0; i < slots.size(); i++)
@@ -478,11 +481,6 @@ namespace LuaFunctions
 					{
 						Script::PushInteger(i);
 						elements++;
-						if (elements >= 128)
-						{
-							Script::EmitFailure("Exceeded list length of found items (128 entries)", Logger::Warning);
-							break;
-						}	
 					}
 				}
 			}
@@ -783,6 +781,25 @@ namespace LuaFunctions
 		}
 	};
 
+	struct GetTargetAimPointFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto item = &items[VerifyItemIndex(1)];
+			short* bounds = (short*)GetBoundsAccurate((StrItemTr4*)item);
+			float xp = (bounds[0] + bounds[1]) * 0.5f;
+			float yp = bounds[2] + (bounds[3] - bounds[2]) / 3.0f;
+			float zp = (bounds[4] + bounds[5]) >> 1;
+			float s = sin(ShortToRad(item->pos.yRot));
+			float c = cos(ShortToRad(item->pos.yRot));
+			float x = item->pos.xPos + (xp * c + zp * s);
+			float y = item->pos.yPos + yp;
+			float z = item->pos.zPos + (zp * c - xp * s);
+			ConstructManagedData<Vector3f>(x, y, z);
+			return 1;
+		}
+	};
+
 	struct GetTombIndexFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -964,28 +981,88 @@ namespace LuaFunctions
 		}
 	};
 
-	struct MeshAlignVelocityFunction final : public LuaObjectFunction
+	struct ParticleAlignVelFunction final : public LuaObjectFunction
 	{
 		int Call() final
 		{
-			auto part = GetData<Particles::MeshParticle>(1);
-			float factor = GetClampedNumber(2, 0.0f, 1.0f, false);
-			bool invert = GetBoolean(3);
+			float factor = 1.0f;
+			bool invert = false;
+
+			int count = GetArgCount(1, 3);
+			auto part = GetData<Particles::BaseParticle>(1);
+			if (count > 1 && !Script::IsNil(2))
+				factor = GetClampedNumber(2, 0.0f, 1.0f, false);
+			if (count > 2 && !Script::IsNil(3))
+				invert = GetBoolean(3);
 			part->AlignToVel(factor, invert);
 			return 0;
 		}
 	};
 
-	struct MeshLookAtTargetFunction final : public LuaObjectFunction
+	struct ParticleLookAtTargetFunction final : public LuaObjectFunction
 	{
 		int Call() final
 		{
-			auto part = GetData<Particles::MeshParticle>(1);
+			float factor = 1.0f;
+			bool invert = false;
+
+			int count = GetArgCount(2, 4);
+			auto part = GetData<Particles::BaseParticle>(1);
 			Vector3f vector = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
-			float factor = GetClampedNumber(3, 0.0f, 1.0f, false);
-			bool invert = GetBoolean(4);
-			part->AlignToTarget(vector, factor, invert);
+			if (count > 2 && !Script::IsNil(3))
+				factor = GetClampedNumber(3, 0.0f, 1.0f, false);
+			if (count > 3 && !Script::IsNil(4))
+				invert = GetBoolean(4);
+			part->LookAtTarget(vector, factor, invert);
 			return 0;
+		}
+	};
+
+	struct MaxFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int offset = 0;
+			float currentMax = std::numeric_limits<float>::min();
+			int count = Script::ArgCount();
+			if (!count)
+				Script::Throw("at least 1 number needed to calculate a maximum");
+			if (count == 1 && Script::IsTable(1))
+			{
+				count = GetTable(1, false);
+				offset = 1;
+			}
+			for (int i = 0; i < count; i++)
+			{
+				float num = GetNumber(i + offset + 1);
+				if (num > currentMax)
+					currentMax = num;
+			}
+			
+			Script::PushNumber(currentMax);
+			return 1;
+		}
+	};
+	
+	struct MeanFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int offset = 0;
+			float accumulator = 0.0f;
+			int count = Script::ArgCount();
+			if (!count)
+				Script::Throw("at least 1 number needed to calculate a mean");
+			if (count == 1 && Script::IsTable(1))
+			{
+				count = GetTable(1, false);
+				offset = 1;
+			}
+			for (int i = 0; i < count; i++)
+				accumulator += GetNumber(i + offset + 1);
+
+			Script::PushNumber(accumulator / count);
+			return 1;
 		}
 	};
 
@@ -997,6 +1074,32 @@ namespace LuaFunctions
 			part->Shatter();
 			part->Kill();
 			return 0;
+		}
+	};
+
+	struct MinFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int offset = 0;
+			float currentMin = std::numeric_limits<float>::max();
+			int count = Script::ArgCount();
+			if (!count)
+				Script::Throw("at least 1 number needed to calculate a minimum");
+			if (count == 1 && Script::IsTable(1))
+			{
+				count = GetTable(1, false);
+				offset = 1;
+			}
+			for (int i = 0; i < count; i++)
+			{
+				float num = GetNumber(i + offset + 1);
+				if (num < currentMin)
+					currentMin = num;
+			}
+
+			Script::PushNumber(currentMin);
+			return 1;
 		}
 	};
 
@@ -1369,6 +1472,38 @@ namespace LuaFunctions
 		}
 	};
 
+	struct ProjectToCameraFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto vec = GetData<LuaObjectClassPosition>(1);
+			float x = vec->GetX() - camera->pos.x;
+			float y = vec->GetY() - camera->pos.y;
+			float z = vec->GetZ() - camera->pos.z;
+
+			phd_PushMatrix();
+			phd_TranslateAbs(camera->pos.x, camera->pos.y, camera->pos.z);
+			float result[3] = {};
+			result[0] = phd_mxptr[M00] * x + phd_mxptr[M01] * y + phd_mxptr[M02] * z + phd_mxptr[M03];
+			result[1] = phd_mxptr[M10] * x + phd_mxptr[M11] * y + phd_mxptr[M12] * z + phd_mxptr[M13];
+			result[2] = phd_mxptr[M20] * x + phd_mxptr[M21] * y + phd_mxptr[M22] * z + phd_mxptr[M23];
+			phd_PopMatrix();
+
+			float zv = f_persp / result[2];
+			x = result[0] * zv + f_centerx;
+			y = result[1] * zv + f_centery;
+			z = result[2] * (1.0f / 16384.0f);
+
+			if (z < f_mznear || z > f_mzfar)
+				Script::PushNil();
+			else if (x < phd_winxmin || x > phd_winxmax || y < phd_winymin || y > phd_winymax)
+				Script::PushNil();
+			else
+				ConstructManagedData<Vector3f>(x / phd_winxmax, y / phd_winxmax, z);
+			return 1;
+		}
+	};
+
 	struct RadToDegFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1474,15 +1609,12 @@ namespace LuaFunctions
 		int Call() final
 		{
 			auto vec = GetData<LuaObjectClassPosition>(1);
-			int adjustment = 1;
-			if (GetArgCount(1, 2) > 1)
-				adjustment = static_cast<int>(!GetBoolean(2));
 			float x = vec->GetX();
 			float y = vec->GetY();
 			float z = vec->GetZ();
 
 			short rotY = RadToShort(atan2f(x, z));
-			short rotX = RadToShort(atan2f(sqrtf(x * x + z * z), y)) - (16384 * adjustment);
+			short rotX = RadToShort(atan2f(sqrtf(x * x + z * z), y));
 
 			ConstructManagedData<Vector3s>(rotX, rotY, 0);
 			return 1;
@@ -1831,6 +1963,7 @@ namespace LuaFunctions
 	GetRoomStaticsFunction GetRoomStaticsFunc;
 	GetSelectedItemFunction GetSelectedItemFunc;
 	GetStaticInfoFunction GetStaticInfoFunc;
+	GetTargetAimPointFunction GetTargetAimPointFunc;
 	GetTombIndexFunction GetTombIndexFunc;
 	GetWaterDepthFunction GetWaterDepthFunc;
 	GetWaterHeightFunction GetWaterHeightFunc;
@@ -1843,13 +1976,15 @@ namespace LuaFunctions
 	LerpFunction LerpFunc;
 	LerpInverseFunction LerpInverseFunc;
 	LogFunction LogFunc;
-	MeshAlignVelocityFunction MeshAlignVelocityFunc;
-	MeshLookAtTargetFunction MeshLookAtTargetFunc;
+	MaxFunction MaxFunc;
+	MeanFunction MeanFunc;
 	MeshShatterFunction MeshShatterFunc;
+	MinFunction MinFunc;
 	NoiseFunction NoiseFunc;
 	NoiseCurlFunction NoiseCurlFunc;
 	NoiseCurlTimeFunction NoiseCurlTimeFunc;
 	ParticleAbsPosFunction ParticleAbsPosFunc;
+	ParticleAlignVelFunction ParticleAlignVelFunc;
 	ParticleAnimateFunction ParticleAnimateFunc;
 	ParticleAttachFunction ParticleAttachFunc;
 	ParticleAttractToItemFunction ParticleAttractToItemFunc;
@@ -1862,6 +1997,7 @@ namespace LuaFunctions
 	ParticleHomingFunction ParticleHomingFunc;
 	ParticleKillFunction ParticleKillFunc;
 	ParticleLimitSpeedFunction ParticleLimitSpeedFunc;
+	ParticleLookAtTargetFunction ParticleLookAtTargetFunc;
 	SplinePosItemsFunction SplinePosItemsFunc;
 	SplinePosVectorsFunction SplinePosVectorsFunc;
 	SplineVelItemsFunction SplineVelItemsFunc;
@@ -1869,6 +2005,7 @@ namespace LuaFunctions
 	ParticleWindVelocityFunction ParticleWindVelocityFunc;
 	PerformTriggerGroupFunction PerformTriggerGroupFunc;
 	PrintFunction PrintFunc;
+	ProjectToCameraFunction ProjectToCameraFunc;
 	RadToDegFunction RadToDegFunc;
 	RandfloatFunction RandfloatFunc;
 	RandintFunction RandintFunc;
@@ -2019,6 +2156,8 @@ namespace LuaFunctions
 				return &GetSelectedItemFunc;
 			if (!strcmp(field, "getStatic"))
 				return &GetStaticInfoFunc;
+			if (!strcmp(field, "getTargetAimPoint"))
+				return &GetTargetAimPointFunc;
 			if (!strcmp(field, "getTombIndex"))
 				return &GetTombIndexFunc;
 			if (!strcmp(field, "getWaterDepth"))
@@ -2058,12 +2197,14 @@ namespace LuaFunctions
 			break;
 
 		case 'm':
-			if (!strcmp(field, "meshAlignVelocity"))
-				return &MeshAlignVelocityFunc;
-			if (!strcmp(field, "meshLookAtTarget"))
-				return &MeshLookAtTargetFunc;
+			if (!strcmp(field, "max"))
+				return &MaxFunc;
+			if (!strcmp(field, "mean"))
+				return &MeanFunc;
 			if (!strcmp(field, "meshShatter"))
 				return &MeshShatterFunc;
+			if (!strcmp(field, "min"))
+				return &MinFunc;
 			break;
 
 		case 'n':
@@ -2078,6 +2219,8 @@ namespace LuaFunctions
 		case 'p':
 			if (!strcmp(field, "partAbsPos"))
 				return &ParticleAbsPosFunc;
+			if (!strcmp(field, "partAlignToVelocity"))
+				return &ParticleAlignVelFunc;
 			if (!strcmp(field, "partAnimate"))
 				return &ParticleAnimateFunc;
 			if (!strcmp(field, "partAttach"))
@@ -2102,12 +2245,16 @@ namespace LuaFunctions
 				return &ParticleKillFunc;
 			if (!strcmp(field, "partLimitSpeed"))
 				return &ParticleLimitSpeedFunc;
+			if (!strcmp(field, "partLookAtTarget"))
+				return &ParticleLookAtTargetFunc;
 			if (!strcmp(field, "partWind"))
 				return &ParticleWindVelocityFunc;
 			if (!strcmp(field, "performTriggerGroup"))
 				return &PerformTriggerGroupFunc;
 			if (!strcmp(field, "print"))
 				return &PrintFunc;
+			if (!strcmp(field, "projectToScreen"))
+				return &ProjectToCameraFunc;
 			break;
 
 		case 'r':
@@ -2192,3 +2339,6 @@ namespace LuaFunctions
 		return nullptr;
 	}
 }
+
+#define min
+#define max

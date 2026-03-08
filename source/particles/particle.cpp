@@ -510,6 +510,8 @@ namespace Particles
 
 			if (pgroup.screenSpace)
 			{
+				if (pgroup.drawMode == DrawMode::DRAW_SPRITE3D)
+					continue;
 				if (part->pos.x < -1.0f || part->pos.x > 2.0f || part->pos.y < -1.0f || part->pos.y > 2.0f)
 					continue;
 
@@ -517,7 +519,7 @@ namespace Particles
 				viewCoords[1] = SaturateRound<long>(part->pos.y * phd_winxmax);
 				viewCoords[2] = SaturateRound<long>(part->pos.z + f_mznear);
 
-				if (pgroup.drawMode > DrawMode::DRAW_SPRITE3D)
+				if (pgroup.drawMode >= DrawMode::DRAW_LINE)
 				{
 					float size = part->sizeCust;
 					auto vel = part->vel;
@@ -650,7 +652,7 @@ namespace Particles
 					viewCoords[2] = result[2] >> 14;
 
 					// if particle is a line do world to screen transform for second vertex
-					if (pgroup.drawMode > DrawMode::DRAW_SPRITE3D)
+					if (pgroup.drawMode >= DrawMode::DRAW_LINE)
 					{
 						float size = part->sizeCust;
 						auto vel = part->vel;
@@ -1149,6 +1151,33 @@ namespace Particles
 		spriteIndex = (ushort)(usedSprite);
 	}
 
+	void SpriteParticle::AlignToVel(float factor, bool invert)
+	{
+		float phi = atan2(vel.x, vel.z);
+		float theta = atan2(sqrt(vel.x * vel.x + vel.z * vel.z), vel.y);
+
+		int dy = GetOrientDiff(rot3D.y, RadToShort(phi));
+		int dx = GetOrientDiff(rot3D.x, RadToShort(theta));
+
+		rot3D.y += SaturateRound<short>(dy * factor);
+		rot3D.x += SaturateRound<short>(dx * factor);
+	}
+
+
+	void SpriteParticle::LookAtTarget(const Vector3f& vec, float factor, bool invert)
+	{
+		auto dir = vec - AbsPos();
+
+		float phi = atan2(dir.x, dir.z);
+		float theta = atan2(sqrt(dir.x * dir.x + dir.z * dir.z), dir.y);
+
+		int dy = GetOrientDiff(rot3D.y, RadToShort(phi));
+		int dx = GetOrientDiff(rot3D.x, RadToShort(theta));
+
+		rot3D.y += SaturateRound<short>(dy * factor);
+		rot3D.x += SaturateRound<short>(dx * factor);
+	}
+
 
 	Vector3f SpriteParticle::BoidSeparationRule(float radius, float factor)
 	{
@@ -1550,11 +1579,11 @@ namespace Particles
 	}
 
 
-	void MeshParticle::AlignToTarget(const Vector3f& v, float factor, bool invert)
+	void MeshParticle::LookAtTarget(const Vector3f& v, float factor, bool invert)
 	{
 		float correction = float(M_PI_2);
 
-		auto dir = v - pos;
+		auto dir = v - AbsPos();
 		float phi = -(atan2(dir.z, dir.x) - correction);
 		float theta = atan2(sqrt(dir.x * dir.x + dir.z * dir.z), dir.y) - correction;
 
@@ -1566,8 +1595,6 @@ namespace Particles
 
 		int dy = GetOrientDiff(rot.y, RadToShort(phi));
 		int dx = GetOrientDiff(rot.x, RadToShort(theta));
-
-		factor = Clamp(factor, 0.0f, 1.0f);
 
 		rot.y += SaturateRound<short>(dy * factor);
 		rot.x += SaturateRound<short>(dx * factor);

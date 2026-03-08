@@ -9,6 +9,7 @@ TYPE_EffectNewRoom EffectNewRoom = (TYPE_EffectNewRoom) 0x453F60;
 TYPE_TestTriggersAtXYZ TestTriggersAtXYZ = (TYPE_TestTriggersAtXYZ) 0x460E80;
 TYPE_GetFreeSpark GetFreeSpark = (TYPE_GetFreeSpark) 0x433830;
 TYPE_TriggerShockwave TriggerShockwave = (TYPE_TriggerShockwave) 0x43A420;
+TYPE_find_target_point find_target_point = (TYPE_find_target_point) 0x42E030;
 TYPE_GetFrames GetFrames = (TYPE_GetFrames) 0x450450;
 TYPE_InitInterpolate2 InitInterpolate2 = (TYPE_InitInterpolate2) 0x45F450;
 TYPE_InterpolateMatrix InterpolateMatrix = (TYPE_InterpolateMatrix) 0x44FED0;

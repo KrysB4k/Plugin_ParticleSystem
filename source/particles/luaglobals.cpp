@@ -141,7 +141,7 @@ namespace LuaGlobals
 					Script::PushInteger(itemptr->mesh_bits);
 					return;
 				}
-				if (!strcmp(field, "meshes"))
+				if (!strcmp(field, "meshCount"))
 				{
 					Script::PushInteger(objects[itemptr->object_number].nmeshes);
 					return;
@@ -301,7 +301,7 @@ namespace LuaGlobals
 				{
 					ReadOnlyFieldError(field);
 				}
-				if (!strcmp(field, "meshes"))
+				if (!strcmp(field, "meshCount"))
 				{
 					ReadOnlyFieldError(field);
 				}

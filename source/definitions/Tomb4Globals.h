@@ -18,6 +18,7 @@
 #define f_centery (*(float*)(0x753C00))
 #define f_moneoznear (*(float*)(0x753C28))
 #define f_mznear (*(float*)(0x753BA4))
+#define f_mzfar (*(float*)(0x754038))
 
 #define phd_mxptr (*(long**)(0x7E70C8))
 #define IMptr (*(long**)(0x7FE004))
