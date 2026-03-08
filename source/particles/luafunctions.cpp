@@ -789,7 +789,7 @@ namespace LuaFunctions
 			short* bounds = (short*)GetBoundsAccurate((StrItemTr4*)item);
 			float xp = (bounds[0] + bounds[1]) * 0.5f;
 			float yp = bounds[2] + (bounds[3] - bounds[2]) / 3.0f;
-			float zp = (bounds[4] + bounds[5]) >> 1;
+			float zp = (bounds[4] + bounds[5]) * 0.5f;
 			float s = sin(ShortToRad(item->pos.yRot));
 			float c = cos(ShortToRad(item->pos.yRot));
 			float x = item->pos.xPos + (xp * c + zp * s);
@@ -892,7 +892,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			//CheckCaller(FunctionType::FUNCTION_BIND, "invokeInit");
+			CheckCaller(FUNCTION_BIND | FUNCTION_INIT | FUNCTION_UPDATE, "invokeInit");
 			Particles::CallerGuard guard(FUNCTION_INIT);
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->autoTrigger)

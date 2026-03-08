@@ -31,6 +31,7 @@
 #include "..\definitions\constants_mine.h"
 #include "..\definitions\structures_mine.h"
 #include "..\definitions\macros_mine.h"
+#include "trng.h"
 
 #pragma warning( error : 4706 )
 #pragma warning(disable: 4996)

@@ -121,7 +121,7 @@ void SetCamera(int Distance, int HOrient, int VOrient, int Speed);
 
 // ----------------- DECLARES of variables declared in trng.cpp source -----------------------
 
-extern StrTrngInfos Trng;
+extern "C" __declspec(dllexport) StrTrngInfos Trng;
 extern StrGetLocator GET;
 extern StrFind FIND;
 extern StrFloorAnalyse FLOOR;
