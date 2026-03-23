@@ -581,6 +581,15 @@ namespace LuaFunctions
 		}
 	};
 
+	struct GetInputFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			Script::PushInteger(input);
+			return 1;
+		}
+	};
+
 	struct GetItemInfoFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1979,6 +1988,7 @@ namespace LuaFunctions
 	GetFloorHeightFunction GetFloorHeightFunc;
 	GetFloorNormalFunction GetFloorNormalFunc;
 	GetGameTickFunction GetGameTickFunc;
+	GetInputFunction GetInputFunc;
 	GetItemInfoFunction GetItemInfoFunc;
 	GetItemJointPosFunction GetItemJointPosFunc;
 	GetItemJointRotFunction GetItemJointRotFunc;
@@ -2162,6 +2172,8 @@ namespace LuaFunctions
 				return &GetFloorNormalFunc;
 			if (!strcmp(field, "getGameTick"))
 				return &GetGameTickFunc;
+			if (!strcmp(field, "getInput"))
+				return &GetInputFunc;
 			if (!strcmp(field, "getItemJointPosition"))
 				return &GetItemJointPosFunc;
 			if (!strcmp(field, "getItemJointPosRot"))

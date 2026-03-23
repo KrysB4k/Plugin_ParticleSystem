@@ -14,6 +14,7 @@ using namespace Utilities;
 namespace LuaGlobals
 {
 	TrngVarWrapper TrngVars;
+	LuaCameraWrapper Camera;
 	LuaItemInfoWrapper LuaItemArray[MAX_LEVEL_ITEMS];
 
 	const char* ItemData::Name()
@@ -550,9 +551,11 @@ namespace LuaGlobals
 
 	LuaObject* RetrieveGlobals(const char* field)
 	{
+		if (!strcmp(field, "Camera"))
+			return &Camera;
 		if (!strcmp(field, "Lara"))
 			return &LuaGlobals::LuaItemArray[lara_info.item_number];
-		if (!strcmp(field, "Vars"))
+		if (!strcmp(field, "TrngVars"))
 			return &TrngVars;
 
 		return nullptr;
@@ -591,6 +594,21 @@ namespace LuaGlobals
 				return std::optional(BlendMode::BLEND_CUSTOM_13);
 			break;
 
+		case 'C':
+			if (!strcmp(field, "CAMERA_CHASE"))
+				return std::optional(CameraType::CHASE_CAMERA);
+			if (!strcmp(field, "CAMERA_CINEMATIC"))
+				return std::optional(CameraType::CINEMATIC_CAMERA);
+			if (!strcmp(field, "CAMERA_COMBAT"))
+				return std::optional(CameraType::COMBAT_CAMERA);
+			if (!strcmp(field, "CAMERA_FIXED"))
+				return std::optional(CameraType::FIXED_CAMERA);
+			if (!strcmp(field, "CAMERA_HEAVY"))
+				return std::optional(CameraType::HEAVY_CAMERA);
+			if (!strcmp(field, "CAMERA_LOOK"))
+				return std::optional(CameraType::LOOK_CAMERA);
+			break;
+
 		case 'D':
 			if (!strcmp(field, "DRAW_SPRITE"))
 				return std::optional(Particles::DrawMode::DRAW_SPRITE);
@@ -602,6 +620,49 @@ namespace LuaGlobals
 				return std::optional(Particles::DrawMode::DRAW_ARROW);
 			if (!strcmp(field, "DRAW_NONE"))
 				return std::optional(Particles::DrawMode::DRAW_NONE);
+			break;
+
+		case 'I':
+			if (!strcmp(field, "INPUT_ACTION"))
+				return std::optional(CMD_ACTION);
+			if (!strcmp(field, "INPUT_DASH"))
+				return std::optional(CMD_DASH);
+			if (!strcmp(field, "INPUT_DOWN"))
+				return std::optional(CMD_DOWN);
+			if (!strcmp(field, "INPUT_DRAW"))
+				return std::optional(CMD_DRAW_WEAPON);
+			if (!strcmp(field, "INPUT_DUCK"))
+				return std::optional(CMD_DUCK);
+			if (!strcmp(field, "INPUT_FLARE"))
+				return std::optional(CMD_USE_FLARE);
+			if (!strcmp(field, "INPUT_INVENTORY"))
+				return std::optional(CMD_INVENTORY);
+			if (!strcmp(field, "INPUT_JUMP"))
+				return std::optional(CMD_JUMP);
+			if (!strcmp(field, "INPUT_LEFT"))
+				return std::optional(CMD_LEFT);
+			if (!strcmp(field, "INPUT_LOADGAME"))
+				return std::optional(CMD_LOAD_GAME);
+			if (!strcmp(field, "INPUT_LOOK"))
+				return std::optional(CMD_LOOK);
+			if (!strcmp(field, "INPUT_PAUSE"))
+				return std::optional(CMD_PAUSE);
+			if (!strcmp(field, "INPUT_RIGHT"))
+				return std::optional(CMD_RIGHT);
+			if (!strcmp(field, "INPUT_ROLL"))
+				return std::optional(CMD_ROLL);
+			if (!strcmp(field, "INPUT_SAVEGAME"))
+				return std::optional(CMD_SAVE_GAME);
+			if (!strcmp(field, "INPUT_SELECT"))
+				return std::optional(CMD_ENTER);
+			if (!strcmp(field, "INPUT_STEPLEFT"))
+				return std::optional(CMD_STEP_LEFT);
+			if (!strcmp(field, "INPUT_STEPRIGHT"))
+				return std::optional(CMD_STEP_RIGHT);
+			if (!strcmp(field, "INPUT_UP"))
+				return std::optional(CMD_UP);
+			if (!strcmp(field, "INPUT_WALK"))
+				return std::optional(CMD_WALK);
 			break;
 
 		case 'L':
@@ -2110,6 +2171,238 @@ namespace LuaGlobals
 		}
 
 		return std::nullopt;
+	}
+
+	void LuaCameraWrapper::Index(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'b':
+				if (!strcmp(field, "bounce"))
+				{
+					Script::PushInteger(camera->bounce);
+					return;
+				}
+				break;
+
+			case 'c':
+				if (!strcmp(field, "cameraType"))
+				{
+					Script::PushInteger(camera->type);
+					return;
+				}
+				if (!strcmp(field, "currentAngle"))
+				{
+					Script::PushNumber(ShortToRad(camera->actual_elevation));
+					return;
+				}
+				if (!strcmp(field, "currentElevation"))
+				{
+					Script::PushNumber(ShortToRad(camera->actual_angle));
+					return;
+				}
+				break;
+
+			case 'f':
+				if (!strcmp(field, "fixed"))
+				{
+					Script::PushBoolean(camera->fixed_camera);
+					return;
+				}
+				break;
+
+			case 'p':
+				if (!strcmp(field, "pos"))
+				{
+					ConstructManagedData<LuaItemInfoPos>((phd_3dpos*)&camera->pos);
+					return;
+				}
+				break;
+
+			case 'r':
+				if (!strcmp(field, "roomIndex"))
+				{
+					Script::PushInteger(camera->pos.room_number);
+					return;
+				}
+				break;
+
+			case 's':
+				if (!strcmp(field, "speed"))
+				{
+					Script::PushInteger(camera->speed);
+					return;
+				}
+				break;
+
+			case 't':
+				if (!strcmp(field, "targetAngle"))
+				{
+					Script::PushNumber(ShortToRad(camera->target_angle));
+					return;
+				}
+				if (!strcmp(field, "targetDistance"))
+				{
+					Script::PushInteger(camera->target_distance);
+					return;
+				}
+				if (!strcmp(field, "targetElevation"))
+				{
+					Script::PushNumber(ShortToRad(camera->target_elevation));
+					return;
+				}
+				if (!strcmp(field, "targetItem"))
+				{
+					if (camera->item)
+						Script::PushInteger(camera->item - items);
+					else
+						Script::PushNil();
+					return;
+				}
+				if (!strcmp(field, "targetPos"))
+				{
+					ConstructManagedData<LuaItemInfoPos>((phd_3dpos*)&camera->target);
+					return;
+				}
+				if (!strcmp(field, "targetRoomIndex"))
+				{
+					Script::PushInteger(camera->target.room_number);
+					return;
+				}
+				if (!strcmp(field, "timer"))
+				{
+					Script::PushInteger(camera->timer);
+					return;
+				}
+				break;
+
+			case 'u':
+				if (!strcmp(field, "underwater"))
+				{
+					Script::PushBoolean(camera->underwater);
+					return;
+				}
+				break;
+			}
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void LuaCameraWrapper::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'b':
+				if (!strcmp(field, "bounce"))
+				{
+					camera->bounce = GetClampedInteger(-1, -UINT8_MAX, UINT8_MAX, false);
+					return;
+				}
+				break;
+
+			case 'c':
+				if (!strcmp(field, "cameraType"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				if (!strcmp(field, "currentAngle"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				if (!strcmp(field, "currentElevation"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+
+			case 'f':
+				if (!strcmp(field, "fixed"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+
+			case 'p':
+				if (!strcmp(field, "pos"))
+				{
+					auto pos = GetData<LuaObjectClassPosition>(-1);
+					camera->pos.x = pos->GetX();
+					camera->pos.y = pos->GetY();
+					camera->pos.z = pos->GetZ();
+					return;
+				}
+				break;
+
+			case 'r':
+				if (!strcmp(field, "roomIndex"))
+				{
+					camera->pos.room_number = GetClampedInteger(-1, 0, number_rooms - 1, false);
+					return;
+				}
+				break;
+
+			case 's':
+				if (!strcmp(field, "speed"))
+				{
+					camera->speed = GetClampedInteger(-1, 0, INT8_MAX, false);
+					return;
+				}
+				break;
+
+			case 't':
+				if (!strcmp(field, "targetAngle"))
+				{
+					camera->target_angle = RadToShort(GetNumber(-1));
+					return;
+				}
+				if (!strcmp(field, "targetDistance"))
+				{
+					camera->target_distance = GetClampedInteger(-1, 0, 20480, false);
+					return;
+				}
+				if (!strcmp(field, "targetElevation"))
+				{
+					camera->target_elevation = RadToShort(GetNumber(-1));
+					return;
+				}
+				if (!strcmp(field, "targetItem"))
+				{
+					auto item = &items[VerifyItemIndex(-1)];
+					camera->item = item;
+					return;
+				}
+				if (!strcmp(field, "targetPos"))
+				{
+					auto pos = GetData<LuaObjectClassPosition>(-1);
+					camera->target.x = pos->GetX();
+					camera->target.y = pos->GetY();
+					camera->target.z = pos->GetZ();
+					return;
+				}
+				if (!strcmp(field, "targetRoomIndex"))
+				{
+					camera->target.room_number = GetClampedInteger(-1, 0, number_rooms - 1, false);
+					return;
+				}
+				if (!strcmp(field, "timer"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+
+			case 'u':
+				if (!strcmp(field, "underwater"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			}
+		}
+		LuaObjectClass::NewIndex(field);
 	}
 
 	void TrngVarWrapper::Index(const char* field)

@@ -1564,7 +1564,7 @@ namespace Particles
 	void MeshParticle::AlignToVel(float factor, bool invert)
 	{
 		float correction = float(M_PI_2);
-
+		
 		float phi = -(atan2(vel.z, vel.x) - correction);
 		float theta = atan2(sqrt(vel.x * vel.x + vel.z * vel.z), vel.y) - correction;
 
@@ -1573,6 +1573,16 @@ namespace Particles
 			theta = -theta;
 			phi += float(M_PI);
 		}
+
+		if (theta >= float(M_PI))
+			theta -= float(M_PI * 2);
+		else if (theta <= float(-M_PI))
+			theta += float(M_PI * 2);
+
+		if (phi >= float(M_PI))
+			phi -= float(M_PI * 2);
+		else if (phi <= float(-M_PI))
+			phi += float(M_PI * 2);
 
 		int dy = GetOrientDiff(rot.y, RadToShort(phi));
 		int dx = GetOrientDiff(rot.x, RadToShort(theta));
@@ -1595,6 +1605,16 @@ namespace Particles
 			theta = -theta;
 			phi += float(M_PI);
 		}
+
+		if (theta >= float(M_PI))
+			theta -= float(M_PI * 2);
+		else if (theta <= float(-M_PI))
+			theta += float(M_PI * 2);
+
+		if (phi >= float(M_PI))
+			phi -= float(M_PI * 2);
+		else if (phi <= float(-M_PI))
+			phi += float(M_PI * 2);
 
 		int dy = GetOrientDiff(rot.y, RadToShort(phi));
 		int dx = GetOrientDiff(rot.x, RadToShort(theta));
