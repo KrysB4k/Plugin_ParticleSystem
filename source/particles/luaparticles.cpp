@@ -342,9 +342,9 @@ namespace Particles
 				Script::PushInteger(lightMode);
 				return;
 			}
-			if (!strcmp(field, "lineIgnoreVel"))
+			if (!strcmp(field, "lineIgnoreSpeed"))
 			{
-				Script::PushBoolean(lineIgnoreVel);
+				Script::PushBoolean(lineIgnoreSpeed);
 				return;
 			}
 			break;
@@ -444,9 +444,9 @@ namespace Particles
 					lightMode = static_cast<LightMode>(GetClampedInteger(-1, LightMode::LIGHT_STATIC, LightMode::LIGHT_DYNAMIC, false));
 					return;
 				}
-				if (!strcmp(field, "lineIgnoreVel"))
+				if (!strcmp(field, "lineIgnoreSpeed"))
 				{
-					lineIgnoreVel = GetBoolean(-1);
+					lineIgnoreSpeed = GetBoolean(-1);
 					return;
 				}
 				break;

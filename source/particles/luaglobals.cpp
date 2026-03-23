@@ -60,6 +60,11 @@ namespace LuaGlobals
 			switch (field[0])
 			{
 			case 'a':
+				if (!strcmp(field, "afterDeath"))
+				{
+					Script::PushInteger(itemptr->after_death);
+					return;
+				}
 				if (!strcmp(field, "animNumber"))
 				{
 					int anim = itemptr->anim_number - objects[itemptr->object_number].anim_index;
@@ -112,8 +117,23 @@ namespace LuaGlobals
 					Script::PushInteger(itemptr->hit_points);
 					return;
 				}
+				if (!strcmp(field, "hitPointsMax"))
+				{
+					Script::PushInteger(objects[itemptr->object_number].hit_points);
+					return;
+				}
+				if (!strcmp(field, "hitStatus"))
+				{
+					Script::PushBoolean(itemptr->hit_status);
+					return;
+				}
 				break;
 			case 'i':
+				if (!strcmp(field, "intelligent"))
+				{
+					Script::PushBoolean(objects[itemptr->object_number].intelligent);
+					return;
+				}
 				if (!strcmp(field, "itemFlag1"))
 				{
 					Script::PushInteger(itemptr->item_flags[0]);
@@ -132,6 +152,13 @@ namespace LuaGlobals
 				if (!strcmp(field, "itemFlag4"))
 				{
 					Script::PushInteger(itemptr->item_flags[3]);
+					return;
+				}
+				break;
+			case 'l':
+				if (!strcmp(field, "lookedAt"))
+				{
+					Script::PushBoolean(itemptr->looked_at);
 					return;
 				}
 				break;
@@ -155,6 +182,11 @@ namespace LuaGlobals
 				}
 				break;
 			case 'p':
+				if (!strcmp(field, "poisoned"))
+				{
+					Script::PushBoolean(itemptr->poisoned);
+					return;
+				}
 				if (!strcmp(field, "pos"))
 				{
 					ConstructManagedData<LuaItemInfoPos>(&itemptr->pos);
@@ -197,6 +229,25 @@ namespace LuaGlobals
 					Script::PushBoolean(active);
 					return;
 				}
+				if (!strcmp(field, "timer"))
+				{
+					Script::PushInteger(itemptr->timer);
+					return;
+				}
+				break;
+			case 'u':
+				if (!strcmp(field, "undead"))
+				{
+					Script::PushBoolean(objects[itemptr->object_number].undead);
+					return;
+				}
+				break;
+			case 'w':
+				if (!strcmp(field, "waterCreature"))
+				{
+					Script::PushBoolean(objects[itemptr->object_number].water_creature);
+					return;
+				}
 				break;
 			}
 		}
@@ -216,6 +267,10 @@ namespace LuaGlobals
 			switch (field[0])
 			{
 			case 'a':
+				if (!strcmp(field, "afterDeath"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				if (!strcmp(field, "animNumber"))
 				{
 					//int maxAnim = objects[itemptr->object_number + 1].anim_index - 1;
@@ -273,8 +328,20 @@ namespace LuaGlobals
 					itemptr->hit_points = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
 				}
+				if (!strcmp(field, "hitPointsMax"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				if (!strcmp(field, "hitStatus"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				break;
 			case 'i':
+				if (!strcmp(field, "intelligent"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				if (!strcmp(field, "itemFlag1"))
 				{
 					itemptr->item_flags[0] = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
@@ -296,6 +363,12 @@ namespace LuaGlobals
 					return;
 				}
 				break;
+			case 'l':
+				if (!strcmp(field, "lookedAt"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
 			case 'm':
 				if (!strcmp(field, "meshBits"))
 				{
@@ -314,6 +387,10 @@ namespace LuaGlobals
 				}
 				break;
 			case 'p':
+				if (!strcmp(field, "poisoned"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				if (!strcmp(field, "pos"))
 				{
 					auto position = GetData<LuaObjectClassPosition>(-1);
@@ -354,6 +431,22 @@ namespace LuaGlobals
 					ReadOnlyFieldError(field);
 				}
 				if (!strcmp(field, "triggered"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				if (!strcmp(field, "timer"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			case 'u':
+				if (!strcmp(field, "undead"))
+				{
+					ReadOnlyFieldError(field);
+				}
+				break;
+			case 'w':
+				if (!strcmp(field, "waterCreature"))
 				{
 					ReadOnlyFieldError(field);
 				}

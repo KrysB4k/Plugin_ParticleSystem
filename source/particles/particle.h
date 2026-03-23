@@ -169,7 +169,7 @@ namespace Particles
 		bool immortal;
 		bool saved;
 		bool screenSpace;
-		bool lineIgnoreVel;
+		bool lineIgnoreSpeed;
 		bool ignorePerspective;
 
 		// lua integration

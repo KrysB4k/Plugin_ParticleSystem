@@ -510,6 +510,17 @@ namespace LuaFunctions
 		}
 	};
 
+	struct FracFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			float a;
+			float frac = modf(GetNumber(1), &a);
+			Script::PushNumber(frac);
+			return 1;
+		}
+	};
+
 	struct GetCeilingHeightFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1630,6 +1641,23 @@ namespace LuaFunctions
 		}
 	};
 
+	struct ScreenCoordsFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			int count = GetArgCount(2, 3);
+			float x = GetClampedNumber(1, -1.0f, 2.0f, false);
+			float y = GetClampedNumber(2, -1.0f, 2.0f, false);
+			float z = 10.0f;
+			if (count > 2 && !Script::IsNil(3))
+				z = GetClampedNumber(3, 0.0f, 1024.0f, false);
+
+			float inverseRatio = float(phd_winymax) / float(phd_winxmax);
+			ConstructManagedData<Vector3f>(x, y * inverseRatio, z);
+			return 1;
+		}
+	};
+
 	struct SelectItemFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1946,6 +1974,7 @@ namespace LuaFunctions
 	FindNearbyItemsFunction FindNearbyItemsFunc;
 	FloorFunction FloorFunc;
 	FmodFunction FmodFunc;
+	FracFunction FracFunc;
 	GetCeilingHeightFunction GetCeilingHeightFunc;
 	GetFloorHeightFunction GetFloorHeightFunc;
 	GetFloorNormalFunction GetFloorNormalFunc;
@@ -2017,6 +2046,7 @@ namespace LuaFunctions
 	RotateVectorByAxisAngleFunction RotateVectorByAxisAngleFunc;
 	RotFromVectorFunction RotFromVectorFunc;
 	RoundFunction RoundFunc;
+	ScreenCoordsFunction ScreenCoordsFunc;
 	SelectItemFunction SelectItemFunc;
 	SetLogLevelFunction SetLogLevelFunc;
 	SinFunction SinFunc;
@@ -2119,6 +2149,8 @@ namespace LuaFunctions
 				return &FloorFunc;
 			if (!strcmp(field, "fmod"))
 				return &FmodFunc;
+			if (!strcmp(field, "frac"))
+				return &FracFunc;
 			break;
 
 		case 'g':
@@ -2283,6 +2315,8 @@ namespace LuaFunctions
 			break;
 
 		case 's':
+			if (!strcmp(field, "screenCoords"))
+				return &ScreenCoordsFunc;
 			if (!strcmp(field, "setLogLevel"))
 				return &SetLogLevelFunc;
 			if (!strcmp(field, "setSelectedItem"))

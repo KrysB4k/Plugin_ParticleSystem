@@ -526,7 +526,7 @@ namespace Particles
 
 					size *= (1.0f / 32.0f);
 
-					if (pgroup.lineIgnoreVel)
+					if (pgroup.lineIgnoreSpeed)
 						vel = vel.normalized() * (1.0f / 32.0f);
 
 					vel *= size;
@@ -657,7 +657,7 @@ namespace Particles
 						float size = part->sizeCust;
 						auto vel = part->vel;
 
-						if (pgroup.lineIgnoreVel)
+						if (pgroup.lineIgnoreSpeed)
 							vel = vel.normalized(); // ignore speed contribution to particle's size
 						else
 							size *= (1.0f / 32.0f); // else scale down size
@@ -887,7 +887,10 @@ namespace Particles
 			const auto& item = items[emitterIndex];
 			const auto& tether = ParticleGroup::groups[groupIndex].attach.tether;
 			if (tether == TetherType::TETHER_ROTATING)
+			{
 				vel = RotatePointByAngles(vel, item.pos.xRot, item.pos.yRot, item.pos.zRot);
+				accel = RotatePointByAngles(accel, item.pos.xRot, item.pos.yRot, item.pos.zRot);
+			}
 		}
 		emitterIndex = NO_ITEM;
 		emitterNode = NO_MESH;
