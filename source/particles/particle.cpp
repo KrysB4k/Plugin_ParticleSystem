@@ -1394,6 +1394,8 @@ namespace Particles
 				if (size < smallest_size)
 					size = (float)smallest_size;
 			}
+			else
+				size *= (phd_winymax / 1080.0f);
 
 			float xsize = 0.5f, ysize = 0.5f;
 

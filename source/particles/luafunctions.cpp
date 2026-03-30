@@ -1696,6 +1696,16 @@ namespace LuaFunctions
 		}
 	};
 
+	struct SizeToScreenCoordFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			float units = GetNumber(1) * (1.0f / 1080.0f);
+			Script::PushNumber(units);
+			return 1;
+		}
+	};
+
 	struct SmoothStepFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -1709,8 +1719,8 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			phd_vector vec;
-			phd_vector* pvec = nullptr ;
+			static phd_vector vec;
+			phd_vector* pvec = nullptr;
 			int flags = 0;
 			int count = GetArgCount(1, 3);
 
@@ -2060,6 +2070,7 @@ namespace LuaFunctions
 	SelectItemFunction SelectItemFunc;
 	SetLogLevelFunction SetLogLevelFunc;
 	SinFunction SinFunc;
+	SizeToScreenCoordFunction SizeToScreenCoordFunc;
 	SmoothStepFunction SmoothStepFunc;
 	SoundEffectFunction SoundEffectFunc;
 	SphericalToCartesianFunction SphericalToCartesianFunc;
@@ -2335,6 +2346,8 @@ namespace LuaFunctions
 				return &SelectItemFunc;
 			if (!strcmp(field, "sin"))
 				return &SinFunc;
+			if (!strcmp(field, "sizeToScreenCoord"))
+				return &SizeToScreenCoordFunc;
 			if (!strcmp(field, "smoothStep"))
 				return &SmoothStepFunc;
 			if (!strcmp(field, "soundEffect"))

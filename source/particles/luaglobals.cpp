@@ -2188,7 +2188,7 @@ namespace LuaGlobals
 				break;
 
 			case 'c':
-				if (!strcmp(field, "cameraType"))
+				if (!strcmp(field, "cameraMode"))
 				{
 					Script::PushInteger(camera->type);
 					return;
@@ -2305,7 +2305,7 @@ namespace LuaGlobals
 				break;
 
 			case 'c':
-				if (!strcmp(field, "cameraType"))
+				if (!strcmp(field, "cameraMode"))
 				{
 					ReadOnlyFieldError(field);
 				}
