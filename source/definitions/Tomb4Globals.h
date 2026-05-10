@@ -34,6 +34,7 @@
 #define bones (*(long**)(0x533958))
 #define input (*(DWORD*)(0x5355D8))
 #define rooms (*(Tr4RoomInfo**)(0x533934))
+#define effects (*(Tr4FxInfo**)(0x8011C0))
 
 #define lara_info (*(Tr4LaraInfo*)(0x80DEC0))
 #define lara_item (*(Tr4ItemInfo**)(0x80E01C))
@@ -56,6 +57,7 @@
 
 #define level_items (*(long*)(0x4BF564))
 #define number_rooms (*(short*)(0x53392C))
+#define next_fx_active (*(short*)(0x8011D0))
 
 #define font_height (*(long*)(0x7F4F30))
 

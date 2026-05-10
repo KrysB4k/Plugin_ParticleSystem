@@ -110,10 +110,7 @@ namespace LuaFunctions
 
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->autoTrigger)
-			{
-				Script::EmitFailure("this group cannot be bound because it is auto triggered", Logger::Error);
-				return 0;
-			}
+				Script::Throw("this group cannot be bound because it is auto triggered");
 			int index = GetClampedInteger(2, 1, MAX_FUNCREFS, false) - 1;
 			auto funcRef = &Particles::BoundFunction::functionRefs[index];
 			if (funcRef->ref != SCRIPT_REFNIL)
@@ -398,6 +395,16 @@ namespace LuaFunctions
 		}
 	};
 
+	struct DisableGroupFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto group = GetData<Particles::ParticleGroup>(1);
+			group->autoTrigger = false;
+			return 0;
+		}
+	};
+
 	struct DistanceFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -431,6 +438,16 @@ namespace LuaFunctions
 				res = -1;
 			Script::PushInteger(res);
 			return 1;
+		}
+	};
+
+	struct EnableGroupFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto group = GetData<Particles::ParticleGroup>(1);
+			group->autoTrigger = true;
+			return 0;
 		}
 	};
 
@@ -725,8 +742,7 @@ namespace LuaFunctions
 			int roomIndex = Trng.pGlobTomb4->VetRemapRooms[ngIndex];
 			if (roomIndex == -1)
 			{
-				Script::EmitFailure(FormatString("Index = %d does not correspond to a valid room index in level", ngIndex), Logger::Error);
-				return 0;
+				Script::Throw(FormatString("Index = %d does not correspond to a valid room index in level", ngIndex));
 			}
 			Script::PushInteger(roomIndex);
 			return 1;
@@ -792,7 +808,7 @@ namespace LuaFunctions
 			short staticIndex = Trng.pGlobTomb4->VetRemapStatics[ngIndex].IndiceStatic;
 			if (staticIndex == -1)
 			{
-				Script::EmitFailure(FormatString("Index = %d does not match any static object", ngIndex), Logger::Error);
+				Script::Throw(FormatString("Index = %d does not match any static object", ngIndex));
 				return 0;
 			}
 			const auto& room = rooms[Trng.pGlobTomb4->VetRemapStatics[ngIndex].IndiceRoom];
@@ -897,7 +913,7 @@ namespace LuaFunctions
 
 			int remainder = 0;
 			if (count > 1)
-				remainder = GetClampedInteger(1, 0, (interval - 1), true);
+				remainder = GetClampedInteger(2, 0, (interval - 1), true);
 
 			bool check = true;
 			if ((MyData.Save.Global.gameTick - remainder) % interval)
@@ -916,10 +932,7 @@ namespace LuaFunctions
 			Particles::CallerGuard guard(FUNCTION_INIT);
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->autoTrigger)
-			{
-				Script::EmitFailure("this group cannot be invoked because it is auto triggered", Logger::Error);
-				return 0;
-			}
+				Script::Throw("this group cannot be bound because it is auto triggered");
 			Script::PreFunctionLoop();
 			if (!Script::ExecuteFunction(group->initIndex, nullptr))
 				Script::DeleteFunction(&group->initIndex);
@@ -1355,9 +1368,12 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			int radius = 1;
+			int count = GetArgCount(2, 3);
 			auto part = GetData<Particles::BaseParticle>(1);
 			auto item = &items[VerifyItemIndex(2)];
-			int radius = GetInteger(3);
+			if (count > 2 && !Script::IsNil(3))
+				radius = GetInteger(3);
 			Script::PushBoolean(part->CollidedWithItem(item, radius));
 			return 1;
 		}
@@ -1408,11 +1424,14 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			float distInner = 0.0f;
+			int count = GetArgCount(4, 5);
 			auto part = GetData<Particles::BaseParticle>(1);
 			Vector3f vect = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(2));
 			float maxSpeed = GetNumber(3);
 			float distOuter = GetNumber(4);
-			float distInner = GetNumber(5);
+			if (count > 4 && !Script::IsNil(5))
+				distInner = GetNumber(5);
 			part->vel = part->FollowTarget(vect, maxSpeed, distInner, distOuter);
 			return 0;
 		}
@@ -1521,6 +1540,29 @@ namespace LuaFunctions
 			else
 				ConstructManagedData<Vector3f>(x / phd_winxmax, y / phd_winxmax, z);
 			return 1;
+		}
+	};
+
+	struct QuenchLaraFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			if (lara_info.burn)
+			{
+				short fx_num = next_fx_active;
+				while (fx_num != NO_ITEM)
+				{
+					auto fx = &effects[fx_num];
+					if (fx->object_number == SLOT_FLAME)
+					{
+						lara_info.burn = 0;
+						KillEffect(fx_num);
+						break;
+					}
+					fx_num = fx->next_active;
+				}
+			}
+			return 0;
 		}
 	};
 
@@ -1987,8 +2029,10 @@ namespace LuaFunctions
 	CreateSpritePartFunction CreateSpritePartFunc;
 	CreateVectorFunction CreateVectorFunc;
 	DegToRadFunction DegToRadFunc;
+	DisableGroupFunction DisableGroupFunc;
 	DistanceFunction DistanceFunc;
 	DistCompareFunction DistCompareFunc;
+	EnableGroupFunction EnableGroupFunc;
 	ExpFunction ExpFunc;
 	FindNearbyItemsFunction FindNearbyItemsFunc;
 	FloorFunction FloorFunc;
@@ -2047,14 +2091,11 @@ namespace LuaFunctions
 	ParticleKillFunction ParticleKillFunc;
 	ParticleLimitSpeedFunction ParticleLimitSpeedFunc;
 	ParticleLookAtTargetFunction ParticleLookAtTargetFunc;
-	SplinePosItemsFunction SplinePosItemsFunc;
-	SplinePosVectorsFunction SplinePosVectorsFunc;
-	SplineVelItemsFunction SplineVelItemsFunc;
-	SplineVelVectorsFunction SplineVelVectorsFunc;
 	ParticleWindVelocityFunction ParticleWindVelocityFunc;
 	PerformTriggerGroupFunction PerformTriggerGroupFunc;
 	PrintFunction PrintFunc;
 	ProjectToCameraFunction ProjectToCameraFunc;
+	QuenchLaraFunction QuenchLaraFunc;
 	RadToDegFunction RadToDegFunc;
 	RandfloatFunction RandfloatFunc;
 	RandintFunction RandintFunc;
@@ -2074,6 +2115,10 @@ namespace LuaFunctions
 	SmoothStepFunction SmoothStepFunc;
 	SoundEffectFunction SoundEffectFunc;
 	SphericalToCartesianFunction SphericalToCartesianFunc;
+	SplinePosItemsFunction SplinePosItemsFunc;
+	SplinePosVectorsFunction SplinePosVectorsFunc;
+	SplineVelItemsFunction SplineVelItemsFunc;
+	SplineVelVectorsFunction SplineVelVectorsFunc;
 	SqrtFunction SqrtFunc;
 	TanFunction TanFunc;
 	TestCollisionSpheresFunction TestCollisionSpheresFunc;
@@ -2116,6 +2161,8 @@ namespace LuaFunctions
 				return &BoidCohesionFunc;
 			if (!strcmp(field, "boidSeparation"))
 				return &BoidSeparationFunc;
+			if (!strcmp(field, "burnLara"))
+				return &LaraBurnFunc;
 			break;
 
 		case 'c':
@@ -2152,6 +2199,8 @@ namespace LuaFunctions
 		case 'd':
 			if (!strcmp(field, "degToRad"))
 				return &DegToRadFunc;
+			if (!strcmp(field, "disableGroup"))
+				return &DisableGroupFunc;
 			if (!strcmp(field, "distance"))
 				return &DistanceFunc;
 			if (!strcmp(field, "distCompare"))
@@ -2159,6 +2208,8 @@ namespace LuaFunctions
 			break;
 
 		case 'e':
+			if (!strcmp(field, "enableGroup"))
+				return &EnableGroupFunc;
 			if (!strcmp(field, "exp"))
 				return &ExpFunc;
 			break;
@@ -2241,8 +2292,6 @@ namespace LuaFunctions
 			break;
 
 		case 'l':
-			if (!strcmp(field, "laraBurn"))
-				return &LaraBurnFunc;
 			if (!strcmp(field, "lerp"))
 				return &LerpFunc;
 			if (!strcmp(field, "lerpInverse"))
@@ -2310,6 +2359,11 @@ namespace LuaFunctions
 				return &PrintFunc;
 			if (!strcmp(field, "projectToScreen"))
 				return &ProjectToCameraFunc;
+			break;
+
+		case 'q':
+			if (!strcmp(field, "quenchLara"))
+				return &QuenchLaraFunc;
 			break;
 
 		case 'r':

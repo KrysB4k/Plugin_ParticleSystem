@@ -778,6 +778,10 @@ namespace LuaGlobals
 			break;
 
 		case 'S':
+			if (!strcmp(field, "SHOCKWAVE_DEADLY"))
+				return std::optional(SHOCKWAVE_DEADLY);
+			if (!strcmp(field, "SHOCKWAVE_EXTRA_DAMAGE"))
+				return std::optional(SHOCKWAVE_EXTRA_DAMAGE);
 			if (!strcmp(field, "SLOT_LARA"))
 				return std::optional(SLOT_LARA);
 			if (!strcmp(field, "SLOT_PISTOLS_ANIM"))

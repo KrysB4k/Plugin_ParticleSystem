@@ -5,7 +5,6 @@ TYPE_GetSpheres GetSpheres = (TYPE_GetSpheres) 0x45EE70;
 TYPE_GetLaraJointPos GetLaraJointPos = (TYPE_GetLaraJointPos) 0x41D890;
 TYPE_phd_GetVectorAngles phd_GetVectorAngles = (TYPE_phd_GetVectorAngles) 0x48E710;
 TYPE_phd_PushUnitMatrix phd_PushUnitMatrix = (TYPE_phd_PushUnitMatrix) 0x48DF90;
-TYPE_EffectNewRoom EffectNewRoom = (TYPE_EffectNewRoom) 0x453F60;
 TYPE_TestTriggersAtXYZ TestTriggersAtXYZ = (TYPE_TestTriggersAtXYZ) 0x460E80;
 TYPE_GetFreeSpark GetFreeSpark = (TYPE_GetFreeSpark) 0x433830;
 TYPE_TriggerShockwave TriggerShockwave = (TYPE_TriggerShockwave) 0x43A420;

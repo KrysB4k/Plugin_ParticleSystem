@@ -40,6 +40,9 @@
 #define NO_ITEM -1
 #define NO_MESH (char(-1))
 
+#define SHOCKWAVE_DEADLY 3
+#define SHOCKWAVE_EXTRA_DAMAGE 2
+
 #define CUST_LEVEL_SCRIPTS 1
 #define CUST_SCRIPT_INTEGRITY 2
 
