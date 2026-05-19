@@ -1,0 +1,17 @@
+name: Build Pipeline
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: microsoft/setup-msbuild@v3
+      - run: |
+          msbuild /t:Rebuild /p:Configuration=Release source\Plugin_ParticleSystem.sln
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Plugin_ParticleSystem
+          path: source/Release/Plugin_ParticleSystem.dll
