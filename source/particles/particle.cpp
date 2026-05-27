@@ -699,7 +699,7 @@ namespace Particles
 				}
 			}
 
-			long minSize = 4;
+			long minSize = 1;
 
 			// draw the particle to the given screen coordinates
 			part->DrawSpritePart(pgroup, viewCoords, rgb, minSize);
@@ -1272,7 +1272,7 @@ namespace Particles
 
 		if (z1 <= 0)
 			return;
-		if (z1 >= 0x5000)
+		if (z1 >= 0x18000)
 			return;
 
 		int cR = rgb[0];
