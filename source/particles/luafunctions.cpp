@@ -265,7 +265,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createMeshPart");
+			CheckCaller(FUNCTION_BIND | FUNCTION_INIT | FUNCTION_UPDATE, "createMeshPart");
 
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->partLimit)
@@ -352,7 +352,7 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
-			CheckCaller(FunctionType::FUNCTION_INIT | FunctionType::FUNCTION_UPDATE, "createSpritePart");
+			CheckCaller(FUNCTION_BIND | FUNCTION_INIT | FUNCTION_UPDATE, "createSpritePart");
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->partLimit)
 			{
@@ -931,8 +931,6 @@ namespace LuaFunctions
 			CheckCaller(FUNCTION_BIND | FUNCTION_INIT | FUNCTION_UPDATE, "invokeInit");
 			Particles::CallerGuard guard(FUNCTION_INIT);
 			auto group = GetData<Particles::ParticleGroup>(1);
-			if (group->autoTrigger)
-				Script::Throw("this group cannot be bound because it is auto triggered");
 			Script::PreFunctionLoop();
 			if (!Script::ExecuteFunction(group->initIndex, nullptr))
 				Script::DeleteFunction(&group->initIndex);
