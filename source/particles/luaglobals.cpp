@@ -226,7 +226,7 @@ namespace LuaGlobals
 				}
 				if (!strcmp(field, "triggered"))
 				{
-					bool active = (itemptr->status == 0x1) ? true : false;
+					bool active = TriggerActive((StrItemTr4*)itemptr) ? true : false;
 					Script::PushBoolean(active);
 					return;
 				}
