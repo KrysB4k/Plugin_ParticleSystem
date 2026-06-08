@@ -265,8 +265,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			Particles::BaseParticle* parent = nullptr;
 			CheckCaller(FUNCTION_BIND | FUNCTION_INIT | FUNCTION_UPDATE, "createMeshPart");
-
+			int count = GetArgCount(1, 2);
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->partLimit)
 			{
@@ -279,10 +280,14 @@ namespace LuaFunctions
 				group->partCount++;
 			}
 
+			if (count > 1 && !Script::IsNil(2))
+				parent = GetData<Particles::BaseParticle>(2);
+
 			int i = Particles::MeshParticle::GetFreePart();
 			auto part = &Particles::MeshParticle::parts[i];
 			part->groupIndex = group->groupIndex;
 			part->createdInCurrentLoop = true;
+			part->parent = parent;
 
 			Tr4ItemInfo* item = &part->item;
 			item->il.fcnt = -1;
@@ -352,7 +357,9 @@ namespace LuaFunctions
 	{
 		int Call() final
 		{
+			Particles::BaseParticle* parent = nullptr;
 			CheckCaller(FUNCTION_BIND | FUNCTION_INIT | FUNCTION_UPDATE, "createSpritePart");
+			int count = GetArgCount(1, 2);
 			auto group = GetData<Particles::ParticleGroup>(1);
 			if (group->partLimit)
 			{
@@ -365,10 +372,14 @@ namespace LuaFunctions
 				group->partCount++;
 			}
 
+			if (count > 1 && !Script::IsNil(2))
+				parent = GetData<Particles::BaseParticle>(2);
+
 			int i = Particles::SpriteParticle::GetFreePart();
 			auto part = &Particles::SpriteParticle::parts[i];
 			part->groupIndex = group->groupIndex;
 			part->createdInCurrentLoop = true;
+			part->parent = parent;
 			Script::PushData(part);
 			return 1;
 		}
@@ -1435,6 +1446,24 @@ namespace LuaFunctions
 		}
 	};
 
+	struct ParticleGetRootFunction final : public LuaObjectFunction
+	{
+		int Call() final
+		{
+			auto part = GetData<Particles::BaseParticle>(1);
+			if (!part->parent)
+			{
+				Script::PushNil();
+				return 1;
+			}
+
+			while (part->parent)
+				part = part->parent;
+			Script::PushData(part);
+			return 1;
+		}
+	};
+
 	struct ParticleHomingFunction final : public LuaObjectFunction
 	{
 		int Call() final
@@ -2085,6 +2114,7 @@ namespace LuaFunctions
 	ParticleCollideWallsFunction ParticleCollideWallsFunc;
 	ParticleDetachFunction ParticleDetachFunc;
 	ParticleFollowTargetFunction ParticleFollowTargetFunc;
+	ParticleGetRootFunction ParticleGetRootFunc;
 	ParticleHomingFunction ParticleHomingFunc;
 	ParticleKillFunction ParticleKillFunc;
 	ParticleLimitSpeedFunction ParticleLimitSpeedFunc;
@@ -2341,6 +2371,8 @@ namespace LuaFunctions
 				return &ParticleDetachFunc;
 			if (!strcmp(field, "partFollow"))
 				return &ParticleFollowTargetFunc;
+			if (!strcmp(field, "partGetRoot"))
+				return &ParticleGetRootFunc;
 			if (!strcmp(field, "partHoming"))
 				return &ParticleHomingFunc;
 			if (!strcmp(field, "partKill"))

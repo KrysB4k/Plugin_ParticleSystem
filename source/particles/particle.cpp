@@ -389,6 +389,12 @@ namespace Particles
 			part->rot3D.y += part->rotVel3D.y;
 			part->rot3D.z += part->rotVel3D.z;
 
+			if (part->parent)
+			{
+				if (part->parent->lifeCounter <= 0)
+					part->parent = nullptr;
+			}
+
 			--part->lifeCounter;
 			if (!part->lifeCounter)
 			{
@@ -444,6 +450,12 @@ namespace Particles
 			part->rot.x += part->rotVel.x;
 			part->rot.y += part->rotVel.y;
 			part->rot.z += part->rotVel.z;
+
+			if (part->parent)
+			{
+				if (part->parent->lifeCounter <= 0)
+					part->parent = nullptr;
+			}
 
 			--part->lifeCounter;
 			if (!part->lifeCounter)

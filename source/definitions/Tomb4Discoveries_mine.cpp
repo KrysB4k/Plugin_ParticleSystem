@@ -42,3 +42,4 @@ TYPE_AddQuadSorted* AddQuadSorted = (TYPE_AddQuadSorted*) 0x5339A4; // function 
 TYPE_AddQuadZBuffer* AddQuadZBuffer = (TYPE_AddQuadZBuffer*) 0x5339A8; // function pointer
 TYPE_phd_PutPolygons phd_PutPolygons = (TYPE_phd_PutPolygons) 0x47BB30;
 TYPE_CalculateObjectLighting CalculateObjectLighting = (TYPE_CalculateObjectLighting) 0x450240;
+TYPE_DxAttempt DxAttempt = (TYPE_DxAttempt) 0x48F8A0;

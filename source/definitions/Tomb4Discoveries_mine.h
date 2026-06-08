@@ -54,6 +54,7 @@ typedef void (__cdecl *TYPE_AddQuadSorted) (D3DTLVERTEX* v, short s1, short s2, 
 typedef void (__cdecl *TYPE_AddQuadZBuffer) (D3DTLVERTEX* v, short s1, short s2, short s3, short s4, TextureStruct* t, long l1);
 typedef void (__cdecl *TYPE_phd_PutPolygons) (short* mesh, int clip);
 typedef void (__cdecl *TYPE_CalculateObjectLighting) (Tr4ItemInfo* pItem, short* pFrame);
+typedef long (__cdecl* TYPE_DxAttempt) (HRESULT r);
 
 extern TYPE_GetRandomDraw GetRandomDraw;
 extern TYPE_GetSpheres GetSpheres;
@@ -98,3 +99,4 @@ extern TYPE_AddQuadSorted* AddQuadSorted; // function pointer
 extern TYPE_AddQuadZBuffer* AddQuadZBuffer; // function pointer
 extern TYPE_phd_PutPolygons phd_PutPolygons;
 extern TYPE_CalculateObjectLighting CalculateObjectLighting;
+extern TYPE_DxAttempt DxAttempt;

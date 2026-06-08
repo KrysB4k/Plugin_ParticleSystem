@@ -739,6 +739,14 @@ namespace Particles
 					Script::PushData(&pos);
 					return;
 				}
+				if (!strcmp(field, "parent"))
+				{
+					if (parent)
+						Script::PushData(parent);
+					else
+						Script::PushNil();
+					return;
+				}
 				break;
 
 			case 'r':
@@ -829,6 +837,8 @@ namespace Particles
 				break;
 
 			case 'p':
+				if (!strcmp(field, "parent"))
+					ReadOnlyFieldError(field);
 				if (!strcmp(field, "pos"))
 				{
 					pos = static_cast<Vector3f>(*GetData<LuaObjectClassPosition>(-1));

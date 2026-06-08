@@ -5,6 +5,7 @@
 #include "particle.h"
 #include "utilities.h"
 #include "logger.h"
+#include <d3d.h>
 
 using namespace LuaHelpers;
 using namespace Utilities;
@@ -15,6 +16,7 @@ namespace LuaGlobals
 {
 	TrngVarWrapper TrngVars;
 	LuaCameraWrapper Camera;
+	LuaFogWrapper Fog;
 	LuaItemInfoWrapper LuaItemArray[MAX_LEVEL_ITEMS];
 
 	const char* ItemData::Name()
@@ -553,6 +555,8 @@ namespace LuaGlobals
 	{
 		if (!strcmp(field, "Camera"))
 			return &Camera;
+		if (!strcmp(field, "Fog"))
+			return &Fog;
 		if (!strcmp(field, "Lara"))
 			return &LuaGlobals::LuaItemArray[lara_info.item_number];
 		if (!strcmp(field, "TrngVars"))
@@ -2175,6 +2179,71 @@ namespace LuaGlobals
 		}
 
 		return std::nullopt;
+	}
+
+	void LuaFogWrapper::Index(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'c':
+				if (!strcmp(field, "col"))
+				{
+					ConstructManagedData<ColorRGB>(FogColorR, FogColorG, FogColorB);
+					return;
+				}
+				break;
+
+			case 'm':
+				if (!strcmp(field, "minRange"))
+				{
+					Script::PushNumber(FogStart);
+					return;
+				}
+				if (!strcmp(field, "maxRange"))
+				{
+					Script::PushNumber(FogEnd);
+					return;
+				}
+				break;
+			}
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void LuaFogWrapper::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'c':
+				if (!strcmp(field, "col"))
+				{
+					auto col = GetData<ColorRGB>(-1);
+					SetFogColor(col->R, col->G, col->B);
+					return;
+				}
+				break;
+
+			case 'm':
+				if (!strcmp(field, "minRange"))
+				{
+					FogStart = GetNumber(-1);
+					App.dx.lpD3DDevice->SetLightState(D3DLIGHTSTATE_FOGSTART, *(DWORD*)(&FogStart));
+					return;
+				}
+				if (!strcmp(field, "maxRange"))
+				{
+					FogEnd = GetNumber(-1);
+					App.dx.lpD3DDevice->SetLightState(D3DLIGHTSTATE_FOGEND, *(DWORD*)(&FogEnd));
+					return;
+				}
+				break;
+			}
+		}
+		LuaObjectClass::NewIndex(field);
 	}
 
 	void LuaCameraWrapper::Index(const char* field)

@@ -243,6 +243,7 @@ namespace Particles
 		char		emitterNode;
 		bool		createdInCurrentLoop;
 
+		BaseParticle* parent;
 		ParticleData data;
 
 		// methods
@@ -390,6 +391,8 @@ namespace Particles
 		short		emitterIndex;
 		char		emitterNode;
 
+		int			parentIndex;
+
 		ushort		spriteIndex;
 
 		ushort		sizeStart;
@@ -429,6 +432,8 @@ namespace Particles
 
 		short		emitterIndex;
 		char		emitterNode;
+
+		int			parentIndex;
 
 		short		rotX, rotY, rotZ;
 		short		rotVelX, rotVelY, rotVelZ;

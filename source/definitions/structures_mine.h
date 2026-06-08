@@ -1,6 +1,8 @@
 #pragma once
 #include "structures.h"
 #include "constants_mine.h"
+#include <d3d.h>
+#include <d3dtypes.h>
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -583,22 +585,6 @@ struct Tr4ShatterItem
 	short flags;
 };
 
-
-struct D3DTLVERTEX
-{
-	float sx;
-	float sy;
-	float sz;
-	float rhw;
-
-	ulong color;
-	ulong specular;
-
-	float tu;
-	float tv;
-};
-
-
 struct TextureStruct
 {
 	ushort drawtype;
@@ -782,6 +768,73 @@ struct DYNAMIC
 	uchar used;
 	uchar pad1[1];
 	long FalloffScale;
+};
+
+struct DXINFO
+{
+	long nDDInfo;
+	long nDSInfo;
+	void* DDInfo;
+	void* DSInfo;
+	long nDD;
+	long nD3D;
+	long nDisplayMode;
+	long nTexture;
+	long nZBuffer;
+	long nDS;
+	bool bHardware;
+};
+
+struct DXPTR
+{
+	LPDIRECTDRAW4 lpDD;
+	LPDIRECT3D3 lpD3D;
+	LPDIRECT3DDEVICE3 lpD3DDevice;
+	LPDIRECT3DDEVICE3 _lpD3DDevice;
+	LPDIRECTDRAWSURFACE4 lpPrimaryBuffer;
+	LPDIRECTDRAWSURFACE4 lpBackBuffer;
+	LPDIRECTDRAWSURFACE4 lpZBuffer;
+	LPDIRECT3DVIEWPORT3 lpViewport;
+	void* lpDS;
+	ulong dwRenderWidth;
+	ulong dwRenderHeight;
+	RECT rViewport;
+	RECT rScreen;
+	long Flags;
+	long WindowStyle;
+	long CoopLevel;
+	void* lpDirectInput;
+	void* Keyboard;
+	HWND hWnd;
+	volatile long InScene;
+	volatile long WaitAtBeginScene;
+	volatile long DoneBlit;
+};
+
+struct WINAPP
+{
+	HINSTANCE hInstance;//0x753858
+	HWND hWnd;//0x75385C
+	WNDCLASS WindowClass;//0x753860
+	DXINFO DXInfo;//0x753888
+	DXPTR dx; //0x7538B1
+	HANDLE mutex; //0x753921
+	float fps; //0x753925
+	LPDIRECT3DMATERIAL3 GlobalMaterial; // 0x753929
+	D3DMATERIALHANDLE GlobalMaterialHandle; //0x75392D
+	HACCEL hAccel; //0x753931
+	bool SetupComplete; //0x753935
+	bool BumpMapping; //0x753936
+	long TextureSize; //0x753937
+	long BumpMapSize; //0x75393B
+	bool mmx;
+	bool Filtering;
+	bool Volumetric;
+	bool SoundDisabled;
+	long StartFlags;
+	volatile bool fmv;
+	long Desktopbpp;
+	long AutoTarget;
 };
 
 // let below pragma directive at bottom of this source
