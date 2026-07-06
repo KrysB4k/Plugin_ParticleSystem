@@ -67,3 +67,9 @@
 #define gfLevelNames ((char*)(0x7FD1A0))
 #define gfStringOffset (*(ushort**)(0x7FD154))
 #define gfStringWad (*(char**)(0x7FD198))
+
+#define FogStart (*(float*)(0x4B2498))
+#define FogEnd (*(float*)(0x4B249C))
+#define FogColorR (*(uchar*)(0x4BF53A))
+#define FogColorG (*(uchar*)(0x4BF539))
+#define FogColorB (*(uchar*)(0x4BF538))

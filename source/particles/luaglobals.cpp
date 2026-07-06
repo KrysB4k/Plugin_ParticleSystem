@@ -15,6 +15,7 @@ namespace LuaGlobals
 {
 	TrngVarWrapper TrngVars;
 	LuaCameraWrapper Camera;
+	LuaFogWrapper Fog;
 	LuaItemInfoWrapper LuaItemArray[MAX_LEVEL_ITEMS];
 
 	const char* ItemData::Name()
@@ -61,6 +62,11 @@ namespace LuaGlobals
 			switch (field[0])
 			{
 			case 'a':
+				if (!strcmp(field, "active"))
+				{
+					Script::PushBoolean(itemptr->active);
+					return;
+				}
 				if (!strcmp(field, "afterDeath"))
 				{
 					Script::PushInteger(itemptr->after_death);
@@ -91,6 +97,11 @@ namespace LuaGlobals
 				if (!strcmp(field, "fallSpeed"))
 				{
 					Script::PushInteger(itemptr->fallspeed);
+					return;
+				}
+				if (!strcmp(field, "flags"))
+				{
+					Script::PushInteger(itemptr->flags);
 					return;
 				}
 				if (!strcmp(field, "floorDistance"))
@@ -268,6 +279,10 @@ namespace LuaGlobals
 			switch (field[0])
 			{
 			case 'a':
+				if (!strcmp(field, "active"))
+				{
+					ReadOnlyFieldError(field);
+				}
 				if (!strcmp(field, "afterDeath"))
 				{
 					ReadOnlyFieldError(field);
@@ -303,6 +318,10 @@ namespace LuaGlobals
 				{
 					itemptr->fallspeed = GetClampedInteger(-1, INT16_MIN, INT16_MAX, false);
 					return;
+				}
+				if (!strcmp(field, "flags"))
+				{
+					ReadOnlyFieldError(field);
 				}
 				if (!strcmp(field, "floorDistance"))
 				{
@@ -553,6 +572,8 @@ namespace LuaGlobals
 	{
 		if (!strcmp(field, "Camera"))
 			return &Camera;
+		if (!strcmp(field, "Fog"))
+			return &Fog;
 		if (!strcmp(field, "Lara"))
 			return &LuaGlobals::LuaItemArray[lara_info.item_number];
 		if (!strcmp(field, "TrngVars"))
@@ -663,6 +684,20 @@ namespace LuaGlobals
 				return std::optional(CMD_UP);
 			if (!strcmp(field, "INPUT_WALK"))
 				return std::optional(CMD_WALK);
+			if (!strcmp(field, "ITEMFLAG_ANTITRIGGER_ONESHOT"))
+				return std::optional(0x80);
+			if (!strcmp(field, "ITEMFLAG_CLEARBODY"))
+				return std::optional(0x8000);
+			if (!strcmp(field, "ITEMFLAG_CODEBITS"))
+				return std::optional(0x3E00);
+			if (!strcmp(field, "ITEMFLAG_INVISIBLE"))
+				return std::optional(0x100);
+			if (!strcmp(field, "ITEMFLAG_REVERSE"))
+				return std::optional(0x4000);
+			if (!strcmp(field, "ITEMFLAG_SWITCH_ONESHOT"))
+				return std::optional(0x40);
+			if (!strcmp(field, "ITEMFLAG_TRIGGERED"))
+				return std::optional(0x20);
 			break;
 
 		case 'L':
@@ -2402,6 +2437,43 @@ namespace LuaGlobals
 				if (!strcmp(field, "underwater"))
 				{
 					ReadOnlyFieldError(field);
+				}
+				break;
+			}
+		}
+		LuaObjectClass::NewIndex(field);
+	}
+
+	void LuaFogWrapper::Index(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'c':
+				if (!strcmp(field, "col"))
+				{
+					ConstructManagedData<ColorRGB>(FogColorR, FogColorG, FogColorB);
+					return;
+				}
+				break;
+			}
+		}
+		LuaObjectClass::Index(field);
+	}
+
+	void LuaFogWrapper::NewIndex(const char* field)
+	{
+		if (field)
+		{
+			switch (field[0])
+			{
+			case 'c':
+				if (!strcmp(field, "col"))
+				{
+					auto col = GetData<ColorRGB>(-1);
+					SetFogColor(col->R, col->G, col->B);
+					return;
 				}
 				break;
 			}

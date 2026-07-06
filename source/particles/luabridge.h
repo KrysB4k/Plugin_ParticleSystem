@@ -136,6 +136,12 @@ namespace LuaGlobals
 		void NewIndex(const char* field) final;
 	};
 
+	struct LuaFogWrapper final : public LuaObjectClass
+	{
+		void Index(const char* field) final;
+		void NewIndex(const char* field) final;
+	};
+
 	struct ItemData final : public LuaTableObjectClass
 	{
 		static const char* Name();
@@ -166,7 +172,7 @@ namespace LuaGlobals
 
 	extern TrngVarWrapper TrngVars;
 	extern LuaCameraWrapper Camera;
-	
+	extern LuaFogWrapper Fog;
 	extern LuaItemInfoWrapper LuaItemArray[];
 
 	LuaObject* RetrieveGlobals(const char* field);
